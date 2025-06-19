@@ -73,8 +73,10 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link to="/" className="lg:hidden">
-            <img className="dark:hidden" src="./images/logo/logo.svg" alt="Logo" />
-            <img className="hidden dark:block" src="./images/logo/logo-dark.svg" alt="Logo" />
+            <div className="flex gap-3 justify-start align-middle">
+              <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
+              <span className="text-2xl font-normal dark:text-white">GenTech</span>
+            </div>
           </Link>
 
           <button
