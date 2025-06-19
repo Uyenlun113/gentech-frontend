@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
 import { useSidebar } from "../context/SidebarContext";
-import { ChevronDownIcon, GridIcon, ListIcon, TableIcon } from "../icons";
+import { CalenderIcon, ChevronDownIcon, GridIcon, ListIcon, PageIcon, TableIcon, UserCircleIcon } from "../icons";
 
 type NavItem = {
   name: string;
@@ -18,16 +18,16 @@ const navItems: NavItem[] = [
     name: "Trang chủ",
     path: "/",
   },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
+  {
+    icon: <CalenderIcon />,
+    name: "Calendar",
+    path: "/calendar",
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "User Profile",
+    path: "/profile",
+  },
   {
     name: "Danh mục ",
     icon: <ListIcon />,
@@ -38,14 +38,14 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [{ name: "Nhập chứng từ", path: "/basic-tables", pro: false }],
   },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
+  {
+    name: "Pages",
+    icon: <PageIcon />,
+    subItems: [
+      { name: "Blank Page", path: "/blank", pro: false },
+      { name: "404 Error", path: "/error-404", pro: false },
+    ],
+  },
 ];
 
 const AppSidebar: React.FC = () => {
@@ -115,7 +115,9 @@ const AppSidebar: React.FC = () => {
               >
                 {nav.icon}
               </span>
-              {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
+              {(isExpanded || isHovered || isMobileOpen) && (
+                <span className="menu-item-text font-normal">{nav.name}</span>
+              )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
@@ -137,7 +139,9 @@ const AppSidebar: React.FC = () => {
                 >
                   {nav.icon}
                 </span>
-                {(isExpanded || isHovered || isMobileOpen) && <span className="menu-item-text">{nav.name}</span>}
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <span className="menu-item-text font-normal">{nav.name}</span>
+                )}
               </Link>
             )
           )}
@@ -205,8 +209,10 @@ const AppSidebar: React.FC = () => {
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <img className="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width={150} height={40} />
-              <img className="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" width={150} height={40} />
+              <div className="flex gap-3 justify-start align-middle">
+                <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
+                <span className="text-2xl font-medium dark:text-white">GenTech</span>
+              </div>
             </>
           ) : (
             <img src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
