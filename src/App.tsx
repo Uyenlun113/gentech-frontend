@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router";
+import PrivateRoute from "./components/auth/PrivateRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import AppLayout from "./layout/AppLayout";
 import SignIn from "./pages/AuthPages/SignIn";
@@ -27,36 +28,37 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+          <Route element={<PrivateRoute />}>
+            {/* Dashboard Layout */}
+            <Route element={<AppLayout />}>
+              <Route index path="/" element={<Home />} />
 
-            {/* Customer Page */}
-            <Route path="/customer-list" element={<CustomerList />} />
+              {/* Customer Page */}
+              <Route path="/customer-list" element={<CustomerList />} />
 
-            {/* TransactionRecords Page */}
-            <Route path="/transaction-records-create" element={<TransactionRecordsCreate />} />
+              {/* TransactionRecords Page */}
+              <Route path="/transaction-records-create" element={<TransactionRecordsCreate />} />
 
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+              {/* Others Page */}
+              <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/blank" element={<Blank />} />
+              {/* Forms */}
+              <Route path="/form-elements" element={<FormElements />} />
+              {/* Tables */}
+              <Route path="/basic-tables" element={<BasicTables />} />
+              {/* Ui Elements */}
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/avatars" element={<Avatars />} />
+              <Route path="/badge" element={<Badges />} />
+              <Route path="/buttons" element={<Buttons />} />
+              <Route path="/images" element={<Images />} />
+              <Route path="/videos" element={<Videos />} />
+              {/* Charts */}
+              <Route path="/line-chart" element={<LineChart />} />
+              <Route path="/bar-chart" element={<BarChart />} />
+            </Route>
           </Route>
-
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
