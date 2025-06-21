@@ -96,6 +96,8 @@ export const useDepreciationCalculation = () => {
     {
       key: "user",
       title: "Thành viên",
+      fixed: "left",
+      width: 240,
       render: (val) => {
         return (
           <div className="flex items-center gap-3">
@@ -111,6 +113,7 @@ export const useDepreciationCalculation = () => {
     {
       key: "projectName",
       title: "Dự án",
+      fixed: "left",
     },
     {
       key: "team",
@@ -149,8 +152,25 @@ export const useDepreciationCalculation = () => {
       title: "Dự án",
     },
     {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
       key: "action",
       title: "Thao tác",
+      fixed: "right",
       render: (_, record) => (
         <div className="flex items-center gap-3">
           <button className="text-gray-500 hover:text-blue-500" title="Xem chi tiết" onClick={openModalDetail}>
