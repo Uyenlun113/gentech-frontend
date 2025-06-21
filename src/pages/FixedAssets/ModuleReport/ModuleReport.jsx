@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
-import ListWithButton, { ListItem } from "../../../components/list/ListWithButton";
+import ListWithButton from "../../../components/list/ListWithButton";
 
 export default function ModuleReportPage() {
-  const listItems: ListItem[] = [
+  const listItems = [
     {
       id: "depreciation-calculation",
       icon: <FileBarChart2 className="w-5 h-5" />,
