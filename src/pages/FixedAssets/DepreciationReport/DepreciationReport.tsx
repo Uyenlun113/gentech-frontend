@@ -8,7 +8,7 @@ export default function DepreciationReportPage() {
       <PageMeta title="Báo cáo quản trị" description="Báo cáo quản trị" />
       <PageBreadcrumb pageTitle="Báo cáo quản trị" />
       <div className="space-y-6">
-        <ComponentCard title="Báo cáo quản trị">123{/* <BasicTableOne /> */}</ComponentCard>
+        <ComponentCard title="Báo cáo quản trị">Báo cáo quản trị</ComponentCard>
       </div>
     </>
   );

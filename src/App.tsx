@@ -12,6 +12,7 @@ import LineChart from "./pages/Charts/LineChart";
 import CostingPage from "./pages/Costing/Costing";
 import Home from "./pages/Dashboard/Home";
 import DepreciationReportPage from "./pages/FixedAssets/DepreciationReport/DepreciationReport";
+import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/DepreciationCalculation/DepreciationCalculation";
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedger";
@@ -57,6 +58,10 @@ export default function App() {
               {/* Fixed Assets Page */}
               <Route path="/fixed-assets/module-report" element={<ModuleReportPage />} />
               <Route path="/fixed-assets/depreciation-report" element={<DepreciationReportPage />} />
+              <Route
+                path="/fixed-assets/module-report/depreciation-calculation"
+                element={<DepreciationCalculationPage />}
+              />
 
               {/* Tools Page */}
               <Route path="/tools" element={<ToolsPage />} />
