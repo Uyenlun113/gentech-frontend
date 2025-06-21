@@ -31,14 +31,62 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
-    name: "Danh mục ",
+    name: "Vốn bằng tiền",
     icon: <ListIcon />,
-    subItems: [{ name: "Danh mục khách hàng", path: "/customer-list", pro: false }],
+    path: "/cash",
   },
   {
-    name: "Chứng từ",
-    icon: <TableIcon />,
-    subItems: [{ name: "Nhập chứng từ", path: "/transaction-records-create", pro: false }],
+    name: "Mua hàng - phải trả",
+    icon: <ListIcon />,
+    path: "/purchases",
+  },
+  {
+    name: "Bán hàng - phải thu",
+    icon: <ListIcon />,
+    path: "/sales",
+  },
+  {
+    name: "Hàng tồn kho",
+    icon: <ListIcon />,
+    path: "/inventory",
+  },
+  {
+    name: "Tài sản cố định",
+    icon: <ListIcon />,
+    subItems: [
+      { name: "Báo cáo phân hệ", path: "/fixed-assets/module-report", pro: false },
+      { name: "Báo cáo quản trị", path: "/fixed-assets/depreciation-report", pro: false },
+    ],
+  },
+  {
+    name: "Công cụ dụng cụ",
+    icon: <ListIcon />,
+    path: "/tools",
+  },
+  {
+    name: "Tiền lương",
+    icon: <ListIcon />,
+    path: "/payroll",
+  },
+  {
+    name: "Chi phí giá thành",
+    icon: <ListIcon />,
+    path: "/costing",
+  },
+  {
+    name: "Kế toán tổng hợp",
+    icon: <ListIcon />,
+    path: "/general-ledger",
+  },
+  {
+    name: "Chuyển dữ liệu từ Excel",
+    icon: <ListIcon />,
+    path: "/import-excel",
+  },
+  {
+    name: "Hệ thống",
+    icon: <ListIcon />,
+    path: "/system",
   },
 ];
 
@@ -310,7 +358,7 @@ const AppSidebar: React.FC = () => {
               </h2>
               {renderMenuItems(navItems, "main")}
             </div>
-            <div>
+            <div className="mt-[500px]">
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"

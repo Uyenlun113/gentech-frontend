@@ -6,14 +6,24 @@ import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
+import CashPage from "./pages/Cash/Cash";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
-import CustomerList from "./pages/Customer/CustomerList";
+import CostingPage from "./pages/Costing/Costing";
 import Home from "./pages/Dashboard/Home";
+import DepreciationReportPage from "./pages/FixedAssets/DepreciationReport/DepreciationReport";
+import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
+import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedger";
+import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
+import InventoryPage from "./pages/Inventory/Inventory";
 import NotFound from "./pages/OtherPage/NotFound";
+import PayrollPage from "./pages/Payroll/Payroll";
+import PurchasesPage from "./pages/Purchases/Purchases";
+import SalesPage from "./pages/Sales/Sales";
+import SystemPage from "./pages/System/System";
 import BasicTables from "./pages/Tables/BasicTables";
-import TransactionRecordsCreate from "./pages/TransactionRecords/TransactionRecordsCreate";
+import ToolsPage from "./pages/Tools/Tools";
 import Alerts from "./pages/UiElements/Alerts";
 import Avatars from "./pages/UiElements/Avatars";
 import Badges from "./pages/UiElements/Badges";
@@ -32,12 +42,39 @@ export default function App() {
             {/* Dashboard Layout */}
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              {/* Cash Page */}
+              <Route path="/cash" element={<CashPage />} />
 
-              {/* Customer Page */}
-              <Route path="/customer-list" element={<CustomerList />} />
+              {/* Purchases Page */}
+              <Route path="/purchases" element={<PurchasesPage />} />
 
-              {/* TransactionRecords Page */}
-              <Route path="/transaction-records-create" element={<TransactionRecordsCreate />} />
+              {/* Sales Page */}
+              <Route path="/sales" element={<SalesPage />} />
+
+              {/* Inventory Page */}
+              <Route path="/inventory" element={<InventoryPage />} />
+
+              {/* Fixed Assets Page */}
+              <Route path="/fixed-assets/module-report" element={<ModuleReportPage />} />
+              <Route path="/fixed-assets/depreciation-report" element={<DepreciationReportPage />} />
+
+              {/* Tools Page */}
+              <Route path="/tools" element={<ToolsPage />} />
+
+              {/* Payroll Page */}
+              <Route path="/payroll" element={<PayrollPage />} />
+
+              {/* Costing Page */}
+              <Route path="/costing" element={<CostingPage />} />
+
+              {/* General Ledger Page */}
+              <Route path="/general-ledger" element={<GeneralLedgerPage />} />
+
+              {/* Import Excel Page */}
+              <Route path="/import-excel" element={<ImportExcelPage />} />
+
+              {/* System Page */}
+              <Route path="/system" element={<SystemPage />} />
 
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
