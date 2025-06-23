@@ -10,6 +10,7 @@ const TableBasic = ({
   onDeleteRow,
   showAddButton = false,
   addButtonText = "Thêm dòng mới",
+  onRowClick,
 }) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -217,7 +218,7 @@ const TableBasic = ({
 
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {data.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} onClick={() => onRowClick?.(row)} className="cursor-pointer hover:bg-gray-50">
                   {/* Left Fixed Columns */}
                   {leftFixedColumns.map((col, colIdx) => {
                     const value = row[col.key];

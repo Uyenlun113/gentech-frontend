@@ -17,6 +17,7 @@ import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/Deprec
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
 import GeneralLedgerCreate from "./pages/GeneralLedger/GeneralLedgerCreate";
+import GeneralLedgerListPage from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerList";
 import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
 import InventoryPage from "./pages/Inventory/Inventory";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -34,8 +35,6 @@ import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
 
-
-
 export default function App() {
   return (
     <>
@@ -47,20 +46,15 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
               <Route path="/category/customer" element={<ListCustomerPage />} />
-
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
-
               {/* Purchases Page */}
               <Route path="/purchases" element={<PurchasesPage />} />
-
               {/* Sales Page */}
               <Route path="/sales" element={<SalesPage />} />
-
               {/* Inventory Page */}
               <Route path="/inventory" element={<InventoryPage />} />
-
               {/* Fixed Assets Page */}
               <Route path="/fixed-assets/module-report" element={<ModuleReportPage />} />
               <Route path="/fixed-assets/depreciation-report" element={<DepreciationReportPage />} />
@@ -68,25 +62,20 @@ export default function App() {
                 path="/fixed-assets/module-report/depreciation-calculation"
                 element={<DepreciationCalculationPage />}
               />
-
               {/* Tools Page */}
               <Route path="/tools" element={<ToolsPage />} />
-
               {/* Payroll Page */}
               <Route path="/payroll" element={<PayrollPage />} />
-
               {/* Costing Page */}
               <Route path="/costing" element={<CostingPage />} />
-
               {/* General Ledger Page */}
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
+              <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
 
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
-
               {/* System Page */}
               <Route path="/system" element={<SystemPage />} />
-
               {/* Others Page */}
               <Route path="/profile" element={<UserProfiles />} />
               <Route path="/calendar" element={<Calendar />} />
