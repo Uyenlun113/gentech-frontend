@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 
 const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
@@ -119,7 +119,9 @@ const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div ref={scrollContainerRef} className="w-full overflow-x-auto relative" style={{ scrollBehavior: "smooth" }}>
-        <Table className="min-w-max">
+        <Table
+        // className="min-w-max"
+        >
           <TableHeader>
             <TableRow>
               {/* Left Fixed Columns */}

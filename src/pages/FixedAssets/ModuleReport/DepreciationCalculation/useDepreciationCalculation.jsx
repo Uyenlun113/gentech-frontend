@@ -168,9 +168,26 @@ export const useDepreciationCalculation = () => {
       title: "Dự án",
     },
     {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
+      key: "projectName",
+      title: "Dự án",
+    },
+    {
       key: "action",
       title: "Thao tác",
       fixed: "right",
+      width: 100,
       render: (_, record) => (
         <div className="flex items-center gap-3">
           <button className="text-gray-500 hover:text-blue-500" title="Xem chi tiết" onClick={openModalDetail}>
