@@ -90,6 +90,104 @@ export const useDepreciationCalculation = () => {
       budget: "4.5K",
       status: "Active",
     },
+    {
+      id: 6,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 7,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 8,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 9,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 10,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 11,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
+    {
+      id: 12,
+      user: {
+        image: "/images/user/user-21.jpg",
+        name: "Carla George",
+        role: "Front-end Developer",
+      },
+      projectName: "Website",
+      team: {
+        images: ["/images/user/user-31.jpg", "/images/user/user-32.jpg", "/images/user/user-33.jpg"],
+      },
+      budget: "4.5K",
+      status: "Active",
+    },
   ];
 
   const columnsTable = [

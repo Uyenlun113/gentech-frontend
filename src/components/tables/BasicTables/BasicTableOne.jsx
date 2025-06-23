@@ -132,9 +132,8 @@ const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
                 <TableCell
                   key={`scrollable-${idx}`}
                   isHeader
-                  className={`px-4 py-4 text-start text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${
-                    col.className || ""
-                  }`}
+                  className={`px-4 py-4 text-start text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${col.className || ""
+                    }`}
                   style={{
                     width: col.width,
                     minWidth: col.minWidth || col.width,
