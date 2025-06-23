@@ -1,7 +1,16 @@
+import { Plus, Trash } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 
-const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
+const TableBasic = ({
+  data,
+  columns,
+  fixedColumnWidth = 200,
+  onAddRow,
+  onDeleteRow,
+  showAddButton = false,
+  addButtonText = "Thêm dòng mới",
+}) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [scrollWidth, setScrollWidth] = useState(0);
   const [clientWidth, setClientWidth] = useState(0);
@@ -50,6 +59,35 @@ const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
       const width = typeof col.width === "number" ? col.width : 150;
       return acc + width;
     }, 0);
+  };
+
+  // Handle add new row
+  const handleAddRow = () => {
+    if (onAddRow) {
+      // Tạo ID mới (có thể cải thiện logic này)
+      const newId = Math.max(...data.map((item) => item.id || 0)) + 1;
+
+      // Tạo object mới với các field mặc định
+      const newRow = {
+        id: newId,
+        // Khởi tạo các field mặc định dựa trên columns
+        ...columns.reduce((acc, col) => {
+          if (col.key && col.key !== "action") {
+            acc[col.key] = col.defaultValue || "";
+          }
+          return acc;
+        }, {}),
+      };
+
+      onAddRow(newRow);
+    }
+  };
+
+  // Handle delete row
+  const handleDeleteRow = (record) => {
+    if (onDeleteRow) {
+      onDeleteRow(record);
+    }
   };
 
   const renderTableCell = (col, colIdx, value, row, isHeader = false) => {
@@ -107,7 +145,20 @@ const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
       cellStyle.minWidth = col.minWidth;
     }
 
-    const content = isHeader ? col.title : col.render && row ? col.render(value, row) : value;
+    let content = isHeader ? col.title : col.render && row ? col.render(value, row) : value;
+
+    // Nếu là column action và không phải header, thêm nút xoá mặc định
+    if (!isHeader && col.key === "action" && !col.render) {
+      content = (
+        <button
+          onClick={() => handleDeleteRow(row)}
+          className="text-gray-500 hover:text-red-500 transition-colors"
+          title="Xoá dòng"
+        >
+          <Trash size={18} />
+        </button>
+      );
+    }
 
     return (
       <TableCell key={colIdx} isHeader={isHeader} className={cellClassName} style={cellStyle}>
@@ -117,74 +168,94 @@ const TableBasic = ({ data, columns, fixedColumnWidth = 200 }) => {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-      <div ref={scrollContainerRef} className="w-full overflow-x-auto relative" style={{ scrollBehavior: "smooth" }}>
-        <Table
-        // className="min-w-max"
-        >
-          <TableHeader>
-            <TableRow>
-              {/* Left Fixed Columns */}
-              {leftFixedColumns.map((col, idx) => renderTableCell(col, idx, null, undefined, true))}
+    <div className="space-y-4">
+      {/* Add Button */}
+      {showAddButton && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleAddRow}
+            className="flex items-center text-sm gap-2 px-4 py-3 bg-brand-500 text-white rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={16} />
+            {addButtonText}
+          </button>
+        </div>
+      )}
 
-              {/* Scrollable Columns */}
-              {scrollableColumns.map((col, idx) => (
-                <TableCell
-                  key={`scrollable-${idx}`}
-                  isHeader
-                  className={`px-4 py-4 text-start text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${col.className || ""
-                    }`}
-                  style={{
-                    width: col.width,
-                    minWidth: col.minWidth || col.width,
-                  }}
-                >
-                  {col.title}
-                </TableCell>
-              ))}
-
-              {/* Right Fixed Columns */}
-              {rightFixedColumns.map((col, idx) =>
-                renderTableCell(col, idx + leftFixedColumns.length + scrollableColumns.length, null, undefined, true)
-              )}
-            </TableRow>
-          </TableHeader>
-
-          <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-            {data.map((row) => (
-              <TableRow key={row.id}>
+      {/* Table */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div ref={scrollContainerRef} className="w-full overflow-x-auto relative" style={{ scrollBehavior: "smooth" }}>
+          <Table>
+            <TableHeader>
+              <TableRow>
                 {/* Left Fixed Columns */}
-                {leftFixedColumns.map((col, colIdx) => {
-                  const value = row[col.key];
-                  return renderTableCell(col, colIdx, value, row);
-                })}
+                {leftFixedColumns.map((col, idx) => renderTableCell(col, idx, null, undefined, true))}
 
                 {/* Scrollable Columns */}
-                {scrollableColumns.map((col, colIdx) => {
-                  const value = row[col.key];
-                  return (
-                    <TableCell
-                      key={`scrollable-${colIdx}`}
-                      className="px-4 py-5 text-sm font-light text-start leading-tight"
-                      style={{
-                        width: col.width,
-                        minWidth: col.minWidth || col.width,
-                      }}
-                    >
-                      {col.render ? col.render(value, row) : value}
-                    </TableCell>
-                  );
-                })}
+                {scrollableColumns.map((col, idx) => (
+                  <TableCell
+                    key={`scrollable-${idx}`}
+                    isHeader
+                    className={`px-4 py-4 text-start text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${
+                      col.className || ""
+                    }`}
+                    style={{
+                      width: col.width,
+                      minWidth: col.minWidth || col.width,
+                    }}
+                  >
+                    {col.title}
+                  </TableCell>
+                ))}
 
                 {/* Right Fixed Columns */}
-                {rightFixedColumns.map((col, colIdx) => {
-                  const value = row[col.key];
-                  return renderTableCell(col, colIdx + leftFixedColumns.length + scrollableColumns.length, value, row);
-                })}
+                {rightFixedColumns.map((col, idx) =>
+                  renderTableCell(col, idx + leftFixedColumns.length + scrollableColumns.length, null, undefined, true)
+                )}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+              {data.map((row) => (
+                <TableRow key={row.id}>
+                  {/* Left Fixed Columns */}
+                  {leftFixedColumns.map((col, colIdx) => {
+                    const value = row[col.key];
+                    return renderTableCell(col, colIdx, value, row);
+                  })}
+
+                  {/* Scrollable Columns */}
+                  {scrollableColumns.map((col, colIdx) => {
+                    const value = row[col.key];
+                    return (
+                      <TableCell
+                        key={`scrollable-${colIdx}`}
+                        className="px-4 py-5 text-sm font-light text-start leading-tight"
+                        style={{
+                          width: col.width,
+                          minWidth: col.minWidth || col.width,
+                        }}
+                      >
+                        {col.render ? col.render(value, row) : value}
+                      </TableCell>
+                    );
+                  })}
+
+                  {/* Right Fixed Columns */}
+                  {rightFixedColumns.map((col, colIdx) => {
+                    const value = row[col.key];
+                    return renderTableCell(
+                      col,
+                      colIdx + leftFixedColumns.length + scrollableColumns.length,
+                      value,
+                      row
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
