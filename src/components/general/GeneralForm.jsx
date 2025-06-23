@@ -74,43 +74,19 @@ export default function GeneralForm() {
       key: "projectName",
       title: "Dự án",
       defaultValue: "Dự án mới",
-      render: (val) => (
-        <input
-          type="text"
-          defaultValue={val || "Dự án mới"}
-          className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Nhập tên dự án"
-        />
-      ),
+      render: (val) => <Input type="text" id="inputTwo" placeholder="info@gmail.com" />,
     },
     {
       key: "team",
       title: "Team",
       defaultValue: "",
-      render: (val) => (
-        <input
-          type="text"
-          defaultValue={val?.images?.length ? `${val.images.length} thành viên` : "0 thành viên"}
-          className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Nhập thông tin team"
-        />
-      ),
+      render: (val) => <Input type="text" id="inputTwo" placeholder="info@gmail.com" />,
     },
     {
       key: "status",
       title: "Trạng thái",
       defaultValue: "Pending",
-      render: (val) => (
-        <select
-          defaultValue={val || "Pending"}
-          className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="Active">Active</option>
-          <option value="Pending">Pending</option>
-          <option value="Inactive">Inactive</option>
-          <option value="Completed">Completed</option>
-        </select>
-      ),
+      render: (val) => <Input type="text" id="inputTwo" placeholder="info@gmail.com" />,
     },
     {
       key: "action",
