@@ -7,6 +7,7 @@ import SignUp from "./pages/AuthPages/SignUp";
 import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
+import ListCustomerPage from "./pages/category/customer/ListCustomer";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
 import CostingPage from "./pages/Costing/Costing";
@@ -15,7 +16,7 @@ import DepreciationReportPage from "./pages/FixedAssets/DepreciationReport/Depre
 import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/DepreciationCalculation/DepreciationCalculation";
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
-import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedger";
+import GeneralLedgerCreate from "./pages/GeneralLedger/GeneralLedgerCreate";
 import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
 import InventoryPage from "./pages/Inventory/Inventory";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -32,7 +33,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import ListCustomerPage from "./pages/category/customer/ListCustomer";
 
 
 
@@ -79,7 +79,7 @@ export default function App() {
               <Route path="/costing" element={<CostingPage />} />
 
               {/* General Ledger Page */}
-              <Route path="/general-ledger" element={<GeneralLedgerPage />} />
+              <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
 
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />

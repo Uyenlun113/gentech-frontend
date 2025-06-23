@@ -81,7 +81,10 @@ const navItems: NavItem[] = [
   {
     name: "Kế toán tổng hợp",
     icon: <ListIcon />,
-    path: "/general-ledger",
+    subItems: [
+      { name: "Phiếu kế toán", path: "/general-ledger/create", pro: false },
+      { name: "Danh sách phiếu kế toán", path: "/general-ledger/list", pro: false },
+    ],
   },
   {
     name: "Chuyển dữ liệu từ Excel",
