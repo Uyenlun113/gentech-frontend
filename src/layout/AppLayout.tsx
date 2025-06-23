@@ -20,7 +20,7 @@ const LayoutContent: React.FC = () => {
         style={{ width: "-webkit-fill-available" }}
       >
         <AppHeader />
-        <div className="p-4 mx-auto max-w-screen-3xl md:p-4">
+        <div className="p-4 mx-auto md:p-4">
           <Outlet />
         </div>
       </div>
