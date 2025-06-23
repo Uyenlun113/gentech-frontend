@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { ToastContainer } from "react-toastify";
 import "simplebar-react/dist/simplebar.min.css";
 import "swiper/swiper-bundle.css";
-import App from "./App.tsx";
+import App from "./App.jsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import "./index.css";

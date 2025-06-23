@@ -31,6 +31,11 @@ const navItems: NavItem[] = [
     path: "/",
   },
   {
+    name: "Danh mục",
+    icon: <ListIcon />,
+    subItems: [{ name: "Danh mục khách hàng", path: "/category/customer", pro: false }],
+  },
+  {
     name: "Vốn bằng tiền",
     icon: <ListIcon />,
     path: "/cash",

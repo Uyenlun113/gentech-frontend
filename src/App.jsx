@@ -32,6 +32,9 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import ListCustomerPage from "./pages/category/customer/ListCustomer";
+
+
 
 export default function App() {
   return (
@@ -43,6 +46,9 @@ export default function App() {
             {/* Dashboard Layout */}
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              <Route path="/category/customer" element={<ListCustomerPage />} />
+
+              {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
 
