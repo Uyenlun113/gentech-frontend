@@ -1,6 +1,8 @@
+// pages/GeneralLedgerListPage.jsx
 import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { FilePlus, Search } from "lucide-react";
+import { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -8,9 +10,6 @@ import PageMeta from "../../../components/common/PageMeta";
 import { ShowMoreTables } from "../../../components/tables/ShowMoreTables";
 import Button from "../../../components/ui/button/Button";
 import { CalenderIcon } from "../../../icons";
-import { ModalCreateDepreciationCalculation } from "./ModalCreate";
-import { ModalDetailDepreciationCalculation } from "./ModalDetail";
-import { ModalEditDepreciationCalculation } from "./ModalEdit";
 import { useGeneralLedgerList } from "./useGeneralLedgerList";
 
 export default function GeneralLedgerListPage() {
@@ -20,7 +19,13 @@ export default function GeneralLedgerListPage() {
     isOpenDetail,
     dataTable,
     columnsTable,
+    columnsSubTable,
     rangePickerValue,
+    loading,
+    searchTerm,
+    currentPage,
+    totalItems,
+    selectedRecord,
     openModalCreate,
     closeModalCreate,
     closeModalEdit,
@@ -29,17 +34,41 @@ export default function GeneralLedgerListPage() {
     handleChangePage,
     handleSaveCreate,
     handleSaveEdit,
+    handleSearch,
+    handleRowClick,
+    fetchCt11Data,
+    fetchPh11Data,
   } = useGeneralLedgerList();
+
+  const [localSearchTerm, setLocalSearchTerm] = useState("");
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    handleSearch(localSearchTerm);
+  };
+
+  const handleSearchInputChange = (e) => {
+    setLocalSearchTerm(e.target.value);
+    if (e.target.value === "") {
+      handleSearch("");
+    }
+  };
+
 
   return (
     <>
-      <PageMeta title="Bảng tính khấu hao tài sản" description="Bảng tính khấu hao tài sản" />
-      <PageBreadcrumb pageTitle="Bảng tính khấu hao tài sản" />
+      <PageMeta title="Danh sách phiếu kế toán tổng hợp" description="Danh sách phiếu kế toán tổng hợp" />
+      <PageBreadcrumb pageTitle="Danh sách phiếu kế toán tổng hợp" />
       <div className="space-y-6">
         <ComponentCard>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={openModalCreate}
+                size="sm"
+                variant="primary"
+                startIcon={<FilePlus className="size-5" />}
+              >
                 Thêm mới
               </Button>
             </div>
@@ -47,14 +76,16 @@ export default function GeneralLedgerListPage() {
             {/* Right: Search + Date Range */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               {/* Search */}
-              <form className="w-full sm:max-w-xs">
+              <form className="w-full sm:max-w-xs" onSubmit={handleSearchSubmit}>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                     <Search size={18} className="text-gray-500 dark:text-white/50" />
                   </span>
                   <input
                     type="text"
-                    placeholder="Tìm kiếm..."
+                    placeholder="Tìm kiếm theo mã CT, diễn giải..."
+                    value={localSearchTerm}
+                    onChange={handleSearchInputChange}
                     className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 pl-11 pr-4 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -79,24 +110,39 @@ export default function GeneralLedgerListPage() {
               </div>
             </div>
           </div>
+
           <ShowMoreTables
             dataTable={dataTable}
             columnsTable={columnsTable}
-            columnsSubTable={columnsTable}
+            columnsSubTable={columnsSubTable}
             handleChangePage={handleChangePage}
+            fetchCt11Data={fetchCt11Data}
+            loading={loading}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            handleRowClick={handleRowClick}
           />
         </ComponentCard>
-        <ModalCreateDepreciationCalculation
+
+        {/* Modals */}
+        {/* <ModalCreateDepreciationCalculation
           isOpenCreate={isOpenCreate}
           closeModalCreate={closeModalCreate}
           onSaveCreate={handleSaveCreate}
         />
+
         <ModalEditDepreciationCalculation
           isOpenEdit={isOpenEdit}
           closeModalEdit={closeModalEdit}
           onSaveEdit={handleSaveEdit}
+          selectedRecord={selectedRecord}
         />
-        <ModalDetailDepreciationCalculation isOpenDetail={isOpenDetail} closeModalDetail={closeModalDetail} />
+
+        <ModalDetailDepreciationCalculation
+          isOpenDetail={isOpenDetail}
+          closeModalDetail={closeModalDetail}
+          selectedRecord={selectedRecord}
+        /> */}
       </div>
     </>
   );

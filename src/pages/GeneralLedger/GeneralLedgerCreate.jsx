@@ -9,7 +9,6 @@ export default function GeneralLedgerCreate() {
       <PageBreadcrumb pageTitle="Tạo phiếu kế toán" />
       <div className="space-y-6">
         <GeneralForm />
-        {/* <TableBasic data={dataTable} columns={columnsTable} /> */}
       </div>
     </>
   );

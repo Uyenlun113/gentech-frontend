@@ -2,22 +2,22 @@ import { useState } from "react";
 import Pagination from "../../pagination/Pagination";
 import TableBasic from "../BasicTables/BasicTableOne";
 
-export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handleChangePage }) => {
+export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handleChangePage, handleRowClick }) => {
   const [isShowMore, setIsShowMore] = useState(false);
   const [selectedRow, setSelectedRow] = useState([]);
 
-  const handleRowClick = (row) => {
-    console.log(row);
+  const handleLocalRowClick = (row) => {
     if (!isShowMore) {
       setIsShowMore(true);
     }
     setSelectedRow(row);
+    handleRowClick(row);
   };
 
   return (
     <>
       <div className={`${isShowMore ? "h-[40vh] overflow-scroll" : "h-full"}`}>
-        <TableBasic data={dataTable} columns={columnsTable} onRowClick={handleRowClick} />
+        <TableBasic data={dataTable} columns={columnsTable} onRowClick={handleLocalRowClick} />
       </div>
       <Pagination currentPage={1} totalItems={80} onPageChange={handleChangePage} />
       <div className="w-full flex justify-center mt-4">
@@ -27,7 +27,7 @@ export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handl
             if (!isShowMore) setSelectedRow(null);
           }}
         >
-          {isShowMore ? "Thu gọn" : "Mở rộng"}
+
         </button>
       </div>
 

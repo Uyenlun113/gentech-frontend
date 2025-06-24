@@ -188,7 +188,7 @@ const TableBasic = ({
         <div ref={scrollContainerRef} className="w-full overflow-x-auto relative" style={{ scrollBehavior: "smooth" }}>
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow >
                 {/* Left Fixed Columns */}
                 {leftFixedColumns.map((col, idx) => renderTableCell(col, idx, null, undefined, true))}
 
@@ -197,9 +197,8 @@ const TableBasic = ({
                   <TableCell
                     key={`scrollable-${idx}`}
                     isHeader
-                    className={`px-4 py-4 text-start text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${
-                      col.className || ""
-                    }`}
+                    className={`px-4 py-4 text-center text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${col.className || ""
+                      }`}
                     style={{
                       width: col.width,
                       minWidth: col.minWidth || col.width,
@@ -231,7 +230,7 @@ const TableBasic = ({
                     return (
                       <TableCell
                         key={`scrollable-${colIdx}`}
-                        className="px-4 py-5 text-sm font-light text-start leading-tight"
+                        className="px-4 py-5 text-sm font-light text-center leading-tight"
                         style={{
                           width: col.width,
                           minWidth: col.minWidth || col.width,
