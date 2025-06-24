@@ -11,6 +11,7 @@ import { ShowMoreTables } from "../../../components/tables/ShowMoreTables";
 import Button from "../../../components/ui/button/Button";
 import { CalenderIcon } from "../../../icons";
 import { useGeneralLedgerList } from "./useGeneralLedgerList";
+import { Link } from "react-router";
 
 export default function GeneralLedgerListPage() {
   const {
@@ -63,14 +64,15 @@ export default function GeneralLedgerListPage() {
         <ComponentCard>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <Button
-                onClick={openModalCreate}
-                size="sm"
-                variant="primary"
-                startIcon={<FilePlus className="size-5" />}
-              >
-                Thêm mới
-              </Button>
+              <Link to="/general-ledger/create">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  startIcon={<FilePlus className="size-5" />}
+                >
+                  Thêm mới
+                </Button>
+              </Link>
             </div>
 
             {/* Right: Search + Date Range */}

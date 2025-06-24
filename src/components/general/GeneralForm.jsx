@@ -3,7 +3,7 @@ import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Flatpickr from "react-flatpickr";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCustomers } from "../../hooks/useCustomer";
@@ -120,7 +120,7 @@ export default function GeneralForm() {
       setMaKhSearchRowId(id);
     }
   };
-
+  const navigate = useNavigate();
   const handleCustomerSelect = (id, customer) => {
     setHopDongThueData(prev => prev.map(item =>
       item.id === id ? { ...item, ma_kh: customer.ma_kh, ten_kh: customer.ten_kh } : item
@@ -197,7 +197,7 @@ export default function GeneralForm() {
       const result = await saveAccounting(payload);
       toast.success("Lưu thành công!");
       resetForm();
-      Navigate("/general-ledger/list");
+      navigate("/general-ledger/list");
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi lưu: " + (err?.message || "Không xác định"));

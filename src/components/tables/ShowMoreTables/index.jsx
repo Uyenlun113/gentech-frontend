@@ -16,7 +16,7 @@ export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handl
 
   return (
     <>
-      <div className={`${isShowMore ? "min-h-[40vh] overflow-scroll" : "h-full"}`}>
+      <div className={`${isShowMore ? "max-h-[40vh] overflow-y-scroll" : "h-full"}`}>
         <TableBasic data={dataTable} columns={columnsTable} onRowClick={handleLocalRowClick} />
       </div>
       <Pagination currentPage={1} totalItems={80} onPageChange={handleChangePage} />

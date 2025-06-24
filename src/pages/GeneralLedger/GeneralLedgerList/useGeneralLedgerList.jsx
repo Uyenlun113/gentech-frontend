@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFetchCt11Data, useGetGeneralAccounting } from "../../../hooks/useGeneralAccounting.TS";
 import { useModal } from "../../../hooks/useModal";
@@ -28,7 +28,7 @@ export const useGeneralLedgerList = () => {
     isLoading: isLoadingCt11,
     error: errorCt11
   } = useFetchCt11Data(selectedRecord?.stt_rec || "", {
-    enabled: !!selectedRecord?.stt_rec, // Chỉ gọi API khi có stt_rec
+    enabled: !!selectedRecord?.stt_rec,
   });
 
   console.log("🚀 ~ useGeneralLedgerList ~ fetchCt11Data:", fetchCt11Data);
@@ -162,16 +162,6 @@ export const useGeneralLedgerList = () => {
       render: (_, record) => (
         <div className="flex items-center gap-2">
           <button
-            className="text-gray-500 hover:text-blue-500 p-1"
-            title="Xem chi tiết"
-            onClick={(e) => {
-              e.stopPropagation();
-              openModalDetail();
-            }}
-          >
-            <Eye size={16} />
-          </button>
-          <button
             className="text-gray-500 hover:text-amber-500 p-1"
             title="Sửa"
             onClick={(e) => {
@@ -202,6 +192,7 @@ export const useGeneralLedgerList = () => {
     {
       key: "tk_i",
       title: "Tài khoản",
+      fixed: "left",
       width: 120,
       render: (val) => <span className="font-mono">{val || '-'}</span>
     },
@@ -210,7 +201,7 @@ export const useGeneralLedgerList = () => {
       title: "PS Nợ",
       width: 120,
       render: (val) => (
-        <span className="text-right block">
+        <span className="text-center block">
           {formatCurrency(val)}
         </span>
       )
@@ -220,7 +211,7 @@ export const useGeneralLedgerList = () => {
       title: "PS Có",
       width: 120,
       render: (val) => (
-        <span className="text-right block">
+        <span className="text-center block">
           {formatCurrency(val)}
         </span>
       )
@@ -236,7 +227,7 @@ export const useGeneralLedgerList = () => {
       title: "Diễn giải",
       width: 250,
       render: (val) => (
-        <div className="max-w-xs truncate" title={val}>
+        <div className="text-center truncate" title={val}>
           {val || '-'}
         </div>
       )
