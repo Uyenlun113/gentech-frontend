@@ -16,7 +16,7 @@ export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handl
 
   return (
     <>
-      <div className={`${isShowMore ? "h-[40vh] overflow-scroll" : "h-full"}`}>
+      <div className={`${isShowMore ? "min-h-[40vh] overflow-scroll" : "h-full"}`}>
         <TableBasic data={dataTable} columns={columnsTable} onRowClick={handleLocalRowClick} />
       </div>
       <Pagination currentPage={1} totalItems={80} onPageChange={handleChangePage} />
@@ -26,9 +26,7 @@ export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handl
             setIsShowMore(!isShowMore);
             if (!isShowMore) setSelectedRow(null);
           }}
-        >
-
-        </button>
+        ></button>
       </div>
 
       {isShowMore && selectedRow?.children && (
