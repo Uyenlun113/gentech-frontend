@@ -4,20 +4,18 @@ import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { FilePlus, Search } from "lucide-react";
 import { useState } from "react";
 import Flatpickr from "react-flatpickr";
+import { Link } from "react-router";
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
 import { ShowMoreTables } from "../../../components/tables/ShowMoreTables";
 import Button from "../../../components/ui/button/Button";
+import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../../icons";
 import { useGeneralLedgerList } from "./useGeneralLedgerList";
-import { Link } from "react-router";
 
 export default function GeneralLedgerListPage() {
   const {
-    isOpenCreate,
-    isOpenEdit,
-    isOpenDetail,
     dataTable,
     columnsTable,
     columnsSubTable,
@@ -27,16 +25,14 @@ export default function GeneralLedgerListPage() {
     currentPage,
     totalItems,
     selectedRecord,
-    openModalCreate,
-    closeModalCreate,
-    closeModalEdit,
-    closeModalDetail,
+    recordToDelete,
+    isOpenDelete,
     handleRangePicker,
     handleChangePage,
-    handleSaveCreate,
-    handleSaveEdit,
     handleSearch,
     handleRowClick,
+    handleConfirmDelete,
+    handleCancelDelete,
     fetchCt11Data,
     fetchPh11Data,
   } = useGeneralLedgerList();
@@ -54,7 +50,6 @@ export default function GeneralLedgerListPage() {
       handleSearch("");
     }
   };
-
 
   return (
     <>
@@ -126,25 +121,17 @@ export default function GeneralLedgerListPage() {
           />
         </ComponentCard>
 
-        {/* Modals */}
-        {/* <ModalCreateDepreciationCalculation
-          isOpenCreate={isOpenCreate}
-          closeModalCreate={closeModalCreate}
-          onSaveCreate={handleSaveCreate}
+        {/* Modal xác nhận xóa */}
+        <ConfirmModal
+          isOpen={isOpenDelete}
+          title="Xác nhận xóa"
+          message={`Bạn có chắc chắn muốn xóa phiếu kế toán "${recordToDelete?.ma_ct || recordToDelete?.stt_rec}" không?`}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          confirmText="Xóa"
+          cancelText="Hủy"
+          variant="danger"
         />
-
-        <ModalEditDepreciationCalculation
-          isOpenEdit={isOpenEdit}
-          closeModalEdit={closeModalEdit}
-          onSaveEdit={handleSaveEdit}
-          selectedRecord={selectedRecord}
-        />
-
-        <ModalDetailDepreciationCalculation
-          isOpenDetail={isOpenDetail}
-          closeModalDetail={closeModalDetail}
-          selectedRecord={selectedRecord}
-        /> */}
       </div>
     </>
   );

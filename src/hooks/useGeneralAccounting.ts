@@ -1,26 +1,63 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import generalLedgerApi from "../services/generalLedger";
 
 export const useSaveGeneralAccounting = () => {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (payload: any) => {
             return await generalLedgerApi.createGeneralLedger(payload);
         },
         onSuccess: () => {
-            // Có thể invalidate queries liên quan
-            // queryClient.invalidateQueries(['generalAccounting']);
+            // Invalidate và refetch danh sách
+            queryClient.invalidateQueries({ queryKey: ['generalAccounting'] });
         }
     });
 };
 
-export const useGetGeneralAccounting = () => {
-    return useQuery({
-        queryKey: ['generalAccounting'],
-        queryFn: async () => {
-            return await generalLedgerApi.getGeneralLedger();
+export const useUpdateGeneralAccounting = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ stt_rec, payload }: { stt_rec: string; payload: any }) => {
+            return await generalLedgerApi.updateGeneralLedger(stt_rec, payload);
         },
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
+        onSuccess: (data, variables) => {
+            // Invalidate danh sách
+            queryClient.invalidateQueries({ queryKey: ['generalAccounting'] });
+            // Invalidate chi tiết của record vừa update
+            queryClient.invalidateQueries({ queryKey: ['generalAccounting', variables.stt_rec] });
+            // Invalidate CT11 data
+            queryClient.invalidateQueries({ queryKey: ['ct11Data', variables.stt_rec] });
+        }
+    });
+};
+
+export const useDeleteGeneralAccounting = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (stt_rec: string) => {
+            return await generalLedgerApi.deleteGeneralLedger(stt_rec);
+        },
+        onSuccess: (data, stt_rec) => {
+            // Invalidate danh sách
+            queryClient.invalidateQueries({ queryKey: ['generalAccounting'] });
+            // Remove chi tiết của record vừa xóa khỏi cache
+            queryClient.removeQueries({ queryKey: ['generalAccounting', stt_rec] });
+            queryClient.removeQueries({ queryKey: ['ct11Data', stt_rec] });
+        }
+    });
+};
+
+export const useGetGeneralAccounting = (params?: { page?: number; limit?: number; search?: string }) => {
+    return useQuery({
+        queryKey: ['generalAccounting', params],
+        queryFn: async () => {
+            return await generalLedgerApi.getGeneralLedger(params);
+        },
+        staleTime: 5 * 60 * 1000, // 5 phút
+        gcTime: 10 * 60 * 1000, // 10 phút
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         retry: 3,
@@ -28,7 +65,23 @@ export const useGetGeneralAccounting = () => {
     });
 };
 
-export const useFetchCt11Data = (stt_rec?: string) => {
+export const useGetGeneralAccountingById = (stt_rec: string) => {
+    console.log("🎯 useGetGeneralAccountingById called with stt_rec:", stt_rec);
+    return useQuery({
+        queryKey: ['generalAccounting', stt_rec],
+        queryFn: async () => {
+            return await generalLedgerApi.getGeneralLedgerById(stt_rec);
+        },
+        enabled: !!stt_rec,
+        staleTime: 3 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        retry: 2,
+    });
+};
+
+export const useFetchCt11Data = (stt_rec?: string, options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: ['ct11Data', stt_rec],
         queryFn: async () => {
@@ -37,7 +90,7 @@ export const useFetchCt11Data = (stt_rec?: string) => {
             }
             return await generalLedgerApi.fetchCt11Data(stt_rec);
         },
-        enabled: !!stt_rec,
+        enabled: !!stt_rec && (options?.enabled !== false),
         staleTime: 3 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
         refetchOnWindowFocus: false,

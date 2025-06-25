@@ -34,6 +34,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
 
 export default function App() {
   return (
@@ -70,6 +71,7 @@ export default function App() {
               <Route path="/costing" element={<CostingPage />} />
               {/* General Ledger Page */}
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
+              <Route path="/general-ledger/update/:stt_rec" element={<GeneralLedgerUpdate />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
 
               {/* Import Excel Page */}

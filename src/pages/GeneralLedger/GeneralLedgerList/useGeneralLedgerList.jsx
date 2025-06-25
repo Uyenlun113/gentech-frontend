@@ -1,19 +1,25 @@
 import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useFetchCt11Data, useGetGeneralAccounting } from "../../../hooks/useGeneralAccounting.TS";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
+import {
+  useFetchCt11Data,
+  useGetGeneralAccounting,
+  useDeleteGeneralAccounting
+} from "../../../hooks/useGeneralAccounting.TS";
 import { useModal } from "../../../hooks/useModal";
 import generalLedgerApi from "../../../services/generalLedger";
 
 export const useGeneralLedgerList = () => {
+  const navigate = useNavigate();
   const [rangePickerValue, setRangePickerValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showCt11Table, setShowCt11Table] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
 
-  const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
-  const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-  const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
+  const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
 
   // Fetch Ph11 data với staleTime để tránh gọi API không cần thiết
   const {
@@ -23,6 +29,7 @@ export const useGeneralLedgerList = () => {
   } = useGetGeneralAccounting();
 
   console.log("🚀 ~ useGeneralLedgerList ~ fetchPh11Data:", fetchPh11Data);
+
   const {
     data: fetchCt11Data,
     isLoading: isLoadingCt11,
@@ -32,6 +39,9 @@ export const useGeneralLedgerList = () => {
   });
 
   console.log("🚀 ~ useGeneralLedgerList ~ fetchCt11Data:", fetchCt11Data);
+
+  // Mutations for delete
+  const deleteMutation = useDeleteGeneralAccounting();
 
   // Xử lý dữ liệu từ API response
   const dataTable = useMemo(() => {
@@ -51,8 +61,8 @@ export const useGeneralLedgerList = () => {
 
   // Cập nhật loading state
   useEffect(() => {
-    setLoading(isLoadingPh11 || isLoadingCt11);
-  }, [isLoadingPh11, isLoadingCt11]);
+    setLoading(isLoadingPh11 || isLoadingCt11 || deleteMutation.isPending);
+  }, [isLoadingPh11, isLoadingCt11, deleteMutation.isPending]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -64,28 +74,51 @@ export const useGeneralLedgerList = () => {
     return new Intl.NumberFormat('vi-VN').format(amount);
   };
 
-  const handleSaveCreate = () => {
-    console.log("Saving changes...");
-    closeModalCreate();
-    refetchPh11Data(); // Sử dụng refetch thay vì gọi lại toàn bộ hook
+  // Xử lý chuyển hướng đến trang update
+  const handleUpdateClick = (record, e) => {
+    e.stopPropagation();
+    navigate(`/general-ledger/update/${record.stt_rec}`);
   };
 
-  const handleSaveEdit = () => {
-    console.log("Saving changes...");
-    closeModalEdit();
-    refetchPh11Data();
+  // Xử lý mở modal xóa
+  const handleDeleteClick = (record, e) => {
+    e.stopPropagation();
+    setRecordToDelete(record);
+    openModalDelete();
   };
 
-  const handleDelete = async (record) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
-      try {
-        console.log('Deleting:', record);
-        // Thêm logic xóa ở đây
-        refetchPh11Data();
-      } catch (error) {
-        console.error('Error deleting record:', error);
-      }
+  // Xử lý xác nhận xóa
+  const handleConfirmDelete = async () => {
+    if (!recordToDelete?.stt_rec) {
+      toast.error("Không có thông tin bản ghi để xóa");
+      return;
     }
+
+    try {
+      console.log('Deleting:', recordToDelete);
+
+      await deleteMutation.mutateAsync(recordToDelete.stt_rec);
+
+      toast.success("Xóa thành công!");
+
+      // Nếu đang xem chi tiết của record vừa xóa thì đóng popup
+      if (selectedRecord?.stt_rec === recordToDelete.stt_rec) {
+        handleCloseCt11Table();
+      }
+
+      closeModalDelete();
+      setRecordToDelete(null);
+      refetchPh11Data(); // Refresh danh sách sau khi xóa
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      toast.error("Lỗi khi xóa: " + (error?.message || "Không xác định"));
+    }
+  };
+
+  // Xử lý hủy xóa
+  const handleCancelDelete = () => {
+    closeModalDelete();
+    setRecordToDelete(null);
   };
 
   const handleRowClick = async (record) => {
@@ -103,6 +136,7 @@ export const useGeneralLedgerList = () => {
     } catch (error) {
       console.error("Failed to fetch CT11 data:", error);
       record.children = [];
+      toast.error("Không thể tải dữ liệu chi tiết");
     }
   };
 
@@ -141,9 +175,9 @@ export const useGeneralLedgerList = () => {
     {
       key: "dien_giai",
       title: "Diễn giải",
-      width: 250,
+      width: 150,
       render: (val) => (
-        <div className="max-w-xs truncate" title={val}>
+        <div className="max-w-xs truncate text-center" title={val}>
           {val || '-'}
         </div>
       )
@@ -158,27 +192,21 @@ export const useGeneralLedgerList = () => {
       key: "action",
       title: "Thao tác",
       fixed: "right",
-      width: 120,
+      width: 100,
       render: (_, record) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-center">
           <button
-            className="text-gray-500 hover:text-amber-500 p-1"
+            className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Sửa"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedRecord(record);
-              openModalEdit();
-            }}
+            onClick={(e) => handleUpdateClick(record, e)}
           >
             <Pencil size={16} />
           </button>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete(record);
-            }}
-            className="text-gray-500 hover:text-red-500 p-1"
+            onClick={(e) => handleDeleteClick(record, e)}
+            className="text-gray-500 hover:text-red-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Xóa"
+            disabled={deleteMutation.isPending}
           >
             <Trash size={16} />
           </button>
@@ -279,9 +307,6 @@ export const useGeneralLedgerList = () => {
   };
 
   return {
-    isOpenCreate,
-    isOpenEdit,
-    isOpenDetail,
     dataTable: filteredDataTable,
     dataCt11Table,
     columnsTable,
@@ -293,17 +318,19 @@ export const useGeneralLedgerList = () => {
     showCt11Table,
     isLoadingCt11,
     errorCt11,
-    openModalCreate,
-    closeModalCreate,
-    closeModalEdit,
-    closeModalDetail,
+    recordToDelete,
+    isOpenDelete,
     handleRangePicker,
     handleChangePage,
-    handleSaveCreate,
-    handleSaveEdit,
     handleSearch,
     handleRowClick,
     handleCloseCt11Table,
+    handleConfirmDelete,
+    handleCancelDelete,
     setSelectedRecord,
+    // Export thêm các state và function cần thiết
+    deleteMutation,
+    fetchCt11Data,
+    fetchPh11Data,
   };
 };
