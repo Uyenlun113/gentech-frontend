@@ -8,21 +8,23 @@ const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
-    <div className="min-h-screen xl:flex">
-      <div>
+    <div className="h-screen overflow-hidden">
+      <AppHeader />
+
+      <div className="flex pt-24 h-full">
+        {" "}
         <AppSidebar />
         <Backdrop />
-      </div>
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
-        } ${isMobileOpen ? "ml-0" : ""}`}
-        style={{ width: "-webkit-fill-available" }}
-      >
-        <AppHeader />
-        <div className="p-4 mx-auto md:p-4">
+        <main
+          className={`
+            flex-1 overflow-y-auto transition-all duration-300 ease-in-out
+            ${isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"}
+            ${isMobileOpen ? "ml-0" : ""}
+            px-4 md:px-6 pb-4
+          `}
+        >
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );
