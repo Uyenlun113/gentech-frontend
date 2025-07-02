@@ -3,6 +3,7 @@ import { SidebarProvider, useSidebar } from "../context/SidebarContext";
 import AppHeader from "./AppHeader";
 import AppSidebar from "./AppSidebar";
 import Backdrop from "./Backdrop";
+import SidebarMenu from "./SidebarMenu";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
@@ -10,6 +11,7 @@ const LayoutContent: React.FC = () => {
   return (
     <div className="h-screen overflow-hidden">
       <AppHeader />
+      <SidebarMenu />
 
       <div className="flex pt-24 h-full">
         {" "}

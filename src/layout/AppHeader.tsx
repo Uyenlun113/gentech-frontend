@@ -238,26 +238,18 @@ const AppHeader = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-6 px-6 ">
-          {/* <img src="/images/icons/V.svg" alt="Logo" className="w-5 h-5" />
-          <img src="/images/icons/khoa.svg" alt="Logo" className="w-7 h-7" />
-          <div className="w-[2px] h-6 bg-gray-400 mx-2" />
-          <img src="/images/icons/phao.svg" alt="Logo" className="w-7 h-7" />
-          <img src="/images/icons/sach.svg" alt="Logo" className="w-7 h-7" />
-          <img src="/images/icons/user.svg" alt="Logo" className="w-7 h-7" />
-          <img src="/images/icons/teamview.svg" alt="Logo" className="w-7 h-7" /> */}
-          <div className=" dark:bg-slate-800  ">
-            <div className="flex flex-wrap gap-2">
-              {menuHeader.map((item, index) => (
-                <a
-                  key={index}
-                  href={item.path}
-                  className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all hover:scale-105 hover:shadow-md ${item.color}`}
-                >
-                  {item.name}
-                </a>
-              ))}
-            </div>
+
+        <div className="flex items-center gap-6 px-6 py-3  dark:bg-slate-800  ">
+          <div className="flex flex-wrap gap-2">
+            {menuHeader.map((item, index) => (
+              <a
+                key={index}
+                href={item.path}
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all hover:scale-105 hover:shadow-md ${item.color}`}
+              >
+                {item.name}
+              </a>
+            ))}
           </div>
         </div>
       </header>

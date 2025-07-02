@@ -11,6 +11,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+  { name: "Hệ thống", icon: <ListIcon />, path: "/system" },
   { icon: <GridIcon />, name: "Vốn bằng tiền", path: "/" },
   {
     name: "Mua hàng - Phải trả",
@@ -39,7 +40,6 @@ const navItems: NavItem[] = [
     ],
   },
   { name: "Chuyển dữ liệu từ Excel", icon: <ListIcon />, path: "/import-excel" },
-  { name: "Hệ thống", icon: <ListIcon />, path: "/system" },
 ];
 
 const AppSidebar: React.FC = () => {
