@@ -5,12 +5,8 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 const AppHeader = () => {
-  const [isMenuOpen, setMenuOpen] = useState(false);
-
   const [activeDropdown, setActiveDropdown] = useState(null);
-
-  const inputRef = useRef(null);
-
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -18,7 +14,6 @@ const AppHeader = () => {
         inputRef.current?.focus();
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
@@ -68,7 +63,7 @@ const AppHeader = () => {
       label: "Danh mục",
       hasDropdown: true,
       items: [
-        { label: "1. Danh mục tài khoản", path: "/danh-muc/tai-khoan" },
+        { label: "1. Danh mục tài khoản", path: "/category/account" },
         { label: "2. Danh mục nhóm đối tượng", path: "/danh-muc/nhom-doi-tuong" },
         { label: "3. Danh mục đối tượng", path: "/danh-muc/doi-tuong" },
         { label: "4. Danh mục sản phẩm (công trình)", path: "/danh-muc/san-pham" },
