@@ -1,17 +1,22 @@
 import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
+  useDeleteGeneralAccounting,
   useFetchCt11Data,
-  useGetGeneralAccounting,
-  useDeleteGeneralAccounting
+  useGetGeneralAccounting
 } from "../../../hooks/useGeneralAccounting.TS";
 import { useModal } from "../../../hooks/useModal";
 import generalLedgerApi from "../../../services/generalLedger";
 
 export const useGeneralLedgerList = () => {
   const navigate = useNavigate();
+  const [selectedEditId, setSelectedEditId] = useState();
+
+  const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
+  const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
+
   const [rangePickerValue, setRangePickerValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,11 +79,6 @@ export const useGeneralLedgerList = () => {
     return new Intl.NumberFormat('vi-VN').format(amount);
   };
 
-  // Xử lý chuyển hướng đến trang update
-  const handleUpdateClick = (record, e) => {
-    e.stopPropagation();
-    navigate(`/general-ledger/update/${record.stt_rec}`);
-  };
 
   // Xử lý mở modal xóa
   const handleDeleteClick = (record, e) => {
@@ -145,6 +145,11 @@ export const useGeneralLedgerList = () => {
     setSelectedRecord(null);
   };
 
+  const handleOpenEdit = (id) => {
+    setSelectedEditId(id);
+    openModalEdit();
+  };
+
   const columnsTable = [
     {
       key: "ma_ct",
@@ -193,25 +198,28 @@ export const useGeneralLedgerList = () => {
       title: "Thao tác",
       fixed: "right",
       width: 100,
-      render: (_, record) => (
-        <div className="flex items-center gap-2 justify-center">
-          <button
-            className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Sửa"
-            onClick={(e) => handleUpdateClick(record, e)}
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            onClick={(e) => handleDeleteClick(record, e)}
-            className="text-gray-500 hover:text-red-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Xóa"
-            disabled={deleteMutation.isPending}
-          >
-            <Trash size={16} />
-          </button>
-        </div>
-      ),
+      render: (_, record) => {
+        console.log(record);
+        return (
+          <div className="flex items-center gap-2 justify-center">
+            <button
+              className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Sửa"
+              onClick={(e) => handleOpenEdit(record?.stt_rec)}
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={(e) => handleDeleteClick(record, e)}
+              className="text-gray-500 hover:text-red-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Xóa"
+              disabled={deleteMutation.isPending}
+            >
+              <Trash size={16} />
+            </button>
+          </div>
+        )
+      },
     },
   ];
 
@@ -332,5 +340,13 @@ export const useGeneralLedgerList = () => {
     deleteMutation,
     fetchCt11Data,
     fetchPh11Data,
+    isOpenCreate,
+    openModalCreate,
+    closeModalCreate,
+    isOpenEdit,
+    openModalEdit,
+    closeModalEdit,
+    selectedEditId,
+    setSelectedEditId,
   };
 };

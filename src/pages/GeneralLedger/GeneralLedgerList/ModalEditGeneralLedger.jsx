@@ -1,44 +1,37 @@
-import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Flatpickr from "react-flatpickr";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import ComponentCard from "../../../components/common/ComponentCard";
-import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
-import PageMeta from "../../../components/common/PageMeta";
 import Input from "../../../components/form/input/InputField";
 import TextArea from "../../../components/form/input/TextArea";
 import Label from "../../../components/form/Label";
 import Select from "../../../components/form/Select";
 import AccountSelectionPopup from "../../../components/general/AccountSelectionPopup";
-import CustomerSelectionPopup from "../../../components/general/CustomerSelectionPopup";
 import TableBasic from "../../../components/tables/BasicTables/BasicTableOne";
 import Button from "../../../components/ui/button/Button";
+import { Modal } from "../../../components/ui/modal";
 import { Tabs } from "../../../components/ui/tabs";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCustomers } from "../../../hooks/useCustomer";
-import { useGetGeneralAccountingById, useUpdateGeneralAccounting } from "../../../hooks/useGeneralAccounting.TS";
+import { useGetGeneralAccountingById, useUpdateGeneralAccounting } from "../../../hooks/useGeneralAccounting";
 import { CalenderIcon } from "../../../icons";
 
-export default function GeneralLedgerUpdate() {
-  const { stt_rec } = useParams();
-  console.log("🔍 stt_rec from params:", stt_rec);
+export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) => {
   const navigate = useNavigate();
-
   // States for form data
   const [ngayHachToan, setNgayHachToan] = useState("");
   const [ngayLapChungTu, setNgayLapChungTu] = useState("");
   const [quyenSo, setQuyenSo] = useState("");
   const [soChungTu, setSoChungTu] = useState("");
   const [tyGia, setTyGia] = useState(0);
-  const [trangThai, setTrangThai] = useState("");
+  const [trangThai, setTrangThai] = useState("1");
   const [dienGiaiChung, setDienGiaiChung] = useState("");
 
   const [hachToanData, setHachToanData] = useState([]);
   const [hopDongThueData, setHopDongThueData] = useState([]);
-
   // Search states for popups
   const [tkSearch, setTkSearch] = useState("");
   const [tkSearchRowId, setTkSearchRowId] = useState(null);
@@ -49,8 +42,6 @@ export default function GeneralLedgerUpdate() {
 
   // Fetch data
   const { data: recordData, isLoading: isLoadingRecord } = useGetGeneralAccountingById(stt_rec);
-  console.log("📦 recordData:", recordData);
-  console.log("⏳ isLoadingRecord:", isLoadingRecord);
   const { data: accountRawData = {} } = useAccounts(tkSearch ? { search: tkSearch } : {});
   const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
 
@@ -59,8 +50,6 @@ export default function GeneralLedgerUpdate() {
 
   // Load data when record is fetched
   useEffect(() => {
-    console.log("🔍 recordData trong useEffect:", recordData);
-
     if (recordData && recordData.phieu) {
       const data = recordData; // Không cần .data nữa
 
@@ -72,14 +61,6 @@ export default function GeneralLedgerUpdate() {
       setSoChungTu(phieu.ma_ct?.trim() || "");
       setTyGia(phieu.ty_giaf || 0);
       setDienGiaiChung(phieu.dien_giai || "");
-
-      console.log("📝 Đã set form data:", {
-        ngayHachToan: phieu.ngay_ct ? phieu.ngay_ct.split("T")[0] : "",
-        ngayLapChungTu: phieu.ngay_lct ? phieu.ngay_lct.split("T")[0] : "",
-        soChungTu: phieu.ma_ct?.trim(),
-        tyGia: phieu.ty_giaf,
-        dienGiai: phieu.dien_giai,
-      });
 
       // Fill hach toan data
       if (data.hachToan && Array.isArray(data.hachToan) && data.hachToan.length > 0) {
@@ -95,7 +76,6 @@ export default function GeneralLedgerUpdate() {
             dien_giaii: item.dien_giaii || "",
           }))
         );
-        console.log("📊 Đã set hachToanData:", data.hachToan);
       } else {
         setHachToanData([
           {
@@ -109,7 +89,6 @@ export default function GeneralLedgerUpdate() {
             dien_giaii: "",
           },
         ]);
-        console.log("📊 Set hachToanData mặc định");
       }
 
       // Fill hop dong thue data
@@ -122,7 +101,6 @@ export default function GeneralLedgerUpdate() {
             ten_kh: item.ten_kh || "",
           }))
         );
-        console.log("📋 Đã set hopDongThueData:", data.hopDongThue);
       } else {
         setHopDongThueData([
           {
@@ -132,10 +110,9 @@ export default function GeneralLedgerUpdate() {
             ten_kh: "",
           },
         ]);
-        console.log("📋 Set hopDongThueData mặc định");
       }
     } else {
-      console.log("❌ recordData không hợp lệ:", recordData);
+      console.error("❌ recordData không hợp lệ:", recordData);
     }
   }, [recordData]);
 
@@ -359,19 +336,19 @@ export default function GeneralLedgerUpdate() {
           ten_kh,
         })),
       };
+      await updateAccounting({ stt_rec, payload }).then(() => {
+        closeModalEdit();
+        toast.success("Cập nhật thành công!");
+        navigate("/general-ledger/list");
+      });
 
-      await updateAccounting({ stt_rec, payload });
-      toast.success("Cập nhật thành công!");
-      navigate("/general-ledger/list");
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi cập nhật: " + (err?.message || "Không xác định"));
     }
   };
 
-  const handleCancel = () => {
-    navigate("/general-ledger/list");
-  };
+
 
   if (isLoadingRecord) {
     return (
@@ -385,163 +362,154 @@ export default function GeneralLedgerUpdate() {
   }
 
   return (
-    <>
-      <PageMeta title="Cập nhật phiếu kế toán tổng hợp" description="Cập nhật phiếu kế toán tổng hợp" />
-      <PageBreadcrumb
-        pageTitle="Cập nhật phiếu kế toán tổng hợp"
-        breadcrumbItems={[
-          { title: "Trang chủ", href: "/" },
-          { title: "Danh sách phiếu kế toán", href: "/general-ledger/list" },
-          { title: "Cập nhật" },
-        ]}
-      />
-
-      <div className="space-y-6">
-        {/* Header với nút quay lại */}
-        <div className="flex items-center gap-4">
-          <Button size="sm" variant="outline" startIcon={<ArrowLeft className="size-4" />} onClick={handleCancel}>
-            Quay lại
-          </Button>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+    <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-[80%] max-h-[90vh] m-4">
+      <div className="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+        <div className="px-2 pr-14">
+          <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Cập nhật phiếu kế toán tổng hợp</h4>
+          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
             Cập nhật phiếu kế toán - {soChungTu || stt_rec}
-          </h1>
+          </p>
         </div>
 
-        {/* Form chính */}
-        <ComponentCard>
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 mb-6">
-            <div>
-              <Label>Ngày hạch toán </Label>
-              <div className="relative w-full flatpickr-wrapper">
-                <Flatpickr
-                  value={ngayHachToan}
-                  onChange={(date) => handleDateChange(date, "ngayHachToan")}
-                  options={{
-                    dateFormat: "Y-m-d",
-                    locale: Vietnamese,
-                  }}
-                  placeholder="dd-mm-yyyy"
-                  className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
-                />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <CalenderIcon className="size-6" />
-                </span>
+        <>
+          <div className="space-y-6">
+            {/* Form chính */}
+            <ComponentCard>
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 3xl:grid-cols-4 mb-6">
+                <div>
+                  <Label>Ngày hạch toán </Label>
+                  <div className="relative w-full flatpickr-wrapper">
+                    <Flatpickr
+                      value={ngayHachToan}
+                      onChange={(date) => handleDateChange(date, "ngayHachToan")}
+                      options={{
+                        dateFormat: "Y-m-d",
+                        locale: Vietnamese,
+                      }}
+                      placeholder="dd-mm-yyyy"
+                      className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
+                    />
+                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                      <CalenderIcon className="size-6" />
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <Label>Ngày lập chứng từ </Label>
+                  <div className="relative w-full flatpickr-wrapper">
+                    <Flatpickr
+                      value={ngayLapChungTu}
+                      onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
+                      options={{
+                        dateFormat: "Y-m-d",
+                        locale: Vietnamese,
+                      }}
+                      placeholder="dd-mm-yyyy"
+                      className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
+                    />
+                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                      <CalenderIcon className="size-6" />
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <Label>Quyển sổ</Label>
+                  <Input value={quyenSo} onChange={(e) => setQuyenSo(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Số chứng từ</Label>
+                  <Input value={soChungTu} onChange={(e) => setSoChungTu(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Tỷ giá</Label>
+                  <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                    <span className="px-4 text-gray-700 font-medium select-none">VND</span>
+                    <input
+                      type="number"
+                      value={tyGia}
+                      onChange={(e) => setTyGia(e.target.value)}
+                      placeholder="Nhập tỷ giá"
+                      className="flex-1 px-4 py-2.5 focus:outline-none text-sm text-gray-900 "
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Trạng thái</Label>
+                  <Select defaultValue={trangThai} value={trangThai} options={statusOptions} onChange={setTrangThai} />
+                </div>
               </div>
-            </div>
-            <div>
-              <Label>Ngày lập chứng từ </Label>
-              <div className="relative w-full flatpickr-wrapper">
-                <Flatpickr
-                  value={ngayLapChungTu}
-                  onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
-                  options={{
-                    dateFormat: "Y-m-d",
-                    locale: Vietnamese,
-                  }}
-                  placeholder="dd-mm-yyyy"
-                  className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
-                />
-                <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                  <CalenderIcon className="size-6" />
-                </span>
+              <div>
+                <Label>Diễn giải</Label>
+                <TextArea value={dienGiaiChung} onChange={(val) => setDienGiaiChung(val)} rows={4} />
               </div>
-            </div>
-            <div>
-              <Label>Quyển sổ</Label>
-              <Input value={quyenSo} onChange={(e) => setQuyenSo(e.target.value)} />
-            </div>
-            <div>
-              <Label>Số chứng từ</Label>
-              <Input value={soChungTu} onChange={(e) => setSoChungTu(e.target.value)} />
-            </div>
-            <div>
-              <Label>Tỷ giá</Label>
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                <span className="px-4 text-gray-700 font-medium select-none">VND</span>
-                <input
-                  type="number"
-                  value={tyGia}
-                  onChange={(e) => setTyGia(e.target.value)}
-                  placeholder="Nhập tỷ giá"
-                  className="flex-1 px-4 py-2.5 focus:outline-none text-sm text-gray-900 "
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Trạng thái</Label>
-              <Select value={trangThai} options={statusOptions} onChange={setTrangThai} />
+            </ComponentCard>
+
+            {/* Tabs */}
+            <ComponentCard>
+              <Tabs
+                tabs={[
+                  {
+                    label: "Hạch toán",
+                    content: (
+                      <TableBasic
+                        data={hachToanData}
+                        columns={hachToanColumns}
+                        onAddRow={addHachToanRow}
+                        onDeleteRow={deleteHachToanRow}
+                        showAddButton={true}
+                        addButtonText="Thêm dòng "
+                      />
+                    ),
+                  },
+                  {
+                    label: "Hợp đồng thuế",
+                    content: (
+                      <TableBasic
+                        data={hopDongThueData}
+                        columns={hopDongThueColumns}
+                        onAddRow={addHopDongThueRow}
+                        onDeleteRow={deleteHopDongThueRow}
+                        showAddButton={true}
+                        addButtonText="Thêm dòng"
+                      />
+                    ),
+                  },
+                ]}
+              />
+            </ComponentCard>
+
+            {/* Action buttons */}
+            <div className="flex justify-end gap-4">
+              <Button onClick={closeModalEdit} variant="outline" disabled={isUpdating}>
+                Hủy bỏ
+              </Button>
+              <Button onClick={handleUpdate} variant="primary" disabled={isUpdating}>
+                {isUpdating ? "Đang cập nhật..." : "Cập nhật"}
+              </Button>
             </div>
           </div>
-          <div>
-            <Label>Diễn giải</Label>
-            <TextArea value={dienGiaiChung} onChange={(val) => setDienGiaiChung(val)} rows={4} />
-          </div>
-        </ComponentCard>
 
-        {/* Tabs */}
-        <ComponentCard>
-          <Tabs
-            tabs={[
-              {
-                label: "Hạch toán",
-                content: (
-                  <TableBasic
-                    data={hachToanData}
-                    columns={hachToanColumns}
-                    onAddRow={addHachToanRow}
-                    onDeleteRow={deleteHachToanRow}
-                    showAddButton={true}
-                    addButtonText="Thêm dòng "
-                  />
-                ),
-              },
-              {
-                label: "Hợp đồng thuế",
-                content: (
-                  <TableBasic
-                    data={hopDongThueData}
-                    columns={hopDongThueColumns}
-                    onAddRow={addHopDongThueRow}
-                    onDeleteRow={deleteHopDongThueRow}
-                    showAddButton={true}
-                    addButtonText="Thêm dòng"
-                  />
-                ),
-              },
-            ]}
-          />
-        </ComponentCard>
-
-        {/* Action buttons */}
-        <div className="flex justify-end gap-4">
-          <Button onClick={handleCancel} variant="outline" disabled={isUpdating}>
-            Hủy bỏ
-          </Button>
-          <Button onClick={handleUpdate} variant="primary" disabled={isUpdating}>
-            {isUpdating ? "Đang cập nhật..." : "Cập nhật"}
-          </Button>
-        </div>
+          {/* Popups */}
+          {showAccountPopup && (
+            <AccountSelectionPopup
+              isOpen={true}
+              onClose={() => setShowAccountPopup(false)}
+              onSelect={(account) => handleAccountSelect(tkSearchRowId, account)}
+              accounts={accountRawData.data || []}
+              searchValue={tkSearch}
+            />
+          )}
+          {showCustomerPopup && (
+            <CustomerSelectionPopup
+              isOpen={true}
+              onClose={() => setShowCustomerPopup(false)}
+              onSelect={(customer) => handleCustomerSelect(maKhSearchRowId, customer)}
+              customers={customerData.data || []}
+              searchValue={maKhSearch}
+            />
+          )}
+        </>
       </div>
-
-      {/* Popups */}
-      {showAccountPopup && (
-        <AccountSelectionPopup
-          isOpen={true}
-          onClose={() => setShowAccountPopup(false)}
-          onSelect={(account) => handleAccountSelect(tkSearchRowId, account)}
-          accounts={accountRawData.data || []}
-          searchValue={tkSearch}
-        />
-      )}
-      {showCustomerPopup && (
-        <CustomerSelectionPopup
-          isOpen={true}
-          onClose={() => setShowCustomerPopup(false)}
-          onSelect={(customer) => handleCustomerSelect(maKhSearchRowId, customer)}
-          customers={customerData.data || []}
-          searchValue={maKhSearch}
-        />
-      )}
-    </>
+    </Modal>
   );
-}
+};

@@ -4,7 +4,6 @@ import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { FilePlus, Search } from "lucide-react";
 import { useState } from "react";
 import Flatpickr from "react-flatpickr";
-import { Link } from "react-router";
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
@@ -12,6 +11,8 @@ import { ShowMoreTables } from "../../../components/tables/ShowMoreTables";
 import Button from "../../../components/ui/button/Button";
 import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../../icons";
+import { ModalCreateGeneralLedger } from "./ModalCreateGeneralLedger";
+import { ModalEditGeneralLedger } from "./ModalEditGeneralLedger";
 import { useGeneralLedgerList } from "./useGeneralLedgerList";
 
 export default function GeneralLedgerListPage() {
@@ -35,6 +36,13 @@ export default function GeneralLedgerListPage() {
     handleCancelDelete,
     fetchCt11Data,
     fetchPh11Data,
+    isOpenCreate,
+    openModalCreate,
+    closeModalCreate,
+    isOpenEdit,
+    closeModalEdit,
+    selectedEditId,
+    setSelectedEditId,
   } = useGeneralLedgerList();
 
   const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -53,21 +61,23 @@ export default function GeneralLedgerListPage() {
 
   return (
     <>
+      <ModalCreateGeneralLedger isOpenCreate={isOpenCreate} closeModalCreate={closeModalCreate} />
+      <ModalEditGeneralLedger
+        isOpenEdit={isOpenEdit}
+        closeModalEdit={closeModalEdit}
+        stt_rec={selectedEditId}
+        setSelectedEditId={setSelectedEditId}
+      />
+
       <PageMeta title="Danh sách phiếu kế toán tổng hợp" description="Danh sách phiếu kế toán tổng hợp" />
       <PageBreadcrumb pageTitle="Danh sách phiếu kế toán tổng hợp" />
       <div className="space-y-6">
         <ComponentCard>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <Link to="/general-ledger/create">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  startIcon={<FilePlus className="size-5" />}
-                >
-                  Thêm mới
-                </Button>
-              </Link>
+              <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
+                Thêm mới
+              </Button>
             </div>
 
             {/* Right: Search + Date Range */}
@@ -125,7 +135,8 @@ export default function GeneralLedgerListPage() {
         <ConfirmModal
           isOpen={isOpenDelete}
           title="Xác nhận xóa"
-          message={`Bạn có chắc chắn muốn xóa phiếu kế toán "${recordToDelete?.ma_ct || recordToDelete?.stt_rec}" không?`}
+          message={`Bạn có chắc chắn muốn xóa phiếu kế toán "${recordToDelete?.ma_ct || recordToDelete?.stt_rec
+            }" không?`}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
           confirmText="Xóa"
