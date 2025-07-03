@@ -97,13 +97,20 @@ export const useListAccount = () => {
       key: "tk0",
       title: "Mã tài khoản",
       fixed: "left",
-      width: 150,
+      align: "center",
+      width: 120,
+      render: (_, record) => {
+        return <div className="text-center">{record?.tk0}</div>;
+      },
     },
     {
       key: "ten_tk",
       title: "Tên tài khoản",
       fixed: "left",
       width: 300,
+      render: (_, record) => {
+        return <div className="text-left">{record?.ten_tk}</div>;
+      },
     },
     {
       key: "tk_me",

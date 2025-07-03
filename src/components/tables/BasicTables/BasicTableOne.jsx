@@ -93,7 +93,7 @@ const TableBasic = ({
 
   const renderTableCell = (col, colIdx, value, row, isHeader = false) => {
     let cellStyle = {};
-    let cellClassName = `px-4 py-4 text-start text-xs font-medium ${col.className || ""}`;
+    let cellClassName = `px-4 py-0 text-sm ${col.className || ""}`;
 
     if (col.fixed === "left") {
       const leftColumnIndex = leftFixedColumns.indexOf(col);
@@ -197,7 +197,7 @@ const TableBasic = ({
                   <TableCell
                     key={`scrollable-${idx}`}
                     isHeader
-                    className={`px-4 py-4 text-center text-xs font-medium bg-gray-50 text-gray-500 dark:text-gray-400 ${col.className || ""
+                    className={`px-4 py-4 text-center text-xs font-medium bg-gray-50 dark:text-gray-400 ${col.className || ""
                       }`}
                     style={{
                       width: col.width,
@@ -230,7 +230,7 @@ const TableBasic = ({
                     return (
                       <TableCell
                         key={`scrollable-${colIdx}`}
-                        className="px-4 py-5 text-sm font-light text-center leading-tight"
+                        className="px-4 py-4 text-sm text-center leading-tight"
                         style={{
                           width: col.width,
                           minWidth: col.minWidth || col.width,
