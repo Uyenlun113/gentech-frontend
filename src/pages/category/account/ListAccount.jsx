@@ -35,6 +35,10 @@ export default function ListAccountPage() {
         confirmDelete,
         confirmDeleteAccount,
         cancelDeleteAccount,
+        // New edit confirmation states
+        confirmEdit,
+        confirmEditAccount,
+        cancelEditAccount,
     } = useListAccount();
 
     const [searchInput, setSearchInput] = useState(searchValue);
@@ -126,6 +130,7 @@ export default function ListAccountPage() {
                     selectedAccount={selectedAccount}
                 />
 
+                {/* Delete Confirmation Modal */}
                 <ConfirmModal
                     isOpen={confirmDelete.open}
                     title="Xác nhận xoá"
@@ -133,8 +138,18 @@ export default function ListAccountPage() {
                     onConfirm={confirmDeleteAccount}
                     onCancel={cancelDeleteAccount}
                 />
+
+                {/* Edit Confirmation Modal */}
+                <ConfirmModal
+                    isOpen={confirmEdit.open}
+                    title="Xác nhận sửa"
+                    message={`Bạn có muốn sửa tài khoản "${confirmEdit.account?.ten_tk}" không?`}
+                    onConfirm={confirmEditAccount}
+                    onCancel={cancelEditAccount}
+                    titleButton="Sửa"
+                    titleCancel="Hủy"
+                />
             </div>
         </>
     );
 }
-

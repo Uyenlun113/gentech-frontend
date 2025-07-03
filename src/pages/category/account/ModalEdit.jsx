@@ -3,13 +3,12 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
-import { useGroupAccounts, useUpdateAccount } from "../../../hooks/useAccounts";
+import { useAccounts, useGroupAccounts, useUpdateAccount } from "../../../hooks/useAccounts";
 import SearchableSelect from "./SearchableSelect";
-
 
 export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selectedAccount }) => {
   const [formData, setFormData] = useState({
-    tk: "",
+    tk0: "",
     ten_tk: "",
     tk_me: "",
     ma_nt: "",
@@ -17,23 +16,32 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
   });
 
   const [groupSearchTerm, setGroupSearchTerm] = useState("");
+  const [listSearchTerm, setListSearchTerm] = useState("");
   const updateAccountMutation = useUpdateAccount();
+  const [errors, setErrors] = useState({
+    ten_tk: "",
+  });
 
-  // Query group accounts với search
   const { data: groupAccountsResponse, isLoading: isGroupLoading } = useGroupAccounts({
     search: groupSearchTerm,
     page: 1,
     limit: 50,
   });
 
+  const { data: accountsResponse, isLoading } = useAccounts({
+    search: listSearchTerm,
+    page: 1,
+  });
+
   const groupAccounts = groupAccountsResponse?.data || [];
+  const accountsList = accountsResponse?.data || [];
 
   useEffect(() => {
     if (selectedAccount) {
       setFormData({
-        tk: selectedAccount.tk.trim() || "",
+        tk0: selectedAccount.tk0?.trim() || "",
         ten_tk: selectedAccount.ten_tk || "",
-        tk_me: selectedAccount.tk_me || "",
+        tk_me: selectedAccount.tk_me?.trim() || "",
         ma_nt: selectedAccount.ma_nt || "",
         nh_tk: selectedAccount.nh_tk?.trim() || "",
       });
@@ -51,19 +59,24 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
     setGroupSearchTerm(searchTerm);
   };
 
+  const handleListSearch = (searchTerm) => {
+    setListSearchTerm(searchTerm);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!selectedAccount) return;
 
-    try {
-      if (!formData.ten_tk.trim()) {
-        alert("Vui lòng nhập tên tài khoản");
-        return;
-      }
+    setErrors({ ten_tk: "" });
+    if (!formData.ten_tk.trim()) {
+      setErrors(prev => ({ ...prev, ten_tk: "Vui lòng nhập tên tài khoản" }));
+      return;
+    }
 
+    try {
       await updateAccountMutation.mutateAsync({
-        tk: selectedAccount.tk,
+        tk0: selectedAccount.tk0,
         data: {
           ...formData,
           tk_me: formData.tk_me || undefined,
@@ -81,16 +94,22 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
 
   const handleClose = () => {
     setGroupSearchTerm("");
+    setListSearchTerm("");
+    setErrors({ ten_tk: "" });
     closeModalEdit();
   };
 
-  // Prepare options for SearchableSelect
   const groupOptions = groupAccounts.map(item => ({
     value: item.ma_nh?.trim(),
     label: item.ten_nh,
     loai_nh: item.loai_nh
   }));
 
+  const accountOptions = accountsList.map(item => ({
+    value: item.tk0?.trim(),
+    label: item.ten_tk,
+  }));
+  console.log(formData);
   return (
     <Modal isOpen={isOpenEdit} onClose={handleClose} className="max-w-[700px] m-4 h-[800px]">
       <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11 h-[800px]">
@@ -115,8 +134,8 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   <Label>Mã tài khoản</Label>
                   <Input
                     type="text"
-                    value={formData.tk}
-                    onChange={(e) => handleInputChange('tk', e.target.value)}
+                    value={formData.tk0}
+                    onChange={(e) => handleInputChange('tk0', e.target.value)}
                     className="bg-gray-100 dark:bg-gray-800"
                     placeholder="Mã tài khoản"
                   />
@@ -127,19 +146,32 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   <Input
                     type="text"
                     value={formData.ten_tk}
-                    onChange={(e) => handleInputChange('ten_tk', e.target.value)}
+                    onChange={(e) => {
+                      handleInputChange('ten_tk', e.target.value);
+                      if (errors.ten_tk) {
+                        setErrors(prev => ({ ...prev, ten_tk: "" }));
+                      }
+                    }}
                     placeholder="Nhập tên tài khoản"
                     required
                   />
+                  {errors.ten_tk && (
+                    <p className="mt-1 text-sm text-red-500">{errors.ten_tk}</p>
+                  )}
                 </div>
 
                 <div>
                   <Label>Tài khoản mẹ</Label>
-                  <Input
-                    type="text"
+                  <SearchableSelect
                     value={formData.tk_me}
-                    onChange={(e) => handleInputChange('tk_me', e.target.value)}
-                    placeholder="Nhập tài khoản mẹ"
+                    onChange={(value) => handleInputChange('tk_me', value)}
+                    options={accountOptions}
+                    placeholder="Chọn tài khoản"
+                    searchPlaceholder="Tìm kiếm tài khoản..."
+                    loading={isLoading}
+                    onSearch={handleListSearch}
+                    displayKey="label"
+                    valueKey="value"
                   />
                 </div>
 

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const SearchableSelect = ({
     value,
@@ -9,7 +9,7 @@ const SearchableSelect = ({
     searchPlaceholder = "Tìm kiếm...",
     loading = false,
     onSearch,
-    displayKey = "label",
+    displayKey = "value",
     valueKey = "value"
 }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +79,7 @@ const SearchableSelect = ({
                 className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 flex items-center justify-between"
             >
                 <span className={`truncate ${!selectedOption ? 'text-gray-500' : ''}`}>
-                    {selectedOption ? selectedOption[displayKey] : placeholder}
+                    {selectedOption ? `${selectedOption[valueKey]} - ${selectedOption[displayKey]}` : placeholder}
                 </span>
                 <div className="flex items-center gap-2">
                     {selectedOption && (
@@ -133,11 +133,11 @@ const SearchableSelect = ({
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${value === option[valueKey]
-                                            ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                                            : 'text-gray-800 dark:text-white'
+                                        ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
+                                        : 'text-gray-800 dark:text-white'
                                         }`}
                                 >
-                                    {option[displayKey]}
+                                    {option[valueKey]} - {option[displayKey]}
                                 </button>
                             ))
                         )}

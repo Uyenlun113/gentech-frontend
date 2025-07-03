@@ -1,7 +1,5 @@
 import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
-
-
 import { useAccounts, useDeleteAccount } from "../../../hooks/useAccounts";
 import { useModal } from "../../../hooks/useModal";
 
@@ -34,24 +32,42 @@ export const useListAccount = () => {
     // Fetch data
     const { data: accountData, isLoading, error, refetch } = useAccounts(queryParams);
     const deleteAccountMutation = useDeleteAccount();
+
+    // Delete confirmation state
     const [confirmDelete, setConfirmDelete] = useState({
         open: false,
         account: null,
     });
 
+    // Edit confirmation state
+    const [confirmEdit, setConfirmEdit] = useState({
+        open: false,
+        account: null,
+    });
+
     const handleSaveCreate = () => {
-        refetch();
         closeModalCreate();
     };
 
     const handleSaveEdit = () => {
-        refetch();
         closeModalEdit();
     };
 
     const handleEditAccount = (record) => {
-        setSelectedAccount(record);
+        setConfirmEdit({
+            open: true,
+            account: record,
+        });
+    };
+
+    const confirmEditAccount = () => {
+        setSelectedAccount(confirmEdit.account);
+        setConfirmEdit({ open: false, account: null });
         openModalEdit();
+    };
+
+    const cancelEditAccount = () => {
+        setConfirmEdit({ open: false, account: null });
     };
 
     const handleDeleteAccount = (record) => {
@@ -63,8 +79,7 @@ export const useListAccount = () => {
 
     const confirmDeleteAccount = async () => {
         try {
-            await deleteAccountMutation.mutateAsync(confirmDelete.account.tk);
-            refetch();
+            await deleteAccountMutation.mutateAsync(confirmDelete.account.tk0);
         } catch (error) {
             console.error("Xoá thất bại:", error);
         } finally {
@@ -78,7 +93,7 @@ export const useListAccount = () => {
 
     const columnsTable = [
         {
-            key: "tk",
+            key: "tk0",
             title: "Mã tài khoản",
             fixed: "left",
             width: 150,
@@ -159,7 +174,7 @@ export const useListAccount = () => {
         // Data
         dataTable: accountData?.data || [],
         columnsTable,
-        pagination: accountData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+        pagination: accountData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
 
         // Form states
         rangePickerValue,
@@ -188,8 +203,14 @@ export const useListAccount = () => {
         loaiTk,
         setLoaiTk,
 
+        // Delete confirmation
         confirmDelete,
         confirmDeleteAccount,
         cancelDeleteAccount,
+
+        // Edit confirmation
+        confirmEdit,
+        confirmEditAccount,
+        cancelEditAccount,
     };
 };

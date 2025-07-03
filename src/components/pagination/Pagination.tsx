@@ -4,14 +4,11 @@ import React from "react";
 interface PaginationProps {
   currentPage: number;
   totalItems: number;
+  totalPages: number;
   onPageChange: (page: number) => void;
 }
 
-const ITEMS_PER_PAGE = 10;
-
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalItems, onPageChange }) => {
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
   const getPageNumbers = () => {
     const pages: (number | "...")[] = [];
 

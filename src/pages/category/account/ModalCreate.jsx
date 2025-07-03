@@ -3,13 +3,12 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
-import { useCreateAccount, useGroupAccounts } from "../../../hooks/useAccounts";
+import { useAccounts, useCreateAccount, useGroupAccounts } from "../../../hooks/useAccounts";
 import SearchableSelect from "./SearchableSelect";
-
 
 export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
-    tk: "",
+    tk0: "",
     ten_tk: "",
     tk_me: "",
     ma_nt: "",
@@ -17,20 +16,27 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
   });
 
   const [groupSearchTerm, setGroupSearchTerm] = useState("");
+  const [listSearchTerm, setListSearchTerm] = useState("");
   const createAccountMutation = useCreateAccount();
   const [errors, setErrors] = useState({
-    tk: "",
+    tk0: "",
     ten_tk: "",
   });
 
-  // Query group accounts với search
   const { data: groupAccountsResponse, isLoading: isGroupLoading } = useGroupAccounts({
     search: groupSearchTerm,
     page: 1,
-    limit: 50, // Lấy nhiều hơn để có đủ options
+    limit: 50,
+  });
+
+  const { data: accountsResponse, isLoading } = useAccounts({
+    search: listSearchTerm,
+    page: 1,
+    limit: 50,
   });
 
   const groupAccounts = groupAccountsResponse?.data || [];
+  const accountsList = accountsResponse?.data || [];
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -43,13 +49,16 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
     setGroupSearchTerm(searchTerm);
   };
 
+  const handleListSearch = (searchTerm) => {
+    setListSearchTerm(searchTerm);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     let hasError = false;
-    setErrors({ tk: "", ten_tk: "" });
+    setErrors({ tk0: "", ten_tk: "" });
 
-    // Validate required fields
-    if (!formData.tk.trim()) {
+    if (!formData.tk0.trim()) {
       setErrors(prev => ({ ...prev, tk: "Vui lòng nhập mã tài khoản" }));
       hasError = true;
     }
@@ -71,19 +80,19 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
 
       // Reset form
       setFormData({
-        tk: "",
+        tk0: "",
         ten_tk: "",
         tk_me: "",
         ma_nt: "",
         nh_tk: "",
       });
-      setErrors({ tk: "", ten_tk: "" });
+      setErrors({ tk0: "", ten_tk: "" });
       setGroupSearchTerm("");
+      setListSearchTerm("");
 
       onSaveCreate();
     } catch (error) {
       console.error("Error creating account:", error);
-      // Handle specific error cases
       if (error.response?.data?.message) {
         if (error.response.data.message.includes('tk')) {
           setErrors(prev => ({ ...prev, tk: "Mã tài khoản đã tồn tại" }));
@@ -94,22 +103,27 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
 
   const handleClose = () => {
     setFormData({
-      tk: "",
+      tk0: "",
       ten_tk: "",
       tk_me: "",
       ma_nt: "",
       nh_tk: "",
     });
-    setErrors({ tk: "", ten_tk: "" });
+    setErrors({ tk0: "", ten_tk: "" });
     setGroupSearchTerm("");
+    setListSearchTerm("");
     closeModalCreate();
   };
 
-  // Prepare options for SearchableSelect
   const groupOptions = groupAccounts.map(item => ({
     value: item.ma_nh,
     label: item.ten_nh,
     loai_nh: item.loai_nh
+  }));
+
+  const accountOptions = accountsList.map(item => ({
+    value: item.tk0,
+    label: item.ten_tk,
   }));
 
   return (
@@ -136,19 +150,19 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
                   <Label>Mã tài khoản *</Label>
                   <Input
                     type="text"
-                    value={formData.tk}
+                    value={formData.tk0}
                     onChange={(e) => {
-                      handleInputChange('tk', e.target.value);
-                      if (errors.tk) {
-                        setErrors((prev) => ({ ...prev, tk: "" }));
+                      handleInputChange('tk0', e.target.value);
+                      if (errors.tk0) {
+                        setErrors((prev) => ({ ...prev, tk0: "" }));
                       }
                     }}
                     placeholder="Nhập mã tài khoản"
                     maxLength={16}
                     required
                   />
-                  {errors.tk && (
-                    <p className="mt-1 text-sm text-red-500">{errors.tk}</p>
+                  {errors.tk0 && (
+                    <p className="mt-1 text-sm text-red-500">{errors.tk0}</p>
                   )}
                 </div>
 
@@ -173,11 +187,16 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
 
                 <div>
                   <Label>Tài khoản mẹ</Label>
-                  <Input
-                    type="text"
+                  <SearchableSelect
                     value={formData.tk_me}
-                    onChange={(e) => handleInputChange('tk_me', e.target.value)}
-                    placeholder="Nhập tài khoản mẹ"
+                    onChange={(value) => handleInputChange('tk_me', value)}
+                    options={accountOptions}
+                    placeholder="Chọn tài khoản"
+                    searchPlaceholder="Tìm kiếm tài khoản..."
+                    loading={isLoading}
+                    onSearch={handleListSearch}
+                    displayKey="label"
+                    valueKey="value"
                   />
                 </div>
 

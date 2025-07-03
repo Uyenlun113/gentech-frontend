@@ -2,19 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import accountDirectoryApi from '../services/account-directory';
 
-
 export const useAccounts = (params = {}) => {
     return useQuery({
         queryKey: ['accounts', params],
         queryFn: () => accountDirectoryApi.getAccounts(params),
-        staleTime: Infinity,
+        staleTime: 0,
+        refetchOnWindowFocus: false,
     });
 };
-export const useAccount = (tk: string) => {
+
+export const useAccount = (tk0) => {
     return useQuery({
-        queryKey: ['account', tk],
-        queryFn: () => accountDirectoryApi.getAccount(tk),
-        enabled: !!tk,
+        queryKey: ['account', tk0],
+        queryFn: () => accountDirectoryApi.getAccount(tk0),
+        enabled: !!tk0,
     });
 };
 
@@ -28,6 +29,11 @@ export const useCreateAccount = () => {
             queryClient.invalidateQueries({ queryKey: ['accounts'] });
             toast.success('Tạo tài khoản thành công!');
         },
+        onError: (error) => {
+            console.error('Create account error:', error);
+            const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản';
+            toast.error(errorMessage);
+        },
     });
 };
 
@@ -36,11 +42,16 @@ export const useUpdateAccount = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ tk, data }) => accountDirectoryApi.updateAccount(tk, data),
+        mutationFn: ({ tk0, data }) => accountDirectoryApi.updateAccount(tk0, data),
         onSuccess: (data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['accounts'], exact: false });
-            queryClient.invalidateQueries({ queryKey: ['account', variables.tk] });
-            toast.success('Cập nhật tài khoản thành cong!');
+            queryClient.invalidateQueries({ queryKey: ['accounts'] });
+            queryClient.invalidateQueries({ queryKey: ['account', variables.tk0] });
+            toast.success('Cập nhật tài khoản thành công!');
+        },
+        onError: (error) => {
+            console.error('Update account error:', error);
+            const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra khi cập nhật tài khoản';
+            toast.error(errorMessage);
         },
     });
 };
@@ -52,8 +63,13 @@ export const useDeleteAccount = () => {
     return useMutation({
         mutationFn: accountDirectoryApi.deleteAccount,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['accounts'], exact: false });
-            toast.success('Xóa tài khoản thanh cong!');
+            queryClient.invalidateQueries({ queryKey: ['accounts'] });
+            toast.success('Xóa tài khoản thành công!');
+        },
+        onError: (error) => {
+            console.error('Delete account error:', error);
+            const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra khi xóa tài khoản';
+            toast.error(errorMessage);
         },
     });
 };
