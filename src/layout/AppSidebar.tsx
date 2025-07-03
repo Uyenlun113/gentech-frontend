@@ -204,8 +204,8 @@ const AppSidebar: React.FC = () => {
       </div>
 
       {/* --- BOTTOM SECTION giống như ảnh --- */}
-      <div className="px-5 py-4 border-t h-[350px]">
-        <div className="flex flex-col gap-2 text-sm text-blue-700">
+      <div className="px-5 py-4 border-t h-[400px]">
+        <div className="flex flex-col gap-2 text-sm text-blue-700 h-[120px]">
           <Link to="/contact" className="hover:underline text-green-600 font-semibold text-center">
             Liên hệ với chúng tôi
           </Link>

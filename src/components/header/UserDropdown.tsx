@@ -29,7 +29,7 @@ export default function UserDropdown() {
   return (
     <div className="relative">
       <button onClick={toggleDropdown} className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400">
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+        <span className="mr-3 overflow-hidden rounded-full h-10 w-10">
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
@@ -39,7 +39,7 @@ export default function UserDropdown() {
             isOpen ? "rotate-180" : ""
           }`}
           width="18"
-          height="20"
+          height="18"
           viewBox="0 0 18 20"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
