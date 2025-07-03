@@ -7,7 +7,6 @@ import SignUp from "./pages/AuthPages/SignUp";
 import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
-import ListAccountPage from "./pages/category/account/ListAccount";
 import ListCustomerPage from "./pages/category/customer/ListCustomer";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
@@ -18,7 +17,6 @@ import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/Deprec
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
 import GeneralLedgerCreate from "./pages/GeneralLedger/GeneralLedgerCreate";
-import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
 import GeneralLedgerListPage from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerList";
 import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
 import InventoryPage from "./pages/Inventory/Inventory";
@@ -36,6 +34,8 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
+import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 
 export default function App() {
   return (
@@ -48,7 +48,6 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
               <Route path="/category/customer" element={<ListCustomerPage />} />
-              <Route path="/category/account" element={<ListAccountPage />} />
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
@@ -98,6 +97,12 @@ export default function App() {
               {/* Charts */}
               <Route path="/line-chart" element={<LineChart />} />
               <Route path="/bar-chart" element={<BarChart />} />
+
+              {/* SupportingDocuments */}
+
+              {/* CashReceip */}
+              <Route path="/chung-tu/phieu-thu" element={<CashReceiptList />} />
+
             </Route>
           </Route>
           {/* Auth Layout */}
@@ -111,3 +116,4 @@ export default function App() {
     </>
   );
 }
+
