@@ -127,8 +127,8 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
   }));
 
   return (
-    <Modal isOpen={isOpenCreate} onClose={handleClose} className="max-w-[700px] m-4 h-[800px] ">
-      <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11 h-[800px]">
+    <Modal isOpen={isOpenCreate} onClose={handleClose} className="max-w-[700px] max-h-[90vh] m-4">
+      <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
             Thêm mới tài khoản
@@ -139,7 +139,7 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
         </div>
 
         <form className="flex flex-col" onSubmit={handleSubmit}>
-          <div className="custom-scrollbar h-[550px] overflow-y-auto px-2 pb-3">
+          <div className="custom-scrollbar overflow-y-auto px-2 pb-3">
             <div>
               <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                 Thông tin tài khoản
