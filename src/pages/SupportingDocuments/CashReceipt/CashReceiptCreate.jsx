@@ -45,37 +45,37 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const dataToSave = {
-      ma_gd: "2",
-      ma_kh: "KH001",
-      dia_chi: "123 Đường Lê Lợi, Hà Nội",
-      mst: "0101234567",
-      ong_ba: "Nguyễn Văn B",
-      dien_giai: "Thu tiền đặt cọc hợp đồng",
-      ngay_ct: "2025-07-04T00:00:00.000Z",
-      ngay_lct: "2025-07-04T00:00:00.000Z",
-      ma_qs: "PT001",
-      so_ct: "PT001",
-      ma_nt: "VND",
-      ty_gia: 1,
-      loai_ct: "PT"
-    };
-
     // const dataToSave = {
-    //   ma_gd: formData.ma_gd || "2",
-    //   ma_kh: formData.ma_kh,
-    //   dia_chi: formData.dia_chi,
-    //   mst: formData.MST,
-    //   ong_ba: formData.ong_ba,
-    //   dien_giai: formData.dien_giai,
-    //   ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : undefined,
-    //   ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : undefined,
-    //   ma_qs: formData.ma_qs,
-    //   so_ct: formData.so_ct ? formData.so_ct : "2",
-    //   ma_nt: formData.ma_nt || "VND",
-    //   ty_gia: formData.ty_gia ? Number(formData.ty_gia) : 1,
-    //   loai_ct: "PT",
+    //   ma_gd: "2",
+    //   ma_kh: "KH001",
+    //   dia_chi: "123 Đường Lê Lợi, Hà Nội",
+    //   mst: "0101234567",
+    //   ong_ba: "Nguyễn Văn B",
+    //   dien_giai: "Thu tiền đặt cọc hợp đồng",
+    //   ngay_ct: "2025-07-04T00:00:00.000Z",
+    //   ngay_lct: "2025-07-04T00:00:00.000Z",
+    //   ma_qs: "PT001",
+    //   so_ct: "PT001",
+    //   ma_nt: "VND",
+    //   ty_gia: 1,
+    //   loai_ct: "PT"
     // };
+
+    const dataToSave = {
+      ma_gd: formData.ma_gd || "2",
+      ma_kh: formData.ma_kh,
+      dia_chi: formData.dia_chi,
+      mst: formData.MST,
+      ong_ba: formData.ong_ba,
+      dien_giai: formData.dien_giai,
+      ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : undefined,
+      ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : undefined,
+      ma_qs: formData.ma_qs,
+      so_ct: formData.so_ct ? formData.so_ct : "2",
+      ma_nt: formData.ma_nt || "VND",
+      ty_gia: formData.ty_gia ? Number(formData.ty_gia) : 1,
+      loai_ct: "PT",
+    };
     await createCashReceiptMutation.mutateAsync(dataToSave);
     setFormData({
       so_ct: "",
