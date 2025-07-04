@@ -1,38 +1,51 @@
+import {
+  Banknote,
+  BookOpenCheck,
+  Boxes,
+  Building2,
+  ClipboardList,
+  FileBarChart2,
+  FileInput,
+  HandCoins,
+  Settings,
+  ShoppingCart,
+  Wallet,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
-import { ChevronDownIcon, GridIcon, ListIcon } from "../icons";
+import { ChevronDownIcon } from "../icons";
 
 const navItems = [
-  { name: "Hệ thống", icon: <ListIcon />, path: "/system" },
-  { icon: <GridIcon />, name: "Vốn bằng tiền", path: "/" },
+  { name: "Hệ thống", icon: <Settings />, path: "/system" },
+  { name: "Vốn bằng tiền", icon: <Banknote />, path: "/" },
   {
     name: "Mua hàng - Phải trả",
-    icon: <ListIcon />,
+    icon: <ShoppingCart />,
     path: "/sales",
   },
-  { name: "Bán hàng - Phải thu", icon: <ListIcon />, path: "/cash" },
-  { name: "Hàng tồn kho", icon: <ListIcon />, path: "/purchases" },
+  { name: "Bán hàng - Phải thu", icon: <HandCoins />, path: "/cash" },
+  { name: "Hàng tồn kho", icon: <Boxes />, path: "/purchases" },
   {
     name: "Tài sản cố định",
-    icon: <ListIcon />,
+    icon: <Building2 />,
     subItems: [
       { name: "Báo cáo phân hệ", path: "/fixed-assets/module-report" },
       { name: "Báo cáo quản trị", path: "/fixed-assets/depreciation-report" },
     ],
   },
-  { name: "Công cụ dụng cụ", icon: <ListIcon />, path: "/tools" },
-  { name: "Tiền lương", icon: <ListIcon />, path: "/payroll" },
-  { name: "Chi phí giá thành", icon: <ListIcon />, path: "/costing" },
+  { name: "Công cụ dụng cụ", icon: <ClipboardList />, path: "/tools" },
+  { name: "Tiền lương", icon: <Wallet />, path: "/payroll" },
+  { name: "Chi phí giá thành", icon: <FileBarChart2 />, path: "/costing" },
   {
     name: "Kế toán tổng hợp",
-    icon: <ListIcon />,
+    icon: <BookOpenCheck />,
     subItems: [
       { name: "Phiếu kế toán", path: "/general-ledger/create" },
       { name: "Danh sách phiếu kế toán", path: "/general-ledger/list" },
     ],
   },
-  { name: "Chuyển dữ liệu từ Excel", icon: <ListIcon />, path: "/import-excel" },
+  { name: "Chuyển dữ liệu từ Excel", icon: <FileInput />, path: "/import-excel" },
 ];
 
 const AppSidebar = () => {

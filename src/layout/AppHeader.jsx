@@ -75,7 +75,7 @@ const AppHeader = () => {
         { label: "8. Danh mục hình thức thanh toán", path: "/danh-muc/thanh-toan" },
         { label: "9. Danh mục kho hàng hóa", path: "/danh-muc/kho" },
         { label: "a. Danh mục vàng, đá bán", path: "/danh-muc/vang-da" },
-        { label: "b. Danh mục nhóm vật tư hàng hóa", path: "/danh-muc/nhom-vattu" },
+        { label: "b. Danh mục nhóm vật tư hàng hóa", path: "/category/material-group" },
         { label: "c. Danh mục vật tư hàng hóa", path: "/danh-muc/vattu" },
         { label: "d. Danh mục biểu thuế", path: "/danh-muc/bieu-thue" },
         { label: "đ. Danh mục nguồn vốn", path: "/danh-muc/nguon-von" },
