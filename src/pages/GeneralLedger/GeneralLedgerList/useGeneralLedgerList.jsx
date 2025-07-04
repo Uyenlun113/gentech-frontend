@@ -5,8 +5,8 @@ import { toast } from "react-toastify";
 import {
   useDeleteGeneralAccounting,
   useFetchCt11Data,
-  useGetGeneralAccounting
-} from "../../../hooks/useGeneralAccounting.TS";
+  useGetGeneralAccounting,
+} from "../../../hooks/useGeneralAccounting.js";
 import { useModal } from "../../../hooks/useModal";
 import generalLedgerApi from "../../../services/generalLedger";
 
@@ -27,18 +27,14 @@ export const useGeneralLedgerList = () => {
   const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
 
   // Fetch Ph11 data với staleTime để tránh gọi API không cần thiết
-  const {
-    data: fetchPh11Data,
-    isLoading: isLoadingPh11,
-    refetch: refetchPh11Data
-  } = useGetGeneralAccounting();
+  const { data: fetchPh11Data, isLoading: isLoadingPh11, refetch: refetchPh11Data } = useGetGeneralAccounting();
 
   console.log("🚀 ~ useGeneralLedgerList ~ fetchPh11Data:", fetchPh11Data);
 
   const {
     data: fetchCt11Data,
     isLoading: isLoadingCt11,
-    error: errorCt11
+    error: errorCt11,
   } = useFetchCt11Data(selectedRecord?.stt_rec || "", {
     enabled: !!selectedRecord?.stt_rec,
   });
@@ -64,15 +60,14 @@ export const useGeneralLedgerList = () => {
   }, [isLoadingPh11, isLoadingCt11, deleteMutation.isPending]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return '0';
-    return new Intl.NumberFormat('vi-VN').format(amount);
+    if (!amount) return "0";
+    return new Intl.NumberFormat("vi-VN").format(amount);
   };
-
 
   const handleDeleteClick = (record, e) => {
     e.stopPropagation();
@@ -87,7 +82,7 @@ export const useGeneralLedgerList = () => {
     }
 
     try {
-      console.log('Deleting:', recordToDelete);
+      console.log("Deleting:", recordToDelete);
 
       await deleteMutation.mutateAsync(recordToDelete.stt_rec);
 
@@ -98,13 +93,12 @@ export const useGeneralLedgerList = () => {
 
       closeModalDelete();
       setRecordToDelete(null);
-      refetchPh11Data(); 
+      refetchPh11Data();
     } catch (error) {
-      console.error('Error deleting record:', error);
+      console.error("Error deleting record:", error);
       toast.error("Lỗi khi xóa: " + (error?.message || "Không xác định"));
     }
   };
-
 
   const handleCancelDelete = () => {
     closeModalDelete();
@@ -114,7 +108,7 @@ export const useGeneralLedgerList = () => {
   const handleRowClick = async (record) => {
     setSelectedRecord(record);
     setShowCt11Table(true);
-    console.log('Selected record:', record);
+    console.log("Selected record:", record);
 
     try {
       const res = await generalLedgerApi.fetchCt11Data(record.stt_rec);
@@ -146,26 +140,26 @@ export const useGeneralLedgerList = () => {
       title: "Mã chứng từ",
       fixed: "left",
       width: 120,
-      render: (val) => <span className="font-medium">{val || '-'}</span>
+      render: (val) => <span className="font-medium">{val || "-"}</span>,
     },
     {
       key: "stt_rec",
       title: "STT Record",
       fixed: "left",
       width: 140,
-      render: (val) => <span className="font-mono text-sm">{val || '-'}</span>
+      render: (val) => <span className="font-mono text-sm">{val || "-"}</span>,
     },
     {
       key: "ngay_lct",
       title: "Ngày lập chứng từ",
       width: 140,
-      render: (val) => formatDate(val)
+      render: (val) => formatDate(val),
     },
     {
       key: "ngay_ct",
       title: "Ngày chứng từ",
       width: 140,
-      render: (val) => formatDate(val)
+      render: (val) => formatDate(val),
     },
     {
       key: "dien_giai",
@@ -173,15 +167,15 @@ export const useGeneralLedgerList = () => {
       width: 150,
       render: (val) => (
         <div className="max-w-xs truncate text-center" title={val}>
-          {val || '-'}
+          {val || "-"}
         </div>
-      )
+      ),
     },
     {
       key: "ty_giaf",
       title: "Tỷ giá",
       width: 120,
-      render: (val) => formatCurrency(val)
+      render: (val) => formatCurrency(val),
     },
     {
       key: "action",
@@ -208,7 +202,7 @@ export const useGeneralLedgerList = () => {
               <Trash size={16} />
             </button>
           </div>
-        )
+        );
       },
     },
   ];
@@ -220,33 +214,25 @@ export const useGeneralLedgerList = () => {
       title: "Tài khoản",
       fixed: "left",
       width: 120,
-      render: (val) => <span className="font-mono">{val || '-'}</span>
+      render: (val) => <span className="font-mono">{val || "-"}</span>,
     },
     {
       key: "ps_no",
       title: "PS Nợ",
       width: 120,
-      render: (val) => (
-        <span className="text-center block">
-          {formatCurrency(val)}
-        </span>
-      )
+      render: (val) => <span className="text-center block">{formatCurrency(val)}</span>,
     },
     {
       key: "ps_co",
       title: "PS Có",
       width: 120,
-      render: (val) => (
-        <span className="text-center block">
-          {formatCurrency(val)}
-        </span>
-      )
+      render: (val) => <span className="text-center block">{formatCurrency(val)}</span>,
     },
     {
       key: "nh_dk",
       title: "NH ĐK",
       width: 80,
-      render: (val) => val || '-'
+      render: (val) => val || "-",
     },
     {
       key: "dien_giaii",
@@ -254,16 +240,16 @@ export const useGeneralLedgerList = () => {
       width: 250,
       render: (val) => (
         <div className="text-center truncate" title={val}>
-          {val || '-'}
+          {val || "-"}
         </div>
-      )
+      ),
     },
     {
       key: "ngay_ct",
       title: "Ngày chứng từ",
       width: 120,
-      render: (val) => formatDate(val)
-    }
+      render: (val) => formatDate(val),
+    },
   ];
 
   // Filtered data based on search term và date range
@@ -272,17 +258,18 @@ export const useGeneralLedgerList = () => {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.ma_ct?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.stt_rec?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.dien_giai?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.ma_ct?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.stt_rec?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.dien_giai?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Filter by date range
     if (rangePickerValue && rangePickerValue.length === 2) {
       const [startDate, endDate] = rangePickerValue;
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         const itemDate = new Date(item.ngay_ct);
         return itemDate >= startDate && itemDate <= endDate;
       });
@@ -296,7 +283,7 @@ export const useGeneralLedgerList = () => {
   };
 
   const handleChangePage = (page) => {
-    console.log('Page changed to:', page);
+    console.log("Page changed to:", page);
     // Add pagination logic here
   };
 

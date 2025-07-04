@@ -19,7 +19,7 @@ import Button from "../../../components/ui/button/Button";
 import { Tabs } from "../../../components/ui/tabs";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCustomers } from "../../../hooks/useCustomer";
-import { useGetGeneralAccountingById, useUpdateGeneralAccounting } from "../../../hooks/useGeneralAccounting.TS";
+import { useGetGeneralAccountingById, useUpdateGeneralAccounting } from "../../../hooks/useGeneralAccounting.js";
 import { CalenderIcon } from "../../../icons";
 
 export default function GeneralLedgerUpdate() {
