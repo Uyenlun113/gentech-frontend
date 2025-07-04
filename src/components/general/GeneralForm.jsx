@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCustomers } from "../../hooks/useCustomer";
-import { useSaveGeneralAccounting } from "../../hooks/useGeneralAccounting.TS";
+import { useSaveGeneralAccounting } from "../../hooks/useGeneralAccounting.js";
 import { CalenderIcon } from "../../icons";
 import ComponentCard from "../common/ComponentCard";
 import Input from "../form/input/InputField";

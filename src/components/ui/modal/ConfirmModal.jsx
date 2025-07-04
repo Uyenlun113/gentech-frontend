@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Button from "../button/Button";
 
-export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel }) {
+export default function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, titleButton = "Xác nhận", titleCancel = "Hủy" }) {
   // Handle ESC key press
   useEffect(() => {
     const handleEsc = (event) => {
@@ -52,14 +52,14 @@ export default function ConfirmModal({ isOpen, title, message, onConfirm, onCanc
             variant="outline"
             className="w-full sm:w-auto px-6 py-2.5 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
-            Huỷ
+            {titleCancel}
           </Button>
           <Button
             onClick={onConfirm}
             variant="danger"
             className="w-full sm:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-medium"
           >
-            Xoá
+            {titleButton}
           </Button>
         </div>
       </div>

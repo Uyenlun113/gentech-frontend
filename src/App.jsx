@@ -1,6 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
+
 import AppLayout from "./layout/AppLayout";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
@@ -8,6 +9,7 @@ import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
 import ListCustomerPage from "./pages/category/customer/ListCustomer";
+import ListMaterialGroupPage from "./pages/category/material-group/ListMaterialGroup";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
 import CostingPage from "./pages/Costing/Costing";
@@ -74,7 +76,6 @@ export default function App() {
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
               <Route path="/general-ledger/update/:stt_rec" element={<GeneralLedgerUpdate />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
-
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
               {/* System Page */}

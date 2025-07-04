@@ -1,14 +1,14 @@
 import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 
-import { useAccounts, useDeleteAccount } from "../../../hooks/useAccounts";
+import { useCashReceipts, useDeleteCashReceipt } from "../../../hooks/useCashReceipt";
 import { useModal } from "../../../hooks/useModal";
 
 export const useListCashReceipt = () => {
     const [rangePickerValue, setRangePickerValue] = useState("");
     const [searchValue, setSearchValue] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedAccount, setSelectedAccount] = useState(null);
+    const [selectedCashReceipt, setSelectedCashReceipt] = useState(null);
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
@@ -26,8 +26,7 @@ export const useListCashReceipt = () => {
         dateFrom,
         dateTo,
         page: currentPage,
-        limit: 15,
-        // Các trường mới
+        limit: 10,
         loaiPhieuThu: null,
         maKhach: null,
         diaChi: null,
@@ -44,11 +43,11 @@ export const useListCashReceipt = () => {
     };
 
     // Fetch data
-    const { data: accountData, isLoading, error, refetch } = useAccounts(queryParams);
-    const deleteAccountMutation = useDeleteAccount();
+    const { data: cashReceiptData, isLoading, error, refetch } = useCashReceipts(queryParams);
+    const deleteCashReceiptMutation = useDeleteCashReceipt();
     const [confirmDelete, setConfirmDelete] = useState({
         open: false,
-        account: null,
+        cashReceipt: null,
     });
 
     const handleSaveCreate = () => {
@@ -61,134 +60,139 @@ export const useListCashReceipt = () => {
         closeModalEdit();
     };
 
-    const handleEditAccount = (record) => {
-        setSelectedAccount(record);
+    const handleEditCashReceipt = (record) => {
+        setSelectedCashReceipt(record);
         openModalEdit();
     };
 
-    const handleDeleteAccount = (record) => {
+    const handleDeleteCashReceipt = (record) => {
         setConfirmDelete({
             open: true,
-            account: record,
+            cashReceipt: record,
         });
     };
 
-    const confirmDeleteAccount = async () => {
+    const confirmDeleteCashReceipt = async () => {
         try {
-            await deleteAccountMutation.mutateAsync(confirmDelete.account.tk);
+            await deleteCashReceiptMutation.mutateAsync(confirmDelete.cashReceipt.stt_rec);
             refetch();
         } catch (error) {
             console.error("Xoá thất bại:", error);
         } finally {
-            setConfirmDelete({ open: false, account: null });
+            setConfirmDelete({ open: false, cashReceipt: null });
         }
     };
 
-    const cancelDeleteAccount = () => {
-        setConfirmDelete({ open: false, account: null });
+    const cancelDeleteCashReceipt = () => {
+        setConfirmDelete({ open: false, cashReceipt: null });
     };
 
     // Định nghĩa các cột của bảng, thêm các trường mới
     const columnsTable = [
-    {
-        key: "soPhieuThu",
-        title: "Số phiếu thu",
-        fixed: "left",
-        width: 150,
-    },
-    {
-        key: "ngayHachToan",
-        title: "Ngày hạch toán",
-        fixed: "left",
-        width: 150,
-    },
-    {
-        key: "tkNo",
-        title: "Tài khoản nợ",
-        width: 150,
-    },
-    {
-        key: "loaiPhieuThu",
-        title: "Loại phiếu thu",
-        width: 150,
-    },
-    {
-        key: "maKhach",
-        title: "Mã khách",
-        width: 150,
-    },
-    {
-        key: "diaChi",
-        title: "Địa chỉ",
-        width: 200,
-    },
-    {
-        key: "nguoiNop",
-        title: "Người nộp",
-        width: 150,
-    },
-    {
-        key: "lyDoNop",
-        title: "Lý do nộp",
-        width: 200,
-    },
-    {
-        key: "quyenSo",
-        title: "Quyển số",
-        width: 100,
-    },
-    {
-        key: "soPhieuThu",
-        title: "Số phiếu thu",
-        width: 150,
-    },
-    {
-        key: "tggd",
-        title: "T/g giao dịch",
-        width: 150,
-    },
-    {
-        key: "trangThai",
-        title: "Trạng thái",
-        width: 150,
-    },
-    {
-        key: "MST",
-        title: "MST",
-        width: 150,
-    },
-    {
-        key: "action",
-        title: "Thao tác",
-        fixed: "right",
-        width: 120,
-        render: (_, record) => (
-            <div className="flex items-center gap-3 justify-center">
-                <button
-                    className="text-gray-500 hover:text-amber-500"
-                    title="Sửa"
-                    onClick={() => handleEditAccount(record)}
-                >
-                    <Pencil size={18} />
-                </button>
-                <button
-                    onClick={() => handleDeleteAccount(record)}
-                    className="text-gray-500 hover:text-red-500"
-                    title="Xoá"
-                    disabled={deleteAccountMutation.isLoading}
-                >
-                    <Trash size={18} />
-                </button>
-            </div>
-        ),
-    },
-];
-
+        {
+            key: "so_ct",
+            title: "Số phiếu thu",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "ong_ba",
+            title: "Người nộp",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "ngay_lct",
+            title: "Ngày lập phiếu thu",
+            fixed: "left",
+            width: 150,
+        },  
+        {
+            key: "ngay_ct",
+            title: "Ngày hạch toán",
+            width: 150,
+        },
+        {
+            key: "tk",
+            title: "Tài khoản nợ",
+            width: 150,
+        },
+        {
+            key: "ma_gd",
+            title: "Loại phiếu thu",
+            width: 150,
+        },
+        {
+            key: "ma_kh",
+            title: "Mã khách",
+            width: 150,
+        },
+        {
+            key: "dia_chi",
+            title: "Địa chỉ",
+            width: 200,
+        },
+        {
+            key: "dien_giai",
+            title: "Lý do nộp",
+            width: 200,
+        },
+        {
+            key: "ma_qs",
+            title: "Quyển số",
+            width: 100,
+        },
+        {
+            key: "loai_ct",
+            title: "Trạng thái",
+            width: 100,
+        },
+        {
+            key: "MST",
+            title: "MST",
+            width: 80,
+        },
+        {
+            key: "ma_nt",
+            title: "TGGD(Tỷ giá giao dịch)",
+            width: 50,
+        },
+        {
+            key: "ty_gia",
+            title: "Mức tỷ giá giao dịch",
+            width: 50,
+        },
+        {
+            key: "action",
+            title: "Thao tác",
+            fixed: "right",
+            width: 120,
+            render: (_, record) => (
+                <div className="flex items-center gap-3 justify-center">
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="Sửa"
+                        onClick={() => handleEditCashReceipt(record)}
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteCashReceipt(record)}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Xoá"
+                        disabled={deleteCashReceiptMutation.isLoading}
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
 
     // Các hàm xử lý input cho các trường mới nếu cần
     const handleInputChange = (field, value) => {
         // Cập nhật giá trị cho các trường mới nếu có form chỉnh sửa
-        // Ví dụ: setSelectedAccount({ ...selectedAccount, [field]: value });
+        // Ví dụ: setSelectedCashReceipt({ ...selectedCashReceipt, [field]: value });
     };
 
     const handleRangePicker = (date) => {
@@ -214,12 +218,12 @@ export const useListCashReceipt = () => {
         isOpenCreate,
         isOpenEdit,
         isOpenDetail,
-        selectedAccount,
+        selectedCashReceipt,
 
         // Data
-        dataTable: accountData?.data || [],
+        dataTable: cashReceiptData?.data || [],
         columnsTable,
-        pagination: accountData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+        pagination: cashReceiptData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
 
         // Form states
         rangePickerValue,
@@ -228,7 +232,7 @@ export const useListCashReceipt = () => {
         // Loading states
         isLoading,
         error,
-        isDeleting: deleteAccountMutation.isLoading,
+        isDeleting: deleteCashReceiptMutation.isLoading,
 
         // Modal handlers
         openModalCreate,
@@ -249,7 +253,7 @@ export const useListCashReceipt = () => {
         handleInputChange,
 
         confirmDelete,
-        confirmDeleteAccount,
-        cancelDeleteAccount,
+        confirmDeleteCashReceipt,
+        cancelDeleteCashReceipt,
     };
 };

@@ -18,7 +18,7 @@ export default function ListAccountPage() {
     const {
         isOpenCreate,
         isOpenEdit,
-        selectedAccount,
+        selectedCashReceipt,
         dataTable,
         columnsTable,
         pagination,
@@ -33,8 +33,8 @@ export default function ListAccountPage() {
         handleSaveCreate,
         handleSaveEdit,
         confirmDelete,
-        confirmDeleteAccount,
-        cancelDeleteAccount,
+        confirmDeleteCashReceipt,
+        cancelDeleteCashReceipt,
     } = useListCashReceipt();
 
     const [searchInput, setSearchInput] = useState(searchValue);
@@ -59,8 +59,8 @@ export default function ListAccountPage() {
 
     return (
         <>
-            <PageMeta title="Danh mục tài khoản" description="Danh mục tài khoản" />
-            <PageBreadcrumb pageTitle="Danh mục tài khoản" />
+            <PageMeta title="Phiếu thu tiền mặt" description="Phiếu thu tiền mặt" />
+            <PageBreadcrumb pageTitle="Phiếu thu tiền mặt" />
             <div className="space-y-6">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -123,15 +123,15 @@ export default function ListAccountPage() {
                     isOpenEdit={isOpenEdit}
                     closeModalEdit={closeModalEdit}
                     onSaveEdit={handleSaveEdit}
-                    selectedAccount={selectedAccount}
+                    selectedCashReceipt={selectedCashReceipt}
                 />
 
                 <ConfirmModal
                     isOpen={confirmDelete.open}
                     title="Xác nhận xoá"
-                    message={`Bạn có chắc chắn muốn xoá tài khoản "${confirmDelete.account?.ten_tk}" không?`}
-                    onConfirm={confirmDeleteAccount}
-                    onCancel={cancelDeleteAccount}
+                    message={`Bạn có chắc chắn muốn xoá phiếu "${confirmDelete.cashReceipt?.so_ct}" không?`}
+                    onConfirm={confirmDeleteCashReceipt}
+                    onCancel={cancelDeleteCashReceipt}
                 />
             </div>
         </>
