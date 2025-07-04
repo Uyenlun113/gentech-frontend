@@ -7,8 +7,8 @@ import UserDropdown from "../components/header/UserDropdown";
 const AppHeader = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const inputRef = useRef < HTMLInputElement > null;
   useEffect(() => {
     const handleKeyDown = (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {

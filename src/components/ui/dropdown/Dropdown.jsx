@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 export const Dropdown = ({ isOpen, onClose, children, className = "" }) => {
-  const dropdownRef = useRef < HTMLDivElement > null;
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

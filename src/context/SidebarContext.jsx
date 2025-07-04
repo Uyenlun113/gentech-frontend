@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const SidebarContext = (createContext < SidebarContextType) | (undefined > undefined);
+export const SidebarContext = createContext(undefined);
 
 export const useSidebar = () => {
   const context = useContext(SidebarContext);
@@ -15,8 +15,8 @@ export const SidebarProvider = ({ children }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [activeItem, setActiveItem] = (useState < string) | (null > null);
-  const [openSubmenu, setOpenSubmenu] = (useState < string) | (null > null);
+  const [activeItem, setActiveItem] = useState(null);
+  const [openSubmenu, setOpenSubmenu] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {

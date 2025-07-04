@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "simplebar-react/dist/simplebar.min.css";
 import "swiper/swiper-bundle.css";
 import App from "./App.jsx";
-import { AppWrapper } from "./components/common/PageMeta.tsx";
+import { AppWrapper } from "./components/common/PageMeta.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./index.css";
 const queryClient = new QueryClient();

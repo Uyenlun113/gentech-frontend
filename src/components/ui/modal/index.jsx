@@ -8,7 +8,7 @@ export const Modal = ({
   showCloseButton = true, // Default to true for backwards compatibility
   isFullscreen = false,
 }) => {
-  const modalRef = useRef < HTMLDivElement > null;
+  const modalRef = useRef(null);
 
   useEffect(() => {
     const handleEscape = (event) => {
