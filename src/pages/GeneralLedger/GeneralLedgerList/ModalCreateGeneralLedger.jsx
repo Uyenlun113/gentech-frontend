@@ -206,7 +206,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
       fixed: "right",
       width: 100,
       render: (_, row) => (
-        <button onClick={() => deleteHachToanRow(row.id)} >
+        <button onClick={() => deleteHachToanRow(row.id)}>
           <Trash2 color="#e20303" />
         </button>
       ),
@@ -281,7 +281,6 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         resetForm();
         navigate("/general-ledger/list");
       });
-
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi lưu: " + (err?.message || "Không xác định"));
@@ -290,7 +289,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
   const onClose = async () => {
     resetForm();
     closeModalCreate();
-  }
+  };
   return (
     <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-[60%] h-[80vh] m-4">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
@@ -424,8 +423,9 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
             <button
               onClick={handleSave}
               disabled={isPending}
-              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${isPending ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
+                isPending ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isPending ? "Đang lưu..." : "Lưu lại"}
             </button>

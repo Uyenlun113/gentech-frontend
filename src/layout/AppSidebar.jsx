@@ -193,15 +193,16 @@ const AppSidebar = () => {
   return (
     <aside
       className={`
-      fixed left-0 flex flex-col h-screen
-      bg-white dark:bg-gray-900 text-gray-900 border-r border-gray-200 z-40 transition-all duration-300 ease-in-out
-      ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-      ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
-    `}
+    fixed left-0 flex flex-col h-screen
+    bg-white dark:bg-gray-900 text-gray-900 border-r border-gray-200 z-40 transition-all duration-300 ease-in-out
+    ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
+  `}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex flex-col flex-grow overflow-y-auto px-5 py-4 no-scrollbar">
+      {/* === MAIN CONTENT WITH SCROLL === */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col">
             <div>{renderMenuItems(navItems)}</div>
@@ -209,9 +210,9 @@ const AppSidebar = () => {
         </nav>
       </div>
 
-      {/* --- BOTTOM SECTION giống như ảnh --- */}
-      <div className="px-5 py-4 border-t h-[400px]">
-        <div className="flex flex-col gap-2 text-sm text-blue-700 h-[120px]">
+      {/* === BOTTOM SECTION STICKY TO BOTTOM === */}
+      <div className="px-5 py-4 border-t h-[330px]">
+        <div className="flex flex-col gap-2 text-blue-700 text-xs">
           <Link to="/contact" className="hover:underline text-green-600 font-semibold text-center">
             Liên hệ với chúng tôi
           </Link>
@@ -220,7 +221,7 @@ const AppSidebar = () => {
           <button className="text-left hover:underline">+ Nhắc việc</button>
         </div>
         <div className="mt-4">
-          <img src="/images/logo/logo.jpg" alt="Diamond Soft" className="w-full h-[90px]" />
+          <img src="/images/logo/logo.jpg" alt="Diamond Soft" className="mx-auto w-[70%] h-[60px]" />
         </div>
       </div>
     </aside>
