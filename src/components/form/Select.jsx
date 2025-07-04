@@ -2,8 +2,7 @@ import { useState } from "react";
 
 const Select = ({ options, placeholder = "Select an option", onChange, className = "", defaultValue = "" }) => {
   // Manage the selected value
-  const [selectedValue, setSelectedValue] = useState < string > defaultValue;
-
+  const [selectedValue, setSelectedValue] = useState(defaultValue);
   const handleChange = (e) => {
     const value = e.target.value;
     setSelectedValue(value);

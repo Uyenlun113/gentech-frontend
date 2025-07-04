@@ -67,7 +67,7 @@ const AppHeader = () => {
       items: [
         { label: "1. Danh mục tài khoản", path: "/category/account" },
         { label: "2. Danh mục nhóm đối tượng", path: "/danh-muc/nhom-doi-tuong" },
-        { label: "3. Danh mục đối tượng", path: "/danh-muc/doi-tuong" },
+        { label: "3. Danh mục đối tượng", path: "/category/customer" },
         { label: "4. Danh mục sản phẩm (công trình)", path: "/danh-muc/san-pham" },
         { label: "5. Danh mục yếu tố chi phí", path: "/danh-muc/yto-chi-phi" },
         { label: "6. Danh mục hợp đồng", path: "/danh-muc/hop-dong" },
@@ -76,13 +76,12 @@ const AppHeader = () => {
         { label: "9. Danh mục kho hàng hóa", path: "/danh-muc/kho" },
         { label: "a. Danh mục vàng, đá bán", path: "/danh-muc/vang-da" },
         { label: "b. Danh mục nhóm vật tư hàng hóa", path: "/danh-muc/nhom-vattu" },
-        { label: "c. Danh mục vật tư hàng hóa", path: "/danh-muc/vattu" },
+        { label: "c. Danh mục vật tư hàng hóa", path: "/category/dmvt" },
         { label: "d. Danh mục biểu thuế", path: "/danh-muc/bieu-thue" },
         { label: "đ. Danh mục nguồn vốn", path: "/danh-muc/nguon-von" },
         { label: "e. Danh mục mức độ dịch vụ dùng", path: "/danh-muc/muc-do-dv" },
         { label: "f. Danh mục lý do tăng giảm", path: "/danh-muc/ly-do" },
         { label: "g. Danh mục bộ phận", path: "/danh-muc/bo-phan" },
-        { label: "10. Danh mục khách hàng", path: "/category/customer" },
       ],
     },
     {
@@ -197,9 +196,8 @@ const AppHeader = () => {
                       <span>{item.label}</span>
                       {item.hasDropdown && (
                         <ChevronDown
-                          className={`w-4 h-4 transition-transform ${
-                            activeDropdown === `menu-${index}` ? "rotate-180" : ""
-                          }`}
+                          className={`w-4 h-4 transition-transform ${activeDropdown === `menu-${index}` ? "rotate-180" : ""
+                            }`}
                         />
                       )}
                     </button>

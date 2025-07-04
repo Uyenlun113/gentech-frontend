@@ -10,6 +10,7 @@ import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListCustomerPage from "./pages/category/customer/ListCustomer";
+import ListMaterialPage from "./pages/category/dmvt/ListMaterial";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
 import CostingPage from "./pages/Costing/Costing";
@@ -51,6 +52,8 @@ export default function App() {
               <Route index path="/" element={<Home />} />
               <Route path="/category/customer" element={<ListCustomerPage />} />
               <Route path="/category/account" element={<ListAccountPage />} />
+              <Route path="/category/dmvt" element={<ListMaterialPage />} />
+
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />

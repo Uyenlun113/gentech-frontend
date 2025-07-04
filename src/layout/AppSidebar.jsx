@@ -28,7 +28,6 @@ const navItems = [
     name: "Kế toán tổng hợp",
     icon: <ListIcon />,
     subItems: [
-      { name: "Phiếu kế toán", path: "/general-ledger/create" },
       { name: "Danh sách phiếu kế toán", path: "/general-ledger/list" },
     ],
   },
@@ -82,14 +81,12 @@ const AppSidebar = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group ${
-                openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"
-              } cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+              className={`menu-item group ${openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"
+                } cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
             >
               <span
-                className={`menu-item-icon-size ${
-                  openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                }`}
+                className={`menu-item-icon-size ${openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                  }`}
               >
                 {nav.icon}
               </span>
@@ -98,9 +95,8 @@ const AppSidebar = () => {
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""
-                  }`}
+                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""
+                    }`}
                 />
               )}
             </button>
@@ -111,9 +107,8 @@ const AppSidebar = () => {
                 className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}
               >
                 <span
-                  className={`menu-item-icon-size ${
-                    isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                  }`}
+                  className={`menu-item-icon-size ${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    }`}
                 >
                   {nav.icon}
                 </span>
@@ -139,27 +134,24 @@ const AppSidebar = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
-                      }`}
+                      className={`menu-dropdown-item ${isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
+                        }`}
                     >
                       {subItem.name}
                       {(subItem.new || subItem.pro) && (
                         <span className="flex items-center gap-1 ml-auto">
                           {subItem.new && (
                             <span
-                              className={`menu-dropdown-badge ${
-                                isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
-                              }`}
+                              className={`menu-dropdown-badge ${isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                                }`}
                             >
                               new
                             </span>
                           )}
                           {subItem.pro && (
                             <span
-                              className={`menu-dropdown-badge ${
-                                isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
-                              }`}
+                              className={`menu-dropdown-badge ${isActive(subItem.path) ? "menu-dropdown-badge-active" : "menu-dropdown-badge-inactive"
+                                }`}
                             >
                               pro
                             </span>
