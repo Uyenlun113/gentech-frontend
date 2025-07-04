@@ -3,39 +3,21 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
-import { useAccounts, useCreateAccount, useGroupAccounts } from "../../../hooks/useAccounts";
+import { useCreateMaterialGroup } from "../../../hooks/useMaterialGroup";
 
-export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
+export const ModalCreateMaterialGroup = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
-    tk0: "",
-    ten_tk: "",
-    tk_me: "",
-    ma_nt: "",
-    nh_tk: "",
+    loai_nh: "",
+    ma_nh: "",
+    ten_nh: "",
   });
 
-  const [groupSearchTerm, setGroupSearchTerm] = useState("");
-  const [listSearchTerm, setListSearchTerm] = useState("");
-  const createAccountMutation = useCreateAccount();
+  const createMaterialGroupMutation = useCreateMaterialGroup();
   const [errors, setErrors] = useState({
-    tk0: "",
-    ten_tk: "",
+    loai_nh: "",
+    ma_nh: "",
+    ten_nh: "",
   });
-
-  const { data: groupAccountsResponse, isLoading: isGroupLoading } = useGroupAccounts({
-    search: groupSearchTerm,
-    page: 1,
-    limit: 50,
-  });
-
-  const { data: accountsResponse, isLoading } = useAccounts({
-    search: listSearchTerm,
-    page: 1,
-    limit: 50,
-  });
-
-  const groupAccounts = groupAccountsResponse?.data || [];
-  const accountsList = accountsResponse?.data || [];
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -47,43 +29,41 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
   const handleSubmit = async (e) => {
     e.preventDefault();
     let hasError = false;
-    setErrors({ tk0: "", ten_tk: "" });
+    setErrors({ loai_nh: "", ma_nh: "", ten_nh: "" });
 
-    if (!formData.tk0.trim()) {
-      setErrors((prev) => ({ ...prev, tk: "Vui lòng nhập mã tài khoản" }));
+    if (!formData.loai_nh.trim()) {
+      setErrors((prev) => ({ ...prev, tk: "Vui lòng nhập loại nhóm" }));
       hasError = true;
     }
 
-    if (!formData.ten_tk.trim()) {
-      setErrors((prev) => ({ ...prev, ten_tk: "Vui lòng nhập tên tài khoản" }));
+    if (!formData.ma_nh.trim()) {
+      setErrors((prev) => ({ ...prev, ma_nh: "Vui lòng nhập mẫu nhóm vật tư" }));
       hasError = true;
     }
 
+    if (!formData.ten_nh.trim()) {
+      setErrors((prev) => ({ ...prev, ten_nh: "Vui lòng nhập tên nhóm vật tư" }));
+      hasError = true;
+    }
     if (hasError) return;
 
     try {
-      await createAccountMutation.mutateAsync({
+      await createMaterialGroupMutation.mutateAsync({
         ...formData,
         tk_me: formData.tk_me || undefined,
-        ma_nt: formData.ma_nt || undefined,
-        nh_tk: formData.nh_tk || undefined,
+        ma_nh: formData.ma_nh || undefined,
+        ten_nh: formData.ten_nh || undefined,
       });
 
       // Reset form
       setFormData({
-        tk0: "",
-        ten_tk: "",
-        tk_me: "",
-        ma_nt: "",
-        nh_tk: "",
+        loai_nh: "",
+        ma_nh: "",
+        ten_nh: "",
       });
-      setErrors({ tk0: "", ten_tk: "" });
-      setGroupSearchTerm("");
-      setListSearchTerm("");
-
+      setErrors({ loai_nh: "", ma_nh: "", ten_nh: "" });
       onSaveCreate();
     } catch (error) {
-      console.error("Error creating account:", error);
       if (error.response?.data?.message) {
         if (error.response.data.message.includes("tk")) {
           setErrors((prev) => ({ ...prev, tk: "Mã tài khoản đã tồn tại" }));
@@ -94,15 +74,11 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
 
   const handleClose = () => {
     setFormData({
-      tk0: "",
-      ten_tk: "",
-      tk_me: "",
-      ma_nt: "",
-      nh_tk: "",
+      loai_nh: "",
+      ma_nh: "",
+      ten_nh: "",
     });
-    setErrors({ tk0: "", ten_tk: "" });
-    setGroupSearchTerm("");
-    setListSearchTerm("");
+    setErrors({ loai_nh: "", ma_nh: "", ten_nh: "" });
     closeModalCreate();
   };
 
@@ -126,44 +102,44 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
                   <Label>Loại nhóm *</Label>
                   <Input
                     type="text"
-                    value={formData.tk0}
+                    value={formData.loai_nh}
                     onChange={(e) => {
-                      handleInputChange("tk0", e.target.value);
-                      if (errors.tk0) {
-                        setErrors((prev) => ({ ...prev, tk0: "" }));
+                      handleInputChange("loai_nh", e.target.value);
+                      if (errors.loai_nh) {
+                        setErrors((prev) => ({ ...prev, loai_nh: "" }));
                       }
                     }}
-                    placeholder="Nhập mã tài khoản"
+                    placeholder="Nhập loại nhóm"
                     maxLength={16}
                     required
                   />
-                  {errors.tk0 && <p className="mt-1 text-sm text-red-500">{errors.tk0}</p>}
+                  {errors.loai_nh && <p className="mt-1 text-sm text-red-500">{errors.loai_nh}</p>}
                 </div>
 
                 <div>
                   <Label>Mã nhóm đầu tư *</Label>
                   <Input
                     type="text"
-                    value={formData.ten_tk}
+                    value={formData.ma_nh}
                     onChange={(e) => {
-                      handleInputChange("ten_tk", e.target.value);
-                      if (errors.ten_tk) {
-                        setErrors((prev) => ({ ...prev, ten_tk: "" }));
+                      handleInputChange("ma_nh", e.target.value);
+                      if (errors.ma_nh) {
+                        setErrors((prev) => ({ ...prev, ma_nh: "" }));
                       }
                     }}
-                    placeholder="Nhập tên tài khoản"
+                    placeholder="Nhập mã nhóm đầu tư"
                     required
                   />
-                  {errors.ten_tk && <p className="mt-1 text-sm text-red-500">{errors.ten_tk}</p>}
+                  {errors.ma_nh && <p className="mt-1 text-sm text-red-500">{errors.ma_nh}</p>}
                 </div>
 
                 <div className="col-span-2">
                   <Label>Tên nhóm vật tư</Label>
                   <Input
                     type="text"
-                    value={formData.ma_nt}
-                    onChange={(e) => handleInputChange("ma_nt", e.target.value)}
-                    placeholder="Nhập mã ngoại tệ (VD: VND, USD)"
+                    value={formData.ten_nh}
+                    onChange={(e) => handleInputChange("ten_nh", e.target.value)}
+                    placeholder="Nhập tên nhóm vật tư"
                   />
                 </div>
               </div>
@@ -174,8 +150,8 @@ export const ModalCreateAccount = ({ isOpenCreate, closeModalCreate, onSaveCreat
             <Button size="sm" variant="outline" type="button" onClick={handleClose}>
               Hủy
             </Button>
-            <Button size="sm" type="submit" disabled={createAccountMutation.isLoading}>
-              {createAccountMutation.isLoading ? "Đang lưu..." : "Lưu lại"}
+            <Button size="sm" type="submit" disabled={createMaterialGroupMutation.isLoading}>
+              {createMaterialGroupMutation.isLoading ? "Đang lưu..." : "Lưu lại"}
             </Button>
           </div>
         </form>

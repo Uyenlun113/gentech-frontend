@@ -8,15 +8,15 @@ import Pagination from "../../../components/pagination/Pagination";
 import TableBasic from "../../../components/tables/BasicTables/BasicTableOne";
 import Button from "../../../components/ui/button/Button";
 import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
-import { ModalCreateAccount } from "./ModalCreate";
-import { ModalEditAccount } from "./ModalEdit";
+import { ModalCreateMaterialGroup } from "./ModalCreate";
+import { ModalEditMaterialGroup } from "./ModalEdit";
 import { useListMaterialGroup } from "./useListMaterialGroup";
 
 export default function ListMaterialGroupPage() {
   const {
     isOpenCreate,
     isOpenEdit,
-    selectedAccount,
+    selectedMaterialGroup,
     dataTable,
     columnsTable,
     pagination,
@@ -31,11 +31,11 @@ export default function ListMaterialGroupPage() {
     handleSaveCreate,
     handleSaveEdit,
     confirmDelete,
-    confirmDeleteAccount,
-    cancelDeleteAccount,
+    confirmDeleteMaterialGroup,
+    cancelDeleteMaterialGroup,
     confirmEdit,
-    confirmEditAccount,
-    cancelEditAccount,
+    confirmEditMaterialGroup,
+    cancelEditMaterialGroup,
   } = useListMaterialGroup();
 
   const [searchInput, setSearchInput] = useState(searchValue);
@@ -120,34 +120,34 @@ export default function ListMaterialGroupPage() {
         </ComponentCard>
 
         {/* Modals */}
-        <ModalCreateAccount
+        <ModalCreateMaterialGroup
           isOpenCreate={isOpenCreate}
           closeModalCreate={closeModalCreate}
           onSaveCreate={handleSaveCreate}
         />
-        <ModalEditAccount
+        <ModalEditMaterialGroup
           isOpenEdit={isOpenEdit}
           closeModalEdit={closeModalEdit}
           onSaveEdit={handleSaveEdit}
-          selectedAccount={selectedAccount}
+          selectedMaterialGroup={selectedMaterialGroup}
         />
 
         {/* Delete Confirmation Modal */}
         <ConfirmModal
           isOpen={confirmDelete.open}
           title="Xác nhận xoá"
-          message={`Bạn có chắc chắn muốn xoá tài khoản "${confirmDelete.account?.ten_tk}" không?`}
-          onConfirm={confirmDeleteAccount}
-          onCancel={cancelDeleteAccount}
+          message={`Bạn có chắc chắn muốn xoá tài khoản "${confirmDelete.materialGroup?.ten_tk}" không?`}
+          onConfirm={confirmDeleteMaterialGroup}
+          onCancel={cancelDeleteMaterialGroup}
         />
 
         {/* Edit Confirmation Modal */}
         <ConfirmModal
           isOpen={confirmEdit.open}
           title="Xác nhận sửa"
-          message={`Bạn có muốn sửa tài khoản "${confirmEdit.account?.ten_tk}" không?`}
-          onConfirm={confirmEditAccount}
-          onCancel={cancelEditAccount}
+          message={`Bạn có muốn sửa tài khoản "${confirmEdit.materialGroup?.ten_tk}" không?`}
+          onConfirm={confirmEditMaterialGroup}
+          onCancel={cancelEditMaterialGroup}
           titleButton="Sửa"
           titleCancel="Hủy"
         />

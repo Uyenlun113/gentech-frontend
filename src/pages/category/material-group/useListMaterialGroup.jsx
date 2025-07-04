@@ -1,13 +1,13 @@
 import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
-import { useAccounts, useDeleteAccount } from "../../../hooks/useAccounts";
+import { useDeleteMaterialGroup, useMaterialGroups } from "../../../hooks/useMaterialGroup";
 import { useModal } from "../../../hooks/useModal";
 
 export const useListMaterialGroup = () => {
   const [rangePickerValue, setRangePickerValue] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [selectedMaterialGroup, setSelectedMaterialGroup] = useState(null);
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
   const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
@@ -30,20 +30,19 @@ export const useListMaterialGroup = () => {
   };
 
   // Fetch data
-  const { data: accountData, isLoading, error, refetch } = useAccounts(queryParams);
-  console.log(accountData);
-  const deleteAccountMutation = useDeleteAccount();
+  const { data: materialGroupsData, isLoading, error, refetch } = useMaterialGroups(queryParams);
+  const deleteMaterialGroupMutation = useDeleteMaterialGroup();
 
   // Delete confirmation state
   const [confirmDelete, setConfirmDelete] = useState({
     open: false,
-    account: null,
+    materialGroup: null,
   });
 
   // Edit confirmation state
   const [confirmEdit, setConfirmEdit] = useState({
     open: false,
-    account: null,
+    materialGroup: null,
   });
 
   const handleSaveCreate = () => {
@@ -54,78 +53,70 @@ export const useListMaterialGroup = () => {
     closeModalEdit();
   };
 
-  const handleEditAccount = (record) => {
+  const handleEditMaterialGroup = (record) => {
     setConfirmEdit({
       open: true,
-      account: record,
+      materialGroup: record,
     });
   };
 
-  const confirmEditAccount = () => {
-    setSelectedAccount(confirmEdit.account);
-    setConfirmEdit({ open: false, account: null });
+  const confirmEditMaterialGroup = () => {
+    setSelectedMaterialGroup(confirmEdit.materialGroup);
+    setConfirmEdit({ open: false, materialGroup: null });
     openModalEdit();
   };
 
-  const cancelEditAccount = () => {
-    setConfirmEdit({ open: false, account: null });
+  const cancelEditMaterialGroup = () => {
+    setConfirmEdit({ open: false, materialGroup: null });
   };
 
-  const handleDeleteAccount = (record) => {
+  const handleDeleteMaterialGroup = (record) => {
     setConfirmDelete({
       open: true,
-      account: record,
+      materialGroup: record,
     });
   };
 
-  const confirmDeleteAccount = async () => {
+  const confirmDeleteMaterialGroup = async () => {
     try {
-      await deleteAccountMutation.mutateAsync(confirmDelete.account.tk0);
+      await deleteMaterialGroupMutation.mutateAsync(confirmDelete.materialGroup.tk0);
     } catch (error) {
       console.error("Xoá thất bại:", error);
     } finally {
-      setConfirmDelete({ open: false, account: null });
+      setConfirmDelete({ open: false, materialGroup: null });
     }
   };
 
-  const cancelDeleteAccount = () => {
-    setConfirmDelete({ open: false, account: null });
+  const cancelDeleteMaterialGroup = () => {
+    setConfirmDelete({ open: false, materialGroup: null });
   };
 
   const columnsTable = [
     {
-      key: "tk0",
-      title: "Mã tài khoản",
+      key: "loai_nh",
+      title: "Loại nhóm",
       fixed: "left",
       align: "center",
       width: 120,
       render: (_, record) => {
-        return <div className="text-center">{record?.tk0}</div>;
+        return <div className="text-center">{record?.loai_nh}</div>;
       },
     },
     {
-      key: "ten_tk",
-      title: "Tên tài khoản",
+      key: "ma_nh",
+      title: "Mẫu nhóm vật tư",
       fixed: "left",
       width: 300,
       render: (_, record) => {
-        return <div className="text-left">{record?.ten_tk}</div>;
+        return <div className="text-left">{record?.ma_nh}</div>;
       },
     },
     {
-      key: "tk_me",
-      title: "Tài khoản mẹ",
-      width: 150,
-    },
-    {
-      key: "ma_nt",
-      title: "Mã ngoại tệ",
-      width: 120,
-    },
-    {
-      key: "nh_tk",
-      title: "Loại tài khoản",
-      width: 150,
+      key: "ten_nh",
+      title: "Tên nhóm vật tư",
+      render: (_, record) => {
+        return <div className="text-left">{record?.ten_nh}</div>;
+      },
     },
     {
       key: "action",
@@ -134,14 +125,18 @@ export const useListMaterialGroup = () => {
       width: 120,
       render: (_, record) => (
         <div className="flex items-center gap-3 justify-center">
-          <button className="text-gray-500 hover:text-amber-500" title="Sửa" onClick={() => handleEditAccount(record)}>
+          <button
+            className="text-gray-500 hover:text-amber-500"
+            title="Sửa"
+            onClick={() => handleEditMaterialGroup(record)}
+          >
             <Pencil size={18} />
           </button>
           <button
-            onClick={() => handleDeleteAccount(record)}
+            onClick={() => handleDeleteMaterialGroup(record)}
             className="text-gray-500 hover:text-red-500"
             title="Xoá"
-            disabled={deleteAccountMutation.isLoading}
+            disabled={deleteMaterialGroupMutation.isLoading}
           >
             <Trash size={18} />
           </button>
@@ -173,12 +168,12 @@ export const useListMaterialGroup = () => {
     isOpenCreate,
     isOpenEdit,
     isOpenDetail,
-    selectedAccount,
+    selectedMaterialGroup,
 
     // Data
-    dataTable: accountData?.data || [],
+    dataTable: materialGroupsData?.data || [],
     columnsTable,
-    pagination: accountData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
+    pagination: materialGroupsData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
 
     // Form states
     rangePickerValue,
@@ -187,7 +182,7 @@ export const useListMaterialGroup = () => {
     // Loading states
     isLoading,
     error,
-    isDeleting: deleteAccountMutation.isLoading,
+    isDeleting: deleteMaterialGroupMutation.isLoading,
 
     // Modal handlers
     openModalCreate,
@@ -209,12 +204,12 @@ export const useListMaterialGroup = () => {
 
     // Delete confirmation
     confirmDelete,
-    confirmDeleteAccount,
-    cancelDeleteAccount,
+    confirmDeleteMaterialGroup,
+    cancelDeleteMaterialGroup,
 
     // Edit confirmation
     confirmEdit,
-    confirmEditAccount,
-    cancelEditAccount,
+    confirmEditMaterialGroup,
+    cancelEditMaterialGroup,
   };
 };
