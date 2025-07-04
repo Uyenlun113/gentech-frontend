@@ -6,8 +6,8 @@ const PhoneInput = ({
   onChange,
   selectPosition = "start", // Default position is 'start'
 }) => {
-  const [selectedCountry, setSelectedCountry] = useState < string > "US";
-  const [phoneNumber, setPhoneNumber] = useState < string > "+1";
+  const [selectedCountry, setSelectedCountry] = useState("US");
+  const [phoneNumber, setPhoneNumber] = useState("+1");
 
   const countryCodes = countries.reduce((acc, { code, label }) => ({ ...acc, [code]: label }), {});
 

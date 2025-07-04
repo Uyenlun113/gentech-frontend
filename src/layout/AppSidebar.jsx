@@ -1,37 +1,50 @@
+import {
+  Banknote,
+  BookOpenCheck,
+  Boxes,
+  Building2,
+  ClipboardList,
+  FileBarChart2,
+  FileInput,
+  HandCoins,
+  Settings,
+  ShoppingCart,
+  Wallet,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
-import { ChevronDownIcon, GridIcon, ListIcon } from "../icons";
+import { ChevronDownIcon } from "../icons";
 
 const navItems = [
-  { name: "Hệ thống", icon: <ListIcon />, path: "/system" },
-  { icon: <GridIcon />, name: "Vốn bằng tiền", path: "/" },
+  { name: "Hệ thống", icon: <Settings />, path: "/system" },
+  { name: "Vốn bằng tiền", icon: <Banknote />, path: "/" },
   {
     name: "Mua hàng - Phải trả",
-    icon: <ListIcon />,
+    icon: <ShoppingCart />,
     path: "/sales",
   },
-  { name: "Bán hàng - Phải thu", icon: <ListIcon />, path: "/cash" },
-  { name: "Hàng tồn kho", icon: <ListIcon />, path: "/purchases" },
+  { name: "Bán hàng - Phải thu", icon: <HandCoins />, path: "/cash" },
+  { name: "Hàng tồn kho", icon: <Boxes />, path: "/purchases" },
   {
     name: "Tài sản cố định",
-    icon: <ListIcon />,
+    icon: <Building2 />,
     subItems: [
       { name: "Báo cáo phân hệ", path: "/fixed-assets/module-report" },
       { name: "Báo cáo quản trị", path: "/fixed-assets/depreciation-report" },
     ],
   },
-  { name: "Công cụ dụng cụ", icon: <ListIcon />, path: "/tools" },
-  { name: "Tiền lương", icon: <ListIcon />, path: "/payroll" },
-  { name: "Chi phí giá thành", icon: <ListIcon />, path: "/costing" },
+  { name: "Công cụ dụng cụ", icon: <ClipboardList />, path: "/tools" },
+  { name: "Tiền lương", icon: <Wallet />, path: "/payroll" },
+  { name: "Chi phí giá thành", icon: <FileBarChart2 />, path: "/costing" },
   {
     name: "Kế toán tổng hợp",
-    icon: <ListIcon />,
+    icon: <BookOpenCheck />,
     subItems: [
       { name: "Danh sách phiếu kế toán", path: "/general-ledger/list" },
     ],
   },
-  { name: "Chuyển dữ liệu từ Excel", icon: <ListIcon />, path: "/import-excel" },
+  { name: "Chuyển dữ liệu từ Excel", icon: <FileInput />, path: "/import-excel" },
 ];
 
 const AppSidebar = () => {
@@ -172,15 +185,16 @@ const AppSidebar = () => {
   return (
     <aside
       className={`
-      fixed left-0 flex flex-col h-screen
-      bg-white dark:bg-gray-900 text-gray-900 border-r border-gray-200 z-40 transition-all duration-300 ease-in-out
-      ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-      ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
-    `}
+    fixed left-0 flex flex-col h-screen
+    bg-white dark:bg-gray-900 text-gray-900 border-r border-gray-200 z-40 transition-all duration-300 ease-in-out
+    ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
+  `}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex flex-col flex-grow overflow-y-auto px-5 py-4 no-scrollbar">
+      {/* === MAIN CONTENT WITH SCROLL === */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col">
             <div>{renderMenuItems(navItems)}</div>
@@ -188,9 +202,9 @@ const AppSidebar = () => {
         </nav>
       </div>
 
-      {/* --- BOTTOM SECTION giống như ảnh --- */}
-      <div className="px-5 py-4 border-t h-[400px]">
-        <div className="flex flex-col gap-2 text-sm text-blue-700 h-[120px]">
+      {/* === BOTTOM SECTION STICKY TO BOTTOM === */}
+      <div className="px-5 py-4 border-t h-[330px]">
+        <div className="flex flex-col gap-2 text-blue-700 text-xs">
           <Link to="/contact" className="hover:underline text-green-600 font-semibold text-center">
             Liên hệ với chúng tôi
           </Link>
@@ -199,7 +213,7 @@ const AppSidebar = () => {
           <button className="text-left hover:underline">+ Nhắc việc</button>
         </div>
         <div className="mt-4">
-          <img src="/images/logo/logo.jpg" alt="Diamond Soft" className="w-full h-[90px]" />
+          <img src="/images/logo/logo.jpg" alt="Diamond Soft" className="mx-auto w-[70%] h-[60px]" />
         </div>
       </div>
     </aside>

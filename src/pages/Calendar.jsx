@@ -8,7 +8,7 @@ import { Modal } from "../components/ui/modal";
 import { useModal } from "../hooks/useModal";
 
 const Calendar = () => {
-  const [selectedEvent, setSelectedEvent] = (useState < CalendarEvent) | (null > null);
+  const [selectedEvent, setSelectedEvent] = useState(null > null);
   const [eventTitle, setEventTitle] = useState("");
   const [eventStartDate, setEventStartDate] = useState("");
   const [eventEndDate, setEventEndDate] = useState("");

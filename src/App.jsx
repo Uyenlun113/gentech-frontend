@@ -10,7 +10,10 @@ import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListCustomerPage from "./pages/category/customer/ListCustomer";
+
 import ListMaterialPage from "./pages/category/dmvt/ListMaterial";
+
+import ListMaterialGroupPage from "./pages/category/material-group/ListMaterialGroup";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
 import CostingPage from "./pages/Costing/Costing";
@@ -53,7 +56,7 @@ export default function App() {
               <Route path="/category/customer" element={<ListCustomerPage />} />
               <Route path="/category/account" element={<ListAccountPage />} />
               <Route path="/category/dmvt" element={<ListMaterialPage />} />
-
+              <Route path="/category/material-group" element={<ListMaterialGroupPage />} />
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
@@ -80,7 +83,6 @@ export default function App() {
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
               <Route path="/general-ledger/update/:stt_rec" element={<GeneralLedgerUpdate />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
-
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
               {/* System Page */}
