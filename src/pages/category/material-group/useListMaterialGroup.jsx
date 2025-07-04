@@ -11,7 +11,6 @@ export const useListMaterialGroup = () => {
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
   const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-  const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
 
   // Parse date range
   const dateRange = rangePickerValue ? rangePickerValue.split(" to ") : [];
@@ -79,7 +78,10 @@ export const useListMaterialGroup = () => {
 
   const confirmDeleteMaterialGroup = async () => {
     try {
-      await deleteMaterialGroupMutation.mutateAsync(confirmDelete.materialGroup.tk0);
+      await deleteMaterialGroupMutation.mutateAsync({
+        ma_nh: confirmDelete.materialGroup.ma_nh,
+        loai_nh: confirmDelete.materialGroup.loai_nh
+      });
     } catch (error) {
       console.error("Xoá thất bại:", error);
     } finally {
@@ -156,7 +158,7 @@ export const useListMaterialGroup = () => {
 
   const handleSearch = (value) => {
     setSearchValue(value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleChangePage = (page) => {
@@ -164,45 +166,29 @@ export const useListMaterialGroup = () => {
   };
 
   return {
-    // Modal states
+
     isOpenCreate,
     isOpenEdit,
-    isOpenDetail,
     selectedMaterialGroup,
-
-    // Data
     dataTable: materialGroupsData?.data || [],
     columnsTable,
     pagination: materialGroupsData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
-
-    // Form states
     rangePickerValue,
     searchValue,
-
-    // Loading states
     isLoading,
     error,
     isDeleting: deleteMaterialGroupMutation.isLoading,
-
-    // Modal handlers
     openModalCreate,
     closeModalCreate,
     closeModalEdit,
-    closeModalDetail,
-
-    // Form handlers
     handleRangePicker,
     handleSearch,
     handleChangePage,
     handleSaveCreate,
     handleSaveEdit,
-
-    // Utility
     refetch,
     loaiTk,
     setLoaiTk,
-
-    // Delete confirmation
     confirmDelete,
     confirmDeleteMaterialGroup,
     cancelDeleteMaterialGroup,

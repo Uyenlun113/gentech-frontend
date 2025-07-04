@@ -132,11 +132,10 @@ export default function ListMaterialGroupPage() {
           selectedMaterialGroup={selectedMaterialGroup}
         />
 
-        {/* Delete Confirmation Modal */}
         <ConfirmModal
           isOpen={confirmDelete.open}
           title="Xác nhận xoá"
-          message={`Bạn có chắc chắn muốn xoá tài khoản "${confirmDelete.materialGroup?.ten_tk}" không?`}
+          message={`Bạn có chắc chắn muốn nhóm vật tư không?`}
           onConfirm={confirmDeleteMaterialGroup}
           onCancel={cancelDeleteMaterialGroup}
         />
