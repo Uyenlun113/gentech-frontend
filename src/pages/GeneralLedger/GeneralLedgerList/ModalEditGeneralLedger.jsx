@@ -362,12 +362,12 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
   }
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-[80%] max-h-[90vh] m-4">
+    <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-[60%] max-h-[80vh] m-4">
       <div className="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Cập nhật phiếu kế toán tổng hợp</h4>
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-            Cập nhật phiếu kế toán - {soChungTu || stt_rec}
+            Cập nhật phiếu kế toán
           </p>
         </div>
 
@@ -375,7 +375,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
           <div className="space-y-6">
             {/* Form chính */}
             <ComponentCard>
-              <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 3xl:grid-cols-4 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div>
                   <Label>Ngày hạch toán </Label>
                   <div className="relative w-full flatpickr-wrapper">

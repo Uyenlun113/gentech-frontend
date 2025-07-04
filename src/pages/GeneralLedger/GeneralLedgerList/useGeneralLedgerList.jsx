@@ -43,12 +43,8 @@ export const useGeneralLedgerList = () => {
     enabled: !!selectedRecord?.stt_rec,
   });
 
-  console.log("🚀 ~ useGeneralLedgerList ~ fetchCt11Data:", fetchCt11Data);
-
-  // Mutations for delete
   const deleteMutation = useDeleteGeneralAccounting();
 
-  // Xử lý dữ liệu từ API response
   const dataTable = useMemo(() => {
     if (fetchPh11Data?.status === 200 && fetchPh11Data?.items) {
       return fetchPh11Data.items;
@@ -56,7 +52,6 @@ export const useGeneralLedgerList = () => {
     return [];
   }, [fetchPh11Data]);
 
-  // Xử lý dữ liệu CT11
   const dataCt11Table = useMemo(() => {
     if (fetchCt11Data?.status === 200 && fetchCt11Data?.data) {
       return fetchCt11Data.data;
@@ -64,7 +59,6 @@ export const useGeneralLedgerList = () => {
     return [];
   }, [fetchCt11Data]);
 
-  // Cập nhật loading state
   useEffect(() => {
     setLoading(isLoadingPh11 || isLoadingCt11 || deleteMutation.isPending);
   }, [isLoadingPh11, isLoadingCt11, deleteMutation.isPending]);
@@ -80,14 +74,12 @@ export const useGeneralLedgerList = () => {
   };
 
 
-  // Xử lý mở modal xóa
   const handleDeleteClick = (record, e) => {
     e.stopPropagation();
     setRecordToDelete(record);
     openModalDelete();
   };
 
-  // Xử lý xác nhận xóa
   const handleConfirmDelete = async () => {
     if (!recordToDelete?.stt_rec) {
       toast.error("Không có thông tin bản ghi để xóa");
@@ -100,22 +92,20 @@ export const useGeneralLedgerList = () => {
       await deleteMutation.mutateAsync(recordToDelete.stt_rec);
 
       toast.success("Xóa thành công!");
-
-      // Nếu đang xem chi tiết của record vừa xóa thì đóng popup
       if (selectedRecord?.stt_rec === recordToDelete.stt_rec) {
         handleCloseCt11Table();
       }
 
       closeModalDelete();
       setRecordToDelete(null);
-      refetchPh11Data(); // Refresh danh sách sau khi xóa
+      refetchPh11Data(); 
     } catch (error) {
       console.error('Error deleting record:', error);
       toast.error("Lỗi khi xóa: " + (error?.message || "Không xác định"));
     }
   };
 
-  // Xử lý hủy xóa
+
   const handleCancelDelete = () => {
     closeModalDelete();
     setRecordToDelete(null);
