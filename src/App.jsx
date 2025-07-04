@@ -9,6 +9,9 @@ import Blank from "./pages/Blank";
 import Calendar from "./pages/Calendar";
 import CashPage from "./pages/Cash/Cash";
 import ListCustomerPage from "./pages/category/customer/ListCustomer";
+
+import ListMaterialPage from "./pages/category/dmvt/ListMaterial";
+
 import ListMaterialGroupPage from "./pages/category/material-group/ListMaterialGroup";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";

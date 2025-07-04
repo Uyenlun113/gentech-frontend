@@ -362,7 +362,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
   }
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-[60%] max-h-[80vh] m-4">
+    <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-[50%] max-h-[80vh] m-4">
       <div className="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Cập nhật phiếu kế toán tổng hợp</h4>

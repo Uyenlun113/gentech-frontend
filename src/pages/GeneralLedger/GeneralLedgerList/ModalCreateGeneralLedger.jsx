@@ -291,7 +291,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     closeModalCreate();
   };
   return (
-    <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-[60%] h-[80vh] m-4">
+    <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-[50%] h-[80vh] m-4">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
         {/* Header - Fixed */}
         <div className="flex-shrink-0 px-4 lg:px-11 pt-4 lg:pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
