@@ -4,7 +4,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState < any > null;
   const logoutMutation = useLogout();
 
   useEffect(() => {

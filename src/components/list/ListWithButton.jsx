@@ -1,21 +1,7 @@
 import { ChevronRight } from "lucide-react";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export interface ListItem {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  isLink?: boolean;
-  path?: string;
-}
-
-type ListWithButtonProps = {
-  items: ListItem[];
-};
-
-const ListWithButton: React.FC<ListWithButtonProps> = ({ items }) => {
+const ListWithButton = ({ items }) => {
   const navigate = useNavigate();
 
   return (

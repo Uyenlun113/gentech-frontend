@@ -3,14 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon, GridIcon, ListIcon } from "../icons";
 
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
-
-const navItems: NavItem[] = [
+const navItems = [
   { name: "Hệ thống", icon: <ListIcon />, path: "/system" },
   { icon: <GridIcon />, name: "Vốn bằng tiền", path: "/" },
   {
@@ -42,15 +35,15 @@ const navItems: NavItem[] = [
   { name: "Chuyển dữ liệu từ Excel", icon: <ListIcon />, path: "/import-excel" },
 ];
 
-const AppSidebar: React.FC = () => {
+const AppSidebar = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
 
-  const [openSubmenu, setOpenSubmenu] = useState<{ type: "main"; index: number } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [subMenuHeight, setSubMenuHeight] = useState({});
+  const subMenuRefs = useRef({});
 
-  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+  const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
 
   useEffect(() => {
     let matched = false;
@@ -78,11 +71,11 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number) => {
+  const handleSubmenuToggle = (index) => {
     setOpenSubmenu((prev) => (prev?.index === index ? null : { type: "main", index }));
   };
 
-  const renderMenuItems = (items: NavItem[]) => (
+  const renderMenuItems = (items) => (
     <ul className="flex flex-col gap-2">
       {items.map((nav, index) => (
         <li key={nav.name}>

@@ -1,17 +1,4 @@
-import { ReactNode } from "react";
-
-interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
-}
-
-const Button: React.FC<ButtonProps> = ({
+const Button = ({
   children,
   size = "md",
   variant = "primary",

@@ -5,7 +5,7 @@ import AppSidebar from "./AppSidebar";
 import Backdrop from "./Backdrop";
 import SidebarMenu from "./SidebarMenu";
 
-const LayoutContent: React.FC = () => {
+const LayoutContent = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
@@ -32,7 +32,7 @@ const LayoutContent: React.FC = () => {
   );
 };
 
-const AppLayout: React.FC = () => {
+const AppLayout = () => {
   return (
     <SidebarProvider>
       <LayoutContent />

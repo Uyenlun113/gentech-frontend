@@ -1,16 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
 
-interface PaginationProps {
-  currentPage: number;
-  totalItems: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}
-
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPageNumbers = () => {
-    const pages: (number | "...")[] = [];
+    const pages = [];
 
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);

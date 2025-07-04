@@ -1,6 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
+
 import AppLayout from "./layout/AppLayout";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";

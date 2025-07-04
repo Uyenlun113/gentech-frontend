@@ -1,8 +1,8 @@
 import { useModal } from "../../hooks/useModal";
-import { Modal } from "../ui/modal";
-import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import Button from "../ui/button/Button";
+import { Modal } from "../ui/modal";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -24,13 +24,9 @@ export default function UserMetaCard() {
                 Musharof Chowdhury
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Team Manager
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Team Manager</p>
                 <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Arizona, United States
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Arizona, United States</p>
               </div>
             </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
@@ -145,9 +141,7 @@ export default function UserMetaCard() {
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Personal Information
-            </h4>
+            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Edit Personal Information</h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
               Update your details to keep your profile up-to-date.
             </p>
@@ -155,17 +149,12 @@ export default function UserMetaCard() {
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
+                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">Social Links</h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
                     <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
-                    />
+                    <Input type="text" value="https://www.facebook.com/PimjoHQ" />
                   </div>
 
                   <div>
@@ -175,10 +164,7 @@ export default function UserMetaCard() {
 
                   <div>
                     <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
-                    />
+                    <Input type="text" value="https://www.linkedin.com/company/pimjo" />
                   </div>
 
                   <div>
