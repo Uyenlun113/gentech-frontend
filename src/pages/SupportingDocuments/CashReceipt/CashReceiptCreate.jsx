@@ -163,7 +163,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
             {/* Thông tin chung */}
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2 mb-6">
               <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} placeholder="2" /></div>
-              <div><Label>Người nộp</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
+              <div><Label>Đối tác</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
               <div>
                 <Label>Ngày lập phiếu thu</Label>
                 <div className="relative w-full flatpickr-wrapper">
