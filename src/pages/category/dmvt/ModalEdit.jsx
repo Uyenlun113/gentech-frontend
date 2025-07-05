@@ -5,6 +5,7 @@ import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useUpdateDmvt } from "../../../hooks/useDmvt";
+import { useMaterialGroups } from "../../../hooks/useMaterialGroup";
 import SearchableSelect from "../account/SearchableSelect";
 
 export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, selectedMaterial }) => {
@@ -21,12 +22,16 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         tk_gv: "",
         tk_km: "",
         nh_vt1: "",
+        nh_vt2: "",
+        nh_vt3: "",
         sl_min: "0.000",
         sl_max: "0.000",
         ghi_chu: "",
         status: "1"
     });
+
     const [accountSearchTerm, setAccountSearchTerm] = useState("");
+    const [materialGroupSearchTerm, setMaterialGroupSearchTerm] = useState("");
     const [selectedAccounts, setSelectedAccounts] = useState({
         tk_vt: null,
         tk_dt: null,
@@ -35,14 +40,23 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         tk_gv: null,
         tk_km: null
     });
+
     const { data: accountsData, isLoading: isLoadingAccounts } = useAccounts({
         search: accountSearchTerm,
         limit: 100,
     });
+
+    // Fetch material groups data
+    const { data: materialGroupsData, isLoading: isLoadingMaterialGroups } = useMaterialGroups({
+        search: materialGroupSearchTerm || undefined,
+        limit: 100,
+    });
+
     const updateMaterialMutation = useUpdateDmvt();
     const [errors, setErrors] = useState({
         ten_vt: "",
     });
+
     useEffect(() => {
         if (selectedMaterial && isOpenEdit) {
             setFormData({
@@ -58,6 +72,8 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                 tk_gv: selectedMaterial.tk_gv || "",
                 tk_km: selectedMaterial.tk_km || "",
                 nh_vt1: selectedMaterial.nh_vt1 || "",
+                nh_vt2: selectedMaterial.nh_vt2 || "",
+                nh_vt3: selectedMaterial.nh_vt3 || "",
                 sl_min: selectedMaterial.sl_min || "0.000",
                 sl_max: selectedMaterial.sl_max || "0.000",
                 ghi_chu: selectedMaterial.ghi_chu || "",
@@ -75,17 +91,33 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             }
         }
     }, [selectedMaterial, isOpenEdit, accountsData]);
+
     const accountOptions = accountsData?.data?.map(account => ({
         value: account.tk0,
         displayKey: account.ten_tk,
         valueKey: account.tk0,
     })) || [];
+
+    const materialGroupOptions = materialGroupsData?.data || [];
+
+    // Filter options để tránh trùng lặp cho nhóm vật tư
+    const getFilteredMaterialGroupOptions = (currentField) => {
+        const selectedValues = [formData.nh_vt1, formData.nh_vt2, formData.nh_vt3].filter(Boolean);
+        return materialGroupOptions.filter(option => {
+            // Nếu là giá trị hiện tại của field này thì vẫn hiển thị
+            if (option.ma_nh === formData[currentField]) return true;
+            // Nếu đã được chọn ở field khác thì loại bỏ
+            return !selectedValues.includes(option.ma_nh);
+        });
+    };
+
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
     };
+
     const handleAccountSelect = (accountType, accountCode) => {
         const account = accountsData?.data?.find(acc => acc.tk0 === accountCode);
         setSelectedAccounts(prev => ({
@@ -97,9 +129,16 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             [accountType]: accountCode
         }));
     };
+
     const handleAccountSearch = (searchTerm) => {
         setAccountSearchTerm(searchTerm);
     };
+
+    // Handle material group search
+    const handleMaterialGroupSearch = (searchTerm) => {
+        setMaterialGroupSearchTerm(searchTerm);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         let hasError = false;
@@ -127,6 +166,8 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             console.error("Error updating material:", error);
         }
     };
+
+
     const handleClose = () => {
         setFormData({
             ten_vt: "",
@@ -141,6 +182,8 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             tk_gv: "",
             tk_km: "",
             nh_vt1: "",
+            nh_vt2: "",
+            nh_vt3: "",
             sl_min: "0.000",
             sl_max: "0.000",
             ghi_chu: "",
@@ -155,9 +198,11 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             tk_km: null
         });
         setAccountSearchTerm("");
+        setMaterialGroupSearchTerm("");
         setErrors({ ten_vt: "" });
         closeModalEdit();
     };
+
 
     return (
         <Modal isOpen={isOpenEdit} onClose={handleClose} className="max-w-[900px] m-4">
@@ -171,7 +216,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                     </p>
                 </div>
                 <form className="flex flex-col" onSubmit={handleSubmit}>
-                    <div className="custom-scrollbar h-[500px] overflow-y-auto px-2 pb-3">
+                    <div className="custom-scrollbar h-[550px] overflow-y-auto px-2 pb-3">
                         <div>
                             <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                                 1. Thông tin vật tư
@@ -369,24 +414,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                                         valueKey="valueKey"
                                     />
                                 </div>
-                                <div>
-                                    <Label>Nhóm vật tư 1, 2, 3</Label>
-                                    <Input
-                                        type="text"
-                                        value={formData.nh_vt1}
-                                        onChange={(e) => handleInputChange('nh_vt1', e.target.value)}
-                                        placeholder="SA1"
-                                    />
-                                </div>
-                                <div>
-                                    <Label>Nhóm vật tư 1, 2, 3</Label>
-                                    <Input
-                                        type="text"
-                                        value={formData.nhom_vt_2}
-                                        onChange={(e) => handleInputChange('nhom_vt_2', e.target.value)}
-                                        placeholder="SA1"
-                                    />
-                                </div>
+
                                 <div>
                                     <Label>Số lượng tồn tối thiểu</Label>
                                     <Input
@@ -425,6 +453,60 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                                         value={formData.ghi_chu}
                                         onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
                                         placeholder="Nhập ghi chú"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tab 3: Phân nhóm vật tư */}
+                        <div className="mt-7">
+                            <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                                3. Phân nhóm vật tư
+                            </h5>
+
+                            <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+                                <div>
+                                    <Label>Nhóm vật tư 1</Label>
+                                    <SearchableSelect
+                                        value={formData.nh_vt1}
+                                        onChange={(value) => handleInputChange('nh_vt1', value)}
+                                        options={getFilteredMaterialGroupOptions('nh_vt1')}
+                                        placeholder="Chọn nhóm vật tư 1"
+                                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                                        loading={isLoadingMaterialGroups}
+                                        onSearch={handleMaterialGroupSearch}
+                                        displayKey="ten_nh"
+                                        valueKey="ma_nh"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Nhóm vật tư 2</Label>
+                                    <SearchableSelect
+                                        value={formData.nh_vt2}
+                                        onChange={(value) => handleInputChange('nh_vt2', value)}
+                                        options={getFilteredMaterialGroupOptions('nh_vt2')}
+                                        placeholder="Chọn nhóm vật tư 2"
+                                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                                        loading={isLoadingMaterialGroups}
+                                        onSearch={handleMaterialGroupSearch}
+                                        displayKey="ten_nh"
+                                        valueKey="ma_nh"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Nhóm vật tư 3</Label>
+                                    <SearchableSelect
+                                        value={formData.nh_vt3}
+                                        onChange={(value) => handleInputChange('nh_vt3', value)}
+                                        options={getFilteredMaterialGroupOptions('nh_vt3')}
+                                        placeholder="Chọn nhóm vật tư 3"
+                                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                                        loading={isLoadingMaterialGroups}
+                                        onSearch={handleMaterialGroupSearch}
+                                        displayKey="ten_nh"
+                                        valueKey="ma_nh"
                                     />
                                 </div>
                             </div>

@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import Label from "../../../components/form/Label";
+
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
 import { useUpdateCustomer } from "../../../hooks/useCustomer";
+import { useCustomerGroups } from "../../../hooks/useCustomerGroups";
+import SearchableSelect from "../account/SearchableSelect";
+
 
 export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, selectedCustomer }) => {
   const [formData, setFormData] = useState({
     ten_kh: "",
+    doi_tac: "",
     e_mail: "",
     dien_thoai: "",
     dia_chi: "",
@@ -17,15 +22,37 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
     ten_nh: "",
     ghi_chu: "",
     status: "",
+    nh_kh1: "",
+    nh_kh2: "",
+    nh_kh3: "",
   });
 
   const updateCustomerMutation = useUpdateCustomer();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Populate form when selectedCustomer changes
+  // Fetch customer groups data
+  const { data: customerGroupsData, isLoading: loadingGroups } = useCustomerGroups({
+    search: searchTerm || undefined,
+    limit: 100,
+  });
+
+  const customerGroupOptions = customerGroupsData?.data || [];
+
+  // Filter options để tránh trùng lặp
+  const getFilteredOptions = (currentField) => {
+    const selectedValues = [formData.nh_kh1, formData.nh_kh2, formData.nh_kh3].filter(Boolean);
+    return customerGroupOptions.filter(option => {
+      if (option.ma_nh === formData[currentField]) return true;
+      return !selectedValues.includes(option.ma_nh);
+    });
+  };
+
+
   useEffect(() => {
     if (selectedCustomer) {
       setFormData({
         ten_kh: selectedCustomer.ten_kh || "",
+        doi_tac: selectedCustomer.doi_tac || "",
         e_mail: selectedCustomer.e_mail || "",
         dien_thoai: selectedCustomer.dien_thoai || "",
         dia_chi: selectedCustomer.dia_chi || "",
@@ -35,6 +62,9 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         ten_nh: selectedCustomer.ten_nh || "",
         ghi_chu: selectedCustomer.ghi_chu || "",
         status: selectedCustomer.status || "",
+        nh_kh1: selectedCustomer.nh_kh1 || "",
+        nh_kh2: selectedCustomer.nh_kh2 || "",
+        nh_kh3: selectedCustomer.nh_kh3 || "",
       });
     }
   }, [selectedCustomer]);
@@ -62,7 +92,7 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         ma_kh: selectedCustomer.ma_kh,
         data: {
           ...formData,
-          // Remove empty fields
+          doi_tac: formData.doi_tac || undefined,
           e_mail: formData.e_mail || undefined,
           dien_thoai: formData.dien_thoai || undefined,
           dia_chi: formData.dia_chi || undefined,
@@ -71,6 +101,9 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
           tk_nh: formData.tk_nh || undefined,
           ten_nh: formData.ten_nh || undefined,
           ghi_chu: formData.ghi_chu || undefined,
+          nh_kh1: formData.nh_kh1 || undefined,
+          nh_kh2: formData.nh_kh2 || undefined,
+          nh_kh3: formData.nh_kh3 || undefined,
         }
       });
 
@@ -85,8 +118,8 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
   };
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={handleClose} className="max-w-[700px] m-4">
-      <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+    <Modal isOpen={isOpenEdit} onClose={handleClose} className="w-full max-w-[900px] m-4">
+      <div className="no-scrollbar relative w-full  overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
             Chỉnh sửa khách hàng
@@ -97,7 +130,7 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         </div>
 
         <form className="flex flex-col" onSubmit={handleSubmit}>
-          <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+          <div className="custom-scrollbar h-[500px] overflow-y-auto px-2 pb-3">
             <div>
               <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                 Thông tin cơ bản
@@ -112,6 +145,16 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                     onChange={(e) => handleInputChange('ten_kh', e.target.value)}
                     placeholder="Nhập tên khách hàng"
                     required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <Label>Đối tác</Label>
+                  <Input
+                    type="text"
+                    value={formData.doi_tac}
+                    onChange={(e) => handleInputChange('doi_tac', e.target.value)}
+                    placeholder="Nhập đối tác"
                   />
                 </div>
 
@@ -213,6 +256,59 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                     value={formData.ghi_chu}
                     onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
                     placeholder="Nhập ghi chú"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7">
+              <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                Phân nhóm khách hàng
+              </h5>
+
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+                <div>
+                  <Label>Nhóm khách 1</Label>
+                  <SearchableSelect
+                    value={formData.nh_kh1}
+                    onChange={(value) => handleInputChange('nh_kh1', value)}
+                    options={getFilteredOptions('nh_kh1')}
+                    placeholder="Chọn nhóm khách hàng 1"
+                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                    loading={loadingGroups}
+                    onSearch={setSearchTerm}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
+                  />
+                </div>
+
+                <div>
+                  <Label>Nhóm khách 2</Label>
+                  <SearchableSelect
+                    value={formData.nh_kh2}
+                    onChange={(value) => handleInputChange('nh_kh2', value)}
+                    options={getFilteredOptions('nh_kh2')}
+                    placeholder="Chọn nhóm khách hàng 2"
+                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                    loading={loadingGroups}
+                    onSearch={setSearchTerm}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
+                  />
+                </div>
+
+                <div>
+                  <Label>Nhóm khách 3</Label>
+                  <SearchableSelect
+                    value={formData.nh_kh3}
+                    onChange={(value) => handleInputChange('nh_kh3', value)}
+                    options={getFilteredOptions('nh_kh3')}
+                    placeholder="Chọn nhóm khách hàng 3"
+                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                    loading={loadingGroups}
+                    onSearch={setSearchTerm}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
                   />
                 </div>
               </div>

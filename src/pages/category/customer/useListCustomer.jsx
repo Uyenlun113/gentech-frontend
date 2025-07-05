@@ -12,7 +12,6 @@ export const useListCustomer = () => {
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-    const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
 
     // Parse date range
     const dateRange = rangePickerValue ? rangePickerValue.split(" to ") : [];
@@ -88,6 +87,11 @@ export const useListCustomer = () => {
             width: 200,
         },
         {
+            key: "doi_tac",
+            title: "Đối tác",
+            width: 200,
+        },
+        {
             key: "e_mail",
             title: "Email",
             width: 200,
@@ -96,6 +100,22 @@ export const useListCustomer = () => {
             key: "dien_thoai",
             title: "Số điện thoại",
             width: 150,
+        },
+        {
+            key: "nh_kh1",
+            title: "Nhóm khách 1",
+            width: 150,
+        },
+        {
+            key: "nh_kh2",
+            title: "Nhóm khách 2",
+            width: 150,
+        },
+        {
+            key: "nh_kh3",
+            title: "Nhóm khách 3",
+            width: 150,
+
         },
         {
             key: "dia_chi",
@@ -191,7 +211,6 @@ export const useListCustomer = () => {
         // Modal states
         isOpenCreate,
         isOpenEdit,
-        isOpenDetail,
         selectedCustomer,
 
         // Data
@@ -212,7 +231,6 @@ export const useListCustomer = () => {
         openModalCreate,
         closeModalCreate,
         closeModalEdit,
-        closeModalDetail,
 
         // Form handlers
         handleRangePicker,

@@ -30,7 +30,7 @@ const Input = ({
 
   return (
     <div className="relative">
-      <input
+        <input
         type={type}
         id={id}
         name={name}

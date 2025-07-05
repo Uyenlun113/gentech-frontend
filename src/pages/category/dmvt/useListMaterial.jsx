@@ -13,7 +13,7 @@ export const useListMaterial = () => {
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-    const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
+
 
     // Parse date range
     const dateRange = rangePickerValue ? rangePickerValue.split(" to ") : [];
@@ -82,12 +82,18 @@ export const useListMaterial = () => {
             title: "Mã vật tư",
             fixed: "left",
             width: 150,
+            render: (val) => {
+                return <div className="text-center">{val}</div>;
+            },
         },
         {
             key: "ten_vt",
             title: "Tên vật tư",
             fixed: "left",
             width: 200,
+            render: (val) => {
+                return <div className="text-center">{val}</div>;
+            },
         },
         {
             key: "dvt",
@@ -134,7 +140,17 @@ export const useListMaterial = () => {
         },
         {
             key: "nh_vt1",
-            title: "Nhóm vật tư",
+            title: "Nhóm vật tư 1",
+            width: 120,
+        },
+        {
+            key: "nh_vt2",
+            title: "Nhóm vật tư 2",
+            width: 120,
+        },
+        {
+            key: "nh_vt3",
+            title: "Nhóm vật tư 3",
             width: 120,
         },
         {
@@ -222,7 +238,6 @@ export const useListMaterial = () => {
         // Modal states
         isOpenCreate,
         isOpenEdit,
-        isOpenDetail,
         selectedMaterial,
 
         // Data
@@ -243,7 +258,6 @@ export const useListMaterial = () => {
         openModalCreate,
         closeModalCreate,
         closeModalEdit,
-        closeModalDetail,
 
         // Form handlers
         handleRangePicker,

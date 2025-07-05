@@ -25,13 +25,13 @@ export const useCreateDmvt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data) => dmvtService.addDmvt(data), // data từ mutateAsync
+        mutationFn: (data) => dmvtService.addDmvt(data), 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["dmvt"] });
             toast.success("Tạo danh mục vật tư thành công!");
         },
         onError: (error) => {
-            console.log("Full error:", error.response?.data); // Debug error
+            console.log("Full error:", error.response?.data);
             toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi tạo danh mục vật tư");
         }
     });

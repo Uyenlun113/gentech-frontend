@@ -12,6 +12,7 @@ import ListCustomerPage from "./pages/category/customer/ListCustomer";
 
 import ListMaterialPage from "./pages/category/dmvt/ListMaterial";
 
+import ListCustomerGroupPage from "./pages/category/dmnhkh/ListCustomerGroupPage";
 import ListMaterialGroupPage from "./pages/category/material-group/ListMaterialGroup";
 import BarChart from "./pages/Charts/BarChart";
 import LineChart from "./pages/Charts/LineChart";
@@ -29,6 +30,10 @@ import NotFound from "./pages/OtherPage/NotFound";
 import PayrollPage from "./pages/Payroll/Payroll";
 import PurchasesPage from "./pages/Purchases/Purchases";
 import SalesPage from "./pages/Sales/Sales";
+
+import ListAccountPage from "./pages/category/account/ListAccount";
+import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
+import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 import SystemPage from "./pages/System/System";
 import BasicTables from "./pages/Tables/BasicTables";
 import ToolsPage from "./pages/Tools/Tools";
@@ -39,9 +44,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
-import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
-import ListAccountPage from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
+
 
 export default function App() {
   return (
@@ -57,6 +60,10 @@ export default function App() {
               <Route path="/category/account" element={<ListAccountPage />} />
               <Route path="/category/dmvt" element={<ListMaterialPage />} />
               <Route path="/category/material-group" element={<ListMaterialGroupPage />} />
+              <Route path="/category/dmnhkh" element={<ListCustomerGroupPage />} />
+              <Route path="/category/dmkho" element={<ListWarehousePage />} />
+
+
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
@@ -81,7 +88,6 @@ export default function App() {
               <Route path="/costing" element={<CostingPage />} />
               {/* General Ledger Page */}
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
-              <Route path="/general-ledger/update/:stt_rec" element={<GeneralLedgerUpdate />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />

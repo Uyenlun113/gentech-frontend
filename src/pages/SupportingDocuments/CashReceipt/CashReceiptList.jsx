@@ -1,5 +1,5 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search, Eye, EyeOff } from "lucide-react";
+import { FilePlus, Search } from "lucide-react";
 
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -14,7 +14,7 @@ import { ModalCreateCashReceipt } from "./CashReceiptCreate";
 import { ModalEditCashReceipt } from "./CashReceipUpdate";
 import { useListCashReceipt } from "./useListCashReceipt";
 
-export default function ListAccountPage() {
+export default function CashReceiptList() {
     const {
         isOpenCreate,
         isOpenEdit,
@@ -39,7 +39,7 @@ export default function ListAccountPage() {
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
-    const [showDetailPanel, setShowDetailPanel] = useState(false);
+    const [setShowDetailPanel] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -70,30 +70,6 @@ export default function ListAccountPage() {
             </div>
         );
     }
-
-    // Tạo enhanced columns để handle row click
-    const enhancedColumnsTable = columnsTable.map(col => {
-        // Nếu column có cell custom (như actions), giữ nguyên
-        if (col.cell) {
-            return col;
-        }
-
-        // Cho các column khác, thêm click handler
-        return {
-            ...col,
-            cell: ({ row }) => (
-                <div
-                    onClick={() => {
-                        console.log('🎯 Cell clicked, row data:', row.original);
-                        handleRowSelect(row.original);
-                    }}
-                    className="cursor-pointer w-full py-2"
-                >
-                    {row.original[col.accessorKey]}
-                </div>
-            )
-        };
-    });
 
     return (
         <>

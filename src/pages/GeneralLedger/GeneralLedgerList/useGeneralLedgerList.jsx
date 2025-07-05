@@ -1,6 +1,5 @@
 import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import {
   useDeleteGeneralAccounting,
@@ -11,7 +10,6 @@ import { useModal } from "../../../hooks/useModal";
 import generalLedgerApi from "../../../services/generalLedger";
 
 export const useGeneralLedgerList = () => {
-  const navigate = useNavigate();
   const [selectedEditId, setSelectedEditId] = useState();
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
@@ -25,12 +23,7 @@ export const useGeneralLedgerList = () => {
   const [recordToDelete, setRecordToDelete] = useState(null);
 
   const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
-
-  // Fetch Ph11 data với staleTime để tránh gọi API không cần thiết
   const { data: fetchPh11Data, isLoading: isLoadingPh11, refetch: refetchPh11Data } = useGetGeneralAccounting();
-
-  console.log("🚀 ~ useGeneralLedgerList ~ fetchPh11Data:", fetchPh11Data);
-
   const {
     data: fetchCt11Data,
     isLoading: isLoadingCt11,
@@ -189,7 +182,7 @@ export const useGeneralLedgerList = () => {
             <button
               className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Sửa"
-              onClick={(e) => handleOpenEdit(record?.stt_rec)}
+              onClick={() => handleOpenEdit(record?.stt_rec)}
             >
               <Pencil size={16} />
             </button>

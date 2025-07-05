@@ -11,7 +11,6 @@ export const useListAccount = () => {
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
   const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-  const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
 
   // Parse date range
   const dateRange = rangePickerValue ? rangePickerValue.split(" to ") : [];
@@ -25,7 +24,7 @@ export const useListAccount = () => {
     dateFrom,
     dateTo,
     page: currentPage,
-    limit: 15,
+    limit: 10,
     nh_tk: loaiTk || undefined,
   };
 
@@ -172,7 +171,6 @@ export const useListAccount = () => {
     // Modal states
     isOpenCreate,
     isOpenEdit,
-    isOpenDetail,
     selectedAccount,
 
     // Data
@@ -193,7 +191,6 @@ export const useListAccount = () => {
     openModalCreate,
     closeModalCreate,
     closeModalEdit,
-    closeModalDetail,
 
     // Form handlers
     handleRangePicker,

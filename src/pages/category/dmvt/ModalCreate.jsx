@@ -7,7 +7,10 @@ import { Modal } from "../../../components/ui/modal";
 
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCreateDmvt } from "../../../hooks/useDmvt";
+import { useMaterialGroups } from "../../../hooks/useMaterialGroup";
 import SearchableSelect from "../account/SearchableSelect";
+
+
 
 export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
@@ -24,6 +27,8 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     tk_gv: "",
     tk_km: "",
     nh_vt1: "",
+    nh_vt2: "",
+    nh_vt3: "",
     sl_min: "0.000",
     sl_max: "0.000",
     ghi_chu: "",
@@ -31,6 +36,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
   });
 
   const [accountSearchTerm, setAccountSearchTerm] = useState("");
+  const [materialGroupSearchTerm, setMaterialGroupSearchTerm] = useState("");
   const [selectedAccounts, setSelectedAccounts] = useState({
     tk_vt: null,
     tk_dt: null,
@@ -39,10 +45,15 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     tk_gv: null,
     tk_km: null
   });
+  console.log(selectedAccounts);
 
-  // Fetch accounts data
   const { data: accountsData, isLoading: isLoadingAccounts } = useAccounts({
     search: accountSearchTerm,
+    limit: 100,
+  });
+
+  const { data: materialGroupsData, isLoading: isLoadingMaterialGroups } = useMaterialGroups({
+    search: materialGroupSearchTerm || undefined,
     limit: 100,
   });
 
@@ -57,6 +68,19 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     displayKey: account.ten_tk,
     valueKey: account.tk0,
   })) || [];
+
+  const materialGroupOptions = materialGroupsData?.data || [];
+
+  // Filter options để tránh trùng lặp cho nhóm vật tư
+  const getFilteredMaterialGroupOptions = (currentField) => {
+    const selectedValues = [formData.nh_vt1, formData.nh_vt2, formData.nh_vt3].filter(Boolean);
+    return materialGroupOptions.filter(option => {
+      // Nếu là giá trị hiện tại của field này thì vẫn hiển thị
+      if (option.ma_nh === formData[currentField]) return true;
+      // Nếu đã được chọn ở field khác thì loại bỏ
+      return !selectedValues.includes(option.ma_nh);
+    });
+  };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -83,6 +107,11 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     setAccountSearchTerm(searchTerm);
   };
 
+  // Handle material group search
+  const handleMaterialGroupSearch = (searchTerm) => {
+    setMaterialGroupSearchTerm(searchTerm);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     let hasError = false;
@@ -105,13 +134,16 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         tk_dt: formData.tk_dt,
         tk_dtnb: formData.tk_dtnb,
         tk_ck: formData.tk_ck,
+        tk_nvl: formData.tk_nvl,
         tk_gv: formData.tk_gv,
         tk_km: formData.tk_km,
         nh_vt1: formData.nh_vt1,
+        nh_vt2: formData.nh_vt2,
+        nh_vt3: formData.nh_vt3,
         sl_min: formData.sl_min,
         sl_max: formData.sl_max,
         ghi_chu: formData.ghi_chu,
-        status:formData.status,
+        status: formData.status,
       });
 
       setFormData({
@@ -124,9 +156,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         tk_dt: "",
         tk_dtnb: "",
         tk_ck: "",
+        tk_nvl: "",
         tk_gv: "",
         tk_km: "",
         nh_vt1: "",
+        nh_vt2: "",
+        nh_vt3: "",
         sl_min: "0.000",
         sl_max: "0.000",
         ghi_chu: "",
@@ -141,6 +176,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         tk_km: null
       });
       setAccountSearchTerm("");
+      setMaterialGroupSearchTerm("");
       setErrors({ ten_vt: "" });
 
       onSaveCreate();
@@ -151,7 +187,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
   const handleClose = () => {
     setFormData({
-
       ten_vt: "",
       dvt: "",
       vt_ton_kho: "1",
@@ -161,9 +196,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
       tk_dt: "",
       tk_dtnb: "",
       tk_ck: "",
+      tk_nvl: "",
       tk_gv: "",
       tk_km: "",
       nh_vt1: "",
+      nh_vt2: "",
+      nh_vt3: "",
       sl_min: "0.000",
       sl_max: "0.000",
       ghi_chu: "",
@@ -178,12 +216,14 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
       tk_km: null
     });
     setAccountSearchTerm("");
+    setMaterialGroupSearchTerm("");
     setErrors({ ten_vt: "" });
     closeModalCreate();
   };
+
   return (
-    <Modal isOpen={isOpenCreate} onClose={handleClose} className="max-w-[900px] m-4">
-      <div className="no-scrollbar relative w-full max-w-[900px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+    <Modal isOpen={isOpenCreate} onClose={handleClose} className="w-full max-w-[900px] m-4">
+      <div className="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
             Thêm mới vật tư
@@ -194,7 +234,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         </div>
 
         <form className="flex flex-col" onSubmit={handleSubmit}>
-          <div className="custom-scrollbar h-[500px] overflow-y-auto px-2 pb-3">
+          <div className="custom-scrollbar h-[550px] overflow-y-auto px-2 pb-3">
             {/* Tab 1: Thông tin vật tư */}
             <div>
               <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
@@ -213,14 +253,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                         setErrors((prev) => ({ ...prev, ten_vt: "" }));
                       }
                     }}
-                    placeholder="sadfsadf"
+                    placeholder="Nhập tên vật tư"
                     required
                   />
                   {errors.ten_vt && (
                     <p className="mt-1 text-sm text-red-500">{errors.ten_vt}</p>
                   )}
                 </div>
-
 
                 <div>
                   <Label>Đơn vị tính</Label>
@@ -412,26 +451,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 </div>
 
                 <div>
-                  <Label>Nhóm vật tư 1, 2, 3</Label>
-                  <Input
-                    type="text"
-                    value={formData.nh_vt1}
-                    onChange={(e) => handleInputChange('nh_vt1', e.target.value)}
-                    placeholder="SA1"
-                  />
-                </div>
-
-                <div>
-                  <Label>Nhóm vật tư 1, 2, 3</Label>
-                  <Input
-                    type="text"
-                    value={formData.nhom_vt_2}
-                    onChange={(e) => handleInputChange('nhom_vt_2', e.target.value)}
-                    placeholder="SA1"
-                  />
-                </div>
-
-                <div>
                   <Label>Số lượng tồn tối thiểu</Label>
                   <Input
                     type="number"
@@ -452,6 +471,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                     placeholder="0.000"
                   />
                 </div>
+
                 <div>
                   <Label>Trạng thái</Label>
                   <select
@@ -463,13 +483,68 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                     <option value="1">1 - Sử dụng</option>
                   </select>
                 </div>
+
                 <div className="col-span-2">
                   <Label>Ghi chú</Label>
                   <Input
                     type="text"
                     value={formData.ghi_chu}
                     onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
-                    placeholder="12wewq"
+                    placeholder="Nhập ghi chú"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tab 3: Phân nhóm vật tư */}
+            <div className="mt-7">
+              <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                3. Phân nhóm vật tư
+              </h5>
+
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+                <div>
+                  <Label>Nhóm vật tư 1</Label>
+                  <SearchableSelect
+                    value={formData.nh_vt1}
+                    onChange={(value) => handleInputChange('nh_vt1', value)}
+                    options={getFilteredMaterialGroupOptions('nh_vt1')}
+                    placeholder="Chọn nhóm vật tư 1"
+                    searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                    loading={isLoadingMaterialGroups}
+                    onSearch={handleMaterialGroupSearch}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
+                  />
+                </div>
+
+                <div>
+                  <Label>Nhóm vật tư 2</Label>
+                  <SearchableSelect
+                    value={formData.nh_vt2}
+                    onChange={(value) => handleInputChange('nh_vt2', value)}
+                    options={getFilteredMaterialGroupOptions('nh_vt2')}
+                    placeholder="Chọn nhóm vật tư 2"
+                    searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                    loading={isLoadingMaterialGroups}
+                    onSearch={handleMaterialGroupSearch}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
+                  />
+                </div>
+
+                <div>
+                  <Label>Nhóm vật tư 3</Label>
+                  <SearchableSelect
+                    value={formData.nh_vt3}
+                    onChange={(value) => handleInputChange('nh_vt3', value)}
+                    options={getFilteredMaterialGroupOptions('nh_vt3')}
+                    placeholder="Chọn nhóm vật tư 3"
+                    searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                    loading={isLoadingMaterialGroups}
+                    onSearch={handleMaterialGroupSearch}
+                    displayKey="ten_nh"
+                    valueKey="ma_nh"
                   />
                 </div>
               </div>
