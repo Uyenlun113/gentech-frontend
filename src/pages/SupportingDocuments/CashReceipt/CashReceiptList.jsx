@@ -1,5 +1,5 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search } from "lucide-react";
+import { FilePlus, Search, Eye, EyeOff } from "lucide-react";
 
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -38,6 +38,8 @@ export default function ListAccountPage() {
     } = useListCashReceipt();
 
     const [searchInput, setSearchInput] = useState(searchValue);
+    const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
+    const [showDetailPanel, setShowDetailPanel] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -45,6 +47,18 @@ export default function ListAccountPage() {
         }, 500);
         return () => clearTimeout(timer);
     }, [searchInput]);
+
+    // Xử lý chọn row để hiển thị detail với debug logs
+    const handleRowSelect = (cashReceipt) => {
+        console.log('🚀 handleRowSelect called with:', cashReceipt);
+        if (cashReceipt) {
+            setSelectedRowForDetail(cashReceipt);
+            setShowDetailPanel(true);
+            console.log('🚀 Row selected successfully');
+        } else {
+            console.log('❌ cashReceipt is null/undefined');
+        }
+    };
 
     if (error) {
         return (
@@ -57,11 +71,35 @@ export default function ListAccountPage() {
         );
     }
 
+    // Tạo enhanced columns để handle row click
+    const enhancedColumnsTable = columnsTable.map(col => {
+        // Nếu column có cell custom (như actions), giữ nguyên
+        if (col.cell) {
+            return col;
+        }
+        
+        // Cho các column khác, thêm click handler
+        return {
+            ...col,
+            cell: ({ row }) => (
+                <div 
+                    onClick={() => {
+                        console.log('🎯 Cell clicked, row data:', row.original);
+                        handleRowSelect(row.original);
+                    }}
+                    className="cursor-pointer w-full py-2"
+                >
+                    {row.original[col.accessorKey]}
+                </div>
+            )
+        };
+    });
+
     return (
         <>
             <PageMeta title="Phiếu thu tiền mặt" description="Phiếu thu tiền mặt" />
             <PageBreadcrumb pageTitle="Phiếu thu tiền mặt" />
-            <div className="space-y-6">
+            <div className="space-y-6 pb-16">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         {/* Left: Button */}
@@ -99,19 +137,179 @@ export default function ListAccountPage() {
                         </div>
                     )}
 
-                    {/* Table */}
+                    {/* Table với event delegation đơn giản */}
                     {!isLoading && (
-                        <>
-                            <TableBasic data={dataTable} columns={columnsTable} />
+                        <div className="space-y-4">
+                            <div 
+                                onClick={(e) => {
+                                    console.log('🔍 Table clicked, target:', e.target.tagName);
+                                    
+                                    // Tìm row gần nhất
+                                    let element = e.target;
+                                    while (element && element.tagName !== 'TR') {
+                                        element = element.parentElement;
+                                        if (!element || element.tagName === 'TABLE') break;
+                                    }
+                                    
+                                    if (element && element.tagName === 'TR') {
+                                        // Lấy index từ data attribute hoặc position
+                                        const rowIndex = Array.from(element.parentElement.children).indexOf(element);
+                                        console.log('🔍 Row index found:', rowIndex);
+                                        console.log('🔍 Data table length:', dataTable.length);
+                                        
+                                        if (rowIndex >= 0 && rowIndex < dataTable.length) {
+                                            const rowData = dataTable[rowIndex];
+                                            console.log('🔍 Row data:', rowData);
+                                            handleRowSelect(rowData);
+                                        }
+                                    }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <TableBasic 
+                                    data={dataTable} 
+                                    columns={columnsTable}
+                                />
+                            </div>
                             <Pagination
                                 currentPage={pagination.page}
                                 totalItems={pagination.total}
                                 totalPages={pagination.totalPages}
                                 onPageChange={handleChangePage}
                             />
-                        </>
+                        </div>
                     )}
                 </ComponentCard>
+
+                {/* Detail Panel với spacing đẹp hơn và cách đáy xa hơn */}
+                {selectedRowForDetail && (
+                    <div className="mt-8 mb-20 pb-8">
+                        <ComponentCard>
+                            <div className="space-y-6">
+                                {/* Header */}
+                                <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                            Chi tiết phiếu thu: {selectedRowForDetail.so_ct}
+                                        </h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                            Thông tin chi tiết danh sách tài khoản
+                                        </p>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setSelectedRowForDetail(null);
+                                            setShowDetailPanel(false);
+                                        }}
+                                    >
+                                        Đóng
+                                    </Button>
+                                </div>
+
+                                {/* Thông tin cơ bản */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Người nộp</label>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{selectedRowForDetail.ong_ba || 'N/A'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Mã khách hàng</label>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedRowForDetail.ma_kh || 'N/A'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Địa chỉ</label>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={selectedRowForDetail.dia_chi}>{selectedRowForDetail.dia_chi || 'N/A'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tổng tiền</label>
+                                        <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                                            {selectedRowForDetail.tong_tien ? selectedRowForDetail.tong_tien.toLocaleString() + ' VNĐ' : 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Danh sách tài khoản */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                            Danh sách tài khoản
+                                        </h4>
+                                        <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+                                            {selectedRowForDetail.tai_khoan_list?.length || 0} mục
+                                        </span>
+                                    </div>
+                                    
+                                    {selectedRowForDetail.tai_khoan_list && selectedRowForDetail.tai_khoan_list.length > 0 ? (
+                                        <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                            <table className="w-full border-collapse">
+                                                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                                                    <tr>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK số</th>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên tài khoản</th>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Phát sinh có</th>
+                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                                    {selectedRowForDetail.tai_khoan_list.map((item, index) => (
+                                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                                                {index + 1}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                                {item.tk_so || 'N/A'}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                                {item.tk_me || 'N/A'}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                                {item.ten_tai_khoan || 'N/A'}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
+                                                                {item.ps_co ? item.ps_co.toLocaleString() : '0'}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                                {item.dien_giai || 'N/A'}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                                <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                                    <tr>
+                                                        <td colSpan="4" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
+                                                            Tổng tiền:
+                                                        </td>
+                                                        <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
+                                                            {selectedRowForDetail.tai_khoan_list
+                                                                .reduce((total, item) => total + (item.ps_co || 0), 0)
+                                                                .toLocaleString()
+                                                            } VNĐ
+                                                        </td>
+                                                        <td className="border-t border-gray-200 dark:border-gray-600"></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                            <div className="text-gray-400 dark:text-gray-500 mb-2">
+                                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-gray-500 dark:text-gray-400 font-medium">Không có dữ liệu tài khoản</p>
+                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Danh sách tài khoản trống</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </ComponentCard>
+                    </div>
+                )}
 
                 {/* Modals */}
                 <ModalCreateCashReceipt
@@ -137,4 +335,3 @@ export default function ListAccountPage() {
         </>
     );
 }
-

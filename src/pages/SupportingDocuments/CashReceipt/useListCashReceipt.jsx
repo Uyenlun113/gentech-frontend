@@ -26,7 +26,7 @@ export const useListCashReceipt = () => {
         dateFrom,
         dateTo,
         page: currentPage,
-        limit: 10,
+        limit: 5,
         loaiPhieuThu: null,
         maKhach: null,
         diaChi: null,
@@ -223,7 +223,7 @@ export const useListCashReceipt = () => {
         // Data
         dataTable: cashReceiptData?.data || [],
         columnsTable,
-        pagination: cashReceiptData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+        pagination: cashReceiptData?.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 },
 
         // Form states
         rangePickerValue,

@@ -27,11 +27,27 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
     ty_gia: "",
   });
 
+  // State cho danh sách tài khoản
+  const [taiKhoanList, setTaiKhoanList] = useState([
+    {
+      tk_so: "",
+      tk_me: "",
+      ten_tai_khoan: "",
+      ps_co: 0,
+      dien_giai: ""
+    }
+  ]);
+
   const updateCashReceiptMutation = useUpdateCashReceipt();
 
   // Load data when selectedCashReceipt changes
   useEffect(() => {
-    if (selectedCashReceipt) {
+    console.log('useEffect triggered, selectedCashReceipt:', selectedCashReceipt);
+    console.log('isOpenEdit:', isOpenEdit);
+    
+    if (selectedCashReceipt && isOpenEdit) {
+      console.log('Loading form data:', selectedCashReceipt);
+      
       setFormData({
         so_ct: selectedCashReceipt.so_ct || "",
         ong_ba: selectedCashReceipt.ong_ba || "",
@@ -48,8 +64,32 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
         ma_nt: selectedCashReceipt.ma_nt || "",
         ty_gia: selectedCashReceipt.ty_gia || "",
       });
+
+      // Load danh sách tài khoản nếu có
+      if (selectedCashReceipt.tai_khoan_list && selectedCashReceipt.tai_khoan_list.length > 0) {
+        console.log('Loading tai_khoan_list:', selectedCashReceipt.tai_khoan_list);
+        setTaiKhoanList(selectedCashReceipt.tai_khoan_list.map(item => ({
+          tk_so: item.tk_so || "",
+          tk_me: item.tk_me || "",
+          ten_tai_khoan: item.ten_tai_khoan || "",
+          ps_co: item.ps_co || 0,
+          dien_giai: item.dien_giai || ""
+        })));
+      } else {
+        console.log('No tai_khoan_list found, creating empty row');
+        setTaiKhoanList([{
+          tk_so: "",
+          tk_me: "",
+          ten_tai_khoan: "",
+          ps_co: 0,
+          dien_giai: ""
+        }]);
+      }
+    } else if (!isOpenEdit) {
+      // Reset form khi modal đóng
+      resetForm();
     }
-  }, [selectedCashReceipt]);
+  }, [selectedCashReceipt, isOpenEdit]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -65,16 +105,62 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
     }));
   };
 
+  // Xử lý thay đổi dữ liệu tài khoản
+  const handleTaiKhoanChange = (index, field, value) => {
+    const newList = [...taiKhoanList];
+    newList[index] = {
+      ...newList[index],
+      [field]: field === 'ps_co' ? Number(value) || 0 : value
+    };
+    setTaiKhoanList(newList);
+  };
+
+  // Thêm dòng mới
+  const addTaiKhoan = () => {
+    setTaiKhoanList([...taiKhoanList, {
+      tk_so: "",
+      tk_me: "",
+      ten_tai_khoan: "",
+      ps_co: 0,
+      dien_giai: ""
+    }]);
+  };
+
+  // Xóa dòng
+  const removeTaiKhoan = (index) => {
+    if (taiKhoanList.length > 1) {
+      const newList = taiKhoanList.filter((_, i) => i !== index);
+      setTaiKhoanList(newList);
+    }
+  };
+
+  // Tính tổng tiền
+  const getTongTien = () => {
+    return taiKhoanList.reduce((total, item) => total + (item.ps_co || 0), 0);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!selectedCashReceipt) return;
 
+    // Validation cho danh sách tài khoản
+    const validTaiKhoanList = taiKhoanList.filter(item => 
+      item.tk_so && item.tk_so.trim() !== '' && 
+      item.tk_me && item.tk_me.trim() !== ''
+    );
+
+    if (validTaiKhoanList.length === 0) {
+      alert('Vui lòng nhập ít nhất một tài khoản với TK số và TK mẹ hợp lệ!');
+      return;
+    }
+
     const dataToSave = {
       ma_gd: formData.ma_gd || "2",
       ma_kh: formData.ma_kh,
       dia_chi: formData.dia_chi,
-      mst: formData.MST,
+      // Bỏ mst field vì API không chấp nhận
+      // mst: formData.MST,
       ong_ba: formData.ong_ba,
       dien_giai: formData.dien_giai,
       ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : undefined,
@@ -84,6 +170,9 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       ma_nt: formData.ma_nt || "VND",
       ty_gia: formData.ty_gia ? Number(formData.ty_gia) : 1,
       loai_ct: "PT",
+      tai_khoan_list: validTaiKhoanList,
+      tong_tien: validTaiKhoanList.reduce((total, item) => total + (item.ps_co || 0), 0),
+      han_thanh_toan: 0
     };
 
     try {
@@ -97,7 +186,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
     }
   };
 
-  const handleClose = () => {
+  const resetForm = () => {
     setFormData({
       so_ct: "",
       ong_ba: "",
@@ -114,12 +203,23 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       ma_nt: "",
       ty_gia: "",
     });
+    setTaiKhoanList([{
+      tk_so: "",
+      tk_me: "",
+      ten_tai_khoan: "",
+      ps_co: 0,
+      dien_giai: ""
+    }]);
+  };
+
+  const handleClose = () => {
+    resetForm();
     closeModalEdit();
   };
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={handleClose} title="Chỉnh sửa phiếu thu" className="max-w-[700px] m-4 h-[800px] ">
-      <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11 h-[800px]">
+    <Modal isOpen={isOpenEdit} onClose={handleClose} title="Chỉnh sửa phiếu thu" className="max-w-[900px] m-4 h-[900px]">
+      <div className="no-scrollbar relative w-full max-w-[900px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11 h-[900px]">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
             Chỉnh sửa phiếu thu
@@ -128,9 +228,11 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
             Cập nhật thông tin phiếu thu tiền trong hệ thống.
           </p>
         </div>
+        
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="custom-scrollbar h-[550px] overflow-y-auto px-2 pb-3">
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2">
+          <div className="custom-scrollbar h-[680px] overflow-y-auto px-2 pb-3">
+            {/* Thông tin chung */}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2 mb-6">
               <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} placeholder="2" /></div>
               <div><Label>Người nộp</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
               <div>
@@ -145,7 +247,8 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                     }}
                     placeholder="dd-mm-yyyy"
                     className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
-                  /> <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                  />
+                  <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                     <CalenderIcon className="size-6" />
                   </span>
                 </div>
@@ -179,7 +282,112 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
               <div><Label>TGGD (Tỷ giá giao dịch)</Label><Input value={formData.ma_nt} onChange={e => handleChange("ma_nt", e.target.value)} /></div>
               <div><Label>Mức tỷ giá giao dịch</Label><Input value={formData.ty_gia} onChange={e => handleChange("ty_gia", e.target.value)} /></div>
             </div>
+
+            {/* Danh sách tài khoản */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                  Danh sách tài khoản
+                </h5>
+                <Button type="button" variant="outline" size="sm" onClick={addTaiKhoan}>
+                  + Thêm dòng
+                </Button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">STT</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">TK số</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">TK mẹ</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Tên tài khoản</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Phát sinh có</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Diễn giải</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {taiKhoanList.map((item, index) => (
+                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                          {index + 1}
+                        </td>
+                                                                <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                          <Input
+                            value={item.tk_so}
+                            onChange={e => handleTaiKhoanChange(index, 'tk_so', e.target.value)}
+                            className={`h-8 text-sm ${!item.tk_so || item.tk_so.trim() === '' ? 'border-red-300' : ''}`}
+                            placeholder="TK số *"
+                            required
+                          />
+                        </td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                          <Input
+                            value={item.tk_me}
+                            onChange={e => handleTaiKhoanChange(index, 'tk_me', e.target.value)}
+                            className={`h-8 text-sm ${!item.tk_me || item.tk_me.trim() === '' ? 'border-red-300' : ''}`}
+                            placeholder="TK mẹ *"
+                            required
+                          />
+                        </td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                          <Input
+                            value={item.ten_tai_khoan}
+                            onChange={e => handleTaiKhoanChange(index, 'ten_tai_khoan', e.target.value)}
+                            className="h-8 text-sm"
+                            placeholder="Tên tài khoản"
+                          />
+                        </td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                          <Input
+                            type="number"
+                            value={item.ps_co}
+                            onChange={e => handleTaiKhoanChange(index, 'ps_co', e.target.value)}
+                            className="h-8 text-sm"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                          <Input
+                            value={item.dien_giai}
+                            onChange={e => handleTaiKhoanChange(index, 'dien_giai', e.target.value)}
+                            className="h-8 text-sm"
+                            placeholder="Diễn giải"
+                          />
+                        </td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1 text-center">
+                          {taiKhoanList.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeTaiKhoan(index)}
+                              className="h-8 px-2 text-red-600 hover:text-red-700"
+                            >
+                              Xóa
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <td colSpan="4" className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 text-right">
+                        Tổng tiền:
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {getTongTien().toLocaleString()}
+                      </td>
+                      <td colSpan="2" className="border border-gray-300 dark:border-gray-600"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
           </div>
+          
           <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
             <Button variant="outline" type="button" onClick={handleClose}>Hủy</Button>
             <Button type="submit" disabled={updateCashReceiptMutation.isLoading}>
