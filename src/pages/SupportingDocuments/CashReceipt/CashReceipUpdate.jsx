@@ -8,6 +8,7 @@ import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalenderIcon } from "../../../icons";
 import { useUpdateCashReceipt } from "../../../hooks/useCashReceipt";
+import { useCustomers } from "../../../hooks/useCustomer";
 
 export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashReceipt }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
     dien_giai: "",
     ma_qs: "",
     loai_ct: "Đã ghi sổ cái",
-    MST: "",
+    mst: "",
     ma_nt: "",
     ty_gia: "",
   });
@@ -38,16 +39,41 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
     }
   ]);
 
+
+  // State cho customer dropdown
+  const [maKhSearch, setMaKhSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
+
+  // Debounce customer search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (maKhSearch && maKhSearch.length > 0) {
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [maKhSearch]);
+
+  // Hide dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.customer-dropdown-container')) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const updateCashReceiptMutation = useUpdateCashReceipt();
 
   // Load data when selectedCashReceipt changes
   useEffect(() => {
-    console.log('useEffect triggered, selectedCashReceipt:', selectedCashReceipt);
-    console.log('isOpenEdit:', isOpenEdit);
-    
+
     if (selectedCashReceipt && isOpenEdit) {
-      console.log('Loading form data:', selectedCashReceipt);
-      
+
       setFormData({
         so_ct: selectedCashReceipt.so_ct || "",
         ong_ba: selectedCashReceipt.ong_ba || "",
@@ -60,14 +86,13 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
         dien_giai: selectedCashReceipt.dien_giai || "",
         ma_qs: selectedCashReceipt.ma_qs || "",
         loai_ct: selectedCashReceipt.loai_ct || "Đã ghi sổ cái",
-        MST: selectedCashReceipt.mst || selectedCashReceipt.MST || "",
+        mst: selectedCashReceipt.mst ? selectedCashReceipt.mst : "",
         ma_nt: selectedCashReceipt.ma_nt || "",
         ty_gia: selectedCashReceipt.ty_gia || "",
       });
 
       // Load danh sách tài khoản nếu có
       if (selectedCashReceipt.tai_khoan_list && selectedCashReceipt.tai_khoan_list.length > 0) {
-        console.log('Loading tai_khoan_list:', selectedCashReceipt.tai_khoan_list);
         setTaiKhoanList(selectedCashReceipt.tai_khoan_list.map(item => ({
           tk_so: item.tk_so || "",
           tk_me: item.tk_me || "",
@@ -76,7 +101,6 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
           dien_giai: item.dien_giai || ""
         })));
       } else {
-        console.log('No tai_khoan_list found, creating empty row');
         setTaiKhoanList([{
           tk_so: "",
           tk_me: "",
@@ -96,7 +120,26 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       ...prev,
       [field]: value
     }));
+
+    // Trigger customer search when ma_kh changes
+    if (field === 'ma_kh') {
+      setMaKhSearch(value);
+    }
   };
+
+  // Handle customer selection
+  const handleCustomerSelect = (customer) => {
+    setFormData(prev => ({
+      ...prev,
+      mst: customer.ma_so_thue,
+      ma_kh: customer.ma_kh,
+      ong_ba: customer.ten_kh, // Set customer name as payer
+      dia_chi: customer.dia_chi || prev.dia_chi // Set address if available
+    }));
+    setShowCustomerPopup(false);
+    setMaKhSearch("");
+  };
+
 
   const handleDateChange = (date, field) => {
     setFormData(prev => ({
@@ -141,12 +184,12 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedCashReceipt) return;
 
     // Validation cho danh sách tài khoản
-    const validTaiKhoanList = taiKhoanList.filter(item => 
-      item.tk_so && item.tk_so.trim() !== '' && 
+    const validTaiKhoanList = taiKhoanList.filter(item =>
+      item.tk_so && item.tk_so.trim() !== '' &&
       item.tk_me && item.tk_me.trim() !== ''
     );
 
@@ -160,7 +203,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       ma_kh: formData.ma_kh,
       dia_chi: formData.dia_chi,
       // Bỏ mst field vì API không chấp nhận
-      // mst: formData.MST,
+      // mst: formData.mst,
       ong_ba: formData.ong_ba,
       dien_giai: formData.dien_giai,
       ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : undefined,
@@ -199,7 +242,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       dien_giai: "",
       ma_qs: "",
       loai_ct: "Đã ghi sổ cái",
-      MST: "",
+      mst: "",
       ma_nt: "",
       ty_gia: "",
     });
@@ -210,6 +253,8 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
       ps_co: 0,
       dien_giai: ""
     }]);
+    setMaKhSearch("");
+    setShowDropdown(false);
   };
 
   const handleClose = () => {
@@ -228,13 +273,13 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
             Cập nhật thông tin phiếu thu tiền trong hệ thống.
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="flex flex-col">
           <div className="custom-scrollbar h-[680px] overflow-y-auto px-2 pb-3">
             {/* Thông tin chung */}
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2 mb-6">
               <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} placeholder="2" /></div>
-              <div><Label>Người nộp</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
+              <div><Label>Đối tác</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
               <div>
                 <Label>Ngày lập phiếu thu</Label>
                 <div className="relative w-full flatpickr-wrapper">
@@ -273,12 +318,70 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
               </div>
               <div><Label>Tài khoản nợ</Label><Input value={formData.tk} onChange={e => handleChange("tk", e.target.value)} /></div>
               <div><Label>Loại phiếu thu</Label><Input value={formData.ma_gd} onChange={e => handleChange("ma_gd", e.target.value)} /></div>
-              <div><Label>Mã khách</Label><Input value={formData.ma_kh} onChange={e => handleChange("ma_kh", e.target.value)} /></div>
+              <div>
+                <Label>Mã khách</Label>
+                <div className="relative customer-dropdown-container">
+                  <Input
+                    value={formData.ma_kh}
+                    onChange={e => {
+                      handleChange("ma_kh", e.target.value); // cập nhật formData.ma_kh + maKhSearch
+                    }}
+                    placeholder="Nhập mã khách hàng..."
+                    onFocus={() => formData.ma_kh && setShowDropdown(true)}
+                  />
+
+                  {/* Dropdown customer list */}
+                  {showDropdown && (
+                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+
+                      {customerData?.data && customerData.data.length > 0 ? (
+                        <>
+                          {customerData.data.slice(0, 10).map((customer, index) => (
+                            <div
+                              key={index}
+                              onClick={() => handleCustomerSelect(customer)}
+                              className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-600 last:border-b-0"
+                            >
+                              <div className="flex flex-col">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {customer.ma_kh}
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    MST: {customer.ma_so_thue || 'N/A'}
+                                  </span>
+                                </div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                                  {customer.ten_kh}
+                                </span>
+                                {customer.dia_chi && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {customer.dia_chi}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {customerData.data.length > 10 && (
+                            <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 text-center border-t border-gray-200 dark:border-gray-600">
+                              Hiển thị 10/{customerData.data.length} kết quả
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                          Không tìm thấy khách hàng cho "{maKhSearch}"
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="col-span-2"><Label>Địa chỉ</Label><Input value={formData.dia_chi} onChange={e => handleChange("dia_chi", e.target.value)} /></div>
               <div className="col-span-2"><Label>Lý do nộp</Label><Input value={formData.dien_giai} onChange={e => handleChange("dien_giai", e.target.value)} /></div>
               <div><Label>Quyển số</Label><Input value={formData.ma_qs} onChange={e => handleChange("ma_qs", e.target.value)} /></div>
               <div><Label>Trạng thái</Label><Input value={formData.loai_ct} disabled /></div>
-              <div><Label>Mã số thuế</Label><Input value={formData.MST} onChange={e => handleChange("MST", e.target.value)} /></div>
+              <div><Label>Mã số thuế</Label><Input value={formData.mst} onChange={e => handleChange("mst", e.target.value)} /></div>
               <div><Label>TGGD (Tỷ giá giao dịch)</Label><Input value={formData.ma_nt} onChange={e => handleChange("ma_nt", e.target.value)} /></div>
               <div><Label>Mức tỷ giá giao dịch</Label><Input value={formData.ty_gia} onChange={e => handleChange("ty_gia", e.target.value)} /></div>
             </div>
@@ -293,7 +396,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                   + Thêm dòng
                 </Button>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                   <thead className="bg-gray-50 dark:bg-gray-800">
@@ -313,7 +416,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                         <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
                           {index + 1}
                         </td>
-                                                                <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
                           <Input
                             value={item.tk_so}
                             onChange={e => handleTaiKhoanChange(index, 'tk_so', e.target.value)}
@@ -387,7 +490,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
             <Button variant="outline" type="button" onClick={handleClose}>Hủy</Button>
             <Button type="submit" disabled={updateCashReceiptMutation.isLoading}>

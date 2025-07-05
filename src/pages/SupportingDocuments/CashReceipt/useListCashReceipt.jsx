@@ -97,7 +97,7 @@ export const useListCashReceipt = () => {
         },
         {
             key: "ong_ba",
-            title: "Người nộp",
+            title: "Đối tác",
             fixed: "left",
             width: 150,
         },

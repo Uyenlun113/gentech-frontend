@@ -163,58 +163,34 @@ export default function CashReceiptList() {
                         <ComponentCard>
                             <div className="space-y-6">
                                 {/* Header */}
-                                <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                            Chi tiết phiếu thu: {selectedRowForDetail.so_ct}
-                                        </h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            Thông tin chi tiết danh sách tài khoản
-                                        </p>
-                                    </div>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => {
-                                            setSelectedRowForDetail(null);
-                                            setShowDetailPanel(false);
-                                        }}
-                                    >
-                                        Đóng
-                                    </Button>
-                                </div>
 
-                                {/* Thông tin cơ bản */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Người nộp</label>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{selectedRowForDetail.ong_ba || 'N/A'}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Mã khách hàng</label>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedRowForDetail.ma_kh || 'N/A'}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Địa chỉ</label>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title={selectedRowForDetail.dia_chi}>{selectedRowForDetail.dia_chi || 'N/A'}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tổng tiền</label>
-                                        <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                                            {selectedRowForDetail.tong_tien ? selectedRowForDetail.tong_tien.toLocaleString() + ' VNĐ' : 'N/A'}
-                                        </p>
-                                    </div>
-                                </div>
 
                                 {/* Danh sách tài khoản */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                            Danh sách tài khoản
-                                        </h4>
-                                        <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                                            {selectedRowForDetail.tai_khoan_list?.length || 0} mục
-                                        </span>
+                                        <div className="flex flex-col items-start border-gray-200 dark:border-gray-700 pb-4 space-y-1">
+                                            <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
+                                                Hạch toán
+                                            </h4>
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+                                                {selectedRowForDetail.tai_khoan_list?.length || 0} mục
+                                            </span>
+                                        </div>
+
+
+                                        <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
+
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setSelectedRowForDetail(null);
+                                                    setShowDetailPanel(false);
+                                                }}
+                                            >
+                                                Đóng
+                                            </Button>
+                                        </div>
                                     </div>
 
                                     {selectedRowForDetail.tai_khoan_list && selectedRowForDetail.tai_khoan_list.length > 0 ? (
@@ -224,7 +200,7 @@ export default function CashReceiptList() {
                                                     <tr>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK số</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th>
+                                                        {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th> */}
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên tài khoản</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Phát sinh có</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th>
@@ -239,9 +215,9 @@ export default function CashReceiptList() {
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                                                                 {item.tk_so || 'N/A'}
                                                             </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                            {/* <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                                                                 {item.tk_me || 'N/A'}
-                                                            </td>
+                                                            </td> */}
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                                                 {item.ten_tai_khoan || 'N/A'}
                                                             </td>
