@@ -41,6 +41,7 @@ import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
 import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
+import ListAccountPage from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 
 export default function App() {
   return (
@@ -53,6 +54,9 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
               <Route path="/category/customer" element={<ListCustomerPage />} />
+              <Route path="/category/account" element={<ListAccountPage />} />
+              <Route path="/category/dmvt" element={<ListMaterialPage />} />
+              <Route path="/category/material-group" element={<ListMaterialGroupPage />} />
               {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
