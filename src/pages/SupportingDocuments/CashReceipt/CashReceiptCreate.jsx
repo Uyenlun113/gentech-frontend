@@ -8,6 +8,9 @@ import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalenderIcon } from "../../../icons";
 import { useCreateCashReceipt } from "../../../hooks/useCashReceipt";
+import { useCustomers } from "../../../hooks/useCustomer";
+import { useEffect } from "react";
+// import CustomerSelectionPopup from "../../../components/common/CustomerSelectionPopup";
 
 export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +25,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     dien_giai: "",
     ma_qs: "",
     loai_ct: "Đã ghi sổ cái",
-    MST: "",
+    mst: "",
     ma_nt: "",
     ty_gia: "",
   });
@@ -38,6 +41,35 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     }
   ]);
 
+  // State cho customer dropdown
+  const [maKhSearch, setMaKhSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
+
+  // Debounce customer search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (maKhSearch && maKhSearch.length > 0) {
+        console.log('🔍 Searching for:', maKhSearch);
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [maKhSearch]);
+
+  // Hide dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.customer-dropdown-container')) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const createCashReceiptMutation = useCreateCashReceipt();
 
   const handleChange = (field, value) => {
@@ -45,6 +77,24 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       ...prev,
       [field]: value
     }));
+    
+    // Trigger customer search when ma_kh changes
+    if (field === 'ma_kh') {
+      setMaKhSearch(value);
+    }
+  };
+
+  // Handle customer selection
+  const handleCustomerSelect = (customer) => {
+    setFormData(prev => ({
+      ...prev,
+      mst: customer.ma_so_thue,
+      ma_kh: customer.ma_kh,
+      ong_ba: customer.ten_kh, // Set customer name as payer
+      dia_chi: customer.dia_chi || prev.dia_chi // Set address if available
+    }));
+    setShowCustomerPopup(false);
+    setMaKhSearch("");
   };
 
   const handleDateChange = (date, field) => {
@@ -91,10 +141,22 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validation cho danh sách tài khoản
+    const validTaiKhoanList = taiKhoanList.filter(item => 
+      item.tk_so && item.tk_so.trim() !== '' && 
+      item.tk_me && item.tk_me.trim() !== ''
+    );
+
+    if (validTaiKhoanList.length === 0) {
+      alert('Vui lòng nhập ít nhất một tài khoản với TK số và TK mẹ hợp lệ!');
+      return;
+    }
+
     const dataToSave = {
       ma_gd: formData.ma_gd || "2",
       ma_kh: formData.ma_kh,
       dia_chi: formData.dia_chi,
+      // Bỏ mst field vì API không chấp nhận
       // mst: formData.MST,
       ong_ba: formData.ong_ba,
       dien_giai: formData.dien_giai,
@@ -105,8 +167,8 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       ma_nt: formData.ma_nt || "VND",
       ty_gia: formData.ty_gia ? Number(formData.ty_gia) : 1,
       loai_ct: "PT",
-      tai_khoan_list: taiKhoanList,
-      tong_tien: getTongTien(),
+      tai_khoan_list: validTaiKhoanList,
+      tong_tien: validTaiKhoanList.reduce((total, item) => total + (item.ps_co || 0), 0),
       han_thanh_toan: 0
     };
     
@@ -128,7 +190,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       dien_giai: "",
       ma_qs: "",
       loai_ct: "Đã ghi sổ cái",
-      MST: "",
+      mst: "",
       ma_nt: "",
       ty_gia: "",
     });
@@ -139,6 +201,8 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       ps_co: 0,
       dien_giai: ""
     }]);
+    setMaKhSearch("");
+    setShowDropdown(false);
   };
 
   const handleClose = () => {
@@ -163,7 +227,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
             {/* Thông tin chung */}
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2 mb-6">
               <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} placeholder="2" /></div>
-              <div><Label>Đối tác</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
+              <div><Label>Người nộp</Label><Input value={formData.ong_ba} onChange={e => handleChange("ong_ba", e.target.value)} /></div>
               <div>
                 <Label>Ngày lập phiếu thu</Label>
                 <div className="relative w-full flatpickr-wrapper">
@@ -202,12 +266,72 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
               </div>
               <div><Label>Tài khoản nợ</Label><Input value={formData.tk} onChange={e => handleChange("tk", e.target.value)} /></div>
               <div><Label>Loại phiếu thu</Label><Input value={formData.ma_gd} onChange={e => handleChange("ma_gd", e.target.value)} /></div>
-              <div><Label>Mã khách</Label><Input value={formData.ma_kh} onChange={e => handleChange("ma_kh", e.target.value)} /></div>
+              <div>
+                <Label>Mã khách</Label>
+                <div className="relative customer-dropdown-container">
+                  <Input 
+                    value={maKhSearch} 
+                    onChange={e => {
+                      setMaKhSearch(e.target.value);
+                      handleChange("ma_kh", e.target.value);
+                    }}
+                    placeholder="Nhập mã khách hàng..."
+                    onFocus={() => maKhSearch && setShowDropdown(true)}
+                  />
+                  
+                  {/* Dropdown customer list */}
+                  {console.log('🎯 Render check - showDropdown:', showDropdown, 'customerData:', customerData)}
+                  {showDropdown && (
+                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+
+                      {customerData?.data && customerData.data.length > 0 ? (
+                        <>
+                          {customerData.data.slice(0, 10).map((customer, index) => (
+                            <div
+                              key={index}
+                              onClick={() => handleCustomerSelect(customer)}
+                              className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-600 last:border-b-0"
+                            >
+                              <div className="flex flex-col">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {customer.ma_kh}
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    MST: {customer.ma_so_thue || 'N/A'}
+                                  </span>
+                                </div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                                  {customer.ten_kh}
+                                </span>
+                                {customer.dia_chi && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {customer.dia_chi}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {customerData.data.length > 10 && (
+                            <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 text-center border-t border-gray-200 dark:border-gray-600">
+                              Hiển thị 10/{customerData.data.length} kết quả
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                          Không tìm thấy khách hàng cho "{maKhSearch}"
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="col-span-2"><Label>Địa chỉ</Label><Input value={formData.dia_chi} onChange={e => handleChange("dia_chi", e.target.value)} /></div>
               <div className="col-span-2"><Label>Lý do nộp</Label><Input value={formData.dien_giai} onChange={e => handleChange("dien_giai", e.target.value)} /></div>
               <div><Label>Quyển số</Label><Input value={formData.ma_qs} onChange={e => handleChange("ma_qs", e.target.value)} /></div>
               <div><Label>Trạng thái</Label><Input value={formData.loai_ct} disabled /></div>
-              <div><Label>Mã số thuế</Label><Input value={formData.MST} onChange={e => handleChange("MST", e.target.value)} /></div>
+              <div><Label>Mã số thuế</Label><Input value={formData.mst} onChange={e => handleChange("mst", e.target.value)} /></div>
               <div><Label>TGGD (Tỷ giá giao dịch)</Label><Input value={formData.ma_nt} onChange={e => handleChange("ma_nt", e.target.value)} /></div>
               <div><Label>Mức tỷ giá giao dịch</Label><Input value={formData.ty_gia} onChange={e => handleChange("ty_gia", e.target.value)} /></div>
             </div>
@@ -242,20 +366,22 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                         <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
                           {index + 1}
                         </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                                                                <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
                           <Input
                             value={item.tk_so}
                             onChange={e => handleTaiKhoanChange(index, 'tk_so', e.target.value)}
-                            className="h-8 text-sm"
-                            placeholder="TK số"
+                            className={`h-8 text-sm ${!item.tk_so || item.tk_so.trim() === '' ? 'border-red-300' : ''}`}
+                            placeholder="TK số *"
+                            required
                           />
                         </td>
                         <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
                           <Input
                             value={item.tk_me}
                             onChange={e => handleTaiKhoanChange(index, 'tk_me', e.target.value)}
-                            className="h-8 text-sm"
-                            placeholder="TK mẹ"
+                            className={`h-8 text-sm ${!item.tk_me || item.tk_me.trim() === '' ? 'border-red-300' : ''}`}
+                            placeholder="TK mẹ *"
+                            required
                           />
                         </td>
                         <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
