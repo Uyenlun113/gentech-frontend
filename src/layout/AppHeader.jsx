@@ -66,7 +66,7 @@ const AppHeader = () => {
       hasDropdown: true,
       items: [
         { label: "1. Danh mục tài khoản", path: "/category/account" },
-        { label: "2. Danh mục nhóm đối tượng", path: "/danh-muc/nhom-doi-tuong" },
+        { label: "2. Danh mục nhóm đối tượng", path: "/category/dmnhkh" },
         { label: "3. Danh mục đối tượng", path: "/category/customer" },
         { label: "4. Danh mục sản phẩm (công trình)", path: "/danh-muc/san-pham" },
         { label: "5. Danh mục yếu tố chi phí", path: "/danh-muc/yto-chi-phi" },

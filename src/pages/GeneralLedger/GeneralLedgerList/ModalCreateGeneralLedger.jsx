@@ -29,7 +29,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
   const [quyenSo, setQuyenSo] = useState("");
   const [soChungTu, setSoChungTu] = useState("");
   const [tyGia, setTyGia] = useState(0);
-  const [trangThai, setTrangThai] = useState("");
+  const [setTrangThai] = useState("");
   const [dienGiaiChung, setDienGiaiChung] = useState("");
 
   const [hachToanData, setHachToanData] = useState(initialHachToanData);
@@ -89,7 +89,8 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
 
   const handleDateChange = (date, field) => {
     const formattedDate = date[0]?.toLocaleDateString("en-CA");
-    field === "ngayHachToan" ? setNgayHachToan(formattedDate) : setNgayLapChungTu(formattedDate);
+    const setDate = field === "ngayHachToan" ? setNgayHachToan : setNgayLapChungTu;
+    setDate(formattedDate);
   };
 
   const handleHachToanChange = (id, field, value) => {
@@ -291,7 +292,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     closeModalCreate();
   };
   return (
-    <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-[50%] h-[80vh] m-4">
+    <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className=" w-full max-w-7xl h-[90vh] m-4">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
         {/* Header - Fixed */}
         <div className="flex-shrink-0 px-4 lg:px-11 pt-4 lg:pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -423,9 +424,8 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
             <button
               onClick={handleSave}
               disabled={isPending}
-              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
-                isPending ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${isPending ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isPending ? "Đang lưu..." : "Lưu lại"}
             </button>

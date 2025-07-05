@@ -24,7 +24,7 @@ export const useListMaterialGroup = () => {
     dateFrom,
     dateTo,
     page: currentPage,
-    limit: 15,
+    limit: 10,
     nh_tk: loaiTk || undefined,
   };
 
@@ -110,14 +110,14 @@ export const useListMaterialGroup = () => {
       fixed: "left",
       width: 300,
       render: (_, record) => {
-        return <div className="text-left">{record?.ma_nh}</div>;
+        return <div className="text-center">{record?.ma_nh}</div>;
       },
     },
     {
       key: "ten_nh",
       title: "Tên nhóm vật tư",
       render: (_, record) => {
-        return <div className="text-left">{record?.ten_nh}</div>;
+        return <div className="text-center">{record?.ten_nh}</div>;
       },
     },
     {
@@ -172,7 +172,7 @@ export const useListMaterialGroup = () => {
     selectedMaterialGroup,
     dataTable: materialGroupsData?.data || [],
     columnsTable,
-    pagination: materialGroupsData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
+    pagination: materialGroupsData?.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 },
     rangePickerValue,
     searchValue,
     isLoading,
