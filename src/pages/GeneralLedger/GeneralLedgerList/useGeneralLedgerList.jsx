@@ -132,15 +132,15 @@ export const useGeneralLedgerList = () => {
       key: "ma_ct",
       title: "Mã chứng từ",
       fixed: "left",
-      width: 120,
-      render: (val) => <span className="font-medium">{val || "-"}</span>,
+      width: 100,
+      render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
     },
     {
       key: "stt_rec",
       title: "STT Record",
       fixed: "left",
       width: 140,
-      render: (val) => <span className="font-mono text-sm">{val || "-"}</span>,
+      render: (val) => <div className="font-mono text-sm text-center">{val || "-"}</div>,
     },
     {
       key: "ngay_lct",
