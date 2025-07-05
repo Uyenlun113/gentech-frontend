@@ -11,6 +11,7 @@ import SearchableSelect from "../account/SearchableSelect";
 export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
     ten_kh: "",
+    doi_tac: "",
     e_mail: "",
     dien_thoai: "",
     dia_chi: "",
@@ -71,6 +72,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
     try {
       await createCustomerMutation.mutateAsync({
         ...formData,
+        doi_tac: formData.doi_tac || undefined,
         e_mail: formData.e_mail || undefined,
         dien_thoai: formData.dien_thoai || undefined,
         dia_chi: formData.dia_chi || undefined,
@@ -87,6 +89,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
       setFormData({
         ten_kh: "",
         e_mail: "",
+        doi_tac: "",
         dien_thoai: "",
         dia_chi: "",
         ma_so_thue: "",
@@ -110,6 +113,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
     setFormData({
       ten_kh: "",
       e_mail: "",
+      doi_tac: "",
       dien_thoai: "",
       dia_chi: "",
       ma_so_thue: "",
@@ -163,6 +167,17 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   {errors.ten_kh && (
                     <p className="mt-1 text-sm text-red-500">{errors.ten_kh}</p>
                   )}
+                </div>
+                <div className="col-span-2">
+                  <Label>Đối tác</Label>
+                  <Input
+                    type="text"
+                    value={formData.doi_tac}
+                    onChange={(e) => {
+                      handleInputChange('doi_tac', e.target.value);
+                    }}
+                    placeholder="Nhâp đối tác"
+                  />
                 </div>
 
                 <div>

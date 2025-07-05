@@ -12,6 +12,7 @@ import SearchableSelect from "../account/SearchableSelect";
 export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, selectedCustomer }) => {
   const [formData, setFormData] = useState({
     ten_kh: "",
+    doi_tac: "",
     e_mail: "",
     dien_thoai: "",
     dia_chi: "",
@@ -41,18 +42,17 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
   const getFilteredOptions = (currentField) => {
     const selectedValues = [formData.nh_kh1, formData.nh_kh2, formData.nh_kh3].filter(Boolean);
     return customerGroupOptions.filter(option => {
-      // Nếu là giá trị hiện tại của field này thì vẫn hiển thị
       if (option.ma_nh === formData[currentField]) return true;
-      // Nếu đã được chọn ở field khác thì loại bỏ
       return !selectedValues.includes(option.ma_nh);
     });
   };
 
-  // Populate form when selectedCustomer changes
+
   useEffect(() => {
     if (selectedCustomer) {
       setFormData({
         ten_kh: selectedCustomer.ten_kh || "",
+        doi_tac: selectedCustomer.doi_tac || "",
         e_mail: selectedCustomer.e_mail || "",
         dien_thoai: selectedCustomer.dien_thoai || "",
         dia_chi: selectedCustomer.dia_chi || "",
@@ -92,7 +92,7 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         ma_kh: selectedCustomer.ma_kh,
         data: {
           ...formData,
-          // Remove empty fields
+          doi_tac: formData.doi_tac || undefined,
           e_mail: formData.e_mail || undefined,
           dien_thoai: formData.dien_thoai || undefined,
           dia_chi: formData.dia_chi || undefined,
@@ -118,8 +118,8 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
   };
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={handleClose} className="max-w-[900px] m-4">
-      <div className="no-scrollbar relative w-full max-w-[900px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+    <Modal isOpen={isOpenEdit} onClose={handleClose} className="w-full max-w-[900px] m-4">
+      <div className="no-scrollbar relative w-full  overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
             Chỉnh sửa khách hàng
@@ -145,6 +145,16 @@ export const ModalEditCustomer = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                     onChange={(e) => handleInputChange('ten_kh', e.target.value)}
                     placeholder="Nhập tên khách hàng"
                     required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <Label>Đối tác</Label>
+                  <Input
+                    type="text"
+                    value={formData.doi_tac}
+                    onChange={(e) => handleInputChange('doi_tac', e.target.value)}
+                    placeholder="Nhập đối tác"
                   />
                 </div>
 

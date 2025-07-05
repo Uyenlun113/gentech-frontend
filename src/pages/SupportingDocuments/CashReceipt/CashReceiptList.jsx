@@ -1,5 +1,5 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search, Eye, EyeOff } from "lucide-react";
+import { FilePlus, Search } from "lucide-react";
 
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
@@ -14,7 +14,7 @@ import { ModalCreateCashReceipt } from "./CashReceiptCreate";
 import { ModalEditCashReceipt } from "./CashReceipUpdate";
 import { useListCashReceipt } from "./useListCashReceipt";
 
-export default function ListAccountPage() {
+export default function CashReceiptList() {
     const {
         isOpenCreate,
         isOpenEdit,
@@ -39,7 +39,7 @@ export default function ListAccountPage() {
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
-    const [showDetailPanel, setShowDetailPanel] = useState(false);
+    const [setShowDetailPanel] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -70,30 +70,6 @@ export default function ListAccountPage() {
             </div>
         );
     }
-
-    // Tạo enhanced columns để handle row click
-    const enhancedColumnsTable = columnsTable.map(col => {
-        // Nếu column có cell custom (như actions), giữ nguyên
-        if (col.cell) {
-            return col;
-        }
-        
-        // Cho các column khác, thêm click handler
-        return {
-            ...col,
-            cell: ({ row }) => (
-                <div 
-                    onClick={() => {
-                        console.log('🎯 Cell clicked, row data:', row.original);
-                        handleRowSelect(row.original);
-                    }}
-                    className="cursor-pointer w-full py-2"
-                >
-                    {row.original[col.accessorKey]}
-                </div>
-            )
-        };
-    });
 
     return (
         <>
@@ -140,23 +116,23 @@ export default function ListAccountPage() {
                     {/* Table với event delegation đơn giản */}
                     {!isLoading && (
                         <div className="space-y-4">
-                            <div 
+                            <div
                                 onClick={(e) => {
                                     console.log('🔍 Table clicked, target:', e.target.tagName);
-                                    
+
                                     // Tìm row gần nhất
                                     let element = e.target;
                                     while (element && element.tagName !== 'TR') {
                                         element = element.parentElement;
                                         if (!element || element.tagName === 'TABLE') break;
                                     }
-                                    
+
                                     if (element && element.tagName === 'TR') {
                                         // Lấy index từ data attribute hoặc position
                                         const rowIndex = Array.from(element.parentElement.children).indexOf(element);
                                         console.log('🔍 Row index found:', rowIndex);
                                         console.log('🔍 Data table length:', dataTable.length);
-                                        
+
                                         if (rowIndex >= 0 && rowIndex < dataTable.length) {
                                             const rowData = dataTable[rowIndex];
                                             console.log('🔍 Row data:', rowData);
@@ -166,8 +142,8 @@ export default function ListAccountPage() {
                                 }}
                                 style={{ cursor: 'pointer' }}
                             >
-                                <TableBasic 
-                                    data={dataTable} 
+                                <TableBasic
+                                    data={dataTable}
                                     columns={columnsTable}
                                 />
                             </div>
@@ -240,7 +216,7 @@ export default function ListAccountPage() {
                                             {selectedRowForDetail.tai_khoan_list?.length || 0} mục
                                         </span>
                                     </div>
-                                    
+
                                     {selectedRowForDetail.tai_khoan_list && selectedRowForDetail.tai_khoan_list.length > 0 ? (
                                         <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                                             <table className="w-full border-collapse">

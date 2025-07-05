@@ -87,6 +87,11 @@ export const useListCustomer = () => {
             width: 200,
         },
         {
+            key: "doi_tac",
+            title: "Đối tác",
+            width: 200,
+        },
+        {
             key: "e_mail",
             title: "Email",
             width: 200,

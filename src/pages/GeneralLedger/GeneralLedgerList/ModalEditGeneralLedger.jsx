@@ -142,7 +142,11 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
 
   const handleDateChange = (date, field) => {
     const formattedDate = date[0]?.toLocaleDateString("en-CA");
-    field === "ngayHachToan" ? setNgayHachToan(formattedDate) : setNgayLapChungTu(formattedDate);
+    if (field === "ngayHachToan") {
+      setNgayHachToan(formattedDate);
+    } else {
+      setNgayLapChungTu(formattedDate);
+    }
   };
 
   const handleHachToanChange = (id, field, value) => {

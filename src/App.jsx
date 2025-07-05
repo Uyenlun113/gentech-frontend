@@ -23,7 +23,6 @@ import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/Deprec
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
 import GeneralLedgerCreate from "./pages/GeneralLedger/GeneralLedgerCreate";
-import GeneralLedgerUpdate from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerEdit";
 import GeneralLedgerListPage from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerList";
 import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
 import InventoryPage from "./pages/Inventory/Inventory";
@@ -33,6 +32,8 @@ import PurchasesPage from "./pages/Purchases/Purchases";
 import SalesPage from "./pages/Sales/Sales";
 
 import ListAccountPage from "./pages/category/account/ListAccount";
+import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
+import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 import SystemPage from "./pages/System/System";
 import BasicTables from "./pages/Tables/BasicTables";
 import ToolsPage from "./pages/Tools/Tools";
@@ -60,6 +61,8 @@ export default function App() {
               <Route path="/category/dmvt" element={<ListMaterialPage />} />
               <Route path="/category/material-group" element={<ListMaterialGroupPage />} />
               <Route path="/category/dmnhkh" element={<ListCustomerGroupPage />} />
+              <Route path="/category/dmkho" element={<ListWarehousePage />} />
+
 
               {/* Dashboard Page */}
               {/* Cash Page */}
@@ -85,7 +88,6 @@ export default function App() {
               <Route path="/costing" element={<CostingPage />} />
               {/* General Ledger Page */}
               <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
-              <Route path="/general-ledger/update/:stt_rec" element={<GeneralLedgerUpdate />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
@@ -113,7 +115,7 @@ export default function App() {
               {/* SupportingDocuments */}
 
               {/* CashReceip */}
-              {/* <Route path="/chung-tu/phieu-thu" element={<CashReceiptList />} /> */}
+              <Route path="/chung-tu/phieu-thu" element={<CashReceiptList />} />
 
             </Route>
           </Route>
