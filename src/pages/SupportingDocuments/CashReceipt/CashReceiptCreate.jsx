@@ -48,9 +48,48 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   // State cho account dropdown (tài khoản nợ)
   const [maTaiKhoanSearch, setMaTaiKhoanSearch] = useState("");
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [maTaiKhoanSearchList, setMaTaiKhoanSearchList] = useState([]);
+  const [showAccountDropdownList, setShowAccountDropdownList] = useState([]);
+
 
   const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
   const { data: accountData = [] } = useAccounts(maTaiKhoanSearch ? { search: maTaiKhoanSearch } : {});
+  const { data: accountDataList = [] } = useAccounts(
+    maTaiKhoanSearchList.some(keyword => keyword?.length > 0)
+      ? { search: maTaiKhoanSearchList.find(k => k.length > 0) }
+      : {}
+  );
+
+  useEffect(() => {
+    const timeouts = [];
+
+    maTaiKhoanSearchList.forEach((searchValue, index) => {
+      const timeout = setTimeout(() => {
+        if (searchValue && searchValue.length > 0) {
+          // Chỉ hiển thị dropdown nếu chưa được hiển thị
+          setShowAccountDropdownList(prev => {
+            const newList = [...prev];
+            if (!newList[index]) { // Chỉ set true nếu hiện tại là false
+              newList[index] = true;
+            }
+            return newList;
+          });
+        } else {
+          setShowAccountDropdownList(prev => {
+            const newList = [...prev];
+            newList[index] = false;
+            return newList;
+          });
+        }
+      }, 300);
+
+      timeouts.push(timeout);
+    });
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [maTaiKhoanSearchList]);
 
   // Debounce customer search
   useEffect(() => {
@@ -81,11 +120,22 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   // Hide dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.customer-dropdown-container')) {
+      const target = event.target;
+
+      // Kiểm tra xem target có phải là element và có method closest không
+      if (!target || !target.closest) {
+        return;
+      }
+
+      if (!target.closest('.customer-dropdown-container')) {
         setShowCustomerDropdown(false);
       }
-      if (!event.target.closest('.account-dropdown-container')) {
+      if (!target.closest('.account-dropdown-container')) {
         setShowAccountDropdown(false);
+      }
+      // Ẩn tất cả dropdown của bảng nếu click outside
+      if (!target.closest('.account-table-dropdown')) {
+        setShowAccountDropdownList(prev => prev.map(() => false));
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -176,18 +226,6 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     };
     setTaiKhoanList(newList);
   };
-
-  // Thêm dòng mới
-  const addTaiKhoan = () => {
-    setTaiKhoanList([...taiKhoanList, {
-      tk_so: "",
-      tk_me: "",
-      ten_tai_khoan: "",
-      ps_co: 0,
-      dien_giai: ""
-    }]);
-  };
-
   // Xóa dòng
   const removeTaiKhoan = (index) => {
     if (taiKhoanList.length > 1) {
@@ -210,10 +248,10 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       item.tk_me && item.tk_me.trim() !== ''
     );
 
-    if (validTaiKhoanList.length === 0) {
-      alert('Vui lòng nhập ít nhất một tài khoản với TK số và TK mẹ hợp lệ!');
-      return;
-    }
+    // if (validTaiKhoanList.length === 0) {
+    //   alert('Vui lòng nhập ít nhất một tài khoản với TK số và TK mẹ hợp lệ!');
+    //   return;
+    // }
 
     const dataToSave = {
       ma_gd: formData.ma_gd || "2",
@@ -262,6 +300,9 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       ps_co: 0,
       dien_giai: ""
     }]);
+    setMaTaiKhoanSearchList([]);
+    setShowAccountDropdownList([]);
+
     setMaKhSearch("");
     setMaTaiKhoanSearch("");
     setShowCustomerDropdown(false);
@@ -272,7 +313,17 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     resetForm();
     closeModalCreate();
   };
-
+  const addTaiKhoan = () => {
+    setTaiKhoanList([...taiKhoanList, {
+      tk_so: "",
+      tk_me: "",
+      ten_tai_khoan: "",
+      ps_co: 0,
+      dien_giai: ""
+    }]);
+    setMaTaiKhoanSearchList(prev => [...prev, ""]);
+    setShowAccountDropdownList(prev => [...prev, false]);
+  };
   return (
     <Modal isOpen={isOpenCreate} onClose={handleClose} title="Thêm mới phiếu thu" className="max-w-[900px] m-4 h-[900px]">
       <div className="no-scrollbar relative w-full max-w-[900px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11 h-[900px]">
@@ -289,7 +340,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
           <div className="custom-scrollbar h-[680px] overflow-y-auto px-2 pb-3">
             {/* Thông tin chung */}
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2 mb-6">
-              <div><Label>Loại phiếu thu</Label><Input value={formData.ma_gd} onChange={e => handleChange("ma_gd", e.target.value)} /></div>
+              <div><Label>Loại phiếu thu</Label><Input value={formData.ma_gd} onChange={e => handleChange("ma_gd", e.target.value)} placeholder="2" /></div>
 
               {/* Customer dropdown */}
               <div>
@@ -452,8 +503,8 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                   </span>
                 </div>
               </div>
-              <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} placeholder="2" /></div>
-              <div><Label>Quyển số</Label><Input value={formData.ma_qs} onChange={e => handleChange("ma_qs", e.target.value)} /></div>
+              <div><Label>Quyển số</Label><Input value={formData.ma_qs} onChange={e => handleChange("ma_qs", e.target.value)} placeholder="PT001" /></div>
+              <div><Label>Số phiếu thu</Label><Input value={formData.so_ct} onChange={e => handleChange("so_ct", e.target.value)} /></div>
               <div>
                 <Label>TGGD</Label>
                 <select
@@ -481,7 +532,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
             <div className="mt-6">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-                  Danh sách tài khoản
+                  Hạch toán
                 </h5>
                 <Button type="button" variant="outline" size="sm" onClick={addTaiKhoan}>
                   + Thêm dòng
@@ -494,7 +545,6 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                     <tr>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">STT</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">TK số</th>
-                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">TK mẹ</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Tên tài khoản</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Phát sinh có</th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Diễn giải</th>
@@ -507,24 +557,99 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                         <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
                           {index + 1}
                         </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
+                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1 relative account-table-dropdown">
                           <Input
                             value={item.tk_so}
-                            onChange={e => handleTaiKhoanChange(index, 'tk_so', e.target.value)}
-                            className={`h-8 text-sm ${!item.tk_so || item.tk_so.trim() === '' ? 'border-red-300' : ''}`}
+                            onChange={e => {
+                              const value = e.target.value;
+                              handleTaiKhoanChange(index, 'tk_so', value);
+
+                              // Gán search cho đúng dòng
+                              setMaTaiKhoanSearchList(prev => {
+                                const updated = [...prev];
+                                updated[index] = value;
+                                return updated;
+                              });
+
+                              // Hiện dropdown chỉ khi có từ khóa
+                              setShowAccountDropdownList(prev => {
+                                const updated = [...prev];
+                                updated[index] = value.trim() !== "";
+                                return updated;
+                              });
+                            }}
+                            onFocus={() => {
+                              // Nếu có dữ liệu thì hiển thị dropdown
+                              if (maTaiKhoanSearchList[index]?.trim()) {
+                                setShowAccountDropdownList(prev => {
+                                  const updated = [...prev];
+                                  updated[index] = true;
+                                  return updated;
+                                });
+                              }
+                            }}
+                            onBlur={() => {
+                              // Delay để tránh mất focus trước khi click
+                              setTimeout(() => {
+                                setShowAccountDropdownList(prev => {
+                                  const updated = [...prev];
+                                  updated[index] = false;
+                                  return updated;
+                                });
+                              }, 200);
+                            }}
                             placeholder="TK số *"
-                            required
                           />
+                          {showAccountDropdownList[index] && (
+                            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow max-h-60 overflow-y-auto">
+                              {accountDataList?.data?.length > 0 ? (
+                                accountDataList.data
+                                  .filter(account =>
+                                    !maTaiKhoanSearchList[index] ||
+                                    account.tk?.toLowerCase().includes(maTaiKhoanSearchList[index]?.toLowerCase()) ||
+                                    account.ten_tk?.toLowerCase().includes(maTaiKhoanSearchList[index]?.toLowerCase())
+                                  )
+                                  .slice(0, 10)
+                                  .map((account, accIndex) => (
+                                    <div
+                                      key={accIndex}
+                                      className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                                      onClick={() => {
+                                        const newList = [...taiKhoanList];
+                                        newList[index].tk_so = account.tk;
+                                        newList[index].ten_tai_khoan = account.ten_tk;
+                                        setTaiKhoanList(newList);
+
+                                        // Ẩn dropdown sau khi chọn
+                                        setShowAccountDropdownList(prev => {
+                                          const updated = [...prev];
+                                          updated[index] = false;
+                                          return updated;
+                                        });
+
+                                        // Gán lại search term để phù hợp với dropdown sau
+                                        setMaTaiKhoanSearchList(prev => {
+                                          const updated = [...prev];
+                                          updated[index] = account.tk;
+                                          return updated;
+                                        });
+                                      }}
+                                    >
+                                      <div className="font-medium">{account.tk}</div>
+                                      <div className="text-sm text-gray-500">{account.ten_tk}</div>
+                                    </div>
+                                  ))
+                              ) : (
+                                <div className="px-4 py-2 text-gray-500">
+                                  {maTaiKhoanSearchList[index]
+                                    ? `Không tìm thấy tài khoản cho "${maTaiKhoanSearchList[index]}"`
+                                    : "Không có tài khoản nào"}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </td>
-                        <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
-                          <Input
-                            value={item.tk_me}
-                            onChange={e => handleTaiKhoanChange(index, 'tk_me', e.target.value)}
-                            className={`h-8 text-sm ${!item.tk_me || item.tk_me.trim() === '' ? 'border-red-300' : ''}`}
-                            placeholder="TK mẹ *"
-                            required
-                          />
-                        </td>
+
                         <td className="border border-gray-300 dark:border-gray-600 px-2 py-1">
                           <Input
                             value={item.ten_tai_khoan}
