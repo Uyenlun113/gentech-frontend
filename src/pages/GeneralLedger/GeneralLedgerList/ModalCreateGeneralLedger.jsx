@@ -479,7 +479,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
       title: "Tên khách hàng",
       width: 200,
       render: (val, row) => (
-        <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
+        <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'} `}>
           {row.ten_kh}
         </div>
       )

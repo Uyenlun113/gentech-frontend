@@ -108,7 +108,7 @@ export const useListAccount = () => {
       fixed: "left",
       width: 300,
       render: (_, record) => {
-        return <div className="text-left">{record?.ten_tk}</div>;
+        return <div className="text-center">{record?.ten_tk}</div>;
       },
     },
     {

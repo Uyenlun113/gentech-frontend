@@ -129,7 +129,7 @@ export const useGeneralLedgerList = () => {
 
   const columnsTable = [
     {
-      key: "ma_ct",
+      key: "so_ct",
       title: "Mã chứng từ",
       fixed: "left",
       width: 100,

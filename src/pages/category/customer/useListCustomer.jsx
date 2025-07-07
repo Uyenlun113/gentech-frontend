@@ -79,12 +79,14 @@ export const useListCustomer = () => {
             title: "Mã khách hàng",
             fixed: "left",
             width: 150,
+            render: (val) => <div className="text-center">{val}</div>,
         },
         {
             key: "ten_kh",
             title: "Tên khách hàng",
             fixed: "left",
             width: 200,
+            render: (val) => <div className="text-center">{val}</div>,
         },
         {
             key: "doi_tac",
