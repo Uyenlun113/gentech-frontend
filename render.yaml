@@ -1,0 +1,4 @@
+buildCommand: |
+  corepack enable
+  corepack enable && corepack prepare yarn@4.7.0 --activate && yarn install --immutable && npm run build
+  yarn install
