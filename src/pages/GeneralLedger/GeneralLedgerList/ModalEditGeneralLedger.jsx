@@ -1,6 +1,6 @@
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
-import { Calendar, Edit3, Loader2, Save, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Calendar, Edit3, Loader2, Plus, Save, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Flatpickr from "react-flatpickr";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
@@ -9,8 +9,6 @@ import Input from "../../../components/form/input/InputField";
 import TextArea from "../../../components/form/input/TextArea";
 import Label from "../../../components/form/Label";
 import Select from "../../../components/form/Select";
-import AccountSelectionPopup from "../../../components/general/AccountSelectionPopup";
-import TableBasic from "../../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../../components/ui/modal";
 import { Tabs } from "../../../components/ui/tabs";
 import { useAccounts } from "../../../hooks/useAccounts";
@@ -21,7 +19,7 @@ import { CalenderIcon } from "../../../icons";
 // Constants
 const STATUS_OPTIONS = [
   { value: "1", label: "Đã ghi sổ cái" },
-  { value: "0", label: "Chưa ghi sổ cái" },
+  { value: "2", label: "Chưa ghi sổ cái" },
 ];
 
 const FLATPICKR_OPTIONS = {
@@ -84,6 +82,37 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
   );
   const { mutateAsync: updateAccounting, isPending: isUpdating } = useUpdateGeneralAccounting();
 
+  // Tính tổng PS Nợ và PS Có
+  const totals = useMemo(() => {
+    const totalPsNo = hachToanData.reduce((sum, item) => {
+      const value = parseFloat(item.ps_no) || 0;
+      return sum + value;
+    }, 0);
+
+    const totalPsCo = hachToanData.reduce((sum, item) => {
+      const value = parseFloat(item.ps_co) || 0;
+      return sum + value;
+    }, 0);
+
+    return { totalPsNo, totalPsCo };
+  }, [hachToanData]);
+
+  // Hàm lấy tên tài khoản từ API khi load data
+  const fetchAccountName = useCallback(async (tk_i) => {
+    if (!tk_i) return "";
+    try {
+      // Gọi API lấy thông tin tài khoản theo mã
+      const response = await fetch(`/api/accounts/by-code/${tk_i}`);
+      if (response.ok) {
+        const account = await response.json();
+        return account.ten_tk || "";
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy tên tài khoản:", error);
+    }
+    return "";
+  }, []);
+
   // Load data when record is fetched
   useEffect(() => {
     if (recordData?.phieu) {
@@ -93,27 +122,35 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
       setFormData({
         ngayHachToan: phieu.ngay_ct ? phieu.ngay_ct.split("T")[0] : "",
         ngayLapChungTu: phieu.ngay_lct ? phieu.ngay_lct.split("T")[0] : "",
-        quyenSo: phieu.quyen_so || "",
-        soChungTu: phieu.ma_ct?.trim() || "",
+        quyenSo: phieu.ma_ct?.trim() || "",
+        soChungTu: phieu.so_ct?.trim() || "",
         tyGia: phieu.ty_giaf || 0,
-        trangThai: phieu.trang_thai || "1",
+        // Sửa lại mapping trạng thái
+        trangThai: phieu.trang_thai || phieu.status || "1",
         dienGiaiChung: phieu.dien_giai || "",
       });
 
-      // Set accounting data
+      // Set accounting data và lấy tên tài khoản
       if (hachToan.length > 0) {
-        setHachToanData(
-          hachToan.map((item, index) => ({
-            id: index + 1,
-            stt_rec: (index + 1).toString(),
-            tk_i: item.tk_i?.trim() || "",
-            ten_tk: item.ten_tk || "",
-            ps_no: item.ps_no || "",
-            ps_co: item.ps_co || "",
-            nh_dk: item.nh_dk?.trim() || "",
-            dien_giaii: item.dien_giaii || "",
-          }))
-        );
+        const loadAccountNames = async () => {
+          const updatedHachToan = await Promise.all(
+            hachToan.map(async (item, index) => {
+              const ten_tk = item.ten_tk || await fetchAccountName(item.tk_i);
+              return {
+                id: index + 1,
+                stt_rec: (index + 1).toString(),
+                tk_i: item.tk_i?.trim() || "",
+                ten_tk: ten_tk,
+                ps_no: item.ps_no || "",
+                ps_co: item.ps_co || "",
+                nh_dk: item.nh_dk?.trim() || "",
+                dien_giaii: item.dien_giaii || "",
+              };
+            })
+          );
+          setHachToanData(updatedHachToan);
+        };
+        loadAccountNames();
       }
 
       // Set tax contract data
@@ -128,7 +165,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
         );
       }
     }
-  }, [recordData]);
+  }, [recordData, fetchAccountName]);
 
   // Debounced search effects
   useEffect(() => {
@@ -252,40 +289,84 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
     setHopDongThueData(prev => prev.filter(item => item.id !== id));
   }, []);
 
+  const validateForm = useCallback(() => {
+    // Kiểm tra các trường bắt buộc
+    if (!formData.ngayHachToan) {
+      toast.error("Vui lòng nhập ngày hạch toán");
+      return false;
+    }
+    if (!formData.ngayLapChungTu) {
+      toast.error("Vui lòng nhập ngày lập chứng từ");
+      return false;
+    }
+    if (!formData.soChungTu) {
+      toast.error("Vui lòng nhập số chứng từ");
+      return false;
+    }
+
+    // Kiểm tra cân đối PS Nợ và PS Có
+    if (Math.abs(totals.totalPsNo - totals.totalPsCo) > 0.01) {
+      toast.error("Tổng PS Nợ và PS Có phải bằng nhau!");
+      return false;
+    }
+
+    // Kiểm tra ít nhất có 1 dòng hạch toán hợp lệ
+    const validAccountingRows = hachToanData.filter(row =>
+      row.tk_i && (parseFloat(row.ps_no) > 0 || parseFloat(row.ps_co) > 0)
+    );
+    if (validAccountingRows.length === 0) {
+      toast.error("Vui lòng nhập ít nhất một dòng hạch toán hợp lệ");
+      return false;
+    }
+
+    return true;
+  }, [formData, totals, hachToanData]);
+
   const handleUpdate = useCallback(async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const payload = {
         phieu: {
-          ma_ct: formData.soChungTu,
+          ma_ct: formData.quyenSo,
+          so_ct: formData.soChungTu,
           ngay_lct: formData.ngayLapChungTu,
+          ps_no: totals.totalPsNo,
+          ps_co: totals.totalPsCo,
           dien_giai: formData.dienGiaiChung,
           ty_giaf: Number(formData.tyGia),
+          trang_thai: formData.trangThai,
         },
-        hachToan: hachToanData.map(({ tk_i, ps_no, ps_co, nh_dk, dien_giaii }) => ({
-          tk_i,
-          ps_no: Number(ps_no || 0),
-          ps_co: Number(ps_co || 0),
-          nh_dk,
-          dien_giaii,
-        })),
-        hopDongThue: hopDongThueData.map(({ so_seri0, ma_kh, ten_kh }) => ({
-          so_seri0,
-          ma_kh,
-          ten_kh,
-        })),
+        hachToan: hachToanData
+          .filter(row => row.tk_i && (parseFloat(row.ps_no) > 0 || parseFloat(row.ps_co) > 0))
+          .map(({ tk_i, ps_no, ps_co, nh_dk, dien_giaii }) => ({
+            tk_i,
+            ps_no: Number(ps_no || 0),
+            ps_co: Number(ps_co || 0),
+            nh_dk,
+            dien_giaii,
+          })),
+        hopDongThue: hopDongThueData
+          .filter(row => row.so_seri0 || row.ma_kh)
+          .map(({ so_seri0, ma_kh, ten_kh }) => ({
+            so_seri0,
+            ma_kh,
+            ten_kh,
+          })),
       };
 
       await updateAccounting({ stt_rec, payload });
       closeModalEdit();
       toast.success("Cập nhật thành công!");
-      navigate("/general-ledger/list");
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi cập nhật: " + (err?.message || "Không xác định"));
     }
-  }, [formData, hachToanData, hopDongThueData, updateAccounting, stt_rec, closeModalEdit, navigate]);
+  }, [formData, hachToanData, hopDongThueData, totals, updateAccounting, stt_rec, closeModalEdit, navigate, validateForm]);
 
-  // Table columns
+  // Table columns với dòng tổng
   const hachToanColumns = [
     {
       key: "stt_rec",
@@ -294,7 +375,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
       width: 80,
       render: (val, row) => (
         <div className="text-center font-medium text-gray-700">
-          {row.stt_rec}
+          {row.id === 'total' ? 'Tổng' : row.stt_rec}
         </div>
       )
     },
@@ -303,21 +384,26 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
       title: "Tài khoản",
       width: 200,
       fixed: "left",
-      render: (val, row) => (
-        <Input
-          value={row.tk_i}
-          onChange={(e) => handleHachToanChange(row.id, "tk_i", e.target.value)}
-          placeholder="Nhập mã TK..."
-          className="w-full"
-        />
-      ),
+      render: (val, row) => {
+        if (row.id === 'total') {
+          return <div className="font-bold text-gray-900">TỔNG CỘNG</div>;
+        }
+        return (
+          <Input
+            value={row.tk_i}
+            onChange={(e) => handleHachToanChange(row.id, "tk_i", e.target.value)}
+            placeholder="Nhập mã TK..."
+            className="w-full"
+          />
+        );
+      },
     },
     {
       key: "ten_tk",
       title: "Tên tài khoản",
       width: 250,
       render: (val, row) => (
-        <div className="text-gray-800 font-medium">
+        <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
           {row.ten_tk}
         </div>
       )
@@ -326,72 +412,116 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
       key: "ps_no",
       title: "PS Nợ",
       width: 200,
-      render: (val, row) => (
-        <Input
-          type="number"
-          value={row.ps_no}
-          onChange={(e) => handleHachToanChange(row.id, "ps_no", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
-      ),
+      render: (val, row) => {
+        if (row.id === 'total') {
+          return (
+            <div className="text-right font-bold text-lg text-blue-600 bg-blue-50 p-2 rounded">
+              {totals.totalPsNo.toLocaleString('vi-VN')}
+            </div>
+          );
+        }
+        return (
+          <Input
+            type="number"
+            value={row.ps_no}
+            onChange={(e) => handleHachToanChange(row.id, "ps_no", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+          />
+        );
+      },
     },
     {
       key: "ps_co",
       title: "PS Có",
       width: 200,
-      render: (val, row) => (
-        <Input
-          type="number"
-          value={row.ps_co}
-          onChange={(e) => handleHachToanChange(row.id, "ps_co", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
-      ),
+      render: (val, row) => {
+        if (row.id === 'total') {
+          return (
+            <div className="text-right font-bold text-lg text-green-600 bg-green-50 p-2 rounded">
+              {totals.totalPsCo.toLocaleString('vi-VN')}
+            </div>
+          );
+        }
+        return (
+          <Input
+            type="number"
+            value={row.ps_co}
+            onChange={(e) => handleHachToanChange(row.id, "ps_co", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+          />
+        );
+      },
     },
     {
       key: "nh_dk",
       title: "NH ĐK",
       width: 200,
-      render: (val, row) => (
-        <Input
-          value={row.nh_dk}
-          onChange={(e) => handleHachToanChange(row.id, "nh_dk", e.target.value)}
-          placeholder="Nhập NH ĐK..."
-          className="w-full"
-        />
-      ),
+      render: (val, row) => {
+        if (row.id === 'total') return <div></div>;
+        return (
+          <Input
+            value={row.nh_dk}
+            onChange={(e) => handleHachToanChange(row.id, "nh_dk", e.target.value)}
+            placeholder="Nhập NH ĐK..."
+            className="w-full"
+          />
+        );
+      },
     },
     {
       key: "dien_giaii",
       title: "Diễn giải",
       width: 200,
-      render: (val, row) => (
-        <Input
-          value={row.dien_giaii}
-          onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
-          placeholder="Diễn giải..."
-          className="w-full"
-        />
-      ),
+      render: (val, row) => {
+        if (row.id === 'total') return <div></div>;
+        return (
+          <Input
+            value={row.dien_giaii}
+            onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
+            placeholder="Diễn giải..."
+            className="w-full"
+          />
+        );
+      },
     },
     {
       key: "action",
       title: "Hành động",
       fixed: "right",
       width: 100,
-      render: (_, row) => (
-        <button
-          onClick={() => deleteHachToanRow(row.id)}
-          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-          title="Xóa dòng"
-        >
-          <Trash2 size={18} />
-        </button>
-      ),
+      render: (_, row) => {
+        if (row.id === 'total') return <div></div>;
+        return (
+          <button
+            onClick={() => deleteHachToanRow(row.id)}
+            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+            title="Xóa dòng"
+          >
+            <Trash2 size={18} />
+          </button>
+        );
+      },
     },
   ];
+
+  // Thêm dòng tổng vào data
+  const hachToanDataWithTotal = useMemo(() => {
+    return [
+      ...hachToanData,
+      {
+        id: 'total',
+        stt_rec: 'Tổng',
+        tk_i: '',
+        ten_tk: '',
+        ps_no: totals.totalPsNo,
+        ps_co: totals.totalPsCo,
+        nh_dk: '',
+        dien_giaii: ''
+      }
+    ];
+  }, [hachToanData, totals]);
 
   const hopDongThueColumns = [
     {
@@ -452,8 +582,8 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
       <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-md">
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <div className="relative">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-            <div className="absolute inset-0 w-12 h-12 border-4 border-blue-100 rounded-full"></div>
+            <Loader2 className="w-12 h-12 text-orange-600 animate-spin" />
+            <div className="absolute inset-0 w-12 h-12 border-4 border-orange-100 rounded-full"></div>
           </div>
           <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
             Đang tải dữ liệu
@@ -604,6 +734,22 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
             </div>
           </ComponentCard>
 
+          {/* Hiển thị cảnh báo nếu không cân đối */}
+          {Math.abs(totals.totalPsNo - totals.totalPsCo) > 0.01 && (
+            <div className="mx-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-800">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Cảnh báo: Tổng PS Nợ và PS Có chưa cân đối!</span>
+              </div>
+              <p className="mt-1 text-sm text-red-600">
+                PS Nợ: {totals.totalPsNo.toLocaleString('vi-VN')} | PS Có: {totals.totalPsCo.toLocaleString('vi-VN')} |
+                Chênh lệch: {Math.abs(totals.totalPsNo - totals.totalPsCo).toLocaleString('vi-VN')}
+              </p>
+            </div>
+          )}
+
           {/* Tabs */}
           <ComponentCard className="shadow-lg border-0">
             <Tabs
@@ -612,15 +758,53 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
                   label: "Hạch toán",
                   content: (
                     <div className="">
-                      <TableBasic
-                        data={hachToanData}
-                        columns={hachToanColumns}
-                        onAddRow={addHachToanRow}
-                        onDeleteRow={deleteHachToanRow}
-                        showAddButton={true}
-                        addButtonText="Thêm dòng "
-                        className="w-full"
-                      />
+                      {/* Nút thêm dòng */}
+                      <div className="mb-4">
+                        <button
+                          onClick={addHachToanRow}
+                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2"
+                        >
+                          <Plus size={16} />
+                          Thêm dòng
+                        </button>
+                      </div>
+
+                      {/* Bảng hạch toán */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-gray-300">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              {hachToanColumns.map((col) => (
+                                <th
+                                  key={col.key}
+                                  className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-900"
+                                  style={{ width: col.width }}
+                                >
+                                  {col.title}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {hachToanDataWithTotal.map((row, index) => (
+                              <tr
+                                key={row.id}
+                                className={row.id === 'total' ? 'bg-gray-100 font-bold' : 'hover:bg-gray-50'}
+                              >
+                                {hachToanColumns.map((col) => (
+                                  <td
+                                    key={col.key}
+                                    className="border border-gray-300 px-2 py-2"
+                                    style={{ width: col.width }}
+                                  >
+                                    {col.render ? col.render(row[col.key], row, index) : row[col.key]}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   ),
                 },
@@ -628,15 +812,50 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
                   label: "Hợp đồng thuế",
                   content: (
                     <div className="">
-                      <TableBasic
-                        data={hopDongThueData}
-                        columns={hopDongThueColumns}
-                        onAddRow={addHopDongThueRow}
-                        onDeleteRow={deleteHopDongThueRow}
-                        showAddButton={true}
-                        addButtonText="Thêm dòng"
-                        className="w-full"
-                      />
+                      {/* Nút thêm dòng */}
+                      <div className="mb-4">
+                        <button
+                          onClick={addHopDongThueRow}
+                          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2"
+                        >
+                          <Plus size={16} />
+                          Thêm dòng
+                        </button>
+                      </div>
+
+                      {/* Bảng hợp đồng thuế */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-gray-300">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              {hopDongThueColumns.map((col) => (
+                                <th
+                                  key={col.key}
+                                  className="border border-gray-300 px-4 py-2 text-left font-medium text-gray-900"
+                                  style={{ width: col.width }}
+                                >
+                                  {col.title}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {hopDongThueData.map((row, index) => (
+                              <tr key={row.id} className="hover:bg-gray-50">
+                                {hopDongThueColumns.map((col) => (
+                                  <td
+                                    key={col.key}
+                                    className="border border-gray-300 px-2 py-2"
+                                    style={{ width: col.width }}
+                                  >
+                                    {col.render ? col.render(row[col.key], row, index) : row[col.key]}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   ),
                 },
@@ -678,24 +897,56 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, stt_rec }) 
         </div>
 
         {/* Popups */}
-        {searchStates.showAccountPopup && (
-          <AccountSelectionPopup
-            isOpen={true}
-            onClose={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false }))}
-            onSelect={(account) => handleAccountSelect(searchStates.tkSearchRowId, account)}
-            accounts={accountRawData.data || []}
-            searchValue={searchStates.tkSearch}
-          />
+        {searchStates.showAccountPopup && accountRawData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">Chọn tài khoản</h3>
+              <div className="space-y-2">
+                {accountRawData.data?.map((account) => (
+                  <div
+                    key={account.tk}
+                    onClick={() => handleAccountSelect(searchStates.tkSearchRowId, account)}
+                    className="p-2 hover:bg-gray-100 cursor-pointer rounded border"
+                  >
+                    <div className="font-medium">{account.tk}</div>
+                    <div className="text-sm text-gray-600">{account.ten_tk}</div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false }))}
+                className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         )}
 
-        {searchStates.showCustomerPopup && (
-          <CustomerSelectionPopup
-            isOpen={true}
-            onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
-            onSelect={(customer) => handleCustomerSelect(searchStates.maKhSearchRowId, customer)}
-            customers={customerData.data || []}
-            searchValue={searchStates.maKhSearch}
-          />
+        {searchStates.showCustomerPopup && customerData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">Chọn khách hàng</h3>
+              <div className="space-y-2">
+                {customerData.data?.map((customer) => (
+                  <div
+                    key={customer.ma_kh}
+                    onClick={() => handleCustomerSelect(searchStates.maKhSearchRowId, customer)}
+                    className="p-2 hover:bg-gray-100 cursor-pointer rounded border"
+                  >
+                    <div className="font-medium">{customer.ma_kh}</div>
+                    <div className="text-sm text-gray-600">{customer.ten_kh}</div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
+                className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </Modal>

@@ -66,7 +66,6 @@ export const useGetGeneralAccounting = (params) => {
 };
 
 export const useGetGeneralAccountingById = (stt_rec) => {
-  console.log("🎯 useGetGeneralAccountingById called with stt_rec:", stt_rec);
   return useQuery({
     queryKey: ["generalAccounting", stt_rec],
     queryFn: async () => {

@@ -176,7 +176,6 @@ export const useGeneralLedgerList = () => {
       fixed: "right",
       width: 100,
       render: (_, record) => {
-        console.log(record);
         return (
           <div className="flex items-center gap-2 justify-center">
             <button
@@ -207,7 +206,7 @@ export const useGeneralLedgerList = () => {
       title: "Tài khoản",
       fixed: "left",
       width: 120,
-      render: (val) => <span className="font-mono">{val || "-"}</span>,
+      render: (val) => <span className="font-mono text-center">{val || "-"}</span>,
     },
     {
       key: "ps_no",

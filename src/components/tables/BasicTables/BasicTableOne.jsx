@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/tab
 const TableBasic = ({
   data,
   columns,
-  fixedColumnWidth = 200,
   onAddRow,
   onDeleteRow,
   showAddButton = false,
@@ -175,7 +174,7 @@ const TableBasic = ({
         <div className="flex justify-end">
           <button
             onClick={handleAddRow}
-            className="flex items-center text-sm gap-2 px-4 py-3 bg-brand-500 text-white rounded-xl hover:bg-blue-700 transition-colors"
+            className="flex items-center text-sm gap-2 px-4 py-3 bg-white text-black rounded-xl hover:bg-blue-700 transition-colors border border-black"
           >
             <Plus size={16} />
             {addButtonText}

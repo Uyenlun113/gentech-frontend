@@ -106,7 +106,7 @@ export const useListCashReceipt = () => {
             title: "Ngày lập phiếu thu",
             fixed: "left",
             width: 150,
-        },  
+        },
         {
             key: "ngay_ct",
             title: "Ngày hạch toán",
