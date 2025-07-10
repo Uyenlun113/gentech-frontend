@@ -379,7 +379,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
   // Thay thế toàn bộ phần return trong ModalEditCashReceipt:
 
   return (
-    <Modal isOpen={isOpenEdit} onClose={handleClose} title="Chỉnh sửa phiếu thu" className="max-w-[98vw] max-h-[95vh] m-1">
+    <Modal isOpen={isOpenEdit} onClose={handleClose} title="Chỉnh sửa phiếu thu" className="w-full max-w-7xl  m-1">
       <div className="relative w-full h-[88vh] bg-white dark:bg-gray-900 flex flex-col">
 
         {/* Header section - compact */}
