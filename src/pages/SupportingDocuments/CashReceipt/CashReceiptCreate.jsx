@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
-import Flatpickr from "react-flatpickr";
-import "flatpickr/dist/flatpickr.min.css";
-import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+// import Flatpickr from "react-flatpickr";
+// import "flatpickr/dist/flatpickr.min.css";
+// import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 import { CalenderIcon } from "../../../icons";
 import { useCreateCashReceipt } from "../../../hooks/useCashReceipt";
 import { useCustomers } from "../../../hooks/useCustomer";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useEffect } from "react";
+import { CalendarIcon, Plus, Save, Trash2, X } from "lucide-react";
 
 export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   const [formData, setFormData] = useState({
@@ -62,7 +66,10 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
       ? { search: maTaiKhoanSearchList[activeSearchIndex] }
       : {}
   );
-
+  const [selectedDates, setSelectedDates] = useState({
+    ngay_ct: null,
+    ngay_lct: null
+  });
   // Debounce customer search
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -164,21 +171,26 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     setShowAccountDropdown(false);
     setMaTaiKhoanSearch(account.tk);
   };
-
   const handleDateChange = (date, field) => {
+    if (!date) return;
+    console.log("✅ Chọn ngày:", date);
+
     setFormData(prev => ({
       ...prev,
-      [field]: date[0]?.toLocaleDateString("en-CA") || ""
+      [field]: date.toISOString().split("T")[0], // lưu dưới dạng "2025-07-11"
     }));
   };
+
+
 
   // Xử lý thay đổi dữ liệu tài khoản
   const handleTaiKhoanChange = (index, field, value) => {
     const newList = [...taiKhoanList];
     newList[index] = {
       ...newList[index],
-      [field]: field === 'ps_co' ? Number(value) || 0 : value
+      [field]: field === 'ps_co' ? Number(value) || 0 : value,
     };
+    console.log("🔄 Cập nhật tài khoản:", newList[index]);
     setTaiKhoanList(newList);
   };
 
@@ -187,7 +199,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
     if (taiKhoanList.length > 1) {
       const newList = taiKhoanList.filter((_, i) => i !== index);
       setTaiKhoanList(newList);
-      
+
       // Cập nhật lại search list và dropdown list
       setMaTaiKhoanSearchList(prev => prev.filter((_, i) => i !== index));
       setShowAccountDropdownList(prev => prev.filter((_, i) => i !== index));
@@ -282,14 +294,20 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
   };
 
   return (
-    <Modal isOpen={isOpenCreate} onClose={handleClose} title="Thêm mới phiếu thu" className="w-full max-w-7xl m-1 border-2 border-black">
+    <Modal isOpen={isOpenCreate} onClose={handleClose} title="Thêm mới phiếu thu" className="w-full max-w-7xl m-1 border-2">
       <form onSubmit={handleSubmit} className="relative w-full h-[88vh] bg-white dark:bg-gray-900 flex flex-col rounded-full">
-
-        {/* Header section - compact */}
-        <div className="px-4 py-3 border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0 rounded-t-3xl">
-          <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-            Nhập thông tin phiếu thu tiền vào hệ thống.
-          </p>
+        <div className="flex-shrink-0 px-6 lg:px-8 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-t-3xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-6 h-6 text-blue-600" />
+                Tạo phiếu thu tiền mặt
+              </h4>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Nhập thông tin phiếu thu tiền mặt mới vào hệ thống
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Content area - KHÔNG scroll, chia thành 2 phần cố định */}
@@ -300,7 +318,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
 
               {/* Khung trái - Thông tin chung */}
-              <div className="border border-gray-300 dark:border-gray-600 rounded-lg flex flex-col lg:col-span-3">
+              <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-3">
                 <div className="p-3 flex-1 overflow-y-auto">
                   <div className="space-y-2">
                     <div>
@@ -457,44 +475,38 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
               </div>
 
               {/* Khung phải - Chứng từ */}
-              <div className="border border-gray-300 dark:border-gray-600 rounded-lg flex flex-col lg:col-span-2">
+              <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-2">
                 <div className="p-3 flex-1 overflow-y-auto">
                   <div className="space-y-2">
                     <div>
                       <Label className="text-xs mb-0.5">Ngày hạch toán</Label>
                       <div className="relative w-full flatpickr-wrapper">
-                        <Flatpickr
-                          value={formData.ngay_ct}
+                        <DatePicker
+                          selected={formData.ngay_ct}
                           onChange={date => handleDateChange(date, "ngay_ct")}
-                          options={{
-                            dateFormat: "Y-m-d",
-                            locale: Vietnamese,
-                          }}
-                          placeholder="dd-mm-yyyy"
-                          className="h-8 w-full rounded-lg border appearance-none px-3 py-2 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="h-8 w-full rounded-lg border appearance-none px-3 py-2 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
                         />
-                        <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                        {/* <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                           <CalenderIcon className="size-4" />
-                        </span>
+                        </span> */}
                       </div>
                     </div>
 
                     <div>
                       <Label className="text-xs mb-0.5">Ngày lập phiếu thu</Label>
                       <div className="relative w-full flatpickr-wrapper">
-                        <Flatpickr
-                          value={formData.ngay_lct}
+                        <DatePicker
+                          selected={formData.ngay_lct}
                           onChange={date => handleDateChange(date, "ngay_lct")}
-                          options={{
-                            dateFormat: "Y-m-d",
-                            locale: Vietnamese,
-                          }}
-                          placeholder="dd-mm-yyyy"
-                          className="h-8 w-full rounded-lg border appearance-none px-3 py-2 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30  bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700  dark:focus:border-brand-800"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="h-8 w-full rounded-lg border appearance-none px-3 py-2 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
                         />
-                        <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                        {/* <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                           <CalenderIcon className="size-4" />
-                        </span>
+                        </span> */}
                       </div>
                     </div>
 
@@ -609,7 +621,7 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                             onFocus={() => {
                               // Set active search index
                               setActiveSearchIndex(index);
-                              
+
                               // Tắt tất cả dropdown khác trước
                               setShowAccountDropdownList(prev => {
                                 const updated = [...prev];
@@ -654,7 +666,8 @@ export const ModalCreateCashReceipt = ({ isOpenCreate, closeModalCreate }) => {
                                         const newList = [...taiKhoanList];
                                         newList[index].tk_so = account.tk;
                                         newList[index].ten_tai_khoan = account.ten_tk;
-                                        setTaiKhoanList(newList);
+                                        newList[index].tk_me = account.tk_me;
+                                        setTaiKhoanList(newList); 
 
                                         // Ẩn dropdown sau khi chọn
                                         setShowAccountDropdownList(prev => {
