@@ -75,15 +75,11 @@ export const useGeneralLedgerList = () => {
     }
 
     try {
-      console.log("Deleting:", recordToDelete);
-
       await deleteMutation.mutateAsync(recordToDelete.stt_rec);
-
       toast.success("Xóa thành công!");
       if (selectedRecord?.stt_rec === recordToDelete.stt_rec) {
         handleCloseCt11Table();
       }
-
       closeModalDelete();
       setRecordToDelete(null);
       refetchPh11Data();
@@ -101,7 +97,6 @@ export const useGeneralLedgerList = () => {
   const handleRowClick = async (record) => {
     setSelectedRecord(record);
     setShowCt11Table(true);
-    console.log("Selected record:", record);
 
     try {
       const res = await generalLedgerApi.fetchCt11Data(record.stt_rec);
@@ -206,7 +201,7 @@ export const useGeneralLedgerList = () => {
       title: "Tài khoản",
       fixed: "left",
       width: 120,
-      render: (val) => <span className="font-mono text-center">{val || "-"}</span>,
+      render: (val) => <div className="font-mono text-center">{val || "-"}</div>,
     },
     {
       key: "ps_no",
@@ -282,7 +277,6 @@ export const useGeneralLedgerList = () => {
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
-
   return {
     dataTable: filteredDataTable,
     dataCt11Table,

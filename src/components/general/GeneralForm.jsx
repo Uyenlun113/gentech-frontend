@@ -24,7 +24,7 @@ export default function GeneralForm() {
   const initialHachToanData = [
     { id: 1, stt_rec: '1', tk_i: '', ten_tk: '', ps_no: '', ps_co: '', nh_dk: '', dien_giaii: '' }
   ];
-  const initialHopDongThueData = [{ id: 1, so_seri0: '', ma_kh: '', ten_kh: '' }];
+  const initialHopDongThueData = [{ id: 1, so_seri00: '', ma_kh: '', ten_kh: '' }];
 
   const [ngayHachToan, setNgayHachToan] = useState("");
   const [ngayLapChungTu, setNgayLapChungTu] = useState("");
@@ -129,7 +129,7 @@ export default function GeneralForm() {
     setMaKhSearch("");
   };
 
-  const addHopDongThueRow = () => setHopDongThueData(prev => [...prev, { id: prev.length + 1, so_seri0: '', ma_kh: '', ten_kh: '' }]);
+  const addHopDongThueRow = () => setHopDongThueData(prev => [...prev, { id: prev.length + 1, so_seri00: '', ma_kh: '', ten_kh: '' }]);
   const deleteHopDongThueRow = (id) => setHopDongThueData(prev => prev.filter(item => item.id !== id));
 
   const hachToanColumns = [
@@ -152,7 +152,7 @@ export default function GeneralForm() {
   ];
 
   const hopDongThueColumns = [
-    { key: "so_seri0", title: "Số seri", width: 150, render: (val, row) => <Input value={row.so_seri0} onChange={e => handleHopDongThueChange(row.id, 'so_seri0', e.target.value)} /> },
+    { key: "so_seri00", title: "Số seri", width: 150, render: (val, row) => <Input value={row.so_seri00} onChange={e => handleHopDongThueChange(row.id, 'so_seri00', e.target.value)} /> },
     {
       key: "ma_kh", title: "Mã KH", width: 150, render: (val, row) => (
         <Input
@@ -187,8 +187,8 @@ export default function GeneralForm() {
           nh_dk,
           dien_giaii,
         })),
-        hopDongThue: hopDongThueData.map(({ so_seri0, ma_kh, ten_kh }) => ({
-          so_seri0,
+        hopDongThue: hopDongThueData.map(({ so_seri00, ma_kh, ten_kh }) => ({
+          so_seri00,
           ma_kh,
           ten_kh,
         })),

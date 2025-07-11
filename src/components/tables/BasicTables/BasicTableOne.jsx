@@ -10,6 +10,7 @@ const TableBasic = ({
   showAddButton = false,
   addButtonText = "Thêm dòng mới",
   onRowClick,
+  maxHeight = "max-h-[500px]",
 }) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -80,6 +81,14 @@ const TableBasic = ({
       };
 
       onAddRow(newRow);
+
+      // Scroll chỉ trong phần table container thay vì toàn bộ modal
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          // Scroll to bottom của table container
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      }, 100);
     }
   };
 
@@ -92,7 +101,7 @@ const TableBasic = ({
 
   const renderTableCell = (col, colIdx, value, row, isHeader = false) => {
     let cellStyle = {};
-    let cellClassName = `px-4 py-0 text-sm ${col.className || ""}`;
+    let cellClassName = `px-3 py-1.5 text-sm ${col.className || ""}`; // Giảm padding từ px-4 py-0 xuống px-3 py-1.5
 
     if (col.fixed === "left") {
       const leftColumnIndex = leftFixedColumns.indexOf(col);
@@ -152,10 +161,10 @@ const TableBasic = ({
       content = (
         <button
           onClick={() => handleDeleteRow(row)}
-          className="text-gray-500 hover:text-red-500 transition-colors"
+          className="text-gray-500 hover:text-red-500 transition-colors p-1" // Thêm p-1 để button nhỏ gọn hơn
           title="Xoá dòng"
         >
-          <Trash size={18} />
+          <Trash size={16} /> {/* Giảm size từ 18 xuống 16 */}
         </button>
       );
     }
@@ -168,26 +177,26 @@ const TableBasic = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3"> {/* Giảm space từ space-y-4 xuống space-y-3 */}
       {/* Add Button */}
       {showAddButton && (
         <div className="flex justify-end">
           <button
             onClick={handleAddRow}
-            className="flex items-center text-sm gap-2 px-4 py-3 bg-white text-black rounded-xl hover:bg-blue-700 transition-colors border border-black"
+            className="flex items-center text-sm gap-2 px-3 py-1.5 bg-white text-black rounded-lg hover:bg-gray-300 transition-colors border border-black" // Giảm padding và làm tròn nhỏ hơn
           >
-            <Plus size={16} />
+            <Plus size={14} /> {/* Giảm size từ 16 xuống 14 */}
             {addButtonText}
           </button>
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div ref={scrollContainerRef} className="w-full overflow-x-auto relative" style={{ scrollBehavior: "smooth" }}>
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"> {/* Giảm rounded từ rounded-xl xuống rounded-lg */}
+        <div ref={scrollContainerRef} className={`w-full overflow-x-auto overflow-y-auto ${maxHeight} relative`} style={{ scrollBehavior: "smooth" }}>
           <Table>
             <TableHeader>
-              <TableRow >
+              <TableRow>
                 {/* Left Fixed Columns */}
                 {leftFixedColumns.map((col, idx) => renderTableCell(col, idx, null, undefined, true))}
 
@@ -196,8 +205,7 @@ const TableBasic = ({
                   <TableCell
                     key={`scrollable-${idx}`}
                     isHeader
-                    className={`px-4 py-4 text-center text-xs font-medium bg-gray-50 dark:text-gray-400 ${col.className || ""
-                      }`}
+                    className={`px-3 py-2.5 text-center text-xs font-medium bg-gray-50 dark:text-gray-400 ${col.className || ""}`} // Giảm padding từ px-4 py-4 xuống px-3 py-2.5
                     style={{
                       width: col.width,
                       minWidth: col.minWidth || col.width,
@@ -216,7 +224,7 @@ const TableBasic = ({
 
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {data.map((row) => (
-                <TableRow key={row.id} onClick={() => onRowClick?.(row)} className="cursor-pointer hover:bg-gray-50">
+                <TableRow key={row.id} onClick={() => onRowClick?.(row)} className="cursor-pointer hover:bg-gray-50 h-10"> {/* Thêm h-10 để fix height */}
                   {/* Left Fixed Columns */}
                   {leftFixedColumns.map((col, colIdx) => {
                     const value = row[col.key];
@@ -229,7 +237,7 @@ const TableBasic = ({
                     return (
                       <TableCell
                         key={`scrollable-${colIdx}`}
-                        className="px-4 py-4 text-sm text-center leading-tight"
+                        className="px-3 py-1.5 text-sm text-center leading-tight" // Giảm padding từ px-4 py-4 xuống px-3 py-1.5
                         style={{
                           width: col.width,
                           minWidth: col.minWidth || col.width,
