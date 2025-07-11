@@ -93,7 +93,7 @@ export const useListCashReceipt = () => {
             key: "so_ct",
             title: "Số phiếu thu",
             fixed: "left",
-            width: 150,
+            width: 100,
         },
         {
             key: "ong_ba",
@@ -104,12 +104,13 @@ export const useListCashReceipt = () => {
         {
             key: "ngay_lct",
             title: "Ngày lập phiếu thu",
-            fixed: "left",
+            // fixed: "left",
             width: 150,
         },
         {
             key: "ngay_ct",
             title: "Ngày hạch toán",
+            // fixed: "left",
             width: 150,
         },
         {
@@ -120,7 +121,7 @@ export const useListCashReceipt = () => {
         {
             key: "ma_gd",
             title: "Loại phiếu thu",
-            width: 150,
+            width: 100,
         },
         {
             key: "ma_kh",
@@ -130,7 +131,7 @@ export const useListCashReceipt = () => {
         {
             key: "dia_chi",
             title: "Địa chỉ",
-            width: 200,
+            width: 250,
         },
         {
             key: "dien_giai",
