@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 import generalLedgerApi from "../services/generalLedger";
 
 export const useSaveGeneralAccounting = () => {
@@ -9,8 +10,11 @@ export const useSaveGeneralAccounting = () => {
       return await generalLedgerApi.createGeneralLedger(payload);
     },
     onSuccess: () => {
-      // Invalidate và refetch danh sách
       queryClient.invalidateQueries({ queryKey: ["generalAccounting"] });
+      toast.success("Lập phiếu kế toán thành công!");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi lập phiếu kế toán");
     },
   });
 };
@@ -23,12 +27,13 @@ export const useUpdateGeneralAccounting = () => {
       return await generalLedgerApi.updateGeneralLedger(stt_rec, payload);
     },
     onSuccess: (data, variables) => {
-      // Invalidate danh sách
       queryClient.invalidateQueries({ queryKey: ["generalAccounting"] });
-      // Invalidate chi tiết của record vừa update
       queryClient.invalidateQueries({ queryKey: ["generalAccounting", variables.stt_rec] });
-      // Invalidate CT11 data
       queryClient.invalidateQueries({ queryKey: ["ct11Data", variables.stt_rec] });
+      toast.success("Cập nhật phiếu kế toán thành công!");
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật phiếu kế toán");
     },
   });
 };
@@ -41,9 +46,7 @@ export const useDeleteGeneralAccounting = () => {
       return await generalLedgerApi.deleteGeneralLedger(stt_rec);
     },
     onSuccess: (data, stt_rec) => {
-      // Invalidate danh sách
       queryClient.invalidateQueries({ queryKey: ["generalAccounting"] });
-      // Remove chi tiết của record vừa xóa khỏi cache
       queryClient.removeQueries({ queryKey: ["generalAccounting", stt_rec] });
       queryClient.removeQueries({ queryKey: ["ct11Data", stt_rec] });
     },

@@ -25,7 +25,9 @@ const generalLedgerApi = {
 
   getGeneralLedgerById: async (stt_rec) => {
     const response = await axios.get(`${API_BASE_URL}/general-accounting/find-one/${stt_rec}`);
+    console.log(response.data);
     return response.data;
+
   },
 
   fetchCt11Data: async (stt_rec) => {

@@ -22,10 +22,8 @@ export default function GeneralLedgerListPage() {
     columnsSubTable,
     rangePickerValue,
     loading,
-    searchTerm,
     currentPage,
     totalItems,
-    selectedRecord,
     recordToDelete,
     isOpenDelete,
     handleRangePicker,
@@ -35,14 +33,12 @@ export default function GeneralLedgerListPage() {
     handleConfirmDelete,
     handleCancelDelete,
     fetchCt11Data,
-    fetchPh11Data,
     isOpenCreate,
     openModalCreate,
     closeModalCreate,
     isOpenEdit,
     closeModalEdit,
     selectedEditId,
-    setSelectedEditId,
   } = useGeneralLedgerList();
 
   const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -65,10 +61,8 @@ export default function GeneralLedgerListPage() {
       <ModalEditGeneralLedger
         isOpenEdit={isOpenEdit}
         closeModalEdit={closeModalEdit}
-        stt_rec={selectedEditId}
-        setSelectedEditId={setSelectedEditId}
+        editingId={selectedEditId}
       />
-
       <PageMeta title="Danh sách phiếu kế toán tổng hợp" description="Danh sách phiếu kế toán tổng hợp" />
       <PageBreadcrumb pageTitle="Danh sách phiếu kế toán tổng hợp" />
       <div className="space-y-6">
