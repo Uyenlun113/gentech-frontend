@@ -42,11 +42,11 @@ export const useGeneralLedgerList = () => {
   }, [fetchPh11Data]);
 
   const dataCt11Table = useMemo(() => {
-    if (fetchCt11Data?.status === 200 && fetchCt11Data?.data) {
-      return fetchCt11Data.data;
+    if (fetchCt11Data?.status === 200 && Array.isArray(fetchCt11Data.data)) {
+      return fetchCt11Data.data
     }
     return [];
-  }, [fetchCt11Data]);
+  }, [fetchCt11Data?.status, fetchCt11Data?.data]);
 
   useEffect(() => {
     setLoading(isLoadingPh11 || isLoadingCt11 || deleteMutation.isPending);
@@ -101,7 +101,10 @@ export const useGeneralLedgerList = () => {
     try {
       const res = await generalLedgerApi.fetchCt11Data(record.stt_rec);
       if (res?.status === 200 && Array.isArray(res.data)) {
-        record.children = res.data;
+        record.children = res.data.map((item, index) => ({
+          ...item,
+          stt: index + 1,
+        }));
       } else {
         record.children = [];
       }
@@ -121,33 +124,74 @@ export const useGeneralLedgerList = () => {
     setSelectedEditId(id);
     openModalEdit();
   };
+  const [psCoMap, setPsCoMap] = useState({});
+
+  useEffect(() => {
+    const fetchAllCt11Data = async () => {
+      if (!dataTable?.length) {
+        console.warn("Không có dataTable để tính ps_co");
+        return;
+      }
+
+      try {
+        const sttRecList = [...new Set(dataTable.map((item) => item.stt_rec?.trim?.()))];
+        const res = await generalLedgerApi.fetchCt11Data(sttRecList);
+        if (res?.status === 200 && Array.isArray(res.data)) {
+          const psMap = {};
+          res.data.forEach((item) => {
+            const key = item.stt_rec?.trim?.();
+            const psCoValue = parseFloat(item.ps_co) || 0;
+            if (key) {
+              if (!psMap[key]) psMap[key] = 0;
+              psMap[key] += psCoValue;
+            }
+          });
+          setPsCoMap(psMap);
+        }
+      } catch (err) {
+        console.error("Lỗi khi fetch CT11 all:", err);
+      }
+    };
+
+    fetchAllCt11Data();
+  }, [JSON.stringify(dataTable)]);
+
 
   const columnsTable = [
     {
+      key: "stt",
+      title: "STT",
+      width: 50,
+      fixed: "left",
+      render: (_, record) => {
+        return <div className="font-medium text-center">{record?.stt}</div>;
+      },
+    },
+    {
+      key: "ngay_lct",
+      title: "Ngày lập chứng từ",
+      fixed: "left",
+      width: 140,
+      render: (val) => {
+        return <div className="font-medium text-center">{formatDate(val)}</div>;
+      },
+    },
+    {
       key: "so_ct",
-      title: "Mã chứng từ",
+      title: "Số chứng từ",
       fixed: "left",
       width: 100,
       render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
     },
     {
-      key: "stt_rec",
-      title: "STT Record",
-      fixed: "left",
+      key: "ps_co_total",
+      title: "Tổng PS ngoại tệ",
       width: 140,
-      render: (val) => <div className="font-mono text-sm text-center">{val || "-"}</div>,
-    },
-    {
-      key: "ngay_lct",
-      title: "Ngày lập chứng từ",
-      width: 140,
-      render: (val) => formatDate(val),
-    },
-    {
-      key: "ngay_ct",
-      title: "Ngày chứng từ",
-      width: 140,
-      render: (val) => formatDate(val),
+      render: (_, record) => (
+        <div className="font-mono text-sm text-center">
+          {formatCurrency(psCoMap[record.stt_rec] || 0)}
+        </div>
+      ),
     },
     {
       key: "dien_giai",
@@ -196,6 +240,13 @@ export const useGeneralLedgerList = () => {
 
   // Columns for Ct11 sub-table
   const columnsSubTable = [
+    {
+      key: "stt",
+      title: "STT",
+      width: 50,
+      fixed: "left",
+      render: (_, record) => <div className="text-center">{record.stt}</div>,
+    },
     {
       key: "tk_i",
       title: "Tài khoản",
@@ -262,7 +313,10 @@ export const useGeneralLedgerList = () => {
       });
     }
 
-    return filtered;
+    return filtered.map((item, index) => ({
+      ...item,
+      stt: index + 1,
+    }));
   }, [dataTable, searchTerm, rangePickerValue]);
 
   const handleRangePicker = (date) => {
@@ -271,7 +325,6 @@ export const useGeneralLedgerList = () => {
 
   const handleChangePage = (page) => {
     console.log("Page changed to:", page);
-    // Add pagination logic here
   };
 
   const handleSearch = (value) => {
@@ -299,7 +352,6 @@ export const useGeneralLedgerList = () => {
     handleConfirmDelete,
     handleCancelDelete,
     setSelectedRecord,
-    // Export thêm các state và function cần thiết
     deleteMutation,
     fetchCt11Data,
     fetchPh11Data,

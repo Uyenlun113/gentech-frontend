@@ -24,7 +24,7 @@ const INITIAL_ACCOUNTING_DATA = [
     stt_rec: "1",
     tk_i: "",
     ten_tk: "",
-    ma_kh: "",
+    ma_kh_i: "",
     ten_kh: "",
     ps_no: "",
     ps_co: "",
@@ -93,10 +93,8 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     showCustomerPopup: false,
   });
 
-
   const hachToanTableRef = useRef(null);
   const hopDongThueTableRef = useRef(null);
-
 
   const { data: accountRawData = {} } = useAccounts(
     searchStates.tkSearch ? { search: searchStates.tkSearch } : {}
@@ -140,9 +138,19 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     return () => clearTimeout(timer);
   }, [searchStates.maKhSearch]);
 
-  // Handlers
+  // UPDATED: Handlers with auto-fill description logic
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+
+    // AUTO-FILL: Khi thay đổi "dienGiaiChung", fill xuống tất cả dòng hạch toán
+    if (field === "dienGiaiChung") {
+      setHachToanData(prevHachToan =>
+        prevHachToan.map(item => ({
+          ...item,
+          dien_giaii: value // Fill diễn giải chung xuống tất cả dòng
+        }))
+      );
+    }
   }, []);
 
   const handleDateChange = useCallback((date, field) => {
@@ -150,21 +158,40 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     handleFormChange(field, formattedDate);
   }, [handleFormChange]);
 
+  // UPDATED: handleHachToanChange với two-way sync cho diễn giải
   const handleHachToanChange = useCallback((id, field, value) => {
     setHachToanData(prev => {
       // Cập nhật giá trị cho dòng hiện tại
       const newData = prev.map(item =>
         item.id === id ? { ...item, [field]: value } : item
       );
-      if (id === 1) {
 
-        if (field === "ma_kh" || field === "ten_kh" || field === "nh_dk") {
+      if (id === 1) {
+        // Auto-fill từ dòng đầu tiên xuống các dòng khác
+        if (field === "ma_kh_i" || field === "ten_kh" || field === "nh_dk") {
           return newData.map((item, index) => {
             if (index === 0) return item;
             return { ...item, [field]: value };
           });
         }
+
+        // NEW: Two-way sync cho diễn giải
+        if (field === "dien_giaii") {
+          // Cập nhật "Diễn giải chung" ở đầu phiếu
+          setFormData(prevForm => ({
+            ...prevForm,
+            dienGiaiChung: value
+          }));
+
+          // Fill xuống tất cả dòng khác
+          return newData.map((item, index) => {
+            if (index === 0) return item; // Giữ nguyên dòng đầu
+            return { ...item, dien_giaii: value }; // Fill xuống các dòng khác
+          });
+        }
       }
+
+      // Auto-reverse PS logic
       if ((field === "ps_no" || field === "ps_co") && id % 2 === 1) {
         const nextRowId = id + 1;
         const currentRow = newData.find(item => item.id === id);
@@ -184,6 +211,8 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
 
       return newData;
     });
+
+    // Search logic
     if (field === "tk_i") {
       setSearchStates(prev => ({
         ...prev,
@@ -192,7 +221,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         tkSearchField: "tk_i"
       }));
     }
-    if (field === "ma_kh") {
+    if (field === "ma_kh_i") {
       setSearchStates(prev => ({
         ...prev,
         maKhSearch: value,
@@ -201,7 +230,6 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
       }));
     }
   }, []);
-
 
   const handleHopDongThueChange = useCallback((id, field, value) => {
     setHopDongThueData(prev =>
@@ -262,10 +290,10 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
       setHachToanData(prev =>
         prev.map((item, index) => {
           if (item.id === id) {
-            return { ...item, ma_kh: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
+            return { ...item, ma_kh_i: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
           }
           if (id === 1 && index > 0) {
-            return { ...item, ma_kh: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
+            return { ...item, ma_kh_i: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
           }
           return item;
         })
@@ -295,6 +323,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     }));
   }, [searchStates.searchContext]);
 
+  // UPDATED: addHachToanRow với auto-fill diễn giải
   const addHachToanRow = useCallback(() => {
     setHachToanData(prev => {
       const newRowId = prev.length + 1;
@@ -305,12 +334,12 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         stt_rec: newRowId.toString(),
         tk_i: "",
         ten_tk: "",
-        ma_kh: prev.length > 0 ? prev[0].ma_kh : "",
+        ma_kh_i: prev.length > 0 ? prev[0].ma_kh_i : "",
         ten_kh: prev.length > 0 ? prev[0].ten_kh : "",
         ps_no: "",
         ps_co: "",
         nh_dk: prev.length > 0 ? prev[0].nh_dk : "",
-        dien_giaii: "",
+        dien_giaii: formData.dienGiaiChung || "",
       };
 
       if (isEvenRow && prev.length > 0) {
@@ -333,7 +362,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         }
       }
     }, 100);
-  }, []);
+  }, [formData.dienGiaiChung]); // Thêm dependency
 
   const deleteHachToanRow = useCallback((id) => {
     setHachToanData(prev => prev.filter(item => item.id !== id));
@@ -376,7 +405,6 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
   const deleteHopDongThueRow = useCallback((id) => {
     setHopDongThueData(prev => prev.filter(item => item.id !== id));
   }, []);
-
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -548,7 +576,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            value={row.ma_kh}
+            value={row.ma_kh_i}
             onChange={(e) => handleHachToanChange(row.id, "ma_kh_i", e.target.value)}
             placeholder="Nhập mã KH..."
             className="w-full"
@@ -638,8 +666,9 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
           <Input
             value={row.dien_giaii}
             onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
-            placeholder="Diễn giải..."
+            placeholder={formData.dienGiaiChung || "Diễn giải..."} // Hiển thị diễn giải chung làm placeholder
             className="w-full"
+            title="Diễn giải sẽ đồng bộ với 'Diễn giải chung' ở đầu phiếu"
           />
         );
       },
@@ -685,7 +714,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     ];
   }, [hachToanData, totals]);
 
-  // CẬP NHẬT: Bảng hợp đồng thuế với tìm kiếm tài khoản
+  // Bảng hợp đồng thuế với tìm kiếm tài khoản
   const hopDongThueColumns = [
     {
       key: "stt",
@@ -981,9 +1010,9 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         <div className="flex-1 overflow-y-auto">
           {/* Form thông tin cơ bản */}
           <div className="border-0 px-6 py-2">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Ngày hạch toán <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
@@ -992,14 +1021,14 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
                     onChange={(date) => handleDateChange(date, "ngayHachToan")}
                     options={FLATPICKR_OPTIONS}
                     placeholder="Chọn ngày hạch toán"
-                    className="w-full h-11 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   />
-                  <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <CalenderIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Ngày lập chứng từ <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
@@ -1008,42 +1037,44 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
                     onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
                     options={FLATPICKR_OPTIONS}
                     placeholder="Chọn ngày lập chứng từ"
-                    className="w-full h-11 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   />
-                  <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <CalenderIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Quyển sổ
                 </Label>
-                <Input
+                <input
+                  type="text"
                   value={formData.quyenSo}
                   onChange={(e) => handleFormChange("quyenSo", e.target.value)}
                   placeholder="Nhập quyển sổ..."
-                  className="w-full"
+                  className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Số chứng từ <span className="text-red-500">*</span>
                 </Label>
-                <Input
+                <input
+                  type="text"
                   value={formData.soChungTu}
                   onChange={(e) => handleFormChange("soChungTu", e.target.value)}
                   placeholder="Nhập số chứng từ..."
-                  className="w-full"
+                  className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Tỷ giá
                 </Label>
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-200">
-                  <span className="px-4 py-2.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
+                  <span className="px-2 py-1.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-xs">
                     VND
                   </span>
                   <input
@@ -1051,34 +1082,36 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
                     value={formData.tyGia}
                     onChange={(e) => handleFormChange("tyGia", e.target.value)}
                     placeholder="0"
-                    className="flex-1 px-4 py-2.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none"
+                    className="flex-1 px-3 py-1.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none h-9"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Trạng thái
                 </Label>
                 <Select
-                  value={formData.trangThai}
+                  defaultValue={formData.trangThai}
                   options={STATUS_OPTIONS}
                   onChange={(value) => handleFormChange("trangThai", value)}
-                  className="w-full"
+                  className="w-full h-9"
                 />
               </div>
             </div>
 
-            <div className="space-y-2 mt-2">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Diễn giải
+            {/* UPDATED: Diễn giải chung với visual indicator */}
+            <div className="space-y-1 mt-3">
+              <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                Diễn giải chung
               </Label>
-              <Input
+              <input
                 type="text"
                 value={formData.dienGiaiChung}
                 onChange={(e) => handleFormChange("dienGiaiChung", e.target.value)}
-                placeholder="Nhập diễn giải chung..."
-                className="w-full"
+                placeholder="Nhập diễn giải chung (sẽ áp dụng cho tất cả dòng hạch toán)..."
+                className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                title="Diễn giải này sẽ tự động điền vào tất cả dòng trong tab hạch toán"
               />
             </div>
           </div>
@@ -1149,30 +1182,26 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
         </div>
 
         {/* Popups */}
-        {
-          searchStates.showAccountPopup && (
-            <AccountSelectionPopup
-              isOpen={true}
-              onClose={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false }))}
-              onSelect={(account) => handleAccountSelect(searchStates.tkSearchRowId, account)}
-              accounts={accountRawData.data || []}
-              searchValue={searchStates.tkSearch}
-            />
-          )
-        }
+        {searchStates.showAccountPopup && (
+          <AccountSelectionPopup
+            isOpen={true}
+            onClose={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false }))}
+            onSelect={(account) => handleAccountSelect(searchStates.tkSearchRowId, account)}
+            accounts={accountRawData.data || []}
+            searchValue={searchStates.tkSearch}
+          />
+        )}
 
-        {
-          searchStates.showCustomerPopup && (
-            <CustomerSelectionPopup
-              isOpen={true}
-              onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
-              onSelect={(customer) => handleCustomerSelect(searchStates.maKhSearchRowId, customer)}
-              customers={customerData.data || []}
-              searchValue={searchStates.maKhSearch}
-            />
-          )
-        }
-      </div >
-    </Modal >
+        {searchStates.showCustomerPopup && (
+          <CustomerSelectionPopup
+            isOpen={true}
+            onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
+            onSelect={(customer) => handleCustomerSelect(searchStates.maKhSearchRowId, customer)}
+            customers={customerData.data || []}
+            searchValue={searchStates.maKhSearch}
+          />
+        )}
+      </div>
+    </Modal>
   );
 };

@@ -712,7 +712,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       key: "stt_rec",
       fixed: "left",
       title: "STT",
-      width: 80,
+      width: 50,
       render: (val, row) => (
         <div className="text-center font-medium text-gray-700">
           {row.id === 'total' ? 'Tổng' : row.stt_rec}
@@ -722,7 +722,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
     {
       key: "tk_i",
       title: "Tài khoản",
-      width: 150,
+      width: 100,
       fixed: "left",
       render: (val, row) => {
         if (row.id === 'total') {
@@ -899,7 +899,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       key: "stt",
       fixed: "left",
       title: "STT",
-      width: 80,
+      width: 50,
       render: (val, row) => (
         <div className="text-center font-medium text-gray-700">
           {row.id}
@@ -910,7 +910,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       key: "so_ct0",
       title: "Nhóm",
       fixed: "left",
-      width: 150,
+      width: 80,
       render: (val, row) => (
         <Input
           value={row.so_ct0}
@@ -923,7 +923,8 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
     {
       key: "ma_ms",
       title: "Số hóa đơn",
-      width: 150,
+      fixed: "left",
+      width: 100,
       render: (val, row) => (
         <Input
           value={row.ma_ms}
@@ -1173,7 +1174,6 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       </Modal>
     );
   }
-
   return (
     <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
@@ -1202,7 +1202,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
         <div className="flex-1 overflow-y-auto">
           {/* Form thông tin cơ bản */}
           <div className="border-0 px-6 py-2">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Ngày hạch toán <span className="text-red-500">*</span>
@@ -1213,7 +1213,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                     onChange={(date) => handleDateChange(date, "ngayHachToan")}
                     options={FLATPICKR_OPTIONS}
                     placeholder="Chọn ngày hạch toán"
-                    className="w-full h-11 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   />
                   <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -1229,7 +1229,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                     onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
                     options={FLATPICKR_OPTIONS}
                     placeholder="Chọn ngày lập chứng từ"
-                    className="w-full h-11 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   />
                   <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -1243,7 +1243,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                   value={formData.quyenSo}
                   onChange={(e) => handleFormChange("quyenSo", e.target.value)}
                   placeholder="Nhập quyển sổ..."
-                  className="w-full"
+                  className="w-full h-9 px-3 py-1.5"
                 />
               </div>
 
@@ -1255,7 +1255,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                   value={formData.soChungTu}
                   onChange={(e) => handleFormChange("soChungTu", e.target.value)}
                   placeholder="Nhập số chứng từ..."
-                  className="w-full"
+                  className="w-full h-9 px-3 py-1.5"
                 />
               </div>
 
@@ -1264,7 +1264,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                   Tỷ giá
                 </Label>
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-200">
-                  <span className="px-4 py-2.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
+                  <span className="h-9 px-3 py-1.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                     VND
                   </span>
                   <input
@@ -1272,7 +1272,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                     value={formData.tyGia}
                     onChange={(e) => handleFormChange("tyGia", e.target.value)}
                     placeholder="0"
-                    className="flex-1 px-4 py-2.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none"
+                    className="flex-1 h-9 px-3 py-1.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none"
                   />
                 </div>
               </div>
@@ -1282,11 +1282,12 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                   Trạng thái
                 </Label>
                 <Select
-                  value={STATUS_OPTIONS.find(option => option.value === formData.trangThai)}
+                  defaultValue={formData.trangThai}
                   options={STATUS_OPTIONS}
-                  onChange={(selectedOption) => handleFormChange("trangThai", selectedOption.value)}
-                  className="w-full"
+                  onChange={(value) => handleFormChange("trangThai", value)}
+                  className="h-9 px-3 py-1.5 text-sm"
                 />
+
               </div>
             </div>
 
@@ -1298,7 +1299,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
                 value={formData.dienGiaiChung}
                 onChange={(val) => handleFormChange("dienGiaiChung", val)}
                 placeholder="Nhập diễn giải chung..."
-                className="w-full"
+                className="w-full h-9 px-3 py-1.5"
               />
             </div>
           </div>
