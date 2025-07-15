@@ -1297,7 +1297,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
               </Label>
               <Input
                 value={formData.dienGiaiChung}
-                onChange={(val) => handleFormChange("dienGiaiChung", val)}
+                onChange={(e) => handleFormChange("dienGiaiChung", e.target.value)}
                 placeholder="Nhập diễn giải chung..."
                 className="w-full h-9 px-3 py-1.5"
               />
