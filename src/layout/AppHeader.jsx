@@ -133,7 +133,7 @@ const AppHeader = () => {
   const menuHeader = [
     {
       name: "Báo cáo nhanh",
-      path: "/reporting",
+      path: "/quick-report",
       color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     },
     {

@@ -30,8 +30,11 @@ import PayrollPage from "./pages/Payroll/Payroll";
 import PurchasesPage from "./pages/Purchases/Purchases";
 import SalesPage from "./pages/Sales/Sales";
 
+import CashCapitalPage from "./pages/Cash Capital/CashCapitalPage";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
+import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import QuickReport from "./pages/Quick Report/QuickReport";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 import SystemPage from "./pages/System/System";
 import BasicTables from "./pages/Tables/BasicTables";
@@ -43,7 +46,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 
 
 export default function App() {
@@ -56,15 +59,28 @@ export default function App() {
             {/* Dashboard Layout */}
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              {/* danh mục đối tượng */}
               <Route path="/category/customer" element={<ListCustomerPage />} />
+              {/* danh mục tài khoản */}
               <Route path="/category/account" element={<ListAccountPage />} />
+              {/* danh mục vật tư */}
               <Route path="/category/dmvt" element={<ListMaterialPage />} />
+              {/* danh mục nhóm vật tư */}
               <Route path="/category/material-group" element={<ListMaterialGroupPage />} />
+              {/* danh mục nhóm đối tượng */}
               <Route path="/category/dmnhkh" element={<ListCustomerGroupPage />} />
+              {/* danh mục kho */}
               <Route path="/category/dmkho" element={<ListWarehousePage />} />
+              {/* Báo cáo nhanh */}
+              <Route path="/quick-report" element={<QuickReport />} />
+              {/* Phiếu kế toán */}
+              <Route path="/general-ledger" element={<GeneralLedgerPage />} />
+              <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
+              {/* Vốn bằng tiền */}
+              <Route path="/cash-receipt" element={<CashCapitalPage />} />
+              {/* Phiếu chi tiền mặt */}
+              <Route path="/phieu-chi-tien-mat" element={<Ct46ListPage />} />
 
-
-              {/* Dashboard Page */}
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}
@@ -87,8 +103,7 @@ export default function App() {
               {/* Costing Page */}
               <Route path="/costing" element={<CostingPage />} />
               {/* General Ledger Page */}
-              <Route path="/general-ledger" element={<GeneralLedgerPage />} />
-              <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
+
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
               {/* System Page */}

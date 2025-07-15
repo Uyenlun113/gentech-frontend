@@ -48,10 +48,10 @@ export default function GeneralLedgerPage() {
   return (
     <div className="w-full h-full">
       {/* Header with icons */}
-      <div className=" border-b border-gray-200 p-8">
+      <div className=" border-b border-gray-200 p-8 bg-blue-50">
         <div className="flex justify-between items-center ">
           <div
-            className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity px-6"
             onClick={() => handleIconClick('import')}
           >
             <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mb-2">
@@ -69,7 +69,7 @@ export default function GeneralLedgerPage() {
             <span className="text-sm text-gray-700">Phiếu xuất </span>
           </div>
           <div
-            className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity px-6"
             onClick={() => handleIconClick('discount')}
           >
             <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-2">

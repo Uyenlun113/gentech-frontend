@@ -781,7 +781,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       render: (val, row) => {
         if (row.id === 'total') {
           return (
-            <div className="text-right text-lg text-blue-600 p-2 rounded">
+            <div className="text-right text-[16px] text-blue-600 p-2 rounded px-7">
               {totals.totalPsNo.toLocaleString('vi-VN')}
             </div>
           );
@@ -804,7 +804,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
       render: (val, row) => {
         if (row.id === 'total') {
           return (
-            <div className="text-right text-lg text-green-600 p-2 rounded">
+            <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
               {totals.totalPsCo.toLocaleString('vi-VN')}
             </div>
           );
@@ -1178,7 +1178,7 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
     <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex-shrink-0 px-6 lg:px-8 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="flex-shrink-0 p-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -1199,107 +1199,119 @@ export const ModalEditGeneralLedger = ({ isOpenEdit, closeModalEdit, editingId }
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-blue-50">
           {/* Form thông tin cơ bản */}
           <div className="border-0 px-6 py-2">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Ngày hạch toán <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Flatpickr
-                    value={formData.ngayHachToan}
-                    onChange={(date) => handleDateChange(date, "ngayHachToan")}
-                    options={FLATPICKR_OPTIONS}
-                    placeholder="Chọn ngày hạch toán"
-                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  />
-                  <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Ngày lập chứng từ <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Flatpickr
-                    value={formData.ngayLapChungTu}
-                    onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
-                    options={FLATPICKR_OPTIONS}
-                    placeholder="Chọn ngày lập chứng từ"
-                    className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  />
-                  <CalenderIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Quyển sổ
-                </Label>
-                <Input
-                  value={formData.quyenSo}
-                  onChange={(e) => handleFormChange("quyenSo", e.target.value)}
-                  placeholder="Nhập quyển sổ..."
-                  className="w-full h-9 px-3 py-1.5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Số chứng từ <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  value={formData.soChungTu}
-                  onChange={(e) => handleFormChange("soChungTu", e.target.value)}
-                  placeholder="Nhập số chứng từ..."
-                  className="w-full h-9 px-3 py-1.5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tỷ giá
-                </Label>
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-200">
-                  <span className="h-9 px-3 py-1.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
-                    VND
-                  </span>
+            {/* Grid với tỷ lệ 70-30 */}
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
+              {/* Cột 1 - 70% */}
+              <div className="lg:col-span-7 space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                    Số chứng từ <span className="text-red-500">*</span>
+                  </Label>
                   <input
-                    type="number"
-                    value={formData.tyGia}
-                    onChange={(e) => handleFormChange("tyGia", e.target.value)}
-                    placeholder="0"
-                    className="flex-1 h-9 px-3 py-1.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none"
+                    type="text"
+                    value={formData.soChungTu}
+                    onChange={(e) => handleFormChange("soChungTu", e.target.value)}
+                    placeholder="Nhập số chứng từ..."
+                    className="flex-1 h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   />
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                    Quyển sổ
+                  </Label>
+                  <input
+                    type="text"
+                    value={formData.quyenSo}
+                    onChange={(e) => handleFormChange("quyenSo", e.target.value)}
+                    placeholder="Nhập quyển sổ..."
+                    className="flex-1 h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  />
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                    Ngày hạch toán <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="flex-1">
+                    <Flatpickr
+                      value={formData.ngayHachToan}
+                      onChange={(date) => handleDateChange(date, "ngayHachToan")}
+                      options={FLATPICKR_OPTIONS}
+                      placeholder="Chọn ngày hạch toán"
+                      className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                    Ngày lập chứng từ <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative flex-1">
+                    <Flatpickr
+                      value={formData.ngayLapChungTu}
+                      onChange={(date) => handleDateChange(date, "ngayLapChungTu")}
+                      options={FLATPICKR_OPTIONS}
+                      placeholder="Chọn ngày lập chứng từ"
+                      className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                    />
+                    <CalenderIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Trạng thái
-                </Label>
-                <Select
-                  defaultValue={formData.trangThai}
-                  options={STATUS_OPTIONS}
-                  onChange={(value) => handleFormChange("trangThai", value)}
-                  className="h-9 px-3 py-1.5 text-sm"
-                />
+              {/* Cột 2 - 30% */}
+              <div className="lg:col-span-3 space-y-3">
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[60px]">
+                    Tỷ giá
+                  </Label>
+                  <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-200 flex-1">
+                    <span className="px-2 py-1.5 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-xs">
+                      VND
+                    </span>
+                    <input
+                      type="number"
+                      value={formData.tyGia}
+                      onChange={(e) => handleFormChange("tyGia", e.target.value)}
+                      placeholder="0"
+                      className="flex-1 px-3 py-1.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none h-9"
+                    />
+                  </div>
+                </div>
 
+                <div className="flex gap-2 items-center">
+                  <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[60px]">
+                    Trạng thái
+                  </Label>
+                  <div className="flex-1">
+                    <Select
+                      defaultValue={formData.trangThai}
+                      options={STATUS_OPTIONS}
+                      onChange={(value) => handleFormChange("trangThai", value)}
+                      className="w-full h-9 bg-white"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2 mt-2">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Diễn giải
+            {/* Diễn giải chung - Full width */}
+            <div className="flex gap-2 items-center mt-3">
+              <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                Diễn giải chung
               </Label>
-              <Input
+              <input
+                type="text"
                 value={formData.dienGiaiChung}
                 onChange={(e) => handleFormChange("dienGiaiChung", e.target.value)}
-                placeholder="Nhập diễn giải chung..."
-                className="w-full h-9 px-3 py-1.5"
+                placeholder="Nhập diễn giải chung (sẽ áp dụng cho tất cả dòng hạch toán)..."
+                className="flex-1 h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                title="Diễn giải này sẽ tự động điền vào tất cả dòng trong tab hạch toán"
               />
             </div>
           </div>

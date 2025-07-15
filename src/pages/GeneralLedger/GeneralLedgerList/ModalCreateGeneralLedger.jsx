@@ -984,9 +984,9 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
 
   return (
     <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
-      <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
+      <div className="relative w-full h-full rounded-3xl bg-blue-50 dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex-shrink-0 p-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="flex-shrink-0 p-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -1101,7 +1101,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
                       defaultValue={formData.trangThai}
                       options={STATUS_OPTIONS}
                       onChange={(value) => handleFormChange("trangThai", value)}
-                      className="w-full h-9"
+                      className="w-full h-9 bg-white"
                     />
                   </div>
                 </div>

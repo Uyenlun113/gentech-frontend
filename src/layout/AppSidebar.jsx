@@ -18,7 +18,7 @@ import { ChevronDownIcon } from "../icons";
 
 const navItems = [
   { name: "Hệ thống", icon: <Settings />, path: "/system" },
-  { name: "Vốn bằng tiền", icon: <Banknote />, path: "/" },
+  { name: "Vốn bằng tiền", icon: <Banknote />, path: "/cash-receipt" },
   {
     name: "Mua hàng - Phải trả",
     icon: <ShoppingCart />,

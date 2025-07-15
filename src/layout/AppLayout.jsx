@@ -22,7 +22,7 @@ const LayoutContent = () => {
             flex-1 overflow-y-auto transition-all duration-300 ease-in-out
             ${isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"}
             ${isMobileOpen ? "ml-0" : ""}
-             pb-4 px-4
+             pb-4
           `}
         >
           <Outlet />
