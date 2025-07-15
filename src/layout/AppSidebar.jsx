@@ -40,9 +40,7 @@ const navItems = [
   {
     name: "Kế toán tổng hợp",
     icon: <BookOpenCheck />,
-    subItems: [
-      { name: "Danh sách phiếu kế toán", path: "/general-ledger/list" },
-    ],
+    path: "/general-ledger",
   },
   { name: "Chuyển dữ liệu từ Excel", icon: <FileInput />, path: "/import-excel" },
 ];

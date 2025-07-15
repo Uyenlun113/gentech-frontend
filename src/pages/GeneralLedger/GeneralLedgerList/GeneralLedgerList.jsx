@@ -4,6 +4,7 @@ import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { FilePlus, Search } from "lucide-react";
 import { useState } from "react";
 import Flatpickr from "react-flatpickr";
+import { Link } from "react-router";
 import ComponentCard from "../../../components/common/ComponentCard";
 import PageBreadcrumb from "../../../components/common/PageBreadCrumb";
 import PageMeta from "../../../components/common/PageMeta";
@@ -69,6 +70,12 @@ export default function GeneralLedgerListPage() {
         <ComponentCard>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
+              <Link
+                to="/general-ledger"
+                className="flex items-center border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
+              >
+                Quay lại
+              </Link>
               <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
                 Thêm mới
               </Button>

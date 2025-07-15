@@ -22,7 +22,6 @@ import DepreciationReportPage from "./pages/FixedAssets/DepreciationReport/Depre
 import DepreciationCalculationPage from "./pages/FixedAssets/ModuleReport/DepreciationCalculation/DepreciationCalculation";
 import ModuleReportPage from "./pages/FixedAssets/ModuleReport/ModuleReport";
 import FormElements from "./pages/Forms/FormElements";
-import GeneralLedgerCreate from "./pages/GeneralLedger/GeneralLedgerCreate";
 import GeneralLedgerListPage from "./pages/GeneralLedger/GeneralLedgerList/GeneralLedgerList";
 import ImportExcelPage from "./pages/ImportExcel/ImportExcel";
 import InventoryPage from "./pages/Inventory/Inventory";
@@ -44,6 +43,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
 
 
 export default function App() {
@@ -87,7 +87,7 @@ export default function App() {
               {/* Costing Page */}
               <Route path="/costing" element={<CostingPage />} />
               {/* General Ledger Page */}
-              <Route path="/general-ledger/create" element={<GeneralLedgerCreate />} />
+              <Route path="/general-ledger" element={<GeneralLedgerPage />} />
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
               {/* Import Excel Page */}
               <Route path="/import-excel" element={<ImportExcelPage />} />
