@@ -72,10 +72,10 @@ export default function CashReceiptList() {
     }
 
     return (
-        <>
+        <div className="px-4">
             <PageMeta title="Phiếu thu tiền mặt" description="Phiếu thu tiền mặt" />
             <PageBreadcrumb pageTitle="Phiếu thu tiền mặt" />
-            <div className="space-y-6 pb-16">
+            <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         {/* Left: Button */}
@@ -284,6 +284,6 @@ export default function CashReceiptList() {
                     onCancel={cancelDeleteCashReceipt}
                 />
             </div>
-        </>
+        </div>
     );
 }
