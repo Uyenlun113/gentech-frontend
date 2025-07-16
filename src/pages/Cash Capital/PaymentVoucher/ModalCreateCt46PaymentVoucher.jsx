@@ -50,12 +50,7 @@ const INITIAL_CT46GT_DATA = [
         id: 1,
         so_ct0: "",
         tk_thue_no: "",
-        tien: "",
         thue_suat: "",
-        thue: "",
-        tt: "",
-        tk_thue_i: "",
-        loai_hd: "",
         ma_ms: "",
         mau_bc: "",
         ma_kh: "",
@@ -390,12 +385,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 id: prev.length + 1,
                 so_ct0: "",
                 tk_thue_no: "",
-                tien: "",
                 thue_suat: "",
-                thue: "",
-                tt: "",
-                tk_thue_i: "",
-                loai_hd: "",
                 ma_ms: "",
                 mau_bc: "",
                 ma_kh: "",
@@ -537,17 +527,12 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 hopDongThue: ct46gtData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
-                        so_ct0, tk_thue_no, tien, thue_suat, thue, tt, tk_thue_i, loai_hd, ma_ms, mau_bc,
+                        so_ct0, tk_thue_no, thue_suat, ma_ms, mau_bc,
                         ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct0
                     }) => ({
                         so_ct0: so_ct0?.trim() || "",
                         tk_thue_no: tk_thue_no?.trim() || "",
-                        tien: Number(tien) || 0,
-                        thue_suat: Number(thue_suat) || 0,
-                        thue: Number(thue) || 0,
-                        tt: Number(tt) || 0,
-                        tk_thue_i: tk_thue_i?.trim() || "",
-                        loai_hd: loai_hd?.trim() || "",
+                        thue_suat,
                         ma_ms: ma_ms?.trim() || "",
                         mau_bc: mau_bc?.trim() || "",
                         ma_kh: ma_kh?.trim() || "",
@@ -558,9 +543,9 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                         ten_vt: ten_vt?.trim() || "",
                         ma_thue: ma_thue?.trim() || "",
                         ghi_chu: ghi_chu?.trim() || "",
-                        t_thue: t_thue?.trim() || "",
-                        t_tien: t_tien?.trim() || "",
-                        t_tt: t_tt?.trim() || "",
+                        t_thue,
+                        t_tien,
+                        t_tt,
                         ngay_ct0: ngay_ct0?.trim() || ""
                     })),
             };
@@ -1018,15 +1003,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             ),
         },
         {
-            key: "ngay_ct0",
+            key: "ngay_ct",
             title: "Ngày hóa đơn",
             width: 150,
             render: (val, row) => (
                 <div className="relative">
                     <Flatpickr
-                        value={row.ngay_ct0 ? row.ngay_ct0.split("T")[0] : ""}
+                        value={row.ngay_ct ? row.ngay_ct0.split("T")[0] : ""}
                         onChange={(date) =>
-                            handleCt46gtChange(row.id, "ngay_ct0", date?.[0]?.toISOString() || "")
+                            handleCt46gtChange(row.id, "ngay_ct", date?.[0]?.toISOString() || "")
                         }
                         options={{
                             dateFormat: "Y-m-d",
