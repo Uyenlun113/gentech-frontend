@@ -12,11 +12,10 @@ import CustomerSelectionPopup from "../../../components/general/CustomerSelectio
 import TableBasic from "../../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../../components/ui/modal";
 import { Tabs } from "../../../components/ui/tabs";
-import { useAccounts } from "../../../hooks/useAccounts";
-import { useCustomers } from "../../../hooks/useCustomer";
+import { useAccount, useAccounts } from "../../../hooks/useAccounts";
+import { useCustomer, useCustomers } from "../../../hooks/useCustomer";
 import { useCt46ById, useUpdateCt46Accounting } from "../../../hooks/usePhieuChi";
 import accountDirectoryApi from "../../../services/account-directory";
-import customerApi from "../../../services/category-customer";
 
 // Constants cho CT46 (Phiếu chi)
 const INITIAL_CT46_DATA = [
@@ -51,12 +50,7 @@ const INITIAL_CT46GT_DATA = [
         id: 1,
         so_ct0: "",
         tk_thue_no: "",
-        tien: "",
-        thue_suat: "",
-        thue: "",
-        tt: "",
-        tk_thue_i: "",
-        loai_hd: "",
+        thue_suat: "0",      // ← String
         ma_ms: "",
         mau_bc: "",
         ma_kh: "",
@@ -67,9 +61,9 @@ const INITIAL_CT46GT_DATA = [
         ten_vt: "",
         ma_thue: "",
         ghi_chu: "",
-        t_thue: "",
-        t_tien: "",
-        t_tt: "",
+        t_thue: "0",         // ← String
+        t_tien: "0",         // ← String
+        t_tt: "0",           // ← String
         ngay_ct0: ""
     }
 ];
@@ -248,12 +242,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                         id: index + 1,
                         so_ct0: item.so_ct0 || "",
                         tk_thue_no: item.tk_thue_no || "",
-                        tien: item.tien?.toString() || "",
-                        thue_suat: item.thue_suat?.toString() || "",
-                        thue: item.thue?.toString() || "",
-                        tt: item.tt?.toString() || "",
-                        tk_thue_i: item.tk_thue_i || "",
-                        loai_hd: item.loai_hd || "",
+                        thue_suat: String(item.thue_suat || "0"),    // ← Convert to string
                         ma_ms: item.ma_ms || "",
                         mau_bc: item.mau_bc || "",
                         ma_kh: item.ma_kh || "",
@@ -264,10 +253,10 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                         ten_vt: item.ten_vt || "",
                         ma_thue: item.ma_thue || "",
                         ghi_chu: item.ghi_chu || "",
-                        t_thue: item.t_thue || "",
-                        t_tien: item.t_tien || "",
-                        t_tt: item.t_tt || "",
-                        ngay_ct0: item.ngay_ct0 || ""
+                        t_thue: String(item.t_thue || "0"),         // ← Convert to string
+                        t_tien: String(item.t_tien || "0"),         // ← Convert to string
+                        t_tt: String(item.t_tt || "0"),             // ← Convert to string
+                        ngay_ct: item.ngay_ct || ""
                     }));
 
                     setCt46gtData(mappedCt46gt);
@@ -551,12 +540,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 id: prev.length + 1,
                 so_ct0: "",
                 tk_thue_no: "",
-                tien: "",
-                thue_suat: "",
-                thue: "",
-                tt: "",
-                tk_thue_i: "",
-                loai_hd: "",
+                thue_suat: "0",      // ← String
                 ma_ms: "",
                 mau_bc: "",
                 ma_kh: "",
@@ -567,10 +551,10 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 ten_vt: "",
                 ma_thue: "",
                 ghi_chu: "",
-                t_thue: "",
-                t_tien: "",
-                t_tt: "",
-                ngay_ct0: ""
+                t_thue: "0",         // ← String
+                t_tien: "0",         // ← String
+                t_tt: "0",           // ← String
+                ngay_ct: ""
             }
         ]);
 
@@ -700,38 +684,33 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 hopDongThue: ct46gtData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
-                        so_ct0, tk_thue_no, tien, thue_suat, thue, tt, tk_thue_i, loai_hd, ma_ms, mau_bc,
-                        ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct0
+                        so_ct0, tk_thue_no, thue_suat, ma_ms, mau_bc,
+                        ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct
                     }) => ({
                         so_ct0: so_ct0?.trim() || "",
                         tk_thue_no: tk_thue_no?.trim() || "",
-                        tien: Number(tien) || 0,
-                        thue_suat: Number(thue_suat) || 0,
-                        thue: Number(thue) || 0,
-                        tt: Number(tt) || 0,
-                        tk_thue_i: tk_thue_i?.trim() || "",
-                        loai_hd: loai_hd?.trim() || "",
-                        ma_ms: ma_ms?.trim() || "",
-                        mau_bc: mau_bc?.trim() || "",
+                        thue_suat: String(thue_suat || "0"),        // ← Keep as string
+                        ma_ms: ma_ms || "",
+                        mau_bc: typeof mau_bc === "string" ? mau_bc.trim() : "",
                         ma_kh: ma_kh?.trim() || "",
-                        so_seri0: so_seri0?.trim() || "",
+                        so_seri0: so_seri0 || "",
                         ten_kh: ten_kh?.trim() || "",
-                        dia_chi: dia_chi?.trim() || "",
-                        ma_so_thue: ma_so_thue?.trim() || "",
-                        ten_vt: ten_vt?.trim() || "",
+                        dia_chi: dia_chi || "",
+                        ma_so_thue: ma_so_thue || "",
+                        ten_vt: ten_vt || "",
                         ma_thue: ma_thue?.trim() || "",
                         ghi_chu: ghi_chu?.trim() || "",
-                        t_thue: t_thue?.trim() || "",
-                        t_tien: t_tien?.trim() || "",
-                        t_tt: t_tt?.trim() || "",
-                        ngay_ct0: ngay_ct0?.trim() || ""
+                        t_thue: String(t_thue || "0"),              // ← Keep as string
+                        t_tien: String(t_tien || "0"),              // ← Keep as string
+                        t_tt: String(t_tt || "0"),                  // ← Keep as string
+                        ngay_ct: ngay_ct || ""
                     }))
             };
 
             await updateCt46Accounting({ stt_rec: editingId, payload });
             closeModalEdit();
             resetForm();
-            navigate("/payment-voucher/list");
+            navigate("/phieu-chi-tien-mat");
         } catch (err) {
             console.error(err);
         }
@@ -831,7 +810,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 if (row.id === 'total') return <div></div>;
                 return (
                     <Input
-                        type="number"
+                        type="text"
                         value={row.loai_hd}
                         onChange={(e) => handleCt46Change(row.id, "loai_hd", e.target.value)}
                         placeholder="0"
@@ -1182,15 +1161,15 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
             ),
         },
         {
-            key: "ngay_ct0",
+            key: "ngay_ct",
             title: "Ngày hóa đơn",
             width: 150,
             render: (val, row) => (
                 <div className="relative">
                     <Flatpickr
-                        value={row.ngay_ct0 ? row.ngay_ct0.split("T")[0] : ""}
+                        value={row.ngay_ct ? row.ngay_ct.split("T")[0] : ""}
                         onChange={(date) =>
-                            handleCt46gtChange(row.id, "ngay_ct0", date?.[0]?.toISOString() || "")
+                            handleCt46gtChange(row.id, "ngay_ct", date?.[0]?.toISOString() || "")
                         }
                         options={{
                             dateFormat: "Y-m-d",
@@ -1329,7 +1308,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
             width: 120,
             render: (val, row) => (
                 <Input
-                    type="number"
+                    type="text"
                     value={row.t_tt}
                     onChange={(e) => handleCt46gtChange(row.id, "t_tt", e.target.value)}
                     placeholder="0"
@@ -1369,6 +1348,24 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         },
     ];
 
+    const { data: accountData } = useAccount(formData.taiKhoanCo);
+    const { data: customerApi } = useCustomer(formData.maKhachHang);
+
+    useEffect(() => {
+        if (accountData?.data?.ten_tk || accountData?.ten_tk) {
+            handleFormChange("tenTaiKhoanCo", accountData?.data?.ten_tk || accountData?.ten_tk);
+        }
+    }, [accountData, handleFormChange]);
+
+    useEffect(() => {
+        if (customerApi?.data || customerApi) {
+            const customer = customerApi?.data || customerApi;
+            handleFormChange("tenKhachHang", customer.ten_kh || "");
+            handleFormChange("diaChiKhachHang", customer.dia_chi || "");
+            handleFormChange("maSoThue", customer.ma_so_thue || "");
+        }
+    }, [customerApi, handleFormChange]);
+
     // Loading state
     if (isLoadingEdit) {
         return (
@@ -1386,7 +1383,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
     return (
         <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
-                {/* Header - Updated to match create form */}
+                {/* Header */}
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
@@ -1411,11 +1408,11 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto bg-blue-50">
-                    {/* Form thông tin cơ bản - LAYOUT 7-3 - Updated to match create form */}
+                    {/* Form thông tin cơ bản */}
                     <div className="border-b border-gray-100">
                         <div className="dark:bg-gray-800 rounded-xl p-4">
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                                {/* Cột trái - 70% (7 cột) */}
+                                {/* Cột trái - 70% */}
                                 <div className="lg:col-span-7 space-y-2">
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
@@ -1530,7 +1527,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                                     </div>
                                 </div>
 
-                                {/* Cột phải - 30% (3 cột) */}
+                                {/* Cột phải - 30% */}
                                 <div className="lg:col-span-3 space-y-2">
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
@@ -1671,10 +1668,10 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                     </div>
                 </div>
 
-                {/* Footer - Updated to match create form */}
+                {/* Footer */}
                 <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex justify-between items-center">
-                        {/* Summary info - chỉ hiển thị tổng PS nợ */}
+                        {/* Summary info */}
                         <div className="flex gap-6 text-sm">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-600">Tổng PS nợ:</span>
