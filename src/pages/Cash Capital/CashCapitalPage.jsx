@@ -30,7 +30,7 @@ export default function CashCapitalPage() {
     const handleIconClick = (type) => {
         switch (type) {
             case 'bank-receipt':
-                window.location.href = '/general-ledger/list';
+                window.location.href = '/chung-tu/phieu-thu';
                 break;
             case 'bank-payment':
                 window.location.href = '/phieu-xuat';
