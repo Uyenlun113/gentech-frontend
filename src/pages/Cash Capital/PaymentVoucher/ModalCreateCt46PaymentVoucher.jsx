@@ -52,7 +52,7 @@ const INITIAL_CT46GT_DATA = [
         tk_thue_no: "",
         thue_suat: "",
         ma_ms: "",
-        mau_bc: "",
+        kh_mau_hd: "",
         ma_kh: "",
         so_seri0: "",
         ten_kh: "",
@@ -387,7 +387,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 tk_thue_no: "",
                 thue_suat: "",
                 ma_ms: "",
-                mau_bc: "",
+                kh_mau_hd: "",
                 ma_kh: "",
                 so_seri0: "",
                 ten_kh: "",
@@ -527,14 +527,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 hopDongThue: ct46gtData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
-                        so_ct0, tk_thue_no, thue_suat, ma_ms, mau_bc,
+                        so_ct0, tk_thue_no, thue_suat, ma_ms, kh_mau_hd,
                         ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct
                     }) => ({
                         so_ct0: so_ct0?.trim() || "",
                         tk_thue_no: tk_thue_no?.trim() || "",
-                        thue_suat,
+                        thue_suat: Number(thue_suat) || 0,        // ← Convert to NUMBER
                         ma_ms: ma_ms?.trim() || "",
-                        mau_bc: mau_bc?.trim() || "",
+                        kh_mau_hd: kh_mau_hd?.trim() || "",
                         ma_kh: ma_kh?.trim() || "",
                         so_seri0: so_seri0?.trim() || "",
                         ten_kh: ten_kh?.trim() || "",
@@ -543,9 +543,9 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                         ten_vt: ten_vt?.trim() || "",
                         ma_thue: ma_thue?.trim() || "",
                         ghi_chu: ghi_chu?.trim() || "",
-                        t_thue,
-                        t_tien,
-                        t_tt,
+                        t_thue: Number(t_thue) || 0,              // ← Convert to NUMBER
+                        t_tien: Number(t_tien) || 0,              // ← Convert to NUMBER
+                        t_tt: Number(t_tt) || 0,                  // ← Convert to NUMBER
                         ngay_ct: ngay_ct?.trim() || ""
                     })),
             };
@@ -977,13 +977,13 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             ),
         },
         {
-            key: "mau_bc",
+            key: "kh_mau_hd",
             title: "Mẫu hóa đơn",
             width: 150,
             render: (val, row) => (
                 <Input
-                    value={row.mau_bc}
-                    onChange={(e) => handleCt46gtChange(row.id, "mau_bc", e.target.value)}
+                    value={row.kh_mau_hd}
+                    onChange={(e) => handleCt46gtChange(row.id, "kh_mau_hd", e.target.value)}
                     placeholder="Nhập mẫu hóa đơn..."
                     className="w-full"
                 />
