@@ -64,7 +64,7 @@ const INITIAL_CT46GT_DATA = [
         t_thue: "",
         t_tien: "",
         t_tt: "",
-        ngay_ct0: ""
+        ngay_ct: ""
     }
 ];
 
@@ -399,7 +399,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 t_thue: "",
                 t_tien: "",
                 t_tt: "",
-                ngay_ct0: ""
+                ngay_ct: ""
             }
         ]);
 
@@ -528,7 +528,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
                         so_ct0, tk_thue_no, thue_suat, ma_ms, mau_bc,
-                        ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct0
+                        ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct
                     }) => ({
                         so_ct0: so_ct0?.trim() || "",
                         tk_thue_no: tk_thue_no?.trim() || "",
@@ -546,7 +546,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                         t_thue,
                         t_tien,
                         t_tt,
-                        ngay_ct0: ngay_ct0?.trim() || ""
+                        ngay_ct: ngay_ct?.trim() || ""
                     })),
             };
             await saveCt46Accounting(payload);
@@ -1009,7 +1009,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => (
                 <div className="relative">
                     <Flatpickr
-                        value={row.ngay_ct ? row.ngay_ct0.split("T")[0] : ""}
+                        value={row.ngay_ct ? row.ngay_ct.split("T")[0] : ""}
                         onChange={(date) =>
                             handleCt46gtChange(row.id, "ngay_ct", date?.[0]?.toISOString() || "")
                         }
