@@ -611,7 +611,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
   return (
     <Modal isOpen={isOpenEdit} onClose={handleClose} title="Cập nhật phiếu thu" className="w-full max-w-7xl m-1 border-2">
       <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
-        <div className="flex-shrink-0 px-6 lg:px-8 pt-4 pb-2 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-t-3xl">
+        <div className="flex-shrink-0 px-6 lg:px-8 pt-4 pb-2 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -626,7 +626,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
         </div>
 
         {/* Content area */}
-        <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-col bg-blue-50">
           {/* Form fields section */}
           <div className="h-[45%] px-6 py-4 flex-shrink-0">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
@@ -640,7 +640,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                         value={formData.ma_gd}
                         onChange={e => handleChange("ma_gd", e.target.value)}
                         placeholder="2"
-                        className="h-8 text-sm flex-1"
+                        className="h-8 text-sm flex-1 bg-white"
                       />
                     </div>
 
@@ -666,7 +666,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                                 setSearchStates(prev => ({ ...prev, showMainCustomerPopup: true }));
                               }
                             }}
-                            className="h-8 text-sm w-full"
+                            className="h-8 text-sm w-full bg-white"
                           />
                         </div>
                       </div>
@@ -676,18 +676,18 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                     <div className="grid grid-cols-12 gap-2 items-center">
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
-                        <Input value={formData.dia_chi} disabled className="h-8 text-sm" />
+                        <Input value={formData.dia_chi} disabled className="h-8 text-sm bg-white" />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
-                        <Input value={formData.mst} disabled className="h-8 text-sm" />
+                        <Input value={formData.mst} disabled className="h-8 text-sm bg-white" />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người nộp tiền</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} disabled className="h-8 text-sm flex-1 col-span-6" />
+                        <Input value={formData.ong_ba} disabled className="h-8 text-sm flex-1 col-span-6 bg-white" />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
@@ -698,7 +698,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                         <Input
                           value={formData.dien_giai}
                           onChange={e => handleChange("dien_giai", e.target.value)}
-                          className="h-8 text-sm flex-1"
+                          className="h-8 text-sm flex-1 bg-white"
                         />
                       </div>
                     </div>
@@ -724,7 +724,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                               setSearchStates(prev => ({ ...prev, showMainAccountPopup: true }));
                             }
                           }}
-                          className="h-8 text-sm w-full"
+                          className="h-8 text-sm w-full bg-white"
                         />
                       </div>
                       <div className="col-span-3 flex items-center justify-center">
@@ -784,7 +784,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                         <Input
                           value={formData.ma_qs}
                           onChange={e => handleChange("ma_qs", e.target.value)}
-                          className="h-8 text-sm"
+                          className="h-8 text-sm bg-white"
                         />
                       </div>
                       <div className="col-span-1"></div>
@@ -796,7 +796,7 @@ export const ModalEditCashReceipt = ({ isOpenEdit, closeModalEdit, selectedCashR
                         <Input
                           value={formData.so_ct}
                           onChange={e => handleChange("so_ct", e.target.value)}
-                          className="h-8 text-sm"
+                          className="h-8 text-sm bg-white"
                         />
                       </div>
                       <div className="col-span-1"></div>
