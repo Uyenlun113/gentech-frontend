@@ -7,7 +7,7 @@ import { useCreateGiayBaoCo } from "../../hooks/usegiaybaoco";
 import { useCustomers } from "../../hooks/useCustomer";
 import { useAccounts } from "../../hooks/useAccounts";
 import { useEffect } from "react";
-import { Plus, Trash2, X, Save, CalendarIcon } from "lucide-react";
+import { Plus, Trash2, X, Save } from "lucide-react";
 import { Tabs } from "../../components/ui/tabs";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
@@ -534,7 +534,7 @@ export const ModalCreateGiayBaoCo = ({ isOpenCreate, closeModalCreate }) => {
       await saveGiayBaoCo(payload);
       closeModalCreate();
       resetForm();
-      navigate("/chung-tu/phieu-thu");
+      navigate("/chung-tu/bao-co");
     } catch (err) {
       console.error(err);
     }
@@ -548,10 +548,10 @@ export const ModalCreateGiayBaoCo = ({ isOpenCreate, closeModalCreate }) => {
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Plus className="w-6 h-6 text-blue-600" />
-                Tạo Phiếu báo có Ngân Hàng
+                Tạo Giấy báo có Ngân Hàng
               </h4>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Nhập thông tin Phiếu báo có Ngân Hàng mới vào hệ thống
+                Nhập thông tin Giấy báo có Ngân Hàng mới vào hệ thống
               </p>
             </div>
           </div>

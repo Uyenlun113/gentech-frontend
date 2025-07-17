@@ -3,7 +3,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
 import "react-datepicker/dist/react-datepicker.css";
-import { useUpdateGiayBaoCo } from "../../hooks/usegiaybaoco";
+import { useUpdateGiayBaoNo } from "../../hooks/usegiaybaono";
 import { useCustomers } from "../../hooks/useCustomer";
 import { useAccounts } from "../../hooks/useAccounts";
 import { Plus, Trash2, X, Save, CalendarIcon } from "lucide-react";
@@ -17,7 +17,7 @@ import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalenderIcon } from "../../icons";
 import accountDirectoryApi from "../../services/account-directory";
 
-export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBaoCo }) => {
+export const ModalEditGiayBaoNo = ({ isOpenEdit, closeModalEdit, selectedGiayBaoNo }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     so_ct: "",
@@ -46,8 +46,9 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
   const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
   const { data: accountData = [] } = useAccounts(maTaiKhoanSearch ? { search: maTaiKhoanSearch } : {});
 
-  const { mutateAsync: updateGiayBaoCo, isPending } = useUpdateGiayBaoCo();
+  const { mutateAsync: updateGiayBaoNo, isPending } = useUpdateGiayBaoNo();
   const hachToanTableRef = useRef(null);
+  const hopDongThueTableRef = useRef(null); // Thêm ref cho bảng hợp đồng thuế
 
   const [searchStates, setSearchStates] = useState({
     tkSearch: "",
@@ -59,6 +60,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     showAccountPopup: false,
     showMainAccountPopup: false,
     showMainCustomerPopup: false,
+    showCustomerPopup: false, // Thêm cho customer popup trong bảng
   });
 
   const INITIAL_ACCOUNTING_DATA = [
@@ -73,13 +75,39 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     },
   ];
 
+  // Thêm INITIAL_TAX_CONTRACT_DATA
+  const INITIAL_TAX_CONTRACT_DATA = [
+    {
+      id: 1,
+      so_ct0: "",
+      ma_ms: "",
+      kh_mau_hd: "",
+      so_seri0: "",
+      ngay_ct: "",
+      ma_kh: "",
+      ten_kh: "",
+      dia_chi: "",
+      ma_so_thue: "",
+      ten_vt: "",
+      t_tien: 0,
+      ma_thue: "",
+      thue_suat: 0,
+      t_tt: 0,
+      t_thue: 0,
+      tk_thue_no: "",
+      tk_du: ""
+    }
+  ];
+
   const FLATPICKR_OPTIONS = {
     dateFormat: "Y-m-d",
     locale: Vietnamese,
   };
 
   const [hachToanData, setHachToanData] = useState(INITIAL_ACCOUNTING_DATA);
-  // NEW: Hook để lấy tên khách hàng cho từng dòng hạch toán
+  const [hopDongThueData, setHopDongThueData] = useState(INITIAL_TAX_CONTRACT_DATA); // Thêm state cho hợp đồng thuế
+
+  // Hook để lấy tên tài khoản cho từng dòng hạch toán
   const fetchAccountNames = useCallback(async (hachToanArray) => {
     const promises = hachToanArray.map(async (item) => {
       if (item.tk_i && !item.ten_tk) {
@@ -99,33 +127,34 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
 
     return Promise.all(promises);
   }, []);
-  // Load data when selectedGiayBaoCo changes
+
+  // Load data when selectedGiayBaoNo changes
   useEffect(() => {
-    if (selectedGiayBaoCo && isOpenEdit) {
+    if (selectedGiayBaoNo && isOpenEdit) {
       setFormData({
-        so_ct: selectedGiayBaoCo.so_ct || "",
-        ong_ba: selectedGiayBaoCo.ong_ba || "",
-        ngay_lct: selectedGiayBaoCo.ngay_lct ? new Date(selectedGiayBaoCo.ngay_lct).toLocaleDateString("en-CA") : "",
-        ngay_ct: selectedGiayBaoCo.ngay_ct ? new Date(selectedGiayBaoCo.ngay_ct).toLocaleDateString("en-CA") : "",
-        tk: selectedGiayBaoCo.tk || "",
-        ma_gd: selectedGiayBaoCo.ma_gd || "",
-        ma_kh: selectedGiayBaoCo.ma_kh || "",
-        dia_chi: selectedGiayBaoCo.dia_chi || "",
-        dien_giai: selectedGiayBaoCo.dien_giai || "",
-        ma_qs: selectedGiayBaoCo.ma_qs || "",
-        loai_ct: selectedGiayBaoCo.loai_ct || "Đã ghi sổ cái",
-        mst: selectedGiayBaoCo.mst || "",
-        ma_nt: selectedGiayBaoCo.ma_nt || "VND",
-        ty_gia: selectedGiayBaoCo.ty_gia || "1",
+        so_ct: selectedGiayBaoNo.so_ct || "",
+        ong_ba: selectedGiayBaoNo.ong_ba || "",
+        ngay_lct: selectedGiayBaoNo.ngay_lct ? new Date(selectedGiayBaoNo.ngay_lct).toLocaleDateString("en-CA") : "",
+        ngay_ct: selectedGiayBaoNo.ngay_ct ? new Date(selectedGiayBaoNo.ngay_ct).toLocaleDateString("en-CA") : "",
+        tk: selectedGiayBaoNo.tk || "",
+        ma_gd: selectedGiayBaoNo.ma_gd || "",
+        ma_kh: selectedGiayBaoNo.ma_kh || "",
+        dia_chi: selectedGiayBaoNo.dia_chi || "",
+        dien_giai: selectedGiayBaoNo.dien_giai || "",
+        ma_qs: selectedGiayBaoNo.ma_qs || "",
+        loai_ct: selectedGiayBaoNo.loai_ct || "Đã ghi sổ cái",
+        mst: selectedGiayBaoNo.mst || "",
+        ma_nt: selectedGiayBaoNo.ma_nt || "VND",
+        ty_gia: selectedGiayBaoNo.ty_gia || "1",
       });
 
       // Set search values for existing data
-      setMaKhSearch(selectedGiayBaoCo.ma_kh || "");
-      setMaTaiKhoanSearch(selectedGiayBaoCo.tk || "");
+      setMaKhSearch(selectedGiayBaoNo.ma_kh || "");
+      setMaTaiKhoanSearch(selectedGiayBaoNo.tk || "");
 
       // Load tai_khoan_list data
-      if (selectedGiayBaoCo.tai_khoan_list && selectedGiayBaoCo.tai_khoan_list.length > 0) {
-        const hachToanDataFromServer = selectedGiayBaoCo.tai_khoan_list.map((item, index) => ({
+      if (selectedGiayBaoNo.tai_khoan_list && selectedGiayBaoNo.tai_khoan_list.length > 0) {
+        const hachToanDataFromServer = selectedGiayBaoNo.tai_khoan_list.map((item, index) => ({
           id: index + 1,
           stt_rec: (index + 1).toString(),
           tk_i: item.tk_i || item.tk_so || "",
@@ -136,15 +165,42 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
         }));
         setHachToanData(hachToanDataFromServer);
         fetchAccountNames(hachToanDataFromServer).then(updatedRows => {
-          setHachToanData(updatedRows); // Update state với data có tên tài khoản
+          setHachToanData(updatedRows);
         });
       } else {
         setHachToanData(INITIAL_ACCOUNTING_DATA);
       }
 
+      // Load hopDongThue data - THÊM MỚI
+      if (selectedGiayBaoNo.hopDongThue && selectedGiayBaoNo.hopDongThue.length > 0) {
+        const hopDongThueDataFromServer = selectedGiayBaoNo.hopDongThue.map((item, index) => ({
+          id: index + 1,
+          so_ct0: item.so_ct0 || "",
+          ma_ms: item.ma_ms || "",
+          kh_mau_hd: item.kh_mau_hd || "",
+          so_seri0: item.so_seri0 || "",
+          ngay_ct: item.ngay_ct || "",
+          ma_kh: item.ma_kh || "",
+          ten_kh: item.ten_kh || "",
+          dia_chi: item.dia_chi || "",
+          ma_so_thue: item.ma_so_thue || "",
+          ten_vt: item.ten_vt || "",
+          t_tien: item.t_tien || 0,
+          ma_thue: item.ma_thue || "",
+          thue_suat: item.thue_suat || 0,
+          t_thue: item.t_thue || 0,
+          tk_thue_no: item.tk_thue_no || "",
+          tk_du: item.tk_du || "",
+          t_tt: item.t_tt || 0,
+        }));
+        setHopDongThueData(hopDongThueDataFromServer);
+      } else {
+        setHopDongThueData(INITIAL_TAX_CONTRACT_DATA);
+      }
+
       // Load account info for the main account if exists
-      if (selectedGiayBaoCo.tk && accountData.data) {
-        const accountInfo = accountData.data.find(acc => acc.tk === selectedGiayBaoCo.tk);
+      if (selectedGiayBaoNo.tk && accountData.data) {
+        const accountInfo = accountData.data.find(acc => acc.tk === selectedGiayBaoNo.tk);
         if (accountInfo) {
           setSelectedAccount(accountInfo);
         }
@@ -152,7 +208,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     } else if (!isOpenEdit) {
       resetForm();
     }
-  }, [selectedGiayBaoCo, isOpenEdit, accountData.data, fetchAccountNames]);
+  }, [selectedGiayBaoNo, isOpenEdit, accountData.data, fetchAccountNames]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -162,6 +218,15 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     }, 600);
     return () => clearTimeout(timer);
   }, [searchStates.tkSearch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchStates.maKhSearch) {
+        setSearchStates(prev => ({ ...prev, showCustomerPopup: true }));
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchStates.maKhSearch]);
 
   // Debounce customer search
   useEffect(() => {
@@ -186,6 +251,33 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     }, 300);
     return () => clearTimeout(delayDebounce);
   }, [maTaiKhoanSearch]);
+
+  // Thêm handleHopDongThueChange
+  const handleHopDongThueChange = useCallback((id, field, value) => {
+    setHopDongThueData(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    );
+    if (field === "ma_kh") {
+      setSearchStates(prev => ({
+        ...prev,
+        maKhSearch: value,
+        maKhSearchRowId: id,
+        searchContext: "hopDongThue"
+      }));
+    }
+
+    if (field === "tk_thue_no" || field === "tk_du") {
+      setSearchStates(prev => ({
+        ...prev,
+        tkSearch: value,
+        tkSearchRowId: id,
+        tkSearchField: field,
+        searchContext: "hopDongThue"
+      }));
+    }
+  }, []);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -227,7 +319,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
       console.error("Vui lòng nhập số chứng từ");
       return false;
     }
-    if (!selectedGiayBaoCo) {
+    if (!selectedGiayBaoNo) {
       console.error("Không có dữ liệu phiếu thu để cập nhật");
       return false;
     }
@@ -241,7 +333,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     }
 
     return true;
-  }, [formData, hachToanData, selectedGiayBaoCo]);
+  }, [formData, hachToanData, selectedGiayBaoNo]);
 
   // Handle customer selection
   const handleMainCustomerSelect = (customer) => {
@@ -282,23 +374,78 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     }));
   };
 
-  // Handle account selection for table
+  // Handle account selection for table - CẬP NHẬT để hỗ trợ cả hachToan và hopDongThue
   const handleAccountSelect = useCallback((id, account) => {
-    setHachToanData(prev =>
-      prev.map(item =>
-        item.id === id
-          ? { ...item, tk_i: account.tk.trim(), ten_tk: account.ten_tk, tk_me: account.tk_me.trim() }
-          : item
-      )
-    );
+    // Kiểm tra context để xác định cần cập nhật bảng nào
+    if (searchStates.searchContext === "hopDongThue") {
+      // Xử lý cho bảng hợp đồng thuế
+      const fieldToUpdate = searchStates.tkSearchField || "tk_thue_no";
+      setHopDongThueData(prev =>
+        prev.map(item =>
+          item.id === id
+            ? { ...item, [fieldToUpdate]: account.tk.trim() }
+            : item
+        )
+      );
+    } else {
+      // Xử lý cho bảng hạch toán (logic cũ)
+      setHachToanData(prev =>
+        prev.map(item =>
+          item.id === id
+            ? { ...item, tk_i: account.tk.trim(), ten_tk: account.ten_tk, tk_me: account.tk_me.trim() }
+            : item
+        )
+      );
+    }
 
+    // Reset search states
     setSearchStates(prev => ({
       ...prev,
       showAccountPopup: false,
       tkSearch: "",
-      tkSearchField: null
+      tkSearchField: null,
+      searchContext: null
     }));
-  }, []);
+  }, [searchStates.searchContext, searchStates.tkSearchField]);
+
+  // Thêm handleCustomerSelect
+  const handleCustomerSelect = useCallback((id, customer) => {
+    if (searchStates.searchContext === "hachToan") {
+      setHachToanData(prev =>
+        prev.map((item, index) => {
+          if (item.id === id) {
+            return { ...item, ma_kh_i: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
+          }
+          if (id === 1 && index > 0) {
+            return { ...item, ma_kh_i: customer.ma_kh || "", ten_kh: customer.ten_kh || "" };
+          }
+          return item;
+        })
+      );
+    } else {
+      setHopDongThueData(prev => {
+        const newData = prev.map(item =>
+          item.id === id
+            ? {
+              ...item,
+              ma_kh: customer.ma_kh || "",
+              ten_kh: customer.ten_kh || "",
+              dia_chi: customer.dia_chi || "",
+              ma_so_thue: customer.ma_so_thue || ""
+            }
+            : item
+        );
+        return newData;
+      });
+    }
+
+    setSearchStates(prev => ({
+      ...prev,
+      showCustomerPopup: false,
+      maKhSearch: "",
+      searchContext: null
+    }));
+  }, [searchStates.searchContext]);
 
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -361,6 +508,42 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     setTimeout(() => {
       if (hachToanTableRef.current) {
         const tableContainer = hachToanTableRef.current.querySelector('.overflow-x-auto');
+        if (tableContainer) {
+          tableContainer.scrollTop = tableContainer.scrollHeight;
+        }
+      }
+    }, 100);
+  }, []);
+
+  // Thêm addHopDongThueRow
+  const addHopDongThueRow = useCallback(() => {
+    setHopDongThueData(prev => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        so_ct0: "",
+        ma_ms: "",
+        kh_mau_hd: "",
+        so_seri0: "",
+        ngay_ct: "",
+        ma_kh: "",
+        ten_kh: "",
+        dia_chi: "",
+        ma_so_thue: "",
+        ten_vt: "",
+        t_tien: 0,
+        ma_thue: "",
+        thue_suat: 0,
+        t_thue: 0,
+        tk_thue_no: "",
+        tk_du: "",
+        t_tt: 0,
+      }
+    ]);
+
+    setTimeout(() => {
+      if (hopDongThueTableRef.current) {
+        const tableContainer = hopDongThueTableRef.current.querySelector('.overflow-x-auto');
         if (tableContainer) {
           tableContainer.scrollTop = tableContainer.scrollHeight;
         }
@@ -494,12 +677,285 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
     },
   ];
 
+  // Thêm hopDongThueColumns - COPY từ ModalCreateGiayBaoNo
+  const hopDongThueColumns = [
+    {
+      key: "stt",
+      fixed: "left",
+      title: "STT",
+      width: 80,
+      render: (val, row) => (
+        <div className="text-center font-medium text-gray-700">
+          {row.id}
+        </div>
+      )
+    },
+    {
+      key: "so_ct0",
+      title: "Nhóm",
+      fixed: "left",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.so_ct0}
+          onChange={(e) => handleHopDongThueChange(row.id, "so_ct0", e.target.value)}
+          placeholder="Nhập nhóm..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "ma_ms",
+      title: "Số hóa đơn",
+      width: 150,
+      fixed: "left",
+      render: (val, row) => (
+        <Input
+          value={row.ma_ms}
+          onChange={(e) => handleHopDongThueChange(row.id, "ma_ms", e.target.value)}
+          placeholder="Nhập số hóa đơn..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "kh_mau_hd",
+      title: "Mẫu hóa đơn",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.kh_mau_hd}
+          onChange={(e) => handleHopDongThueChange(row.id, "kh_mau_hd", e.target.value)}
+          placeholder="Nhập mẫu hóa đơn..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "so_seri0",
+      title: "Số seri",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.so_seri0}
+          onChange={(e) => handleHopDongThueChange(row.id, "so_seri0", e.target.value)}
+          placeholder="Nhập số seri..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "ngay_ct",
+      title: "Ngày hóa đơn",
+      width: 150,
+      render: (val, row) => (
+        <div className="relative">
+          <Flatpickr
+            value={row.ngay_ct ? row.ngay_ct.split("T")[0] : ""}
+            onChange={(date) =>
+              handleHopDongThueChange(row.id, "ngay_ct", date?.[0]?.toISOString() || "")
+            }
+            options={{
+              dateFormat: "Y-m-d",
+              allowInput: true,
+            }}
+            className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-800 dark:text-white"
+          />
+          <CalendarIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+        </div>
+      ),
+    },
+    {
+      key: "ma_kh",
+      title: "Mã khách hàng",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.ma_kh}
+          onChange={(e) => handleHopDongThueChange(row.id, "ma_kh", e.target.value)}
+          placeholder="Nhập mã KH..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "ten_kh",
+      title: "Tên khách hàng",
+      width: 200,
+      render: (val, row) => (
+        <Input
+          value={row.ten_kh}
+          onChange={(e) => handleHopDongThueChange(row.id, "ten_kh", e.target.value)}
+          placeholder="Tên khách hàng..."
+          className="w-full"
+          readOnly
+        />
+      )
+    },
+    {
+      key: "dia_chi",
+      title: "Địa chỉ",
+      width: 200,
+      render: (val, row) => (
+        <Input
+          value={row.dia_chi}
+          onChange={(e) => handleHopDongThueChange(row.id, "dia_chi", e.target.value)}
+          placeholder="Nhập địa chỉ..."
+          className="w-full"
+        />
+      )
+    },
+    {
+      key: "ma_so_thue",
+      title: "Mã số thuế",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.ma_so_thue}
+          onChange={(e) => handleHopDongThueChange(row.id, "ma_so_thue", e.target.value)}
+          placeholder="Nhập mã số thuế..."
+          className="w-full"
+        />
+      )
+    },
+    {
+      key: "ten_vt",
+      title: "Hàng hóa, dịch vụ",
+      width: 200,
+      render: (val, row) => (
+        <Input
+          value={row.ten_vt}
+          onChange={(e) => handleHopDongThueChange(row.id, "ten_vt", e.target.value)}
+          placeholder="Nhập hàng hóa, dịch vụ..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "t_tien",
+      title: "Tiền hàng",
+      width: 120,
+      render: (val, row) => (
+        <Input
+          type="text"
+          value={row.t_tien}
+          onChange={(e) => handleHopDongThueChange(row.id, "t_tien", e.target.value)}
+          placeholder="0"
+          className="w-full text-right"
+        />
+      ),
+    },
+    {
+      key: "ma_thue",
+      title: "Mã thuế",
+      width: 100,
+      render: (val, row) => (
+        <Input
+          value={row.ma_thue}
+          onChange={(e) => handleHopDongThueChange(row.id, "ma_thue", e.target.value)}
+          placeholder="Nhập mã thuế..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "thue_suat",
+      title: "%",
+      width: 80,
+      render: (val, row) => (
+        <Input
+          type="text"
+          value={row.thue_suat}
+          onChange={(e) => handleHopDongThueChange(row.id, "thue_suat", e.target.value)}
+          placeholder="0"
+          className="w-full text-right"
+        />
+      ),
+    },
+    {
+      key: "t_thue",
+      title: "Tiền thuế",
+      width: 120,
+      render: (val, row) => (
+        <Input
+          type="text"
+          value={row.t_thue}
+          onChange={(e) => handleHopDongThueChange(row.id, "t_thue", e.target.value)}
+          placeholder="0"
+          className="w-full text-right"
+        />
+      ),
+    },
+    {
+      key: "t_tt",
+      title: "TT",
+      width: 120,
+      render: (val, row) => (
+        <Input
+          type="number"
+          value={row.t_tt}
+          onChange={(e) => handleHopDongThueChange(row.id, "t_tt", e.target.value)}
+          placeholder="0"
+          className="w-full text-right"
+        />
+      ),
+    },
+    {
+      key: "tk_thue_no",
+      title: "Tài khoản thuế",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.tk_thue_no}
+          onChange={(e) => handleHopDongThueChange(row.id, "tk_thue_no", e.target.value)}
+          placeholder="Nhập TK thuế..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "tk_du",
+      title: "Tài khoản đối ứng",
+      width: 150,
+      render: (val, row) => (
+        <Input
+          value={row.tk_du}
+          onChange={(e) => handleHopDongThueChange(row.id, "tk_du", e.target.value)}
+          placeholder="Nhập TK đối ứng..."
+          className="w-full"
+        />
+      ),
+    },
+    {
+      key: "action",
+      title: "Hành động",
+      fixed: "right",
+      width: 100,
+      render: (_, row) => (
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => deleteHopDongThueRow(row.id)}
+            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+            title="Xóa dòng"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   const deleteHachToanRow = useCallback((id, e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setHachToanData(prev => prev.filter(item => item.id !== id));
+  }, []);
+
+  // Thêm deleteHopDongThueRow
+  const deleteHopDongThueRow = useCallback((id) => {
+    setHopDongThueData(prev => prev.filter(item => item.id !== id));
   }, []);
 
   const handleHachToanChange = useCallback((id, field, value) => {
@@ -547,6 +1003,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
       ty_gia: "1",
     });
     setHachToanData(INITIAL_ACCOUNTING_DATA);
+    setHopDongThueData(INITIAL_TAX_CONTRACT_DATA); // Reset hợp đồng thuế
     setSelectedAccount(null);
     setMaTaiKhoanSearch("");
     setMaKhSearch("");
@@ -560,6 +1017,7 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
       showAccountPopup: false,
       showMainAccountPopup: false,
       showMainCustomerPopup: false,
+      showCustomerPopup: false,
     });
   }, []);
 
@@ -594,19 +1052,45 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
             ps_co: Number(ps_co) || 0,
             dien_giai: dien_giai?.trim() || "",
           })),
+        // Thêm hopDongThue vào payload
+        hopDongThue: hopDongThueData
+          .filter(row => row.ma_kh || row.ma_ms)
+          .map(({
+            so_ct0, ma_ms, kh_mau_hd, so_seri0, ngay_ct,
+            ma_kh, ten_kh, dia_chi, ma_so_thue, ten_vt,
+            t_tien, ma_thue, thue_suat, t_thue, tk_thue_no, tk_du, t_tt
+          }) => ({
+            so_ct0: so_ct0?.trim() || "",
+            ma_ms: ma_ms?.trim() || "",
+            kh_mau_hd: kh_mau_hd?.trim() || "",
+            so_seri0: so_seri0?.trim() || "",
+            ngay_ct,
+            ma_kh: ma_kh?.trim() || "",
+            ten_kh: ten_kh?.trim() || "",
+            dia_chi: dia_chi?.trim() || "",
+            ma_so_thue: ma_so_thue?.trim() || "",
+            ten_vt: ten_vt?.trim() || "",
+            t_tien,
+            ma_thue: ma_thue?.trim() || "",
+            thue_suat,
+            t_thue,
+            tk_thue_no: tk_thue_no?.trim() || "",
+            tk_du: tk_du?.trim() || "",
+            t_tt,
+          })),
       };
 
-      await updateGiayBaoCo({
-        stt_rec: selectedGiayBaoCo.stt_rec,
+      await updateGiayBaoNo({
+        stt_rec: selectedGiayBaoNo.stt_rec,
         data: payload
       });
       closeModalEdit();
       resetForm();
-      navigate("/chung-tu/bao-co");
+      navigate("/chung-tu/bao-no");
     } catch (err) {
       console.error(err);
     }
-  }, [formData, hachToanData, totals, updateGiayBaoCo, closeModalEdit, resetForm, navigate, validateForm, selectedGiayBaoCo]);
+  }, [formData, hachToanData, hopDongThueData, totals, updateGiayBaoNo, closeModalEdit, resetForm, navigate, validateForm, selectedGiayBaoNo]);
 
   return (
     <Modal isOpen={isOpenEdit} onClose={handleClose} title="Cập nhật phiếu thu" className="w-full max-w-7xl m-1 border-2">
@@ -616,10 +1100,10 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Plus className="w-6 h-6 text-blue-600" />
-                Cập nhật Giấy báo có Ngân Hàng
+                Cập nhật Giấy báo nợ Ngân Hàng
               </h4>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Cập nhật thông tin Giấy báo có Ngân Hàng trong hệ thống
+                Cập nhật thông tin Giấy báo nợ Ngân Hàng trong hệ thống
               </p>
             </div>
           </div>
@@ -869,10 +1353,29 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
                     </div>
                   ),
                 },
+                {
+                  label: "Hợp đồng thuế",
+                  content: (
+                    <div className="" ref={hopDongThueTableRef}>
+                      <TableBasic
+                        data={hopDongThueData}
+                        columns={hopDongThueColumns}
+                        onAddRow={addHopDongThueRow}
+                        onDeleteRow={deleteHopDongThueRow}
+                        showAddButton={true}
+                        addButtonText="Thêm dòng"
+                        maxHeight="max-h-72"
+                        className="w-full"
+                      />
+                    </div>
+                  ),
+                },
               ]}
               onAddRow={(activeTab) => {
                 if (activeTab === 0) {
                   addHachToanRow();
+                } else if (activeTab === 1) {
+                  addHopDongThueRow();
                 }
               }}
             />
@@ -929,6 +1432,16 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
           onSelect={(customer) => handleMainCustomerSelect(customer)}
           customers={customerData.data || []}
           searchValue={maKhSearch}
+        />
+      )}
+
+      {searchStates.showCustomerPopup && (
+        <CustomerSelectionPopup
+          isOpen={true}
+          onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
+          onSelect={(customer) => handleCustomerSelect(searchStates.maKhSearchRowId, customer)}
+          customers={customerData.data || []}
+          searchValue={searchStates.maKhSearch}
         />
       )}
     </Modal>

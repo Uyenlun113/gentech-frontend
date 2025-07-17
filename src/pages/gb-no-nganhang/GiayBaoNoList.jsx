@@ -10,15 +10,15 @@ import Button from "../../components/ui/button/Button";
 
 import { useEffect, useState } from "react";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
-import { ModalCreateGiayBaoCo } from "./GiayBaoCoCreate";
-import { ModalEditGiayBaoCo } from "./GiayBaoCoUpdate";
-import { useListGiayBaoCo } from "./useListGiayBaoCo";
+import { ModalCreateGiayBaoNo } from "./GiayBaoNoCreate";
+import { ModalEditGiayBaoNo } from "./GiayBaoNoUpdate";
+import { useListGiayBaoNo } from "./useListGiayBaoNo";
 
-export default function GiayBaoCoList() {
+export default function GiayBaoNoList() {
     const {
         isOpenCreate,
         isOpenEdit,
-        selectedGiayBaoCo,
+        selectedGiayBaoNo,
         dataTable,
         columnsTable,
         pagination,
@@ -33,9 +33,9 @@ export default function GiayBaoCoList() {
         handleSaveCreate,
         handleSaveEdit,
         confirmDelete,
-        confirmDeleteGiayBaoCo,
-        cancelDeleteGiayBaoCo,
-    } = useListGiayBaoCo();
+        confirmDeleteGiayBaoNo,
+        cancelDeleteGiayBaoNo,
+    } = useListGiayBaoNo();
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
@@ -73,8 +73,8 @@ export default function GiayBaoCoList() {
 
     return (
         <div className="px-4">
-            <PageMeta title="Giấy báo có Ngân Hàng" description="Giấy báo có Ngân Hàng" />
-            <PageBreadcrumb pageTitle="Giấy báo có Ngân Hàng" />
+            <PageMeta title="Giấy báo nợ Ngân Hàng" description="Giấy báo nợ Ngân Hàng" />
+            <PageBreadcrumb pageTitle="Giấy báo nợ Ngân Hàng" />
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -264,24 +264,24 @@ export default function GiayBaoCoList() {
                 )}
 
                 {/* Modals */}
-                <ModalCreateGiayBaoCo
+                <ModalCreateGiayBaoNo
                     isOpenCreate={isOpenCreate}
                     closeModalCreate={closeModalCreate}
                     onSaveCreate={handleSaveCreate}
                 />
-                <ModalEditGiayBaoCo
+                <ModalEditGiayBaoNo
                     isOpenEdit={isOpenEdit}
                     closeModalEdit={closeModalEdit}
                     onSaveEdit={handleSaveEdit}
-                    selectedGiayBaoCo={selectedGiayBaoCo}
+                    selectedGiayBaoNo={selectedGiayBaoNo}
                 />
 
                 <ConfirmModal
                     isOpen={confirmDelete.open}
                     title="Xác nhận xoá"
                     message={`Bạn có chắc chắn muốn xoá phiếu "${confirmDelete.cashReceipt?.so_ct}" không?`}
-                    onConfirm={confirmDeleteGiayBaoCo}
-                    onCancel={cancelDeleteGiayBaoCo}
+                    onConfirm={confirmDeleteGiayBaoNo}
+                    onCancel={cancelDeleteGiayBaoNo}
                 />
             </div>
         </div>

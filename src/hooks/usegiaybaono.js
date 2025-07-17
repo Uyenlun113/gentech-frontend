@@ -1,30 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import giayBaoCoApi from "../services/giaybaoco";
+import giayBaoNoApi from "../services/giaybaono";
 
-export const useGiayBaoCos = (params) => {
+export const useGiayBaoNos = (params) => {
     return useQuery({
-        queryKey: ["giaybaoco", params],
-        queryFn: () => giayBaoCoApi.getGiayBaoCos(params),
+        queryKey: ["giaybaono", params],
+        queryFn: () => giayBaoNoApi.getGiayBaoNos(params),
         staleTime: Infinity,
     });
 };
 
-export const useGiayBaoCo = (ma_pt) => {
+export const useGiayBaoNo = (ma_pt) => {
     return useQuery({
-        queryKey: ["giaybaoco", ma_pt],
-        queryFn: () => giayBaoCoApi.getGiayBaoCo(ma_pt),
+        queryKey: ["cashReceipt", ma_pt],
+        queryFn: () => giayBaoNoApi.getGiayBaoNo(ma_pt),
         enabled: !!ma_pt,
     });
 };
 
-export const useCreateGiayBaoCo = () => {
+export const useCreateGiayBaoNo = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: giayBaoCoApi.createGiayBaoCo,
+        mutationFn: giayBaoNoApi.createGiayBaoNo,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["giaybaoco"] });
+            queryClient.invalidateQueries({ queryKey: ["giaybaono"] });
             toast.success("Tạo giấy thành công!");
         },
         onError: (error) => {
@@ -33,13 +33,13 @@ export const useCreateGiayBaoCo = () => {
     });
 };
 
-export const useUpdateGiayBaoCo = () => {
+export const useUpdateGiayBaoNo = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ stt_rec, data }) => giayBaoCoApi.updateGiayBaoCo(stt_rec, data),
+        mutationFn: ({ stt_rec, data }) => giayBaoNoApi.updateGiayBaoNo(stt_rec, data),
         onSuccess: (variables) => {
-            queryClient.invalidateQueries({ queryKey: ["giaybaoco"] });
+            queryClient.invalidateQueries({ queryKey: ["giaybaono"] });
             queryClient.invalidateQueries({ queryKey: ["cashReceipt", variables.stt_rec] });
             toast.success("Cập nhật giấy thành công!");
         },
@@ -49,13 +49,13 @@ export const useUpdateGiayBaoCo = () => {
     });
 };
 
-export const useDeleteGiayBaoCo = () => {
+export const useDeleteGiayBaoNo = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: giayBaoCoApi.deleteGiayBaoCo,
+        mutationFn: giayBaoNoApi.deleteGiayBaoNo,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["giaybaoco"] });
+            queryClient.invalidateQueries({ queryKey: ["giaybaono"] });
             toast.success("Xóa giấy thành công!");
         },
         onError: (error) => {
