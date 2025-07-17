@@ -673,21 +673,25 @@ export const ModalEditGiayBaoCo = ({ isOpenEdit, closeModalEdit, selectedGiayBao
                       <div className="col-span-3"></div>
                     </div>
 
+                    {/* Địa chỉ & MST chung hàng */}
                     <div className="grid grid-cols-12 gap-2 items-center">
+                      {/* Label Địa chỉ */}
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
-                        <Input value={formData.dia_chi} disabled className="h-8 text-sm bg-white" />
+                        {/* Input Địa chỉ */}
+                        <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
-                        <Input value={formData.mst} disabled className="h-8 text-sm bg-white" />
+                        {/* Input MST */}
+                        <Input value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người nộp tiền</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} disabled className="h-8 text-sm flex-1 col-span-6 bg-white" />
+                        <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>

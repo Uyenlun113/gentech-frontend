@@ -961,7 +961,7 @@ export const ModalCreateGiayBaoNo = ({ isOpenCreate, closeModalCreate }) => {
         t_thue: 0,
         tk_thue_no: "",
         tk_du: "",
-        t_tt:0,
+        t_tt: 0,
       }
     ]);
 
@@ -1048,19 +1048,19 @@ export const ModalCreateGiayBaoNo = ({ isOpenCreate, closeModalCreate }) => {
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
                         {/* Input Địa chỉ */}
-                        <Input value={formData.dia_chi} disabled className="h-8 text-sm bg-white" />
+                        <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
                         {/* Input MST */}
-                        <Input value={formData.mst} disabled className="h-8 text-sm bg-white" />
+                        <Input value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người nộp tiền</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} disabled className="h-8 text-sm flex-1 col-span-6 bg-white" />
+                        <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
