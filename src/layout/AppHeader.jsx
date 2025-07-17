@@ -41,7 +41,7 @@ const AppHeader = () => {
       hasDropdown: true,
       items: [
         { label: "1. Phiếu thu tiền mặt", path: "/chung-tu/phieu-thu" },
-        { label: "2. Phiếu chi tiền mặt", path: "/chung-tu/phieu-chi" },
+        { label: "2. Phiếu chi tiền mặt", path: "/phieu-chi-tien-mat" },
         { label: "3. Báo có ngân hàng", path: "/chung-tu/bao-co" },
         { label: "4. Báo nợ ngân hàng", path: "/chung-tu/bao-no" },
         { label: "a. Đơn đặt hàng mua", path: "/chung-tu/don-dat-hang-mua" },

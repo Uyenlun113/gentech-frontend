@@ -60,7 +60,7 @@ export default function ListCustomerGroupPage() {
     }
 
     return (
-        <>
+        <div className="px-4">
             <PageMeta title="Danh mục nhóm đối tượng" description="Danh mục nhóm đối tượng" />
             <PageBreadcrumb pageTitle="Danh mục nhóm đối tượng" />
             <div className="space-y-6">
@@ -152,6 +152,6 @@ export default function ListCustomerGroupPage() {
                     titleCancel="Hủy"
                 />
             </div>
-        </>
+        </div>
     );
 }

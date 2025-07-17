@@ -106,7 +106,7 @@ export const useListAccount = () => {
       key: "ten_tk",
       title: "Tên tài khoản",
       fixed: "left",
-      width: 300,
+      width: 200,
       render: (_, record) => {
         return <div className="text-center">{record?.ten_tk}</div>;
       },

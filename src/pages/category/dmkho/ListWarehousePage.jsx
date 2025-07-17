@@ -60,7 +60,7 @@ export default function ListWarehousePage() {
     }
 
     return (
-        <>
+        <div className="px-4">
             <PageMeta title="Danh mục kho" description="Quản lý danh mục kho" />
             <PageBreadcrumb pageTitle="Danh mục kho" />
             <div className="space-y-6">
@@ -152,6 +152,6 @@ export default function ListWarehousePage() {
                     titleCancel="Hủy"
                 />
             </div>
-        </>
+        </div>
     );
 }

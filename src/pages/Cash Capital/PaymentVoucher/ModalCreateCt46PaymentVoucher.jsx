@@ -25,8 +25,8 @@ const INITIAL_CT46_DATA = [
         so_ct0: "",
         dien_giaii: "",
         tien: "",
-        thue_suat: "",
-        thue: "",
+        thue_suat: "0",
+        thue: "0",
         tt: "",
         tk_thue_i: "",
         loai_hd: "",
@@ -41,7 +41,6 @@ const INITIAL_CT46_DATA = [
         ma_thue_i: "",
         ghi_chu_t: "",
         ngay_ct: "",
-        ma_ms: ""
     },
 ];
 
@@ -117,13 +116,32 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
     const ct46TableRef = useRef(null);
     const ct46gtTableRef = useRef(null);
 
-    const { data: accountRawData = {} } = useAccounts(
-        searchStates.tkSearch ? { search: searchStates.tkSearch } : {}
-    );
+    const [searchParams, setSearchParams] = useState({});
+
+    useEffect(() => {
+        setSearchParams({
+            search: searchStates.tkSearch || "",
+        });
+    }, [searchStates.tkSearch]);
+
+    const { data: accountRawData = {} } = useAccounts(searchParams);
     const { data: customerData = [] } = useCustomers(
         searchStates.maKhSearch ? { search: searchStates.maKhSearch } : {}
     );
     const { mutateAsync: saveCt46Accounting, isPending } = useSaveCt46Accounting();
+
+    // Validation function for "Loại phiếu chi"
+    const validateLoaiPhieuChi = useCallback((value) => {
+        // Allow empty value
+        if (value === "") return true;
+
+        // Check if it's a single digit from 1-9
+        const numValue = parseInt(value);
+        if (isNaN(numValue) || numValue < 1 || numValue > 9 || value.length > 1) {
+            return false;
+        }
+        return true;
+    }, []);
 
     // Tính tổng tiền - PS nợ và thành tiền
     const totals = useMemo(() => {
@@ -142,26 +160,37 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (searchStates.tkSearch) {
-                setSearchStates(prev => ({ ...prev, showAccountPopup: true }));
-            }
+            setSearchStates(prev => ({
+                ...prev,
+                showAccountPopup: prev.tkSearch !== "",
+            }));
         }, 600);
         return () => clearTimeout(timer);
     }, [searchStates.tkSearch]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (searchStates.maKhSearch) {
-                setSearchStates(prev => ({ ...prev, showCustomerPopup: true }));
-            }
+            setSearchStates(prev => ({
+                ...prev,
+                showCustomerPopup: prev.maKhSearch !== "",
+            }));
         }, 600);
         return () => clearTimeout(timer);
     }, [searchStates.maKhSearch]);
 
+
     // Handlers
     const handleFormChange = useCallback((field, value) => {
+        // Special validation for "loaiPhieuChi"
+        if (field === "loaiPhieuChi") {
+            if (!validateLoaiPhieuChi(value)) {
+                toast.error("Loại phiếu chi chỉ được nhập từ 1-9");
+                return;
+            }
+        }
+
         setFormData(prev => ({ ...prev, [field]: value }));
-    }, []);
+    }, [validateLoaiPhieuChi]);
 
     const handleDateChange = useCallback((date, field) => {
         const formattedDate = date[0]?.toLocaleDateString("en-CA");
@@ -194,7 +223,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         if (field === "tk_i") {
             setSearchStates(prev => ({
                 ...prev,
-                tkSearch: value,
+                tkSearch: value + "",
                 tkSearchRowId: id,
                 tkSearchField: "tk_i",
                 searchContext: "ct46"
@@ -360,7 +389,6 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 ma_thue_i: "",
                 ghi_chu_t: "",
                 ngay_ct: "",
-                ma_ms: ""
             }
         ]);
 
@@ -467,6 +495,11 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             toast.error("Vui lòng nhập tài khoản");
             return false;
         }
+        // Validate loại phiếu chi
+        if (formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi)) {
+            toast.error("Loại phiếu chi chỉ được nhập từ 1-9");
+            return false;
+        }
 
         const validCt46Rows = ct46Data.filter(row =>
             row.tk_i && parseFloat(row.tien) > 0
@@ -477,7 +510,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         }
 
         return true;
-    }, [formData, ct46Data]);
+    }, [formData, ct46Data, validateLoaiPhieuChi]);
 
     const handleSave = useCallback(async () => {
         if (!validateForm()) {
@@ -1232,12 +1265,19 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             type="text"
                                             value={formData.loaiPhieuChi}
                                             onChange={(e) => handleFormChange("loaiPhieuChi", e.target.value)}
-                                            placeholder="8"
-                                            className="w-24 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            placeholder="1-9"
+                                            maxLength={1}
+                                            className={`w-24 h-9 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi)
+                                                ? 'border-red-500 bg-red-50'
+                                                : 'border-gray-300'
+                                                }`}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[200px] ml-4">
                                             T/T chi phí trực tiếp bằng tiền
                                         </Label>
+                                        {formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi) && (
+                                            <span className="text-xs text-red-500 ml-2">Chỉ nhập từ 1-9</span>
+                                        )}
                                     </div>
 
                                     <div className="flex gap-3 items-center">
@@ -1527,6 +1567,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                         }}
                         accounts={accountRawData.data || []}
                         searchValue={searchStates.tkSearch}
+                        onSearchChange={(value) => setSearchStates(prev => ({ ...prev, tkSearch: value }))}
                     />
                 )}
 

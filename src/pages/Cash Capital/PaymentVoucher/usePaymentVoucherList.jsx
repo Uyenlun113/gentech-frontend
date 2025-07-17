@@ -133,35 +133,69 @@ export const usePaymentVoucherList = () => {
 
     const [tienMap, setTienMap] = useState({});
 
+    // FIX: Improved tienMap calculation
     useEffect(() => {
         const fetchAllCt46Data = async () => {
             if (!dataTable?.length) {
                 console.warn("Không có dataTable để tính tổng tiền");
+                setTienMap({});
                 return;
             }
 
             try {
-                const sttRecList = [...new Set(dataTable.map((item) => item.stt_rec?.trim?.()))];
-                const res = await ct46Api.fetchCt46Data(sttRecList);
-                if (res?.status === 200 && Array.isArray(res.data)) {
-                    const tienMap = {};
-                    res.data.forEach((item) => {
-                        const key = item.stt_rec?.trim?.();
-                        const tienValue = parseFloat(item.tien) || 0;
-                        if (key) {
-                            if (!tienMap[key]) tienMap[key] = 0;
-                            tienMap[key] += tienValue;
-                        }
-                    });
-                    setTienMap(tienMap);
+                // Filter out invalid stt_rec values
+                const sttRecList = dataTable
+                    .map((item) => item.stt_rec?.toString()?.trim())
+                    .filter(Boolean)
+                    .filter((item) => item !== "");
+
+                if (sttRecList.length === 0) {
+                    console.warn("Không có stt_rec hợp lệ");
+                    setTienMap({});
+                    return;
                 }
+                // Remove duplicates
+                const uniqueSttRecList = [...new Set(sttRecList)];
+                const res = await ct46Api.fetchCt46Data(uniqueSttRecList);
+
+                let ct46Data = [];
+
+                // Handle different response formats
+                if (res?.status === 200 && Array.isArray(res.data)) {
+                    ct46Data = res.data;
+                } else if (Array.isArray(res)) {
+                    ct46Data = res;
+                } else if (res?.data && Array.isArray(res.data)) {
+                    ct46Data = res.data;
+                } else {
+                    console.warn("CT46 API không trả về dữ liệu hợp lệ:", res);
+                    setTienMap({});
+                    return;
+                }
+
+                // Calculate tien sum for each stt_rec
+                const newTienMap = {};
+                ct46Data.forEach((item) => {
+                    const key = item.stt_rec?.toString()?.trim();
+                    const tienValue = parseFloat(item.tien) || 0;
+
+                    if (key) {
+                        if (!newTienMap[key]) {
+                            newTienMap[key] = 0;
+                        }
+                        newTienMap[key] += tienValue;
+                    }
+                });
+                setTienMap(newTienMap);
+
             } catch (err) {
                 console.error("Lỗi khi fetch CT46 all:", err);
+                setTienMap({});
             }
         };
 
         fetchAllCt46Data();
-    }, [JSON.stringify(dataTable)]);
+    }, [dataTable]); // Changed dependency to just dataTable
 
     const columnsTable = [
         {
@@ -193,11 +227,19 @@ export const usePaymentVoucherList = () => {
             key: "tien_total",
             title: "Tổng tiền tt ngoại tệ",
             width: 140,
-            render: (_, record) => (
-                <div className="font-mono text-sm text-center text-blue-600">
-                    {formatCurrency(tienMap[record.stt_rec] || record.t_tien || 0)}
-                </div>
-            ),
+            render: (_, record) => {
+                // FIX: Improved total calculation with better fallback
+                const sttRecKey = record.stt_rec?.toString()?.trim();
+                const calculatedTotal = tienMap[sttRecKey];
+                const fallbackTotal = record.t_tien || record.tien_total || 0;
+                const displayTotal = calculatedTotal !== undefined ? calculatedTotal : fallbackTotal;
+
+                return (
+                    <div className="font-mono text-sm text-center text-blue-600">
+                        {formatCurrency(displayTotal)}
+                    </div>
+                );
+            },
         },
         {
             key: "ma_kh",
@@ -231,7 +273,7 @@ export const usePaymentVoucherList = () => {
             ),
         },
         {
-            key: "ty_giaf",
+            key: "ty_gia",
             title: "Tỷ giá",
             width: 100,
             render: (val) => <div className="text-center">{formatCurrency(val)}</div>,
@@ -378,5 +420,6 @@ export const usePaymentVoucherList = () => {
         closeModalEdit,
         selectedEditId,
         setSelectedEditId,
+        tienMap,
     };
 };

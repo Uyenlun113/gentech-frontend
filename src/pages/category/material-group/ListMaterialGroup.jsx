@@ -59,7 +59,7 @@ export default function ListMaterialGroupPage() {
   }
 
   return (
-    <>
+    <div className="px-4">
       <PageMeta title="Danh mục nhóm vật tư hàng hóa" description="Danh mục nhóm vật tư hàng hóa" />
       <PageBreadcrumb pageTitle="Danh mục nhóm vật tư hàng hóa" />
       <div className="space-y-6">
@@ -151,6 +151,6 @@ export default function ListMaterialGroupPage() {
           titleCancel="Hủy"
         />
       </div>
-    </>
+    </div>
   );
 }

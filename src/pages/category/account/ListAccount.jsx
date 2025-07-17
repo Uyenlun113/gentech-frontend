@@ -62,7 +62,7 @@ export default function ListAccountPage() {
   }
 
   return (
-    <>
+    <div className="px-4">
       <PageMeta title="Danh mục tài khoản" description="Danh mục tài khoản" />
       <PageBreadcrumb pageTitle="Danh mục tài khoản" />
       <div className="space-y-6">
@@ -150,6 +150,6 @@ export default function ListAccountPage() {
           titleCancel="Hủy"
         />
       </div>
-    </>
+    </div>
   );
 }

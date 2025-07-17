@@ -74,7 +74,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
     ngayLapChungTu: "",
     quyenSo: "",
     soChungTu: "",
-    tyGia: 100,
+    tyGia: 1,
     trangThai: "1",
     dienGiaiChung: "",
   });
@@ -1088,6 +1088,7 @@ export const ModalCreateGeneralLedger = ({ isOpenCreate, closeModalCreate }) => 
                       onChange={(e) => handleFormChange("tyGia", e.target.value)}
                       placeholder="0"
                       className="flex-1 px-3 py-1.5 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-white border-none h-9"
+                      disabled
                     />
                   </div>
                 </div>

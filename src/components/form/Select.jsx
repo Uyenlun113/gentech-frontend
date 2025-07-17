@@ -1,6 +1,13 @@
 import { useState } from "react";
 
-const Select = ({ options, placeholder = "Select an option", onChange, className = "", defaultValue = "" }) => {
+const Select = ({
+  options,
+  placeholder = "Select an option",
+  onChange,
+  className = "",
+  defaultValue = "",
+  disabled = false,
+}) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
 
   const handleChange = (e) => {
@@ -15,6 +22,7 @@ const Select = ({ options, placeholder = "Select an option", onChange, className
         } ${className}`}
       value={selectedValue}
       onChange={handleChange}
+      disabled={disabled}
     >
       <option value="" disabled className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">
         {placeholder}

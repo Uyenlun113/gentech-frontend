@@ -12,8 +12,8 @@ import { useEffect, useState } from "react";
 import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { ModalCreateMaterial } from "./ModalCreate";
 
-import { useListMaterial } from "./useListMaterial";
 import { ModalEditMaterial } from "./ModalEdit";
+import { useListMaterial } from "./useListMaterial";
 
 export default function ListMaterialPage() {
     const {
@@ -62,7 +62,7 @@ export default function ListMaterialPage() {
     }
 
     return (
-        <>
+        <div className="px-4">
             <PageMeta title="Danh mục vật tư" description="Danh mục vật tư" />
             <PageBreadcrumb pageTitle="Danh mục vật tư" />
             <div className="space-y-6">
@@ -152,6 +152,6 @@ export default function ListMaterialPage() {
                     onCancel={cancelDeleteMaterial}
                 />
             </div>
-        </>
+        </div>
     );
 }
