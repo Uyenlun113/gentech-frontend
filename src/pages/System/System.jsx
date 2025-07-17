@@ -127,7 +127,7 @@ export default function SystemPage() {
     <div className="px-6">
       <PageMeta title="Hệ thống" description="Hệ thống" />
       <PageBreadcrumb pageTitle="Hệ thống" />
-      <div className="grid grid-cols-5 gap-14 px-8 pt-24 justify-items-center">
+      <div className="grid grid-cols-5 gap-14 px-8 pt-20 justify-items-center">
         {systemModules.map((module, index) => (
           <SystemModuleCard
             key={index}

@@ -52,7 +52,7 @@ const INITIAL_CT46GT_DATA = [
         tk_thue_no: "",
         thue_suat: "0",      // ← String
         ma_ms: "",
-        mau_bc: "",
+        kh_mau_hd: "",
         ma_kh: "",
         so_seri0: "",
         ten_kh: "",
@@ -244,7 +244,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                         tk_thue_no: item.tk_thue_no || "",
                         thue_suat: String(item.thue_suat || "0"),    // ← Convert to string
                         ma_ms: item.ma_ms || "",
-                        mau_bc: item.mau_bc || "",
+                        kh_mau_hd: item.kh_mau_hd || "",
                         ma_kh: item.ma_kh || "",
                         so_seri0: item.so_seri0 || "",
                         ten_kh: item.ten_kh || "",
@@ -542,7 +542,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 tk_thue_no: "",
                 thue_suat: "0",      // ← String
                 ma_ms: "",
-                mau_bc: "",
+                kh_mau_hd: "",
                 ma_kh: "",
                 so_seri0: "",
                 ten_kh: "",
@@ -684,14 +684,14 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                 hopDongThue: ct46gtData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
-                        so_ct0, tk_thue_no, thue_suat, ma_ms, mau_bc,
+                        so_ct0, tk_thue_no, thue_suat, ma_ms, kh_mau_hd,
                         ma_kh, so_seri0, ten_kh, dia_chi, ma_so_thue, ten_vt, ma_thue, ghi_chu, t_thue, t_tien, t_tt, ngay_ct
                     }) => ({
                         so_ct0: so_ct0?.trim() || "",
                         tk_thue_no: tk_thue_no?.trim() || "",
-                        thue_suat: String(thue_suat || "0"),        // ← Keep as string
+                        thue_suat: Number(thue_suat) || 0,        // ← Convert to NUMBER (thống nhất với create)
                         ma_ms: ma_ms || "",
-                        mau_bc: typeof mau_bc === "string" ? mau_bc.trim() : "",
+                        kh_mau_hd: typeof kh_mau_hd === "string" ? kh_mau_hd.trim() : "",
                         ma_kh: ma_kh?.trim() || "",
                         so_seri0: so_seri0 || "",
                         ten_kh: ten_kh?.trim() || "",
@@ -700,9 +700,9 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                         ten_vt: ten_vt || "",
                         ma_thue: ma_thue?.trim() || "",
                         ghi_chu: ghi_chu?.trim() || "",
-                        t_thue: String(t_thue || "0"),              // ← Keep as string
-                        t_tien: String(t_tien || "0"),              // ← Keep as string
-                        t_tt: String(t_tt || "0"),                  // ← Keep as string
+                        t_thue: Number(t_thue) || 0,              // ← Convert to NUMBER (thống nhất với create)
+                        t_tien: Number(t_tien) || 0,              // ← Convert to NUMBER (thống nhất với create)
+                        t_tt: Number(t_tt) || 0,                  // ← Convert to NUMBER (thống nhất với create)
                         ngay_ct: ngay_ct || ""
                     }))
             };
@@ -1135,13 +1135,13 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
             ),
         },
         {
-            key: "mau_bc",
+            key: "kh_mau_hd",
             title: "Mẫu hóa đơn",
             width: 150,
             render: (val, row) => (
                 <Input
-                    value={row.mau_bc}
-                    onChange={(e) => handleCt46gtChange(row.id, "mau_bc", e.target.value)}
+                    value={row.kh_mau_hd}
+                    onChange={(e) => handleCt46gtChange(row.id, "kh_mau_hd", e.target.value)}
                     placeholder="Nhập mẫu hóa đơn..."
                     className="w-full"
                 />

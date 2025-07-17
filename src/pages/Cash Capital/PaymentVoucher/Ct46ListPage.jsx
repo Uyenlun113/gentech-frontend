@@ -76,7 +76,7 @@ export default function Ct46ListPage() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
                                 <Link
-                                    to="/payment-voucher"
+                                    to="/cash-receipt"
                                     className="flex items-center border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
                                 >
                                     Quay lại
