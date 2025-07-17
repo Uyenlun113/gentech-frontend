@@ -30,10 +30,10 @@ export default function CashCapitalPage() {
     const handleIconClick = (type) => {
         switch (type) {
             case 'bank-receipt':
-                window.location.href = '/chung-tu/phieu-thu';
+                window.location.href = '/chung-tu/bao-co';
                 break;
             case 'bank-payment':
-                window.location.href = '/phieu-xuat';
+                window.location.href = '/chung-tu/bao-no';
                 break;
             case 'cash-receipt':
                 window.location.href = '/chung-tu/phieu-thu';
