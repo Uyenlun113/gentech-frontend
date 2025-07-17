@@ -15,10 +15,10 @@ export default function NotFound() {
           <h1 className="mb-8 font-bold text-gray-800 text-title-md dark:text-white/90 xl:text-title-2xl">ERROR</h1>
 
           <img src="/images/error/404.svg" alt="404" className="dark:hidden" />
-          <img src="/images/error/404-dark.svg" alt="404" className="hidden dark:block" />
+          <img src="/images/error/phatrien.jpg" alt="404" className="hidden dark:block" />
 
           <p className="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
-            We can’t seem to find the page you are looking for!
+            Xin lỗi , tính năng này hiện chúng tôi đang phát triển !
           </p>
 
           <Link

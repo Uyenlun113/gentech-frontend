@@ -2,7 +2,6 @@ import { Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import { useAccounts, useDeleteAccount } from "../../../hooks/useAccounts";
 import { useModal } from "../../../hooks/useModal";
-
 export const useListAccount = () => {
   const [rangePickerValue, setRangePickerValue] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -32,6 +31,12 @@ export const useListAccount = () => {
   const { data: accountData, isLoading, error, refetch } = useAccounts(queryParams);
   console.log(accountData);
   const deleteAccountMutation = useDeleteAccount();
+
+  // Thêm STT vào data
+  const dataTableWithSTT = (accountData?.data || []).map((item, index) => ({
+    ...item,
+    stt: (currentPage - 1) * queryParams.limit + index + 1
+  }));
 
   // Delete confirmation state
   const [confirmDelete, setConfirmDelete] = useState({
@@ -92,6 +97,16 @@ export const useListAccount = () => {
   };
 
   const columnsTable = [
+    {
+      key: "stt",
+      title: "STT",
+      fixed: "left",
+      align: "center",
+      width: 80,
+      render: (_, record) => {
+        return <div className="text-center">{record?.stt}</div>;
+      }
+    },
     {
       key: "tk0",
       title: "Mã tài khoản",
@@ -173,8 +188,8 @@ export const useListAccount = () => {
     isOpenEdit,
     selectedAccount,
 
-    // Data
-    dataTable: accountData?.data || [],
+    // Data - sử dụng data đã thêm STT
+    dataTable: dataTableWithSTT,
     columnsTable,
     pagination: accountData?.pagination || { page: 1, limit: 15, total: 0, totalPages: 1 },
 

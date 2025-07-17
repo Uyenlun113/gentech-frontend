@@ -1,3 +1,4 @@
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
@@ -6,7 +7,6 @@ import { Modal } from "../../../components/ui/modal";
 import { useCreateCustomer } from "../../../hooks/useCustomer";
 import { useCustomerGroups } from "../../../hooks/useCustomerGroups";
 import SearchableSelect from "../account/SearchableSelect";
-
 
 export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
@@ -131,83 +131,120 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
   };
 
   return (
-    <Modal isOpen={isOpenCreate} onClose={handleClose} className="w-full max-w-[900px] m-4">
-      <div className="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-        <div className="px-2 pr-14">
-          <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-            Thêm mới khách hàng
-          </h4>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-            Nhập thông tin khách hàng mới vào hệ thống.
-          </p>
+    <Modal isOpen={isOpenCreate} onClose={handleClose} className="max-w-7xl max-h-[90vh] m-4">
+      <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
+        <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Plus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                Thêm mới khách hàng
+              </h4>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Nhập thông tin khách hàng mới vào hệ thống
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <form className="flex flex-col" onSubmit={handleSubmit}>
-          <div className="custom-scrollbar h-[500px] overflow-y-auto px-2 pb-3">
+          <div className="custom-scrollbar overflow-y-auto p-4 bg-blue-50">
             <div>
               <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                 Thông tin cơ bản
               </h5>
 
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div className="col-span-2">
-                  <Label>Tên khách hàng *</Label>
-                  <Input
-                    type="text"
-                    value={formData.ten_kh}
-                    onChange={(e) => {
-                      handleInputChange('ten_kh', e.target.value);
-                      if (errors.ten_kh) {
-                        setErrors((prev) => ({ ...prev, ten_kh: "" }));
-                      }
-                    }}
-                    placeholder="Nhập tên khách hàng"
-                    required
-                  />
-                  {errors.ten_kh && (
-                    <p className="mt-1 text-sm text-red-500">{errors.ten_kh}</p>
-                  )}
-                </div>
-                <div className="col-span-2">
-                  <Label>Đối tác</Label>
-                  <Input
-                    type="text"
-                    value={formData.doi_tac}
-                    onChange={(e) => {
-                      handleInputChange('doi_tac', e.target.value);
-                    }}
-                    placeholder="Nhâp đối tác"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Tên khách hàng *
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.ten_kh}
+                      onChange={(e) => {
+                        handleInputChange('ten_kh', e.target.value);
+                        if (errors.ten_kh) {
+                          setErrors((prev) => ({ ...prev, ten_kh: "" }));
+                        }
+                      }}
+                      placeholder="Nhập tên khách hàng"
+                      required
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                    {errors.ten_kh && (
+                      <p className="mt-1 text-sm text-red-500">{errors.ten_kh}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={formData.e_mail}
-                    onChange={(e) => handleInputChange('e_mail', e.target.value)}
-                    placeholder="Nhập email"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Đối tác
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.doi_tac}
+                      onChange={(e) => handleInputChange('doi_tac', e.target.value)}
+                      placeholder="Nhập đối tác"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Số điện thoại</Label>
-                  <Input
-                    type="text"
-                    value={formData.dien_thoai}
-                    onChange={(e) => handleInputChange('dien_thoai', e.target.value)}
-                    placeholder="Nhập số điện thoại"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Email
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="email"
+                      value={formData.e_mail}
+                      onChange={(e) => handleInputChange('e_mail', e.target.value)}
+                      placeholder="Nhập email"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-span-2">
-                  <Label>Địa chỉ</Label>
-                  <Input
-                    type="text"
-                    value={formData.dia_chi}
-                    onChange={(e) => handleInputChange('dia_chi', e.target.value)}
-                    placeholder="Nhập địa chỉ"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Số điện thoại
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.dien_thoai}
+                      onChange={(e) => handleInputChange('dien_thoai', e.target.value)}
+                      placeholder="Nhập số điện thoại"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 lg:col-span-2">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Địa chỉ
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.dia_chi}
+                      onChange={(e) => handleInputChange('dia_chi', e.target.value)}
+                      placeholder="Nhập địa chỉ"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -217,55 +254,80 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 Thông tin bổ sung
               </h5>
 
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
-                  <Label>Mã số thuế</Label>
-                  <Input
-                    type="text"
-                    value={formData.ma_so_thue}
-                    onChange={(e) => handleInputChange('ma_so_thue', e.target.value)}
-                    placeholder="Nhập mã số thuế"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Mã số thuế
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.ma_so_thue}
+                      onChange={(e) => handleInputChange('ma_so_thue', e.target.value)}
+                      placeholder="Nhập mã số thuế"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Mã tra cứu</Label>
-                  <Input
-                    type="text"
-                    value={formData.ma_tra_cuu}
-                    onChange={(e) => handleInputChange('ma_tra_cuu', e.target.value)}
-                    placeholder="Nhập mã tra cứu"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Mã tra cứu
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.ma_tra_cuu}
+                      onChange={(e) => handleInputChange('ma_tra_cuu', e.target.value)}
+                      placeholder="Nhập mã tra cứu"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Tài khoản ngân hàng</Label>
-                  <Input
-                    type="text"
-                    value={formData.tk_nh}
-                    onChange={(e) => handleInputChange('tk_nh', e.target.value)}
-                    placeholder="Nhập số tài khoản"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Tài khoản ngân hàng
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.tk_nh}
+                      onChange={(e) => handleInputChange('tk_nh', e.target.value)}
+                      placeholder="Nhập số tài khoản"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Tên ngân hàng</Label>
-                  <Input
-                    type="text"
-                    value={formData.ten_nh}
-                    onChange={(e) => handleInputChange('ten_nh', e.target.value)}
-                    placeholder="Nhập tên ngân hàng"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Tên ngân hàng
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.ten_nh}
+                      onChange={(e) => handleInputChange('ten_nh', e.target.value)}
+                      placeholder="Nhập tên ngân hàng"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-span-2">
-                  <Label>Ghi chú</Label>
-                  <Input
-                    type="text"
-                    value={formData.ghi_chu}
-                    onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
-                    placeholder="Nhập ghi chú"
-                  />
+                <div className="flex items-center gap-4 lg:col-span-2">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Ghi chú
+                  </Label>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      value={formData.ghi_chu}
+                      onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
+                      placeholder="Nhập ghi chú"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,56 +337,71 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 Phân nhóm khách hàng
               </h5>
 
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5">
-                <div>
-                  <Label>Nhóm khách 1</Label>
-                  <SearchableSelect
-                    value={formData.nh_kh1}
-                    onChange={(value) => handleInputChange('nh_kh1', value)}
-                    options={getFilteredOptions('nh_kh1')}
-                    placeholder="Chọn nhóm khách hàng 1"
-                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
-                    loading={loadingGroups}
-                    onSearch={setSearchTerm}
-                    displayKey="ten_nh"
-                    valueKey="ma_nh"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Nhóm khách 1
+                  </Label>
+                  <div className="flex-1">
+                    <SearchableSelect
+                      value={formData.nh_kh1}
+                      onChange={(value) => handleInputChange('nh_kh1', value)}
+                      options={getFilteredOptions('nh_kh1')}
+                      placeholder="Chọn nhóm khách hàng 1"
+                      searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                      loading={loadingGroups}
+                      onSearch={setSearchTerm}
+                      displayKey="ten_nh"
+                      valueKey="ma_nh"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Nhóm khách 2</Label>
-                  <SearchableSelect
-                    value={formData.nh_kh2}
-                    onChange={(value) => handleInputChange('nh_kh2', value)}
-                    options={getFilteredOptions('nh_kh2')}
-                    placeholder="Chọn nhóm khách hàng 2"
-                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
-                    loading={loadingGroups}
-                    onSearch={setSearchTerm}
-                    displayKey="ten_nh"
-                    valueKey="ma_nh"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Nhóm khách 2
+                  </Label>
+                  <div className="flex-1">
+                    <SearchableSelect
+                      value={formData.nh_kh2}
+                      onChange={(value) => handleInputChange('nh_kh2', value)}
+                      options={getFilteredOptions('nh_kh2')}
+                      placeholder="Chọn nhóm khách hàng 2"
+                      searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                      loading={loadingGroups}
+                      onSearch={setSearchTerm}
+                      displayKey="ten_nh"
+                      valueKey="ma_nh"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Nhóm khách 3</Label>
-                  <SearchableSelect
-                    value={formData.nh_kh3}
-                    onChange={(value) => handleInputChange('nh_kh3', value)}
-                    options={getFilteredOptions('nh_kh3')}
-                    placeholder="Chọn nhóm khách hàng 3"
-                    searchPlaceholder="Tìm kiếm nhóm khách hàng..."
-                    loading={loadingGroups}
-                    onSearch={setSearchTerm}
-                    displayKey="ten_nh"
-                    valueKey="ma_nh"
-                  />
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                    Nhóm khách 3
+                  </Label>
+                  <div className="flex-1">
+                    <SearchableSelect
+                      value={formData.nh_kh3}
+                      onChange={(value) => handleInputChange('nh_kh3', value)}
+                      options={getFilteredOptions('nh_kh3')}
+                      placeholder="Chọn nhóm khách hàng 3"
+                      searchPlaceholder="Tìm kiếm nhóm khách hàng..."
+                      loading={loadingGroups}
+                      onSearch={setSearchTerm}
+                      displayKey="ten_nh"
+                      valueKey="ma_nh"
+                      className="w-full h-9 text-sm bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+          <div className="flex items-center gap-3 px-2 pb-4 px-4 lg:justify-end bg-blue-50">
             <Button size="sm" variant="outline" type="button" onClick={handleClose}>
               Hủy
             </Button>
