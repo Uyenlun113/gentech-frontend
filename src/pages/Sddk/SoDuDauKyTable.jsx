@@ -1,19 +1,29 @@
 import { format } from 'date-fns';
-import { Edit2, Save, X } from 'lucide-react';
+import { Edit2, Save, Search, X } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useListCdtk, useUpdateCdtk } from '../../hooks/useCdtk';
+
+import { useAccounts } from '../../hooks/useAccounts';
+import { useFindCdtkByTkAndYear, useListCdtk, useUpdateCdtk } from '../../hooks/useCdtk';
+
 const SoDuDauKyTable = () => {
     const [searchParams] = useSearchParams();
     const [editingRow, setEditingRow] = useState(null);
     const [editData, setEditData] = useState({});
+    const [showModal, setShowModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedAccount, setSelectedAccount] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+
     const yearFromUrl = searchParams.get('nam');
     const [selectedYear, setSelectedYear] = useState(
         yearFromUrl ? parseInt(yearFromUrl) : new Date().getFullYear()
     );
 
-    // Gọi hook để lấy dữ liệu (đã có account info từ JOIN)
-    const { data: cdtkData, isLoading, error, refetch } = useListCdtk(selectedYear);
+    const { data: cdtkData, isLoading, error } = useListCdtk(selectedYear);
+    const { data: accounts } = useAccounts();
+    const accountsData = accounts?.data;
+    const { data: selectedAccountDetail } = useFindCdtkByTkAndYear(selectedAccount.trim(), selectedYear);
     const updateCdtk = useUpdateCdtk();
 
     const handleEdit = (index, row) => {
@@ -34,13 +44,13 @@ const SoDuDauKyTable = () => {
                     du_no1: parseFloat(editData.du_no1) || 0,
                     du_co1: parseFloat(editData.du_co1) || 0,
                     du_no_nt1: parseFloat(editData.du_no_nt1) || 0,
-                    du_co_nt1: parseFloat(editData.du_co_nt1) || 0
-                }
+                    du_co_nt1: parseFloat(editData.du_co_nt1) || 0,
+                },
             });
             setEditingRow(null);
             setEditData({});
-        } catch (error) {
-            console.error('Error saving:', error);
+        } catch (err) {
+            console.error('Lỗi khi lưu:', err);
         }
     };
 
@@ -50,25 +60,19 @@ const SoDuDauKyTable = () => {
     };
 
     const handleInputChange = (field, value) => {
-        setEditData(prev => ({
+        setEditData((prev) => ({
             ...prev,
-            [field]: value === '' ? '' : parseFloat(value) || 0
+            [field]: value === '' ? '' : parseFloat(value) || 0,
         }));
     };
 
-    const formatNumber = (num) => {
-        return new Intl.NumberFormat('vi-VN').format(num || 0);
-    };
+    const formatNumber = (num) => new Intl.NumberFormat('vi-VN').format(num || 0);
 
-    // Helper function để lấy tên tài khoản
-    const getAccountName = (row) => {
-        return row.account?.ten_tk || row.account?.name || `Tài khoản ${row.tk}`;
-    };
+    const getAccountName = (row) =>
+        row.account?.ten_tk || row.account?.name || `Tài khoản ${row.tk}`;
 
-    // Tính tổng các cột - đảm bảo convert sang number
     const calculateTotals = () => {
-        if (!cdtkData || cdtkData.length === 0) return {};
-
+        if (!cdtkData?.length) return {};
         return {
             du_no00: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_no00) || 0), 0),
             du_co00: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_co00) || 0), 0),
@@ -77,28 +81,42 @@ const SoDuDauKyTable = () => {
             du_no_nt00: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_no_nt00) || 0), 0),
             du_co_nt00: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_co_nt00) || 0), 0),
             du_no_nt1: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_no_nt1) || 0), 0),
-            du_co_nt1: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_co_nt1) || 0), 0)
+            du_co_nt1: cdtkData.reduce((sum, row) => sum + (parseFloat(row.du_co_nt1) || 0), 0),
         };
     };
+
+    const handleShowModal = () => {
+        setShowModal(true);
+        setSelectedAccount('');
+        setSearchTerm('');
+    };
+
+    const handleAccountSelect = () => {
+        if (selectedAccount) {
+            setShowModal(false);
+            setShowDetailModal(true);
+        }
+    };
+
+    const filteredAccounts = accountsData?.filter((account) =>
+        account.tk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        account.ten_tk?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    const accountOptions = cdtkData?.map((row) => ({
+        tk: row.tk,
+        ten_tk: getAccountName(row),
+    })) || [];
 
     const totals = calculateTotals();
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-gray-600 dark:text-gray-400">Đang tải dữ liệu...</div>
-            </div>
-        );
+        return <div className="text-center py-10 text-gray-600 dark:text-gray-400">Đang tải dữ liệu...</div>;
     }
 
     if (error) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-red-600">Lỗi khi tải dữ liệu: {error.message}</div>
-            </div>
-        );
+        return <div className="text-center py-10 text-red-600">Lỗi khi tải dữ liệu: {error.message}</div>;
     }
-
     return (
         <div className="px-4 bg-white dark:bg-gray-900 pt-2">
             {/* Header */}
@@ -129,7 +147,7 @@ const SoDuDauKyTable = () => {
                         <span>Kết xuất</span>
                     </button>
                     <button
-                        onClick={() => refetch()}
+                        onClick={handleShowModal}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                         Tính tổng
@@ -137,7 +155,7 @@ const SoDuDauKyTable = () => {
                 </div>
             </div>
 
-            {/* Table Container with sticky header */}
+            {/* Table Container */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-280px)]">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -251,7 +269,6 @@ const SoDuDauKyTable = () => {
                                     <td className="px-2 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white text-center">
                                         <span className="font-mono">{formatNumber(row.du_co_nt1 || 0)}</span>
                                     </td>
-                                    {/* Hiển thị tên tài khoản từ data đã JOIN */}
                                     <td className="px-2 py-4 text-sm text-gray-900 dark:text-white text-center w-[210px] overflow-hidden ">
                                         <span className="text-gray-900 dark:text-white " title={getAccountName(row)}>
                                             {getAccountName(row)}
@@ -307,7 +324,6 @@ const SoDuDauKyTable = () => {
                    border-t border-blue-200 dark:border-blue-700 text-sm">
                         <div className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <table className="min-w-full table-auto">
-
                                 <tbody>
                                     <tr className="font-semibold text-gray-900 dark:text-white">
                                         <td className="px-2 py-1 w-[40px]">
@@ -355,9 +371,9 @@ const SoDuDauKyTable = () => {
                                                 {formatNumber(totals.du_co_nt1)}
                                             </span>
                                         </td>
-                                        <td className="px-2 py-1 w-[100px]"></td> {/* tên tài khoản */}
-                                        <td className="px-2 py-1 w-[120px]"></td> {/* ngày cập nhật */}
-                                        <td className="px-2 py-1 w-[100px]"></td> {/* thao tác */}
+                                        <td className="px-2 py-1 w-[100px]"></td>
+                                        <td className="px-2 py-1 w-[120px]"></td>
+                                        <td className="px-2 py-1 w-[100px]"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -365,8 +381,180 @@ const SoDuDauKyTable = () => {
                     </div>
                 )}
             </div>
+
+            {/* Account Selection Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-w-md mx-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                Tính tổng
+                            </h3>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Tài khoản
+                            </label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    placeholder="Tài khoản, Tên tài khoản"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Account List */}
+                        <div className="mb-4 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md">
+                            {(filteredAccounts.length > 0 ? filteredAccounts : accountOptions)
+                                .filter(account =>
+                                    account.tk?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    account.ten_tk?.toLowerCase().includes(searchTerm.toLowerCase())
+                                )
+                                .map((account) => (
+                                    <div
+                                        key={account.tk}
+                                        onClick={() => setSelectedAccount(account.tk)}
+                                        className={`p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-600 last:border-b-0 
+                                        ${selectedAccount === account.tk ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                                    >
+                                        <div className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="account"
+                                                value={account.tk}
+                                                checked={selectedAccount === account.tk}
+                                                onChange={() => setSelectedAccount(account.tk)}
+                                                className="mr-3 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {account.tk}
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                    {account.ten_tk}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="px-4 py-2 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={handleAccountSelect}
+                                disabled={!selectedAccount}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Detail Modal */}
+            {showDetailModal && selectedAccountDetail && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-w-md mx-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                Chi tiết tài khoản
+                            </h3>
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dư nợ ban đầu
+                            </label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    value={selectedAccountDetail.tk}
+                                    readOnly
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dư có ban đầu
+                            </label>
+                            <input
+                                type="text"
+                                value={selectedAccountDetail.ten_tk}
+                                readOnly
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dư nợ đầu năm tài chính
+                            </label>
+                            <input
+                                type="text"
+                                value={selectedAccountDetail.ten_tk}
+                                readOnly
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dư có đầu năm tài chính
+                            </label>
+                            <input
+                                type="text"
+                                value={selectedAccountDetail.ten_tk}
+                                readOnly
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <input
+                                type="text"
+                                value={selectedAccountDetail.ten_tk}
+                                readOnly
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
+                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
-
 export default SoDuDauKyTable;

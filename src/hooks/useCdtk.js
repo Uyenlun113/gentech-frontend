@@ -41,3 +41,12 @@ export const useUpdateCdtk = () => {
         },
     });
 };
+
+export const useFindCdtkByTkAndYear = (tk, nam) => {
+    return useQuery({
+        queryKey: ["cdtk", tk, nam],
+        queryFn: () => cdtkService.findOne(tk, nam),
+        enabled: !!tk && !!nam, 
+        staleTime: Infinity,
+    });
+};

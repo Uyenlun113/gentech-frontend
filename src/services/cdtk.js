@@ -24,6 +24,13 @@ const cdtkService = {
         });
         return response.data;
     },
+
+    findOne: async (tk, nam) => {
+        const response = await axios.get(`${API_BASE_URL}/cdtk/one`, {
+            params: { tk, nam },
+        });
+        return response.data;
+    },
 };
 
 export default cdtkService;
