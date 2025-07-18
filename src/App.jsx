@@ -49,6 +49,7 @@ import UserProfiles from "./pages/UserProfiles";
 import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
+import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 
 
 export default function App() {
@@ -135,6 +136,7 @@ export default function App() {
               <Route path="/chung-tu/phieu-thu" element={<CashReceiptList />} />
               <Route path="/chung-tu/bao-co" element={<GiayBaoCoList />} />
               <Route path="/chung-tu/bao-no" element={<GiayBaoNoList />} />
+              <Route path="/chung-tu/phieu-nhap-kho" element={<PhieuNhapKhoList />} />
 
             </Route>
           </Route>
