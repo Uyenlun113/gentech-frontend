@@ -51,6 +51,7 @@ import UserProfiles from "./pages/UserProfiles";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
+import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
 
 
 export default function App() {
@@ -141,6 +142,7 @@ export default function App() {
               <Route path="/chung-tu/bao-co" element={<GiayBaoCoList />} />
               <Route path="/chung-tu/bao-no" element={<GiayBaoNoList />} />
               <Route path="/chung-tu/phieu-nhap-kho" element={<PhieuNhapKhoList />} />
+              <Route path="/chung-tu/phieu-xuat-kho" element={<PhieuXuatKhoList />} />
 
             </Route>
           </Route>
