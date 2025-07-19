@@ -1,13 +1,17 @@
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
+import SoDuDauKyModal from "../pages/Sddk/SoDuDauKyModal";
+
 const AppHeader = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  const navigate = useNavigate(); // Thêm hook navigate
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -22,6 +26,23 @@ const AppHeader = () => {
 
   const toggleDropdown = (dropdown) => {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+  };
+
+  const handleMenuItemClick = (path) => {
+    // Đóng dropdown trước
+    setActiveDropdown(null);
+
+    // Kiểm tra nếu là item "Vào số dư đầu kỳ tài khoản"
+    if (path === "/dau-ky/sodu-tk") {
+      setIsModalOpen(true);
+    } else {
+      // Navigate cho các item khác
+      navigate(path);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   const menuItems = [
@@ -130,6 +151,7 @@ const AppHeader = () => {
       ],
     },
   ];
+
   const menuHeader = [
     {
       name: "Báo cáo nhanh",
@@ -171,97 +193,104 @@ const AppHeader = () => {
   }, []);
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 fixed top-0 left-0 right-0 z-50">
-      {/* Main Header */}
-      <div className="px-4 lg:px-6">
-        <div className="flex items-center justify-between h-[70px]">
-          <div className="items-center space-x-2">
-            <div className="flex items-center space-x-3">
-              <Link to="/">
-                {" "}
-                <img src="/images/logo/logo-icon.svg" alt="Logo" className="w-5 h-5" />
-              </Link>
-              <div className="text-sl font-medium text-gray-900 dark:text-white">
-                <div>Công ty TNHH Vật tài thương mại Việt Trung Phú Thọ</div>
+    <>
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 fixed top-0 left-0 right-0 z-50">
+        {/* Main Header */}
+        <div className="px-4 lg:px-6">
+          <div className="flex items-center justify-between h-[70px]">
+            <div className="items-center space-x-2">
+              <div className="flex items-center space-x-3">
+                <Link to="/">
+                  <img src="/images/logo/logo-icon.svg" alt="Logo" className="w-5 h-5" />
+                </Link>
+                <div className="text-sl font-medium text-gray-900 dark:text-white">
+                  <div>Công ty TNHH Vật tài thương mại Việt Trung Phú Thọ</div>
+                </div>
               </div>
-            </div>
-            <div className="hidden lg:flex flex-1 justify-center mt-2">
-              <nav className="flex space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {menuItems.map((item, index) => (
-                  <div key={index} className="relative">
-                    <button
-                      onClick={() => item.hasDropdown && toggleDropdown(`menu-${index}`)}
-                      className="flex items-center space-x-1 px-2 py-1 hover:text-blue-600 dark:hover:text-white"
-                    >
-                      <span>{item.label}</span>
-                      {item.hasDropdown && (
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${activeDropdown === `menu-${index}` ? "rotate-180" : ""
-                            }`}
-                        />
-                      )}
-                    </button>
-
-                    {/* Dropdown */}
-                    {item.hasDropdown && activeDropdown === `menu-${index}` && (
-                      <div
-                        ref={dropdownRef}
-                        className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-96 overflow-y-auto"
+              <div className="hidden lg:flex flex-1 justify-center mt-2">
+                <nav className="flex space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {menuItems.map((item, index) => (
+                    <div key={index} className="relative">
+                      <button
+                        onClick={() => item.hasDropdown && toggleDropdown(`menu-${index}`)}
+                        className="flex items-center space-x-1 px-2 py-1 hover:text-blue-600 dark:hover:text-white"
                       >
-                        {item.items?.map((subItem, subIndex) => (
-                          <a
-                            key={subIndex}
-                            href={subItem.path || "#"}
-                            className="block mx-2 px-3 py-2.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            {subItem.label || subItem}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </nav>
-            </div>
-          </div>
+                        <span>{item.label}</span>
+                        {item.hasDropdown && (
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform ${activeDropdown === `menu-${index}` ? "rotate-180" : ""
+                              }`}
+                          />
+                        )}
+                      </button>
 
-          {/* Center - Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                      {/* Dropdown */}
+                      {item.hasDropdown && activeDropdown === `menu-${index}` && (
+                        <div
+                          ref={dropdownRef}
+                          className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-96 overflow-y-auto"
+                        >
+                          {item.items?.map((subItem, subIndex) => (
+                            <button
+                              key={subIndex}
+                              onClick={() => handleMenuItemClick(subItem.path)}
+                              className="block w-full text-left mx-2 px-3 py-2.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {subItem.label || subItem}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </nav>
               </div>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Tìm kiếm hoặc nhập lệnh..."
-                className="block w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
-              />
+            </div>
+
+            {/* Center - Search Bar */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Tìm kiếm hoặc nhập lệnh..."
+                  className="block w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <ThemeToggleButton />
+              <NotificationDropdown />
+              <UserDropdown />
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-4">
-            <ThemeToggleButton />
-            <NotificationDropdown />
-            <UserDropdown />
+        <div className="flex items-center gap-6 px-6 py-3 dark:bg-slate-800">
+          <div className="flex flex-wrap gap-2">
+            {menuHeader.map((item, index) => (
+              <Link
+                key={index}
+                to={item.path}
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all hover:scale-105 hover:shadow-md ${item.color}`}
+              >
+                {item.name}
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex items-center gap-6 px-6 py-3  dark:bg-slate-800  ">
-        <div className="flex flex-wrap gap-2">
-          {menuHeader.map((item, index) => (
-            <a
-              key={index}
-              href={item.path}
-              className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all hover:scale-105 hover:shadow-md ${item.color}`}
-            >
-              {item.name}
-            </a>
-          ))}
-        </div>
-      </div>
-    </header>
+      {/* Modal */}
+      <SoDuDauKyModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
+    </>
   );
 };
 

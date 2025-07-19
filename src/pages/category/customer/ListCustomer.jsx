@@ -59,7 +59,7 @@ export default function ListCustomerPage() {
     }
 
     return (
-        <>
+        <div className="px-4">
             <PageMeta title="Danh mục khách hàng" description="Danh mục khách hàng" />
             <PageBreadcrumb pageTitle="Danh mục khách hàng" />
             <div className="space-y-6">
@@ -152,6 +152,6 @@ export default function ListCustomerPage() {
                     onCancel={cancelDeleteCustomer}
                 />
             </div>
-        </>
+        </div>
     );
 }
