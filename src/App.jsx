@@ -34,7 +34,12 @@ import CashCapitalPage from "./pages/Cash Capital/CashCapitalPage";
 import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
+import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
+import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
+import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
+import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
 import QuickReport from "./pages/Quick Report/QuickReport";
 import SoDuDauKyTable from "./pages/Sddk/SoDuDauKyTable";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
@@ -48,10 +53,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
-import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
-import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
-import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
 
 
 export default function App() {
@@ -89,6 +90,7 @@ export default function App() {
               {/* Giáy bao cố ngan hang */}
               <Route path="/dau-ky/sodu-tk/table" element={<SoDuDauKyTable />} />
 
+              <Route path="/phieu-xuat-dc" element={<PhieuXuatDcListPage />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}
