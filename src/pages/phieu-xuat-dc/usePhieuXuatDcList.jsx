@@ -22,7 +22,6 @@ export const usePhieuXuatDcList = () => {
 
     const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
     const { data: fetchPhieuXuatDcData, isLoading: isLoadingPhieuXuatDc, refetch: refetchPhieuXuatDcData } = useGetAllPhieuXuatDc();
-    console.log("fetchPhieuXuatDcData", fetchPhieuXuatDcData);
     const deleteMutation = useDeletePhieuXuatDc();
 
     const dataTable = useMemo(() => {
@@ -145,8 +144,8 @@ export const usePhieuXuatDcList = () => {
         setSelectedRecord(null);
     };
 
-    const handleOpenEdit = (id) => {
-        setSelectedEditId(id);
+    const handleOpenEdit = (stt_rec) => {
+        setSelectedEditId(stt_rec);
         openModalEdit();
     };
 
@@ -255,8 +254,8 @@ export const usePhieuXuatDcList = () => {
             },
         },
         {
-            key: "ma_ct",
-            title: "Mã chứng từ",
+            key: "so_ct",
+            title: "Số chứng từ",
             fixed: "left",
             width: 120,
             render: (val) => <div className="font-medium text-center">{val || "-"}</div>,

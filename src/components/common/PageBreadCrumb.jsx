@@ -2,7 +2,7 @@ import { Link } from "react-router";
 
 const PageBreadcrumb = ({ pageTitle }) => {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6 mt-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 mb-3 mt-2">
       <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90" x-text="pageName">
         {pageTitle}
       </h2>

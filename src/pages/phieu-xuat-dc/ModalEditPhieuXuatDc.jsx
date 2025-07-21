@@ -7,12 +7,13 @@ import { toast } from "react-toastify";
 import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
 
+import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
-import SearchableSelect from "../category/account/SearchableSelect";
-import { useGetPhieuXuatDc, useUpdatePhieuXuatDc } from "../../hooks/usePhieuxuatdc";
-import { Modal } from "../../components/ui/modal";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
+import { Modal } from "../../components/ui/modal";
+import { useGetPhieuXuatDc, useUpdatePhieuXuatDc } from "../../hooks/usePhieuxuatdc";
+import SearchableSelect from "../category/account/SearchableSelect";
 
 // Constants cho CT85 (Phiếu xuất điều chuyển)
 const INITIAL_CT85_DATA = [
@@ -621,7 +622,22 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Mã kho <span className="text-red-500">*</span>
+                                            Mã kho xuất <span className="text-red-500">*</span>
+                                        </Label>
+                                        <input
+                                            type="text"
+                                            value={formData.maKho}
+                                            onChange={(e) => {
+                                                handleFormChange("maKho", e.target.value);
+                                                handleMainFormKhoSearch(e.target.value);
+                                            }}
+                                            placeholder="KHO01"
+                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 items-center">
+                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                                            Mã kho nhận <span className="text-red-500">*</span>
                                         </Label>
                                         <input
                                             type="text"

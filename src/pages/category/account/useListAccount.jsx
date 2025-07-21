@@ -23,7 +23,7 @@ export const useListAccount = () => {
     dateFrom,
     dateTo,
     page: currentPage,
-    limit: 10,
+    limit: 14,
     nh_tk: loaiTk || undefined,
   };
 

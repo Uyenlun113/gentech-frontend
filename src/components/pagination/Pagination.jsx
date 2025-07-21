@@ -25,7 +25,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={`
-  w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300
+  w-6 h-6 flex items-center justify-center rounded-lg border border-gray-300
   text-gray-800 hover:bg-brand-500 hover:text-white
   disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none
 `}
@@ -42,9 +42,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           <button
             key={idx}
             onClick={() => onPageChange(page)}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg font-normal text-sm ${
-              page === currentPage ? "bg-brand-500 text-white" : "text-gray-800 hover:bg-gray-100"
-            }`}
+            className={`w-6 h-6 flex items-center justify-center rounded-lg font-normal text-sm ${page === currentPage ? "bg-brand-500 text-white" : "text-gray-800 hover:bg-gray-100"
+              }`}
           >
             {page}
           </button>
@@ -54,7 +53,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-brand-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+        className="w-6 h-6 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-brand-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
       >
         <ChevronRight size={20} />
       </button>

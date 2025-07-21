@@ -106,7 +106,7 @@ export default function ListAccountPage() {
           {/* Table */}
           {!isLoading && (
             <>
-              <TableBasic data={dataTable} columns={columnsTable} />
+              <TableBasic data={dataTable} columns={columnsTable} maxHeight="max-h-[630px]" />
               <Pagination
                 currentPage={pagination.page}
                 totalItems={pagination.total}

@@ -10,11 +10,14 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
+
+import Button from "../../components/ui/button/Button";
+import { CalenderIcon } from "../../icons";
+
+
 import { ModalCreatePhieuXuatDc } from "./ModalCreatePhieuXuatDc";
 import { ModalEditPhieuXuatDc } from "./ModalEditPhieuXuatDc";
 import { usePhieuXuatDcList } from "./usePhieuXuatDcList";
-import Button from "../../components/ui/button/Button";
-import { CalenderIcon } from "../../icons";
 
 export default function PhieuXuatDcListPage() {
     const {
@@ -75,8 +78,8 @@ export default function PhieuXuatDcListPage() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
                                 <Link
-                                    to="/kho-hang"
-                                    className="flex items-center border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
+                                    to="/purchases"
+                                    className="flex items-center border border-gray-300 px-2 py-1.5 text-gray-600 hover:bg-gray-50 rounded-lg"
                                 >
                                     Quay lại
                                 </Link>

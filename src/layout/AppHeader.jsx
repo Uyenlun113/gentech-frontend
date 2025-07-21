@@ -1,4 +1,4 @@
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
@@ -249,17 +249,17 @@ const AppHeader = () => {
 
             {/* Center - Search Bar */}
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
+              {/* <div className="relative w-full">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="h-4 w-4 text-gray-400" />
                 </div>
-                <input
+                {/* <input
                   ref={inputRef}
                   type="text"
                   placeholder="Tìm kiếm hoặc nhập lệnh..."
                   className="block w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
-                />
-              </div>
+                /> */}
+              {/* </div> */}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -270,7 +270,7 @@ const AppHeader = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6 px-6 py-3 dark:bg-slate-800">
+        <div className="flex items-center gap-6 px-6 pb-2 dark:bg-slate-800">
           <div className="flex flex-wrap gap-2">
             {menuHeader.map((item, index) => (
               <Link
@@ -283,10 +283,10 @@ const AppHeader = () => {
             ))}
           </div>
         </div>
-      </header>
+      </header >
 
       {/* Modal */}
-      <SoDuDauKyModal
+      < SoDuDauKyModal
         isOpen={isModalOpen}
         onClose={closeModal}
       />

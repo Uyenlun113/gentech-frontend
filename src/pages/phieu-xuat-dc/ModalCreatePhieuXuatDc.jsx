@@ -7,13 +7,14 @@ import { toast } from "react-toastify";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
+import WarehouseSelectionPopup from "../../components/general/dmkPopup";
+import MaterialSelectionPopup from "../../components/general/dmvtPopup";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../components/ui/modal";
 import { Tabs } from "../../components/ui/tabs";
 import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
 import { useCreatePhieuXuatDc } from "../../hooks/usePhieuxuatdc";
-import SearchableSelect from "../category/account/SearchableSelect";
 
 
 
@@ -48,13 +49,17 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         ongBa: "",
         dienGiai: "",
         maKho: "",
+        tenKho: "",       // ✅ tên kho xuất
         maKhon: "",
+        tenKhon: "",      // ✅ tên kho nhận
         tSoLuong: 0,
         tyGia: 1,
-        maCt: "",
+        maQs: "",
         ngayLct: "",
         ngayCtPhieu: "",
         trangThai: "1",
+        hd_lenhdd: "",     // ✅ số hợp đồng
+        soCt: "",
     });
 
     const [ct85Data, setCt85Data] = useState(INITIAL_CT85_DATA);
@@ -172,17 +177,26 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             searchContext: null
         }));
     }, []);
+    const handleMainFormKhoNhanSearch = useCallback((value) => {
+        setSearchStates(prev => ({
+            ...prev,
+            khoSearch: value,
+            khoSearchRowId: "main-form-nhan",
+            searchContext: "mainFormReceive"
+        }));
+    }, []);
 
     const handleKhoSelect = useCallback((id, kho) => {
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("maKho", kho.ma_kho.trim());
-            handleFormChange("maKhon", kho.ma_kho.trim()); // Assuming maKhon is same as maKho
+            handleFormChange("tenKho", kho.ten_kho?.trim() || "");
+        } else if (searchStates.searchContext === "mainFormReceive") {
+            handleFormChange("maKhon", kho.ma_kho.trim());
+            handleFormChange("tenKhon", kho.ten_kho?.trim() || "");
         } else {
             setCt85Data(prev =>
                 prev.map(item =>
-                    item.id === id
-                        ? { ...item, ma_nx_i: kho.ma_kho.trim() }
-                        : item
+                    item.id === id ? { ...item, ma_kho: kho.ma_kho.trim() } : item
                 )
             );
         }
@@ -232,10 +246,11 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             maKhon: "",
             tSoLuong: 0,
             tyGia: 1,
-            maCt: "",
+            maQs: "",
             ngayLct: "",
             ngayCtPhieu: "",
             trangThai: "1",
+            soCt: "",
         });
         setCt85Data(INITIAL_CT85_DATA);
         setSearchStates({
@@ -250,7 +265,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     }, []);
 
     const validateForm = useCallback(() => {
-        if (!formData.maCt) {
+        if (!formData.maQs) {
             toast.error("Vui lòng nhập mã chứng từ");
             return false;
         }
@@ -284,13 +299,17 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     ong_ba: formData.ongBa,
                     dien_giai: formData.dienGiai,
                     ma_kho: formData.maKho,
+                    ten_kho: formData.tenKho,
                     ma_khon: formData.maKhon,
+                    ten_khon: formData.tenKhon,
                     t_so_luong: totals.totalSoLuong,
                     ty_gia: formData.tyGia,
-                    ma_ct: formData.maCt,
+                    ma_qs: formData.maQs,
                     ngay_lct: formData.ngayLct ? new Date(formData.ngayLct).toISOString() : undefined,
                     ngay_ct: formData.ngayCtPhieu ? new Date(formData.ngayCtPhieu).toISOString() : undefined,
-                    status: formData.trangThai
+                    status: formData.trangThai,
+                    hd_lenhdd: formData.hd_lenhdd || "",
+                    so_ct: formData.soCt || "",
                 },
                 vatTu: ct85Data
                     .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
@@ -504,13 +523,13 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
 
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
-            <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
+            <div className="relative w-full h-full  bg-white dark:bg-gray-900 flex flex-col overflow-hidden ">
                 {/* Header */}
-                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-100 to-emerald-50 dark:from-gray-800 dark:to-gray-900">
+                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100  to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
                             <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                                <div className="p-2 bg-blue-100 dark:bg-green-900 rounded-lg">
                                     <Plus className="w-6 h-6 text-green-600 dark:text-green-400" />
                                 </div>
                                 Tạo phiếu xuất điều chuyển
@@ -529,13 +548,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto bg-green-50">
+                <div className="flex-1 overflow-y-auto bg-blue-50">
                     {/* Form thông tin cơ bản */}
                     <div className="border-b border-gray-100">
                         <div className="dark:bg-gray-800 rounded-xl p-4">
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                                 {/* Cột trái - 70% */}
                                 <div className="lg:col-span-7 space-y-2">
+                                    {/* Mã kho xuất */}
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Xuất <span className="text-red-500">*</span>
@@ -550,30 +570,35 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             placeholder="KHO01"
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
+                                        <span className="text-gray-600 text-sm">{formData.tenKho}</span>
                                     </div>
+
+                                    {/* Mã kho nhận */}
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Mã kho Xuất <span className="text-red-500">*</span>
+                                            Mã kho Nhận <span className="text-red-500">*</span>
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maKho}
+                                            value={formData.maKhon}
                                             onChange={(e) => {
-                                                handleFormChange("maKho", e.target.value);
-                                                handleMainFormKhoSearch(e.target.value);
+                                                handleFormChange("maKhon", e.target.value);
+                                                handleMainFormKhoNhanSearch(e.target.value);
                                             }}
-                                            placeholder="KHO01"
+                                            placeholder="KHO02"
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
+                                        <span className="text-gray-600 text-sm">{formData.tenKhon}</span>
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận hàng
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maCt}
-                                            onChange={(e) => handleFormChange("maCt", e.target.value)}
+                                            value={formData.maQs}
+                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
                                             placeholder="XDC001"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
@@ -584,24 +609,25 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maCt}
-                                            onChange={(e) => handleFormChange("maCt", e.target.value)}
+                                            value={formData.maQs}
+                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
                                             placeholder="XDC001"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Hợp đồng số
+                                            Số hợp đồng
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maCt}
-                                            onChange={(e) => handleFormChange("maCt", e.target.value)}
-                                            placeholder="XDC001"
+                                            value={formData.hd_lenhdd}
+                                            onChange={(e) => handleFormChange("hd_lenhdd", e.target.value)}
+                                            placeholder="HD-001"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
+
 
 
                                 </div>
@@ -610,12 +636,24 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                 <div className="lg:col-span-3 space-y-2">
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Mã chứng từ <span className="text-red-500">*</span>
+                                            Mã quyển sổ <span className="text-red-500">*</span>
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maCt}
-                                            onChange={(e) => handleFormChange("maCt", e.target.value)}
+                                            value={formData.maQs}
+                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
+                                            placeholder="XDC001"
+                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 items-center">
+                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                                            Số hóa đơn <span className="text-red-500">*</span>
+                                        </Label>
+                                        <input
+                                            type="text"
+                                            value={formData.soCt}
+                                            onChange={(e) => handleFormChange("soCt", e.target.value)}
                                             placeholder="XDC001"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
@@ -707,7 +745,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             </div>
 
             {/* Footer */}
-            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
                 <div className="flex justify-between items-center">
                     {/* Summary info */}
                     <div className="flex gap-6 text-sm">
@@ -735,32 +773,26 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                 }`}
                         >
                             <Save size={16} />
-                            {isPending ? "Đang lưu..." : "Lưu phiếu xuất DC"}
+                            {isPending ? "Đang lưu..." : "Lưu phiếu"}
                         </button>
                     </div>
                 </div>
-                {/* Popups */}
-                {searchStates.showVatTuPopup && (
-                    <SearchableSelect
-                        isOpen={true}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
-                        onSelect={(vatTu) => handleVatTuSelect(searchStates.vtSearchRowId, vatTu)}
-                        vatTus={vatTuData.data || []}
-                        searchValue={searchStates.vtSearch}
-                        onSearchChange={(value) => setSearchStates(prev => ({ ...prev, vtSearch: value }))}
-                    />
-                )}
+                <MaterialSelectionPopup
+                    isOpen={searchStates.showVatTuPopup}
+                    onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
+                    onSelect={handleVatTuSelect}
+                    materials={vatTuData.data || []}
+                    searchValue={searchStates.vtSearch}
+                />
 
-                {searchStates.showKhoPopup && (
-                    <SearchableSelect
-                        isOpen={true}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
-                        onSelect={(kho) => handleKhoSelect(searchStates.khoSearchRowId, kho)}
-                        khos={khoData.data || []}
-                        searchValue={searchStates.khoSearch}
-                        onSearchChange={(value) => setSearchStates(prev => ({ ...prev, khoSearch: value }))}
-                    />
-                )}
+                <WarehouseSelectionPopup
+                    isOpen={searchStates.showKhoPopup}
+                    onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
+                    onSelect={handleKhoSelect}
+                    warehouses={khoData.data || []}
+                    searchValue={searchStates.khoSearch}
+                    onSearch={(value) => setSearchStates(prev => ({ ...prev, khoSearch: value }))}
+                />
             </div>
         </Modal >
     );

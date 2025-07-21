@@ -13,7 +13,7 @@ const LayoutContent = () => {
       <AppHeader />
       <SidebarMenu />
 
-      <div className="flex pt-24 h-full">
+      <div className="flex pt-20 h-full">
         {" "}
         <AppSidebar />
         <Backdrop />
