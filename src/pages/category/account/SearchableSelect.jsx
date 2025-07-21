@@ -10,14 +10,14 @@ const SearchableSelect = ({
     loading = false,
     onSearch,
     displayKey = "value",
-    valueKey = "value"
+    valueKey = "value",
+    className = "", // ✅ THÊM: className truyền từ bên ngoài
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef(null);
     const searchInputRef = useRef(null);
 
-    // Tìm option được chọn
     const selectedOption = options.find(option => option[valueKey] === value);
 
     useEffect(() => {
@@ -27,36 +27,30 @@ const SearchableSelect = ({
                 setSearchTerm('');
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Focus vào input search khi mở dropdown
     useEffect(() => {
         if (isOpen && searchInputRef.current) {
             searchInputRef.current.focus();
         }
     }, [isOpen]);
 
-    // Gọi API search khi người dùng gõ
     useEffect(() => {
         if (searchTerm && onSearch) {
             const timeoutId = setTimeout(() => {
                 onSearch(searchTerm);
-            }, 300); // Debounce 300ms
-
+            }, 300);
             return () => clearTimeout(timeoutId);
         } else if (!searchTerm && onSearch) {
-            onSearch(''); // Reset search
+            onSearch('');
         }
     }, [searchTerm, onSearch]);
 
     const handleToggle = () => {
         setIsOpen(!isOpen);
-        if (!isOpen) {
-            setSearchTerm('');
-        }
+        if (!isOpen) setSearchTerm('');
     };
 
     const handleSelect = (option) => {
@@ -76,23 +70,18 @@ const SearchableSelect = ({
             <button
                 type="button"
                 onClick={handleToggle}
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 flex items-center justify-between"
+                className={`h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 flex items-center justify-between ${className}`}
             >
                 <span className={`truncate ${!selectedOption ? 'text-gray-500' : ''}`}>
                     {selectedOption ? `${selectedOption[valueKey]} - ${selectedOption[displayKey]}` : placeholder}
                 </span>
                 <div className="flex items-center gap-2">
                     {selectedOption && (
-                        <X
-                            size={16}
-                            className="text-gray-400 hover:text-gray-600"
-                            onClick={handleClear}
-                        />
+                        <X size={16} className="text-gray-400 hover:text-gray-600" onClick={handleClear} />
                     )}
                     <ChevronDown
                         size={16}
-                        className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                            }`}
+                        className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                     />
                 </div>
             </button>
@@ -100,7 +89,6 @@ const SearchableSelect = ({
             {/* Dropdown */}
             {isOpen && (
                 <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-                    {/* Search Input */}
                     <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                         <div className="relative">
                             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -115,7 +103,6 @@ const SearchableSelect = ({
                         </div>
                     </div>
 
-                    {/* Options List */}
                     <div className="max-h-60 overflow-y-auto">
                         {loading ? (
                             <div className="p-4 text-center text-gray-500">
@@ -132,10 +119,11 @@ const SearchableSelect = ({
                                     key={option[valueKey]}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${value === option[valueKey]
-                                        ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                                        : 'text-gray-800 dark:text-white'
-                                        }`}
+                                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                                        value === option[valueKey]
+                                            ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
+                                            : 'text-gray-800 dark:text-white'
+                                    }`}
                                 >
                                     {option[valueKey]} - {option[displayKey]}
                                 </button>
