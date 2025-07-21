@@ -1,8 +1,8 @@
 import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const DmkhoService = {
-    getDmkho: async () => {
-        const response = await axios.get(`${API_BASE_URL}/dmkho`);
+    getDmkho: async (params) => {
+        const response = await axios.get(`${API_BASE_URL}/dmkho`, { params });
         return response.data;
     },
     getDmkhoById: async (ma_kho) => {
