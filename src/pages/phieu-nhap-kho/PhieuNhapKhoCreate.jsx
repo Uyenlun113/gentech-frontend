@@ -13,11 +13,13 @@ import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
 import DmvtPopup from "../../components/general/dmvtPopup";
+import DmkPopup from "../../components/general/dmkPopup";
 import { useNavigate } from "react-router";
 import Flatpickr from "react-flatpickr";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalenderIcon } from "../../icons";
 import dmvtService from "../../services/dmvt";
+import { useDmkho } from "../../hooks/useDmkho";
 
 export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
   const navigate = useNavigate();
@@ -51,26 +53,28 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
   const [dmvtData, setDmvtData] = useState({ data: [] });
   const [dmvtLoading, setDmvtLoading] = useState(false);
 
+  // State cho Kho search - THÊM MỚI
+  const [maKhoSearch, setMaKhoSearch] = useState("");
+
   const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
   const { data: accountData = [] } = useAccounts(maTaiKhoanSearch ? { search: maTaiKhoanSearch } : {});
   const { data: accountRawData2 = {} } = useAccounts(
     maTaiKhoanSearch2 ? { search: maTaiKhoanSearch2 } : {}
   );
 
+  // Hook để lấy danh sách kho - THÊM MỚI
+  const { data: dmkhoData = [] } = useDmkho(maKhoSearch ? { search: maKhoSearch } : {});
+
   // Hook để lấy danh sách vật tư - THÊM MỚI
   const fetchDmvtData = useCallback(async (searchTerm = "") => {
     setDmvtLoading(true);
     try {
-      console.log('🔍 Fetching DMVT data with search term:', searchTerm);
-
       // Gọi API danh sách vật tư
       const response = await dmvtService.getDmvt({
         search: searchTerm,
         page: 1,
-        limit: 20
+        limit: 999
       });
-
-      console.log('✅ DMVT data received:', response);
 
       // Cập nhật dữ liệu vật tư
       setDmvtData({
@@ -98,12 +102,16 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
     // Thêm state cho vật tư popup
     maVtSearch: "",
     maVtSearchRowId: null,
+    // Thêm state cho kho popup - THÊM MỚI
+    maKhoSearch: "",
+    maKhoSearchRowId: null,
     searchContext: null,
     showAccountPopup: false,
     showAccountPopup2: false,
     showMainAccountPopup: false,
     showMainCustomerPopup: false,
     showDmvtPopup: false, // Popup chọn vật tư
+    showDmkhoPopup: false, // Popup chọn kho - THÊM MỚI
   });
 
   const INITIAL_HANG_HOA_DATA = [
@@ -129,28 +137,6 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
 
   const [hangHoaData, setHangHoaData] = useState(INITIAL_HANG_HOA_DATA);
 
-  // Hook để lấy tên vật tư cho từng dòng hàng hóa
-  const fetchMaterialNames = useCallback(async (hangHoaArray) => {
-    const promises = hangHoaArray.map(async (item) => {
-      if (item.ma_vt && !item.ten_vt) {
-        try {
-          const materialData = await dmvtService.getDmvtById(item.ma_vt);
-          console.log(`Fetched material for ${item.ma_vt}:`, materialData);
-          return {
-            ...item,
-            ten_vt: materialData?.ten_vt || materialData?.name || ""
-          };
-        } catch (error) {
-          console.warn(`Cannot fetch material name for ${item.ma_vt}:`, error);
-          return item;
-        }
-      }
-      return item;
-    });
-
-    return Promise.all(promises);
-  }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchStates.tkSearch) {
@@ -168,6 +154,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
     }, 600);
     return () => clearTimeout(timer);
   }, [searchStates.tkSearch2]);
+
   // Debounce customer search
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -208,6 +195,21 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
     }, 300);
     return () => clearTimeout(delayDebounce);
   }, [searchStates.maVtSearch, fetchDmvtData]);
+
+  // Debounce kho search - THÊM MỚI
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchStates.maKhoSearch && searchStates.maKhoSearch.length > 0) {
+        console.log('🔍 Searching for warehouse:', searchStates.maKhoSearch);
+        setMaKhoSearch(searchStates.maKhoSearch);
+        setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
+      } else {
+        setSearchStates(prev => ({ ...prev, showDmkhoPopup: false }));
+        setMaKhoSearch("");
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchStates.maKhoSearch]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -374,12 +376,50 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
     setDmvtData({ data: [] });
   }, [searchStates.maVtSearchRowId]);
 
+  // Handle kho selection - THÊM MỚI
+  const handleDmkhoSelect = useCallback((kho) => {
+    if (!kho || !searchStates.maKhoSearchRowId) {
+      console.error('Kho object or row ID is null/undefined');
+      return;
+    }
+
+    // Cập nhật dữ liệu hàng hóa với kho đã chọn
+    setHangHoaData(prev =>
+      prev.map(item =>
+        item.id === searchStates.maKhoSearchRowId
+          ? {
+            ...item,
+            ma_kho_i: kho.ma_kho || kho.code || "",
+            ten_kho: kho.ten_kho || kho.name || ""
+          }
+          : item
+      )
+    );
+
+    // Đóng popup và reset search state
+    setSearchStates(prev => ({
+      ...prev,
+      showDmkhoPopup: false,
+      maKhoSearch: "",
+      maKhoSearchRowId: null
+    }));
+
+    // Reset kho search
+    setMaKhoSearch("");
+  }, [searchStates.maKhoSearchRowId]);
+
   // Handle DMVT search từ popup - THÊM MỚI
   const handleDmvtSearch = useCallback((searchTerm) => {
     console.log('🔍 DMVT search from popup:', searchTerm);
     setDmvtSearchTerm(searchTerm);
     fetchDmvtData(searchTerm);
   }, [fetchDmvtData]);
+
+  // Handle Dmkho search từ popup - THÊM MỚI
+  const handleDmkhoSearch = useCallback((searchTerm) => {
+    console.log('🔍 Dmkho search from popup:', searchTerm);
+    setMaKhoSearch(searchTerm);
+  }, []);
 
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -705,6 +745,15 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
             }));
           }
 
+          // Trigger popup kho khi nhập mã kho - THÊM MỚI
+          if (field === "ma_kho_i" && value && value.trim()) {
+            setSearchStates(prev => ({
+              ...prev,
+              maKhoSearch: value.trim(),
+              maKhoSearchRowId: id
+            }));
+          }
+
           return updatedItem;
         }
         return item;
@@ -756,6 +805,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
     setMaKhSearch("");
     setDmvtSearchTerm("");
     setDmvtData({ data: [] });
+    setMaKhoSearch(""); // THÊM MỚI
     setSearchStates({
       tkSearch: "",
       tkSearch2: "",
@@ -766,12 +816,15 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
       maKhSearchRowId: null,
       maVtSearch: "",
       maVtSearchRowId: null,
+      maKhoSearch: "", // THÊM MỚI
+      maKhoSearchRowId: null, // THÊM MỚI
       searchContext: null,
       showAccountPopup: false,
       showAccountPopup2: false,
       showMainAccountPopup: false,
       showMainCustomerPopup: false,
       showDmvtPopup: false,
+      showDmkhoPopup: false, // THÊM MỚI
     });
   }, []);
 
@@ -1149,6 +1202,27 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
           materials={dmvtData.data || []}
           searchValue={dmvtSearchTerm}
           loading={dmvtLoading}
+        />
+      )}
+
+      {/* DMKHO Popup - THÊM MỚI */}
+      {searchStates.showDmkhoPopup && (
+        <DmkPopup
+          isOpen={true}
+          onClose={() => {
+            setSearchStates(prev => ({
+              ...prev,
+              showDmkhoPopup: false,
+              maKhoSearch: "",
+              maKhoSearchRowId: null
+            }));
+            setMaKhoSearch("");
+          }}
+          onSelect={handleDmkhoSelect}
+          onSearch={handleDmkhoSearch}
+          warehouses={dmkhoData.data || []}
+          searchValue={maKhoSearch}
+          loading={false}
         />
       )}
     </Modal>
