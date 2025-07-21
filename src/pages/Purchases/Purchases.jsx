@@ -39,7 +39,7 @@ export default function PurChases() {
         window.location.href = '/chung-tu/phieu-xuat-kho';
         break;
       case 'cash-payment':
-        window.location.href = '/phieu-chi-tien-mat';
+        window.location.href = '/phieu-xuat-dc';
         break;
       default:
         break;

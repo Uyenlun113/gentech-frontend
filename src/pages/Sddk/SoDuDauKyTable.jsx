@@ -117,6 +117,8 @@ const SoDuDauKyTable = () => {
     if (error) {
         return <div className="text-center py-10 text-red-600">Lỗi khi tải dữ liệu: {error.message}</div>;
     }
+
+    console.log('cdtkData:', selectedAccountDetail);
     return (
         <div className="px-4 bg-white dark:bg-gray-900 pt-2">
             {/* Header */}
@@ -474,10 +476,10 @@ const SoDuDauKyTable = () => {
             {/* Detail Modal */}
             {showDetailModal && selectedAccountDetail && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-w-md mx-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-100 max-w-lg mx-4">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Chi tiết tài khoản
+                                Tổng số
                             </h3>
                             <button
                                 onClick={() => setShowDetailModal(false)}
@@ -487,69 +489,116 @@ const SoDuDauKyTable = () => {
                             </button>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dư nợ ban đầu
-                            </label>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                <input
-                                    type="text"
-                                    value={selectedAccountDetail.tk}
-                                    readOnly
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
+                        <div className="space-y-0">
+                            {/* Header row */}
+                            <div className="grid grid-cols-3 border-b border-gray-300 dark:border-gray-600 pb-2 mb-2">
+                                <div></div>
+                                <div className="text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Tiền VNĐ
+                                </div>
+                                <div className="text-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Tiền n.tệ
+                                </div>
+                            </div>
+
+                            {/* Data rows */}
+                            <div className="grid grid-cols-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                    Dư nợ ban đầu
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_no00 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_no1 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                    Dư có ban đầu
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_co00 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_co1 || '0,00'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                    Dư nợ đầu năm tài chính
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_no_nt00 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_no_nt1 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 py-2 border-b border-gray-200 dark:border-gray-600">
+                                <div className="text-sm text-gray-900 dark:text-white">
+                                    Dư có đầu năm tài chính
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_co_nt00 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
+                                <div className="text-center">
+                                    <input
+                                        type="text"
+                                        value={selectedAccountDetail?.du_co_nt1 || '0'}
+                                        readOnly
+                                        className="w-full text-center border-0 bg-transparent text-sm text-gray-900 dark:text-white focus:outline-none"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dư có ban đầu
-                            </label>
-                            <input
-                                type="text"
-                                value={selectedAccountDetail.ten_tk}
-                                readOnly
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dư nợ đầu năm tài chính
-                            </label>
-                            <input
-                                type="text"
-                                value={selectedAccountDetail.ten_tk}
-                                readOnly
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Dư có đầu năm tài chính
-                            </label>
-                            <input
-                                type="text"
-                                value={selectedAccountDetail.ten_tk}
-                                readOnly
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <input
-                                type="text"
-                                value={selectedAccountDetail.ten_tk}
-                                readOnly
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm
-                                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                        {/* Button */}
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Đóng
+                            </button>
                         </div>
                     </div>
                 </div>
