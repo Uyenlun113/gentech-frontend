@@ -30,13 +30,13 @@ export default function PurChases() {
   const handleIconClick = (type) => {
     switch (type) {
       case 'bank-receipt':
-        window.location.href = '/general-ledger/list';
+        window.location.href = '/chung-tu/phieu-nhap-kho';
         break;
       case 'bank-payment':
         window.location.href = '/phieu-xuat';
         break;
       case 'cash-receipt':
-        window.location.href = '/chung-tu/phieu-thu';
+        window.location.href = '/chung-tu/phieu-xuat-kho';
         break;
       case 'cash-payment':
         window.location.href = '/phieu-chi-tien-mat';
