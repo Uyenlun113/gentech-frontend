@@ -12,11 +12,13 @@ import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
 import DmvtPopup from "../../components/general/dmvtPopup";
+import DmkPopup from "../../components/general/dmkPopup";
 import { useNavigate } from "react-router";
 import Flatpickr from "react-flatpickr";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalenderIcon } from "../../icons";
 import dmvtService from "../../services/dmvt";
+import { useDmkho } from "../../hooks/useDmkho";
 
 export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhieuNhapKho }) => {
   const navigate = useNavigate();
@@ -50,11 +52,18 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
   const [dmvtData, setDmvtData] = useState({ data: [] });
   const [dmvtLoading, setDmvtLoading] = useState(false);
 
+  // State cho Kho search - THÊM MỚI
+  const [maKhoSearch, setMaKhoSearch] = useState("");
+
   const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
   const { data: accountData = [] } = useAccounts(maTaiKhoanSearch ? { search: maTaiKhoanSearch } : {});
   const { data: accountRawData2 = {} } = useAccounts(
     maTaiKhoanSearch2 ? { search: maTaiKhoanSearch2 } : {}
   );
+
+  // Hook để lấy danh sách kho - THÊM MỚI
+  const { data: dmkhoData = [] } = useDmkho(maKhoSearch ? { search: maKhoSearch } : {});
+
   // Hook để lấy danh sách vật tư - THÊM MỚI
   const fetchDmvtData = useCallback(async (searchTerm = "") => {
     setDmvtLoading(true);
@@ -96,11 +105,15 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     // Thêm state cho vật tư popup
     maVtSearch: "",
     maVtSearchRowId: null,
+    // Thêm state cho kho popup - THÊM MỚI
+    maKhoSearch: "",
+    maKhoSearchRowId: null,
     searchContext: null,
     showAccountPopup: false,
     showAccountPopup2: false,
     showMainCustomerPopup: false,
     showDmvtPopup: false, // Popup chọn vật tư
+    showDmkhoPopup: false, // Popup chọn kho - THÊM MỚI
   });
 
   const INITIAL_HANG_HOA_DATA = [
@@ -267,6 +280,21 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     return () => clearTimeout(delayDebounce);
   }, [searchStates.maVtSearch, fetchDmvtData]);
 
+  // Debounce kho search - THÊM MỚI
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchStates.maKhoSearch && searchStates.maKhoSearch.length > 0) {
+        console.log('🔍 Searching for warehouse:', searchStates.maKhoSearch);
+        setMaKhoSearch(searchStates.maKhoSearch);
+        setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
+      } else {
+        setSearchStates(prev => ({ ...prev, showDmkhoPopup: false }));
+        setMaKhoSearch("");
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchStates.maKhoSearch]);
+
   const handleChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -348,8 +376,6 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     }));
   };
 
-
-
   // Handle account selection for table
   const handleAccountSelect = useCallback((id, account) => {
     setHangHoaData(prev =>
@@ -424,12 +450,53 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     setDmvtData({ data: [] });
   }, [searchStates.maVtSearchRowId]);
 
+  // Handle kho selection - THÊM MỚI
+  const handleDmkhoSelect = useCallback((kho) => {
+    if (!kho || !searchStates.maKhoSearchRowId) {
+      console.error('Kho object or row ID is null/undefined');
+      return;
+    }
+
+    console.log('Selected Kho:', kho);
+    console.log('Row ID:', searchStates.maKhoSearchRowId);
+
+    // Cập nhật dữ liệu hàng hóa với kho đã chọn
+    setHangHoaData(prev =>
+      prev.map(item =>
+        item.id === searchStates.maKhoSearchRowId
+          ? {
+            ...item,
+            ma_kho_i: kho.ma_kho?.trim() || "",
+            ten_kho: kho.ten_kho || ""
+          }
+          : item
+      )
+    );
+
+    // Đóng popup và reset search state
+    setSearchStates(prev => ({
+      ...prev,
+      showDmkhoPopup: false,
+      maKhoSearch: "",
+      maKhoSearchRowId: null
+    }));
+
+    // Reset kho search
+    setMaKhoSearch("");
+  }, [searchStates.maKhoSearchRowId]);
+
   // Handle DMVT search từ popup - THÊM MỚI
   const handleDmvtSearch = useCallback((searchTerm) => {
     console.log('🔍 DMVT search from popup:', searchTerm);
     setDmvtSearchTerm(searchTerm);
     fetchDmvtData(searchTerm);
   }, [fetchDmvtData]);
+
+  // Handle Dmkho search từ popup - THÊM MỚI
+  const handleDmkhoSearch = useCallback((searchTerm) => {
+    console.log('🔍 Dmkho search from popup:', searchTerm);
+    setMaKhoSearch(searchTerm);
+  }, []);
 
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -754,6 +821,15 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
             }));
           }
 
+          // Trigger popup kho khi nhập mã kho - THÊM MỚI
+          if (field === "ma_kho_i" && value && value.trim()) {
+            setSearchStates(prev => ({
+              ...prev,
+              maKhoSearch: value.trim(),
+              maKhoSearchRowId: id
+            }));
+          }
+
           return updatedItem;
         }
         return item;
@@ -805,6 +881,7 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     setMaKhSearch("");
     setDmvtSearchTerm("");
     setDmvtData({ data: [] });
+    setMaKhoSearch(""); // THÊM MỚI
     setSearchStates({
       tkSearch: "",
       tkSearch2: "",
@@ -815,11 +892,14 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
       maKhSearchRowId: null,
       maVtSearch: "",
       maVtSearchRowId: null,
+      maKhoSearch: "", // THÊM MỚI
+      maKhoSearchRowId: null, // THÊM MỚI
       searchContext: null,
       showAccountPopup: false,
       showAccountPopup2: false,
       showMainCustomerPopup: false,
       showDmvtPopup: false,
+      showDmkhoPopup: false, // THÊM MỚI
     });
   }, []);
 
@@ -1185,6 +1265,26 @@ export const ModalEditPhieuNhapKho = ({ isOpenEdit, closeModalEdit, selectedPhie
           materials={dmvtData.data || []}
           searchValue={dmvtSearchTerm}
           loading={dmvtLoading}
+        />
+      )}
+
+      {/* DMKHO Popup - THÊM MỚI */}
+      {searchStates.showDmkhoPopup && (
+        <DmkPopup
+          isOpen={true}
+          onClose={() => {
+            setSearchStates(prev => ({
+              ...prev,
+              showDmkhoPopup: false,
+              maKhoSearch: "",
+              maKhoSearchRowId: null
+            }));
+            setMaKhoSearch("");
+          }}
+          onSelect={handleDmkhoSelect}
+          onSearch={handleDmkhoSearch}
+          warehouses={dmkhoData.data || []}
+          searchValue={maKhoSearch}
         />
       )}
     </Modal>
