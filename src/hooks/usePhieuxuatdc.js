@@ -59,7 +59,7 @@ export const useDeletePhieuXuatDc = () => {
         mutationFn: (stt_rec) => phieuXuatDcService.deletePhieuXuatDc(stt_rec),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["phieuxuatdc"] });
-            toast.success("Phiếu xuất DC đã được xóa thành công!");
+            queryClient.invalidateQueries({ queryKey: ["phieuxuat"] });
         },
         onError: (error) => {
             toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi xóa phiếu xuất DC");

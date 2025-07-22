@@ -5,10 +5,12 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 import SoDuDauKyModal from "../pages/Sddk/SoDuDauKyModal";
+import TonKhoDauKyModal from "../components/TonKhoDauKyModal";
 
 const AppHeader = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTonKhoModalOpen, setIsTonKhoModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate(); // Thêm hook navigate
@@ -35,6 +37,9 @@ const AppHeader = () => {
     // Kiểm tra nếu là item "Vào số dư đầu kỳ tài khoản"
     if (path === "/dau-ky/sodu-tk") {
       setIsModalOpen(true);
+    } else if (path === "/dau-ky/tonkho") {
+      // Kiểm tra nếu là item "Vào tồn kho đầu kỳ"
+      setIsTonKhoModalOpen(true);
     } else {
       // Navigate cho các item khác
       navigate(path);
@@ -43,6 +48,10 @@ const AppHeader = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const closeTonKhoModal = () => {
+    setIsTonKhoModalOpen(false);
   };
 
   const menuItems = [
@@ -285,10 +294,15 @@ const AppHeader = () => {
         </div>
       </header >
 
-      {/* Modal */}
-      < SoDuDauKyModal
+      {/* Modals */}
+      <SoDuDauKyModal
         isOpen={isModalOpen}
         onClose={closeModal}
+      />
+
+      <TonKhoDauKyModal
+        isOpen={isTonKhoModalOpen}
+        onClose={closeTonKhoModal}
       />
     </>
   );
