@@ -81,6 +81,7 @@ export default function App() {
               <Route path="/quick-report" element={<QuickReport />} />
               {/* Phiếu kế toán */}
               <Route path="/general-ledger" element={<GeneralLedgerPage />} />
+              
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
               {/* Vốn bằng tiền */}
               <Route path="/cash-receipt" element={<CashCapitalPage />} />
