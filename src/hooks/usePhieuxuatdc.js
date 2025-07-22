@@ -16,9 +16,10 @@ export const useCreatePhieuXuatDc = () => {
     });
 }
 export const useGetPhieuXuatDc = (stt_rec) => {
-    return useQueryClient({
+    return useQuery({
         queryKey: ["phieuxuat", stt_rec],
         queryFn: () => phieuXuatDcService.getPhieuXuatDc(stt_rec),
+        enabled: !!stt_rec,
         onError: (error) => {
             toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi lấy phiếu xuất DC");
         },
@@ -38,12 +39,13 @@ export const useGetAllPhieuXuatDc = (params = {}) => {
     });
 };
 
-export const useUpdatePhieuXuatDc = (stt_rec) => {
+export const useUpdatePhieuXuatDc = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data) => phieuXuatDcService.updatePhieuXuatDc(stt_rec, data),
+        mutationFn: ({ stt_rec, data }) => phieuXuatDcService.updatePhieuXuatDc(stt_rec, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["phieuxuatdc"] });
+            queryClient.invalidateQueries({ queryKey: ["phieuxuat"] }); // Invalidate chi tiết phiếu
             toast.success("Phiếu xuất DC đã được cập nhật thành công!");
         },
         onError: (error) => {
@@ -51,10 +53,10 @@ export const useUpdatePhieuXuatDc = (stt_rec) => {
         },
     });
 }
-export const useDeletePhieuXuatDc = (stt_rec) => {
+export const useDeletePhieuXuatDc = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: () => phieuXuatDcService.deletePhieuXuatDc(stt_rec),
+        mutationFn: (stt_rec) => phieuXuatDcService.deletePhieuXuatDc(stt_rec),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["phieuxuatdc"] });
             toast.success("Phiếu xuất DC đã được xóa thành công!");

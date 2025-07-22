@@ -15,20 +15,20 @@ import { Tabs } from "../../components/ui/tabs";
 import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
 import { useCreatePhieuXuatDc } from "../../hooks/usePhieuxuatdc";
-
-
+import dmvtService from "../../services/dmvt";
 
 // Constants cho CT85 (Phiếu xuất điều chuyển)
 const INITIAL_CT85_DATA = [
     {
         id: 1,
-        ma_ct: "",
-        ngay_ct: "",
         ma_vt: "",
         ten_vt: "",
         tk_vt: "",
+        don_vi_tinh: "",
+        ton_kho: 0,
+        so_luong: "",      // FIX: Đổi từ t_so_luong thành so_luong
+        don_gia: "",
         ma_nx_i: "",
-        so_luong: "",
     },
 ];
 
@@ -49,20 +49,26 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         ongBa: "",
         dienGiai: "",
         maKho: "",
-        tenKho: "",       // ✅ tên kho xuất
         maKhon: "",
-        tenKhon: "",      // ✅ tên kho nhận
         tSoLuong: 0,
         tyGia: 1,
         maQs: "",
         ngayLct: "",
         ngayCtPhieu: "",
         trangThai: "1",
-        hd_lenhdd: "",     // ✅ số hợp đồng
+        hd_lenhdd: "",
         soCt: "",
     });
 
     const [ct85Data, setCt85Data] = useState(INITIAL_CT85_DATA);
+
+    // State cho DMVT search
+    const [dmvtSearchTerm, setDmvtSearchTerm] = useState("");
+    const [dmvtData, setDmvtData] = useState({ data: [] });
+    const [dmvtLoading, setDmvtLoading] = useState(false);
+
+    // State cho Kho search
+    const [maKhoSearch, setMaKhoSearch] = useState("");
 
     const [searchStates, setSearchStates] = useState({
         vtSearch: "",
@@ -72,6 +78,12 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         searchContext: null,
         showVatTuPopup: false,
         showKhoPopup: false,
+        maVtSearch: "",
+        maVtSearchRowId: null,
+        maKhoTableSearch: "",
+        maKhoTableSearchRowId: null,
+        showDmvtPopup: false,
+        showDmkhoPopup: false,
     });
 
     const ct85TableRef = useRef(null);
@@ -82,18 +94,55 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     const { data: khoData = [] } = useDmkho(
         searchStates.khoSearch ? { search: searchStates.khoSearch } : {}
     );
+
+    const { data: dmkhoTableData = [] } = useDmkho(
+        searchStates.maKhoTableSearch ? { search: searchStates.maKhoTableSearch } : {}
+    );
+
     const { mutateAsync: createPhieuXuatDc, isPending } = useCreatePhieuXuatDc();
 
-    // Tính tổng số lượng
+    const fetchDmvtData = useCallback(async (searchTerm = "") => {
+        setDmvtLoading(true);
+        try {
+            const response = await dmvtService.getDmvt({
+                search: searchTerm,
+                page: 1,
+                limit: 999
+            });
+
+            setDmvtData({
+                data: response?.data || response || []
+            });
+        } catch (error) {
+            console.error('❌ Error fetching DMVT data:', error);
+            setDmvtData({ data: [] });
+        } finally {
+            setDmvtLoading(false);
+        }
+    }, []);
+
+    const formatNumber = (number) => {
+        if (!number) return "0";
+        return new Intl.NumberFormat("vi-VN").format(number);
+    };
+
+    // FIX: Sửa tính tổng số lượng
     const totals = useMemo(() => {
         const totalSoLuong = ct85Data.reduce((sum, item) => {
-            const value = parseFloat(item.so_luong) || 0;
+            const value = parseFloat(item.so_luong) || 0; // FIX: Dùng so_luong thay vì t_so_luong
             return sum + value;
         }, 0);
 
-        return { totalSoLuong };
+        const totalThanhTien = ct85Data.reduce((sum, item) => {
+            const soLuong = parseFloat(item.so_luong) || 0;
+            const donGia = parseFloat(item.don_gia) || 0;
+            return sum + (soLuong * donGia);
+        }, 0);
+
+        return { totalSoLuong, totalThanhTien };
     }, [ct85Data]);
 
+    // Debounce search cho main form
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchStates(prev => ({
@@ -114,6 +163,36 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         return () => clearTimeout(timer);
     }, [searchStates.khoSearch]);
 
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            if (searchStates.maVtSearch && searchStates.maVtSearch.length > 0) {
+                console.log('🔍 Searching for material:', searchStates.maVtSearch);
+                setDmvtSearchTerm(searchStates.maVtSearch);
+                fetchDmvtData(searchStates.maVtSearch);
+                setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
+            } else {
+                setSearchStates(prev => ({ ...prev, showDmvtPopup: false }));
+                setDmvtSearchTerm("");
+                setDmvtData({ data: [] });
+            }
+        }, 300);
+        return () => clearTimeout(delayDebounce);
+    }, [searchStates.maVtSearch, fetchDmvtData]);
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            if (searchStates.maKhoTableSearch && searchStates.maKhoTableSearch.length > 0) {
+                console.log('🔍 Searching for warehouse:', searchStates.maKhoTableSearch);
+                setMaKhoSearch(searchStates.maKhoTableSearch);
+                setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
+            } else {
+                setSearchStates(prev => ({ ...prev, showDmkhoPopup: false }));
+                setMaKhoSearch("");
+            }
+        }, 300);
+        return () => clearTimeout(delayDebounce);
+    }, [searchStates.maKhoTableSearch]);
+
     // Handlers
     const handleFormChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -126,32 +205,34 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
 
     const handleCt85Change = useCallback((id, field, value) => {
         setCt85Data(prev => {
-            const newData = prev.map(item =>
-                item.id === id ? { ...item, [field]: value } : item
-            );
+            const newData = prev.map(item => {
+                if (item.id === id) {
+                    const updatedItem = { ...item, [field]: value };
+
+                    // Auto calculate thanh_tien when so_luong or don_gia changes
+                    if (field === "so_luong" || field === "don_gia") {
+                        const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
+                        const donGia = parseFloat(field === "don_gia" ? value : item.don_gia) || 0;
+                        updatedItem.thanh_tien = soLuong * donGia;
+                    }
+
+                    // Trigger popup vật tư khi nhập mã vật tư cho table
+                    if (field === "ma_vt" && value && value.trim()) {
+                        setSearchStates(prev => ({
+                            ...prev,
+                            maVtSearch: value.trim(),
+                            maVtSearchRowId: id
+                        }));
+                    }
+
+                    return updatedItem;
+                }
+                return item;
+            });
             return newData;
         });
-
-        // Search logic
-        if (field === "ma_vt") {
-            setSearchStates(prev => ({
-                ...prev,
-                vtSearch: value,
-                vtSearchRowId: id,
-                searchContext: "ct85"
-            }));
-        }
-        if (field === "ma_nx_i") {
-            setSearchStates(prev => ({
-                ...prev,
-                khoSearch: value,
-                khoSearchRowId: id,
-                searchContext: "ct85"
-            }));
-        }
     }, []);
 
-    // Handle search for main form fields
     const handleMainFormKhoSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -161,11 +242,34 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         }));
     }, []);
 
+    const handleMainFormKhoNhanSearch = useCallback((value) => {
+        setSearchStates(prev => ({
+            ...prev,
+            khoSearch: value,
+            khoSearchRowId: "main-form-nhan",
+            searchContext: "mainFormReceive"
+        }));
+    }, []);
+
     const handleVatTuSelect = useCallback((id, vatTu) => {
+        if (!vatTu || typeof vatTu !== 'object') {
+            console.error('Invalid vatTu object:', vatTu);
+            console.error('ID received:', id);
+            return;
+        }
+
         setCt85Data(prev =>
             prev.map(item =>
                 item.id === id
-                    ? { ...item, ma_vt: vatTu.ma_vt.trim(), ten_vt: vatTu.ten_vt, tk_vt: vatTu.tk_vt }
+                    ? {
+                        ...item,
+                        ma_vt: vatTu.ma_vt?.toString().trim() || "",
+                        ten_vt: vatTu.ten_vt || "",
+                        tk_vt: vatTu.tk_vt || "",
+                        don_vi_tinh: vatTu.don_vi_tinh || vatTu.dvt || vatTu.dv_tinh || "",
+                        ton_kho: vatTu.ton_kho || 0,
+                        don_gia: vatTu.don_gia || '',
+                    }
                     : item
             )
         );
@@ -177,28 +281,19 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             searchContext: null
         }));
     }, []);
-    const handleMainFormKhoNhanSearch = useCallback((value) => {
-        setSearchStates(prev => ({
-            ...prev,
-            khoSearch: value,
-            khoSearchRowId: "main-form-nhan",
-            searchContext: "mainFormReceive"
-        }));
-    }, []);
 
     const handleKhoSelect = useCallback((id, kho) => {
+        if (!kho || typeof kho !== 'object') {
+            console.error('Invalid kho object:', kho);
+            console.error('ID received:', id);
+            return;
+        }
         if (searchStates.searchContext === "mainForm") {
-            handleFormChange("maKho", kho.ma_kho.trim());
-            handleFormChange("tenKho", kho.ten_kho?.trim() || "");
+            handleFormChange("maKho", kho.ma_kho?.toString().trim() || "");
+            handleFormChange("tenKho", kho.ten_kho?.toString().trim() || "");
         } else if (searchStates.searchContext === "mainFormReceive") {
-            handleFormChange("maKhon", kho.ma_kho.trim());
-            handleFormChange("tenKhon", kho.ten_kho?.trim() || "");
-        } else {
-            setCt85Data(prev =>
-                prev.map(item =>
-                    item.id === id ? { ...item, ma_kho: kho.ma_kho.trim() } : item
-                )
-            );
+            handleFormChange("maKhon", kho.ma_kho?.toString().trim() || "");
+            handleFormChange("tenKhon", kho.ten_kho?.toString().trim() || "");
         }
 
         setSearchStates(prev => ({
@@ -209,20 +304,100 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         }));
     }, [searchStates.searchContext, handleFormChange]);
 
-    const addCt85Row = useCallback(() => {
-        setCt85Data(prev => [
+    const handleDmvtSelect = useCallback((dmvt) => {
+        if (!dmvt || !searchStates.maVtSearchRowId) {
+            console.error('DMVT object or row ID is null/undefined');
+            return;
+        }
+
+        setCt85Data(prev =>
+            prev.map(item =>
+                item.id === searchStates.maVtSearchRowId
+                    ? {
+                        ...item,
+                        ma_vt: dmvt.ma_vt || dmvt.code || "",
+                        ten_vt: dmvt.ten_vt || dmvt.name || "",
+                        tk_vt: dmvt.tk_vt || "",
+                        ma_nx_i: dmvt.tk_ck,
+                        don_vi_tinh: dmvt.don_vi_tinh || dmvt.dvt || dmvt.dv_tinh || "",
+                        ton_kho: dmvt.ton_kho || 0,
+                        don_gia: dmvt.don_gia || ''
+                    }
+                    : item
+            )
+        );
+
+        setSearchStates(prev => ({
             ...prev,
-            {
-                id: prev.length + 1,
-                ma_ct: "",
-                ngay_ct: "",
+            showDmvtPopup: false,
+            maVtSearch: "",
+            maVtSearchRowId: null
+        }));
+
+        setDmvtSearchTerm("");
+        setDmvtData({ data: [] });
+    }, [searchStates.maVtSearchRowId]);
+
+    const handleDmkhoSelect = useCallback((kho) => {
+        if (!kho || !searchStates.maKhoTableSearchRowId) {
+            console.error('Kho object or row ID is null/undefined');
+            return;
+        }
+
+        setCt85Data(prev =>
+            prev.map(item =>
+                item.id === searchStates.maKhoTableSearchRowId
+                    ? {
+                        ...item,
+                        ma_kho_i: kho.ma_kho || kho.code || "",
+                        ten_kho: kho.ten_kho || kho.name || ""
+                    }
+                    : item
+            )
+        );
+
+        setSearchStates(prev => ({
+            ...prev,
+            showDmkhoPopup: false,
+            maKhoTableSearch: "",
+            maKhoTableSearchRowId: null
+        }));
+
+        setMaKhoSearch("");
+    }, [searchStates.maKhoTableSearchRowId]);
+
+    const handleDmvtSearch = useCallback((searchTerm) => {
+        console.log('🔍 DMVT search from popup:', searchTerm);
+        setDmvtSearchTerm(searchTerm);
+        fetchDmvtData(searchTerm);
+    }, [fetchDmvtData]);
+
+    const handleDmkhoSearch = useCallback((searchTerm) => {
+        console.log('🔍 Dmkho search from popup:', searchTerm);
+        setMaKhoSearch(searchTerm);
+    }, []);
+
+    // FIX: Sửa hàm addCt85Row để tránh preventDefault khi không cần thiết
+    const addCt85Row = useCallback(() => {
+        console.log('🆕 Adding new CT85 row');
+
+        setCt85Data(prev => {
+            const newRowId = Math.max(...prev.map(item => item.id), 0) + 1; // FIX: Tính ID mới chính xác hơn
+            const newRow = {
+                id: newRowId,
                 ma_vt: "",
                 ten_vt: "",
                 tk_vt: "",
+                don_vi_tinh: "",
+                ton_kho: 0,
+                so_luong: "",      // FIX: Dùng so_luong thay vì t_so_luong
+                don_gia: "",
                 ma_nx_i: "",
-                so_luong: "",
-            }
-        ]);
+            };
+
+            console.log('🆕 New row created:', newRow);
+            return [...prev, newRow];
+        });
 
         setTimeout(() => {
             if (ct85TableRef.current) {
@@ -235,6 +410,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     }, []);
 
     const deleteCt85Row = useCallback((id) => {
+        console.log('🗑️ Deleting CT85 row:', id);
         setCt85Data(prev => prev.filter(item => item.id !== id));
     }, []);
 
@@ -243,16 +419,22 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             ongBa: "",
             dienGiai: "",
             maKho: "",
+            tenKho: "",
             maKhon: "",
+            tenKhon: "",
             tSoLuong: 0,
             tyGia: 1,
             maQs: "",
             ngayLct: "",
             ngayCtPhieu: "",
             trangThai: "1",
+            hd_lenhdd: "",
             soCt: "",
         });
         setCt85Data(INITIAL_CT85_DATA);
+        setDmvtSearchTerm("");
+        setDmvtData({ data: [] });
+        setMaKhoSearch("");
         setSearchStates({
             vtSearch: "",
             vtSearchRowId: null,
@@ -261,16 +443,26 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             searchContext: null,
             showVatTuPopup: false,
             showKhoPopup: false,
+            maVtSearch: "",
+            maVtSearchRowId: null,
+            maKhoTableSearch: "",
+            maKhoTableSearchRowId: null,
+            showDmvtPopup: false,
+            showDmkhoPopup: false,
         });
     }, []);
 
     const validateForm = useCallback(() => {
         if (!formData.maQs) {
-            toast.error("Vui lòng nhập mã chứng từ");
+            toast.error("Vui lòng nhập mã quyển sổ");
             return false;
         }
         if (!formData.maKho) {
-            toast.error("Vui lòng nhập mã kho");
+            toast.error("Vui lòng nhập mã kho xuất");
+            return false;
+        }
+        if (!formData.maKhon) {
+            toast.error("Vui lòng nhập mã kho nhận");
             return false;
         }
         if (!formData.ngayLct) {
@@ -279,7 +471,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         }
 
         const validCt85Rows = ct85Data.filter(row =>
-            row.ma_vt && parseFloat(row.so_luong) > 0
+            row.ma_vt && parseFloat(row.so_luong) > 0 // FIX: Dùng so_luong
         );
         if (validCt85Rows.length === 0) {
             toast.error("Vui lòng nhập ít nhất một dòng vật tư hợp lệ");
@@ -299,9 +491,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     ong_ba: formData.ongBa,
                     dien_giai: formData.dienGiai,
                     ma_kho: formData.maKho,
-                    ten_kho: formData.tenKho,
                     ma_khon: formData.maKhon,
-                    ten_khon: formData.tenKhon,
                     t_so_luong: totals.totalSoLuong,
                     ty_gia: formData.tyGia,
                     ma_qs: formData.maQs,
@@ -312,22 +502,22 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     so_ct: formData.soCt || "",
                 },
                 vatTu: ct85Data
-                    .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
-                    .map(({ ma_ct, ngay_ct, ma_vt, tk_vt, ma_nx_i, so_luong }) => ({
-                        ma_ct: ma_ct?.trim() || "",
-                        ngay_ct: ngay_ct ? new Date(ngay_ct).toISOString() : null,
-                        ma_vt: ma_vt?.trim() || "",
-                        tk_vt: tk_vt?.trim() || "",
-                        ma_nx_i: ma_nx_i?.trim() || "",
-                        so_luong: Number(so_luong) || 0,
+                    .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0) // FIX: Dùng so_luong
+                    .map(({ ma_vt, tk_vt, ma_nx_i, so_luong }) => ({ // FIX: Dùng so_luong
+                        ma_vt: ma_vt?.toString().trim() || "",
+                        tk_vt: tk_vt?.toString().trim() || "",
+                        ma_nx_i: ma_nx_i?.toString().trim() || "",
+                        so_luong: Number(so_luong) || 0, // FIX: Map so_luong thành t_so_luong
                     })),
             };
+
             await createPhieuXuatDc(payload);
             closeModalCreate();
             resetForm();
-            navigate("/phieu-xuat-dieu-chuyen");
+            navigate("/phieu-xuat-dc");
         } catch (err) {
-            console.error(err);
+            console.error('Error creating phieu:', err);
+            toast.error("Lỗi khi tạo phiếu: " + (err?.response?.data?.message || err?.message || "Không xác định"));
         }
     }, [formData, ct85Data, totals, createPhieuXuatDc, closeModalCreate, resetForm, navigate, validateForm]);
 
@@ -336,7 +526,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         closeModalCreate();
     }, [resetForm, closeModalCreate]);
 
-    // Table columns cho CT85
+    // FIX: Sửa key và render cho cột số lượng
     const ct85Columns = [
         {
             key: "stt_rec",
@@ -357,7 +547,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 if (row.id === 'total') return <div></div>;
                 return (
                     <Input
-                        value={row.ma_vt}
+                        value={row.ma_vt || ""}
                         onChange={(e) => handleCt85Change(row.id, "ma_vt", e.target.value)}
                         placeholder="Nhập mã VT..."
                         className="w-full"
@@ -371,116 +561,115 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             width: 200,
             render: (val, row) => (
                 <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
-                    {row.ten_vt}
+                    {row.ten_vt || ""}
                 </div>
             )
         },
         {
-            key: "tk_vt",
+            key: "don_vi_tinh",
             title: "Đơn vị tính",
             width: 100,
             render: (val, row) => (
                 <div className="text-gray-800 font-medium">
-                    {row.tk_vt}
+                    {row.don_vi_tinh || ""}
                 </div>
             )
         },
         {
-            key: "tk_vt",
+            key: "ton_kho",
             title: "Tồn kho",
             width: 100,
             render: (val, row) => (
-                <div className="text-gray-800 font-medium">
-                    {row.tk_vt}
+                <div className="text-gray-800 font-medium text-right">
+                    {formatNumber(row.ton_kho || 0)}
                 </div>
             )
         },
         {
-            key: "ma_nx_i",
+            key: "so_luong", // FIX: Đổi key từ t_so_luong thành so_luong
             title: "Số lượng",
-            width: 100,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_nx_i}
-                        onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
-                        placeholder="Mã kho..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "so_luong",
-            title: "Đơn giá",
             width: 100,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
-                        <div className="text-right text-lg text-blue-600 p-2 rounded ">
-                            {totals.totalSoLuong.toLocaleString('vi-VN')}
+                        <div className="text-right text-lg text-blue-600 p-2 rounded font-bold">
+                            {formatNumber(totals.totalSoLuong)}
                         </div>
                     );
                 }
                 return (
                     <Input
                         type="number"
-                        value={row.so_luong}
-                        onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)}
-                        placeholder="Số lượng"
+                        value={row.so_luong || ""} // FIX: Dùng so_luong
+                        onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)} // FIX: Dùng so_luong
+                        placeholder="0"
                         className="w-full text-right"
                     />
                 );
             },
         },
         {
-            key: "ma_nx_i",
+            key: "don_gia",
+            title: "Đơn giá",
+            width: 100,
+            render: (val, row) => {
+                if (row.id === 'total') return <div></div>;
+                return (
+                    <Input
+                        type="number"
+                        value={row.don_gia || ''}
+                        onChange={(e) => handleCt85Change(row.id, "don_gia", e.target.value)}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                );
+            },
+        },
+        {
+            key: "thanh_tien",
             title: "Thành tiền",
+            width: 120,
+            render: (val, row) => {
+                if (row.id === 'total') {
+                    return (
+                        <div className="text-right text-lg text-blue-600 p-2 rounded font-bold">
+                            {formatNumber(totals.totalThanhTien)}
+                        </div>
+                    );
+                }
+                const thanhTien = (parseFloat(row.so_luong) || 0) * (parseFloat(row.don_gia) || 0); // FIX: Dùng so_luong
+                return (
+                    <div className="text-right text-green-600 font-medium">
+                        {formatNumber(thanhTien)}
+                    </div>
+                );
+            },
+        },
+        {
+            key: "ma_nx_i",
+            title: "TK nợ",
             width: 100,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
                     <Input
-                        value={row.ma_nx_i}
+                        value={row.ma_nx_i || ''}
                         onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
-                        placeholder="Mã kho..."
+                        placeholder="TK nợ"
                         className="w-full"
                     />
                 );
             },
         },
         {
-            key: "ma_nx_i",
-            title: "Tk nợ",
+            key: "tk_vt",
+            title: "TK có",
             width: 100,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_nx_i}
-                        onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
-                        placeholder="Mã kho..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "ma_nx_i",
-            title: "Tk có",
-            width: 100,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_nx_i}
-                        onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
-                        placeholder="Mã kho..."
-                        className="w-full"
-                    />
-                );
-            },
+            render: (val, row) => (
+                <div className="text-gray-800 font-medium">
+                    {row.tk_vt || ""}
+                </div>
+            )
         },
         {
             key: "action",
@@ -492,8 +681,9 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 return (
                     <div className="flex items-center justify-center">
                         <button
-                            onClick={() => deleteCt85Row(row.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            type="button"
+                            onClick={() => deleteCt85Row(row.id)} // FIX: Bỏ preventDefault
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors p-1"
                             title="Xóa dòng"
                         >
                             <Trash2 size={16} />
@@ -504,28 +694,29 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         },
     ];
 
-    // Thêm dòng tổng vào data CT85
+    // FIX: Sửa data cho total row
     const ct85DataWithTotal = useMemo(() => {
         return [
             ...ct85Data,
             {
                 id: 'total',
-                ma_ct: '',
-                ngay_ct: '',
                 ma_vt: '',
                 ten_vt: '',
                 tk_vt: '',
+                don_vi_tinh: '',
+                ton_kho: 0,
+                so_luong: totals.totalSoLuong, // FIX: Dùng so_luong
+                don_gia: '',
                 ma_nx_i: '',
-                so_luong: totals.totalSoLuong,
             }
         ];
     }, [ct85Data, totals]);
 
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
-            <div className="relative w-full h-full  bg-white dark:bg-gray-900 flex flex-col overflow-hidden ">
+            <div className="relative w-full h-full bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100  to-indigo-50 dark:from-gray-800 dark:to-gray-900">
+                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
                             <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -555,7 +746,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                                 {/* Cột trái - 70% */}
                                 <div className="lg:col-span-7 space-y-2">
-                                    {/* Mã kho xuất */}
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Xuất <span className="text-red-500">*</span>
@@ -597,24 +787,26 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maQs}
-                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
-                                            placeholder="XDC001"
+                                            value={formData.ongBa}
+                                            onChange={(e) => handleFormChange("ongBa", e.target.value)}
+                                            placeholder="Nguyễn Văn A"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.maQs}
-                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
-                                            placeholder="XDC001"
+                                            value={formData.dienGiai}
+                                            onChange={(e) => handleFormChange("dienGiai", e.target.value)}
+                                            placeholder="Nhập diễn giải..."
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số hợp đồng
@@ -627,9 +819,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
-
-
-
                                 </div>
 
                                 {/* Cột phải - 30% */}
@@ -646,15 +835,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Số hóa đơn <span className="text-red-500">*</span>
+                                            Số chứng từ
                                         </Label>
                                         <input
                                             type="text"
                                             value={formData.soCt}
                                             onChange={(e) => handleFormChange("soCt", e.target.value)}
-                                            placeholder="XDC001"
+                                            placeholder="001"
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
@@ -684,6 +874,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         />
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Tỷ giá
@@ -718,82 +909,156 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="px-6">
-                        <Tabs
-                            tabs={[
-                                {
-                                    label: "Hạch toán",
-                                    content: (
-                                        <div className="bg-white rounded-lg border border-gray-200" ref={ct85TableRef}>
-                                            <TableBasic
-                                                data={ct85DataWithTotal}
-                                                columns={ct85Columns}
-                                                onAddRow={addCt85Row}
-                                                onDeleteRow={deleteCt85Row}
-                                                showAddButton={true}
-                                                maxHeight="max-h-80"
-                                                className="w-full"
-                                            />
-                                        </div>
-                                    ),
-                                },
-                            ]}
-                        />
-                    </div>
-                </div>
-            </div>
 
-            {/* Footer */}
-            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
-                <div className="flex justify-between items-center">
-                    {/* Summary info */}
-                    <div className="flex gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="text-gray-600">Tổng số lượng:</span>
-                            <span className="font-semibold text-green-600">
-                                {totals.totalSoLuong.toLocaleString('vi-VN')}
-                            </span>
+                        {/* Tabs section */}
+                        <div className="px-6">
+                            <Tabs
+                                tabs={[
+                                    {
+                                        label: "Hạch toán",
+                                        content: (
+                                            <div className="bg-white rounded-lg border border-gray-200" ref={ct85TableRef}>
+                                                <TableBasic
+                                                    data={ct85DataWithTotal}
+                                                    columns={ct85Columns}
+                                                    onDeleteRow={deleteCt85Row}
+                                                    showAddButton={true}
+                                                    addButtonText="Thêm dòng"
+                                                    maxHeight="max-h-80"
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                        ),
+                                    },
+                                ]}
+                                onAddRow={addCt85Row}
+                            />
                         </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex justify-end gap-3">
-                        <button
-                            onClick={handleClose}
-                            className="px-6 py-2.5 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
-                        >
-                            <X size={16} />
-                            Hủy bỏ
-                        </button>
-                        <button
-                            onClick={handleSave}
-                            disabled={isPending}
-                            className={`px-6 py-2.5 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""
-                                }`}
-                        >
-                            <Save size={16} />
-                            {isPending ? "Đang lưu..." : "Lưu phiếu"}
-                        </button>
-                    </div>
-                </div>
-                <MaterialSelectionPopup
-                    isOpen={searchStates.showVatTuPopup}
-                    onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
-                    onSelect={handleVatTuSelect}
-                    materials={vatTuData.data || []}
-                    searchValue={searchStates.vtSearch}
-                />
+                    {/* Footer */}
+                    <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
+                        <div className="flex justify-between items-center">
+                            {/* Summary info */}
+                            <div className="flex gap-6 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Tổng số lượng:</span>
+                                    <span className="font-semibold text-green-600">
+                                        {formatNumber(totals.totalSoLuong)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Tổng thành tiền:</span>
+                                    <span className="font-semibold text-blue-600">
+                                        {formatNumber(totals.totalThanhTien)} VND
+                                    </span>
+                                </div>
+                            </div>
 
-                <WarehouseSelectionPopup
-                    isOpen={searchStates.showKhoPopup}
-                    onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
-                    onSelect={handleKhoSelect}
-                    warehouses={khoData.data || []}
-                    searchValue={searchStates.khoSearch}
-                    onSearch={(value) => setSearchStates(prev => ({ ...prev, khoSearch: value }))}
-                />
+                            {/* Action buttons */}
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={handleClose}
+                                    className="px-6 py-2.5 text-sm font-medium text-white bg-red-600 border border-gray-300 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+                                >
+                                    <X size={16} />
+                                    Hủy bỏ
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isPending}
+                                    className={`px-6 py-2.5 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <Save size={16} />
+                                    {isPending ? "Đang lưu..." : "Lưu phiếu"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Material Selection Popup for main form */}
+                    {searchStates.showVatTuPopup && (
+                        <MaterialSelectionPopup
+                            isOpen={searchStates.showVatTuPopup}
+                            onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
+                            onSelect={(vatTu) => {
+                                console.log('🎯 Material selected from popup:', vatTu);
+                                handleVatTuSelect(searchStates.vtSearchRowId, vatTu);
+                            }}
+                            materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
+                            searchValue={searchStates.vtSearch}
+                            rowId={searchStates.vtSearchRowId}
+                        />
+                    )}
+
+                    {/* Warehouse Selection Popup for main form */}
+                    {searchStates.showKhoPopup && (
+                        <WarehouseSelectionPopup
+                            isOpen={searchStates.showKhoPopup}
+                            onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
+                            onSelect={(kho) => {
+                                console.log('🏠 Warehouse selected from popup:', kho);
+                                handleKhoSelect(searchStates.khoSearchRowId, kho);
+                            }}
+                            warehouses={Array.isArray(khoData?.data) ? khoData.data : []}
+                            searchValue={searchStates.khoSearch}
+                            rowId={searchStates.khoSearchRowId}
+                            onSearch={(value) => setSearchStates(prev => ({ ...prev, khoSearch: value }))}
+                        />
+                    )}
+
+                    {/* DMVT Popup for table */}
+                    {searchStates.showDmvtPopup && (
+                        <MaterialSelectionPopup
+                            isOpen={searchStates.showDmvtPopup}
+                            onClose={() => {
+                                setSearchStates(prev => ({
+                                    ...prev,
+                                    showDmvtPopup: false,
+                                    maVtSearch: "",
+                                    maVtSearchRowId: null
+                                }));
+                                setDmvtSearchTerm("");
+                                setDmvtData({ data: [] });
+                            }}
+                            onSelect={(dmvt) => {
+                                console.log('🎯 DMVT selected from table popup:', dmvt);
+                                handleDmvtSelect(dmvt);
+                            }}
+                            onSearch={handleDmvtSearch}
+                            materials={dmvtData.data || []}
+                            searchValue={dmvtSearchTerm}
+                            loading={dmvtLoading}
+                            rowId={searchStates.maVtSearchRowId}
+                        />
+                    )}
+
+                    {/* DMKHO Popup for table */}
+                    {searchStates.showDmkhoPopup && (
+                        <WarehouseSelectionPopup
+                            isOpen={searchStates.showDmkhoPopup}
+                            onClose={() => {
+                                setSearchStates(prev => ({
+                                    ...prev,
+                                    showDmkhoPopup: false,
+                                    maKhoTableSearch: "",
+                                    maKhoTableSearchRowId: null
+                                }));
+                                setMaKhoSearch("");
+                            }}
+                            onSelect={(kho) => {
+                                console.log('🏠 DMKHO selected from table popup:', kho);
+                                handleDmkhoSelect(kho);
+                            }}
+                            onSearch={handleDmkhoSearch}
+                            warehouses={dmkhoTableData.data || []}
+                            searchValue={maKhoSearch}
+                            loading={false}
+                            rowId={searchStates.maKhoTableSearchRowId}
+                        />
+                    )}
+                </div>
             </div>
-        </Modal >
+        </Modal>
     );
 };

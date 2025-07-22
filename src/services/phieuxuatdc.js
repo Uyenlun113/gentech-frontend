@@ -15,7 +15,7 @@ const phieuXuatDcApi = {
         return response.data;
     },
     updatePhieuXuatDc: async (stt_rec, data) => {
-        const response = await axios.put(`${API_BASE_URL}/ph85/update/${stt_rec}`, data);
+        const response = await axios.patch(`${API_BASE_URL}/ph85/update/${stt_rec}`, data);
         return response.data;
     },
     deletePhieuXuatDc: async (stt_rec) => {
