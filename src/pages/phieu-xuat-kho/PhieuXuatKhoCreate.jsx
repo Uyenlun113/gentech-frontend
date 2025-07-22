@@ -881,7 +881,7 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
         // Updated to match backend structure
         hang_hoa_list: hangHoaData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
-          .map(({ ma_vt, ma_kho_i, so_luong, gia, tien, tk_vt, ma_nx_i }) => ({
+          .map(({ ma_vt, ma_kho_i, so_luong, gia, tien, tk_vt, ma_nx_i, dien_giai }) => ({
             ma_vt: ma_vt?.trim() || "",
             ma_kho_i: ma_kho_i?.trim() || "",
             so_luong: Number(so_luong) || 0,
@@ -889,7 +889,7 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
             tien: Number(tien) || 0,
             tk_vt: tk_vt?.trim() || "",
             ma_nx_i: ma_nx_i?.trim() || "",
-            // dien_giai: dien_giai?.trim() || "",
+            dien_giai: dien_giai?.trim() || "",
           })),
       };
 
