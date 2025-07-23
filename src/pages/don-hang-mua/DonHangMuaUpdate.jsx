@@ -33,7 +33,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         dien_giai: "",
         ma_hdm: "",
         ma_hdm_me: "",
-        loai_ct: "Đã ghi sổ cái",
+        loai_ct: "1",
         mst: "",
         ma_nt: "VND",
         ty_gia: "1",
@@ -58,6 +58,9 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
     // State để lưu trữ giá trị gốc của mã vật tư
     const [originalMaVt, setOriginalMaVt] = useState({});
+
+    // THÊM STATE CHO CHI PHÍ
+    const [chiPhiData, setChiPhiData] = useState([]);
 
     const { data: customerData = [] } = useCustomers(maKhSearch ? { search: maKhSearch } : {});
     const { data: accountData = [] } = useAccounts(maTaiKhoanSearch ? { search: maTaiKhoanSearch } : {});
@@ -112,7 +115,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             cp: 0,             // Tiền cp VNĐ
             gia: 0,            // Giá VNĐ
             tien: 0,
-            ma_thue: 0,
+            ma_thue: "",
             thue_suat: 0,         // Tiền VNĐ
             thue: 0,
             tien0: 0, // Tiền hàng VNĐ
@@ -162,7 +165,8 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     console.log(`Fetched material for ${item.ma_vt}:`, materialData);
                     return {
                         ...item,
-                        ten_vt: materialData.ten_vt || ""
+                        ten_vt: materialData.ten_vt || "",
+                        dvt: materialData.dvt || ""
                     };
                 } catch (error) {
                     console.warn(`Cannot fetch material name for ${item.ma_vt}:`, error);
@@ -175,6 +179,19 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         return Promise.all(promises);
     }, []);
 
+    // FUNCTION ĐỂ ĐỒNG BỘ CHI PHÍ VỚI HÀNG HÓA
+    const syncChiPhiWithHangHoa = useCallback((hangHoaList) => {
+        const newChiPhiData = hangHoaList.map((item, index) => ({
+            id: item.id,
+            stt_rec: (index + 1).toString(),
+            ma_vt: item.ma_vt || "",
+            ten_vt: item.ten_vt || "",
+            tien_hang: item.tien0 || 0, // Tiền hàng từ bảng hàng hóa
+            cp: item.cp || 0, // Chi phí từ trường cp của hàng hóa
+        }));
+        setChiPhiData(newChiPhiData);
+    }, []);
+
     // ĐỊNH NGHĨA handleHangHoaChange TRƯỚC KHI SỬ DỤNG
     const handleHangHoaChange = useCallback((id, field, value) => {
         console.log(`🔄 handleHangHoaChange: id=${id}, field=${field}, value=${value}`);
@@ -185,10 +202,16 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     const updatedItem = { ...item, [field]: value };
 
                     // Auto calculate tien when so_luong or gia changes (VNĐ)
-                    if (field === "so_luong" || field === "gia") {
+                    if (field === "so_luong" || field === "gia0") {
                         const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
-                        const gia = parseFloat(field === "gia" ? value : item.gia) || 0;
-                        updatedItem.tien = soLuong * gia;
+                        const gia = parseFloat(field === "gia0" ? value : item.gia0) || 0;
+                        updatedItem.tien0 = soLuong * gia;
+                    }
+                    //thue_suat
+                    if (field === "thue_suat") {
+                        const thueSuat = parseFloat(field === "thue_suat" ? value : item.thue_suat) || 0;
+
+                        updatedItem.thue = (updatedItem.tien0 * thueSuat) / 100;
                     }
 
                     // Auto calculate tien_nt when so_luong or gia_nt changes (ngoại tệ)
@@ -243,6 +266,10 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 }
                 return item;
             });
+
+            // ĐỒNG BỘ CHI PHÍ SAU KHI CẬP NHẬT HÀNG HÓA
+            syncChiPhiWithHangHoa(newData);
+
             return newData;
         });
 
@@ -256,17 +283,29 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 showAccountPopup: true
             }));
         }
-        // else if (field === "ma_nx_i") {
-        //     // Tài khoản có → Popup 2
-        //     setSearchStates(prev => ({
-        //         ...prev,
-        //         tkSearch2: value,
-        //         tkSearchRowId2: id,
-        //         tkSearchField2: field,
-        //         showAccountPopup2: true
-        //     }));
-        // }
-    }, [formData.ty_gia]);
+    }, [formData.ty_gia, syncChiPhiWithHangHoa]);
+
+    // HANDLE CHI PHÍ CHANGE
+    const handleChiPhiChange = useCallback((id, field, value) => {
+        if (field !== "cp") return; // Chỉ cho phép sửa trường cp
+
+        setChiPhiData(prev =>
+            prev.map(item =>
+                item.id === id
+                    ? { ...item, [field]: parseFloat(value) || 0 }
+                    : item
+            )
+        );
+
+        // Đồng thời cập nhật lại hangHoaData với giá trị cp mới
+        setHangHoaData(prev =>
+            prev.map(item =>
+                item.id === id
+                    ? { ...item, cp: parseFloat(value) || 0 }
+                    : item
+            )
+        );
+    }, []);
 
     // Load data when selectedDonHangMua changes
     useEffect(() => {
@@ -281,7 +320,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 dien_giai: selectedDonHangMua.dien_giai || "",
                 ma_hdm: selectedDonHangMua.ma_hdm || "",
                 ma_hdm_me: selectedDonHangMua.ma_hdm_me || "",
-                loai_ct: selectedDonHangMua.loai_ct || "Đã ghi sổ cái",
+                loai_ct: selectedDonHangMua.loai_ct || "1",
                 mst: selectedDonHangMua.mst || "",
                 ma_nt: selectedDonHangMua.ma_nt || "VND",
                 ty_gia: selectedDonHangMua.ty_gia || "1",
@@ -290,8 +329,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
             // Set search values for existing data
             setMaKhSearch(selectedDonHangMua.ma_kh || "");
-            // ❌ BỎ DÒNG NÀY - NGUYÊN NHÂN GÂY POPUP TỰ HIỂN THỊ
-            // setMaTaiKhoanSearch(selectedDonHangMua.ma_nx || "");
 
             // Load hang_hoa_list data
             if (selectedDonHangMua.hang_hoa_list && selectedDonHangMua.hang_hoa_list.length > 0) {
@@ -300,7 +337,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     stt_rec: (index + 1).toString(),
                     ma_vt: item.ma_vt || "",
                     ten_vt: item.ten_vt || "",
-                    // dvt: item.dvt || item.don_vi_tinh || "",
                     ma_kho_i: item.ma_kho_i || item.ma_kho || "",
                     so_luong: item.so_luong || 0,
                     gia_nt0: item.gia_nt0 || 0,
@@ -313,10 +349,10 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     cp: item.cp || 0,
                     gia: item.gia || 0,
                     tien: item.tien || 0,
-                    ma_thue: item.ma_thue || 0, // THÊM MỚI
-                    thue_suat: item.thue_suat || 0, // Tiền VNĐ
+                    ma_thue: item.ma_thue.trim() || 0,
+                    thue_suat: item.thue_suat || 0,
                     thue: item.thue || 0,
-                    tien0: item.tien0 || 0, // Tiền hàng VNĐ
+                    tien0: item.tien0 || 0,
                 }));
 
                 // Set original values
@@ -327,11 +363,17 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 setOriginalMaVt(originalValues);
 
                 setHangHoaData(hangHoaDataFromServer);
+
+                // ĐỒNG BỘ CHI PHÍ KHI LOAD DATA
+                syncChiPhiWithHangHoa(hangHoaDataFromServer);
+
                 fetchMaterialNames(hangHoaDataFromServer).then(updatedRows => {
                     setHangHoaData(updatedRows);
+                    syncChiPhiWithHangHoa(updatedRows); // Đồng bộ lại sau khi update tên vật tư
                 });
             } else {
                 setHangHoaData(INITIAL_HANG_HOA_DATA);
+                syncChiPhiWithHangHoa(INITIAL_HANG_HOA_DATA);
                 setOriginalMaVt({});
             }
 
@@ -345,7 +387,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         } else if (!isOpenEdit) {
             resetForm();
         }
-    }, [selectedDonHangMua, isOpenEdit, accountData.data, fetchMaterialNames]);
+    }, [selectedDonHangMua, isOpenEdit, accountData.data, fetchMaterialNames, syncChiPhiWithHangHoa]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -382,8 +424,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         const delayDebounce = setTimeout(() => {
             if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
                 console.log('🔍 Searching for main account:', maTaiKhoanSearch);
-                // CHỈ hiển thị popup khi đã được trigger từ UI event
-                // Không hiển thị popup khi chỉ load data
             } else {
                 setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
             }
@@ -445,16 +485,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             setMaTaiKhoanSearch(value);
         }
 
-        // Trigger main account search when ma_nx changes - THÊM MỚI
-        // if (field === 'ma_nx') {
-        //     setMaTaiKhoanSearch(value);
-        //     if (value && value.trim().length > 0) {
-        //         setSearchStates(prev => ({ ...prev, showMainAccountPopup: true }));
-        //     } else {
-        //         setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
-        //     }
-        // }
-
         // Auto update exchange rate when currency changes
         if (field === 'ma_nt') {
             const exchangeRate = value === 'USD' ? 25000 : 1;
@@ -468,13 +498,9 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
     const validateForm = useCallback(() => {
         if (!formData.ngay_ky) {
-            console.error("Vui lòng nhập ngày hạch toán");
+            console.error("Vui lòng nhập Ngày dh");
             return false;
         }
-        // if (!formData.ngay_lct) {
-        //     console.error("Vui lòng nhập ngày lập chứng từ");
-        //     return false;
-        // }
         if (!formData.so_ct) {
             console.error("Vui lòng nhập số chứng từ");
             return false;
@@ -529,7 +555,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         }));
 
         setSelectedAccount(account);
-        // setMaTaiKhoanSearch(account.tk.trim());
 
         setSearchStates(prev => ({
             ...prev,
@@ -586,18 +611,21 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         console.log('Row ID:', searchStates.maVtSearchRowId);
 
         // Cập nhật dữ liệu hàng hóa với vật tư đã chọn
-        setHangHoaData(prev =>
-            prev.map(item =>
+        setHangHoaData(prev => {
+            const newData = prev.map(item =>
                 item.id === searchStates.maVtSearchRowId
                     ? {
                         ...item,
                         ma_vt: dmvt.ma_vt || dmvt.code || "",
                         ten_vt: dmvt.ten_vt || dmvt.name || "",
-                        // dvt: dmvt.dvt || dmvt.don_vi_tinh || ""
                     }
                     : item
-            )
-        );
+            );
+
+            // ĐỒNG BỘ CHI PHÍ SAU KHI CHỌN VẬT TƯ
+            syncChiPhiWithHangHoa(newData);
+            return newData;
+        });
 
         // Cập nhật original value với giá trị mới
         setOriginalMaVt(prev => ({
@@ -616,7 +644,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         // Reset DMVT data
         setDmvtSearchTerm("");
         setDmvtData({ data: [] });
-    }, [searchStates.maVtSearchRowId]);
+    }, [searchStates.maVtSearchRowId, syncChiPhiWithHangHoa]);
 
     // Handle kho selection - THÊM MỚI
     const handleDmkhoSelect = useCallback((kho) => {
@@ -686,6 +714,10 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
     // Calculate totals
     const totals = useMemo(() => {
+        const totalTien0 = hangHoaData.reduce((sum, item) => {
+            const value = parseFloat(item.tien0) || 0;
+            return sum + value;
+        }, 0);
         const totalTien = hangHoaData.reduce((sum, item) => {
             const value = parseFloat(item.tien) || 0;
             return sum + value;
@@ -701,8 +733,23 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             return sum + value;
         }, 0);
 
-        return { totalTien, totalTienNT, totalSoLuong };
+        return { totalTien, totalTienNT, totalSoLuong, totalTien0 };
     }, [hangHoaData]);
+
+    // Calculate chi phí totals
+    const chiPhiTotals = useMemo(() => {
+        const totalTienHang = chiPhiData.reduce((sum, item) => {
+            const value = parseFloat(item.tien_hang) || 0;
+            return sum + value;
+        }, 0);
+
+        const totalChiPhi = chiPhiData.reduce((sum, item) => {
+            const value = parseFloat(item.cp) || 0; // Đổi từ tien_chi_phi sang cp
+            return sum + value;
+        }, 0);
+
+        return { totalTienHang, totalChiPhi };
+    }, [chiPhiData]);
 
     const { data: accountRawData = {} } = useAccounts(
         searchStates.tkSearch ? { search: searchStates.tkSearch } : {}
@@ -726,7 +773,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 stt_rec: newRowId.toString(),
                 ma_vt: "",
                 ten_vt: "",
-                // dvt: "",
                 ma_kho_i: "",
                 so_luong: 0,
                 gia_nt0: 0,
@@ -739,13 +785,18 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 cp: 0,
                 gia: 0,
                 tien: 0,
-                ma_thue: 0, // THÊM MỚI
-                thue_suat: 0, // Tiền VNĐ
+                ma_thue: "",
+                thue_suat: 0,
                 thue: 0,
-                tien0: 0, // Tiền hàng VNĐ
+                tien0: 0,
             };
 
-            return [...prev, newRow];
+            const newData = [...prev, newRow];
+
+            // ĐỒNG BỘ CHI PHÍ KHI THÊM DÒNG MỚI
+            syncChiPhiWithHangHoa(newData);
+
+            return newData;
         });
 
         setTimeout(() => {
@@ -756,7 +807,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 }
             }
         }, 100);
-    }, []);
+    }, [syncChiPhiWithHangHoa]);
 
     const hangHoaDataWithTotal = useMemo(() => {
         return [
@@ -766,14 +817,13 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 stt_rec: 'Tổng',
                 ma_vt: '',
                 ten_vt: '',
-                // dvt: '',
                 ma_kho_i: '',
                 so_luong: totals.totalSoLuong,
                 gia_nt0: '',
                 cp_nt: '',
                 gia_nt: '',
                 tien_nt: totals.totalTienNT,
-                tien_nt0: '',
+                tien_nt0: 0,
                 tk_vt: '',
                 gia0: '',
                 cp: '',
@@ -782,10 +832,25 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 ma_thue: '',
                 thue_suat: '',
                 thue: 0,
-                tien0: totals.totalTien, // Tiền hàng VNĐ
+                tien0: totals.totalTien0,
             }
         ];
     }, [hangHoaData, totals]);
+
+    // CHI PHÍ DATA WITH TOTAL
+    const chiPhiDataWithTotal = useMemo(() => {
+        return [
+            ...chiPhiData,
+            {
+                id: 'total',
+                stt_rec: 'Tổng',
+                ma_vt: '',
+                ten_vt: '',
+                tien_hang: chiPhiTotals.totalTienHang,
+                cp: chiPhiTotals.totalChiPhi, // Đổi từ tien_chi_phi sang cp
+            }
+        ];
+    }, [chiPhiData, chiPhiTotals]);
 
     // Table columns for hang hoa
     const hangHoaColumns = [
@@ -852,19 +917,17 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 </div>
             )
         },
-        // {
-        //     key: "dvt",
-        //     title: "ĐVT",
-        //     width: 80,
-        //     render: (val, row) => {
-        //         if (row.id === 'total') return <div></div>;
-        //         return (
-        //             <div className="text-center text-gray-800">
-        //                 {row.dvt || row.don_vi_tinh || 'cái'}
-        //             </div>
-        //         );
-        //     },
-        // },
+
+        {
+            key: "dvt",
+            title: "Đơn vị tính",
+            width: 100,
+            render: (val, row) => (
+                <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
+                    {row.dvt}
+                </div>
+            )
+        },
         {
             key: "ma_kho_i",
             title: "Mã kho",
@@ -904,164 +967,198 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 );
             },
         },
+
         {
-            key: "gia_nt0",
-            title: "Giá gốc n.tệ",
+            key: "gia0",
+            title: "Đơn giá",
             width: 120,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
                     <Input
-                        type="number"
-                        value={row.gia_nt0}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia_nt0", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "cp_nt",
-            title: "Tiền cp n.tệ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.cp_nt}
-                        onChange={(e) => handleHangHoaChange(row.id, "cp_nt", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "gia_nt",
-            title: "Giá n.tệ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.gia_nt}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia_nt", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "tien_nt",
-            title: "Tiền n.tệ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') {
-                    return (
-                        <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
-                            {totals.totalTienNT?.toLocaleString('vi-VN') || '0'}
-                        </div>
-                    );
-                }
-                return (
-                    <Input
-                        type="number"
-                        value={row.tien_nt}
-                        onChange={(e) => handleHangHoaChange(row.id, "tien_nt", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "tk_vt",
-            title: "TK vật tư",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.tk_vt}
-                        onChange={(e) => handleHangHoaChange(row.id, "tk_vt", e.target.value)}
-                        placeholder="TK"
+                        value={row.gia0}
+                        onChange={(e) => handleHangHoaChange(row.id, "gia0", e.target.value)}
+                        placeholder="Mã kho"
                         className="w-full"
                     />
                 );
             },
         },
         {
-            key: "gia0",
-            title: "Giá gốc VNĐ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.gia0}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia0", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "cp",
-            title: "Tiền cp VNĐ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.cp}
-                        onChange={(e) => handleHangHoaChange(row.id, "cp", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "gia",
-            title: "Giá VNĐ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.gia}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "tien",
-            title: "Tiền VNĐ",
+            key: "tien0",
+            title: "Tiền hàng",
             width: 120,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
                         <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
-                            {totals.totalTien.toLocaleString('vi-VN')}
+                            {totals.totalTien0.toLocaleString('vi-VN')}
+                        </div>
+                    );
+                }
+                return (
+                    // <Input
+                    //     type="number"
+                    //     value={row.tien0}
+                    //     onChange={(e) => handleHangHoaChange(row.id, "tien0", e.target.value)}
+                    //     placeholder="0"
+                    //     className="w-full text-right"
+                    // />
+                    <div className="w-full text-right p-2">
+                        {(row.tien0 || 0).toLocaleString('vi-VN')}
+                    </div>
+                );
+            },
+        },
+
+        {
+            key: "ma_thue",
+            title: "Mã thuế",
+            width: 120,
+            render: (val, row) => {
+                if (row.id === 'total') return <div></div>;
+                return (
+                    <Input
+                        value={row.ma_thue}
+                        onChange={(e) => handleHangHoaChange(row.id, "ma_thue", e.target.value)}
+                        placeholder="Mã Thuế"
+                        className="w-full"
+                    />
+                );
+            },
+        },
+        {
+            key: "thue_suat",
+            title: "Thuế suất",
+            width: 120,
+            render: (val, row) => {
+                if (row.id === 'total') return <div></div>;
+                return (
+                    <Input
+                        value={row.thue_suat}
+                        onChange={(e) => handleHangHoaChange(row.id, "thue_suat", e.target.value)}
+                        placeholder="Thuế suất"
+                        className="w-full"
+                    />
+                );
+            },
+        },
+        {
+            key: "thue",
+            title: "Tiền thuế",
+            width: 120,
+            render: (val, row) => {
+                if (row.id === 'total') return <div></div>;
+                return (
+                    // <Input
+                    //     value={row.thue}
+                    //     onChange={(e) => handleHangHoaChange(row.id, "thue", e.target.value)}
+                    //     placeholder="Tiền thuế"
+                    //     className="w-full"
+                    // />
+                    <div className="w-full text-right p-2">
+                        {(row.thue || 0).toLocaleString('vi-VN')}
+                    </div>
+                );
+            },
+        },
+        {
+            key: "action",
+            title: "Hành động",
+            fixed: "right",
+            width: 100,
+            render: (_, row) => {
+                if (row.id === 'total') return <div></div>;
+                return (
+                    <div className="flex items-center justify-center">
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                deleteHangHoaRow(row.id, e);
+                            }}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors p-1"
+                            title="Xóa dòng"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                );
+            },
+        },
+    ];
+
+    // CHI PHÍ COLUMNS
+    const chiPhiColumns = [
+        {
+            key: "stt_rec",
+            fixed: "left",
+            title: "STT",
+            width: 80,
+            render: (val, row) => (
+                <div className="text-center font-medium text-gray-700">
+                    {row.id === 'total' ? 'Tổng' : row.stt_rec}
+                </div>
+            )
+        },
+        {
+            key: "ma_vt",
+            title: "Mã vật tư",
+            width: 150,
+            fixed: "left",
+            render: (val, row) => (
+                <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
+                    {row.ma_vt}
+                </div>
+            )
+        },
+        {
+            key: "ten_vt",
+            title: "Tên vật tư",
+            width: 200,
+            render: (val, row) => (
+                <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
+                    {row.ten_vt}
+                </div>
+            )
+        },
+        {
+            key: "tien_hang",
+            title: "Tiền hàng",
+            width: 150,
+            render: (val, row) => {
+                if (row.id === 'total') {
+                    return (
+                        <div className="text-right text-[16px] text-blue-600 p-2 rounded px-7">
+                            {chiPhiTotals.totalTienHang.toLocaleString('vi-VN')}
+                        </div>
+                    );
+                }
+                return (
+                    <div className="text-right text-gray-700 p-2">
+                        {(parseFloat(row.tien_hang) || 0).toLocaleString('vi-VN')}
+                    </div>
+                );
+            },
+        },
+        {
+            key: "cp",
+            title: "Tiền chi phí",
+            width: 150,
+            render: (val, row) => {
+                if (row.id === 'total') {
+                    return (
+                        <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
+                            {chiPhiTotals.totalChiPhi.toLocaleString('vi-VN')}
                         </div>
                     );
                 }
                 return (
                     <Input
                         type="number"
-                        value={row.tien}
-                        onChange={(e) => handleHangHoaChange(row.id, "tien", e.target.value)}
+                        value={row.cp}
+                        onChange={(e) => handleChiPhiChange(row.id, "cp", e.target.value)}
                         placeholder="0"
                         className="w-full text-right"
                     />
@@ -1100,8 +1197,13 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             e.preventDefault();
             e.stopPropagation();
         }
-        setHangHoaData(prev => prev.filter(item => item.id !== id));
-    }, []);
+        setHangHoaData(prev => {
+            const newData = prev.filter(item => item.id !== id);
+            // ĐỒNG BỘ CHI PHÍ SAU KHI XÓA DÒNG
+            syncChiPhiWithHangHoa(newData);
+            return newData;
+        });
+    }, [syncChiPhiWithHangHoa]);
 
     const resetForm = useCallback(() => {
         setFormData({
@@ -1114,13 +1216,14 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             dien_giai: "",
             ma_hdm: "",
             ma_hdm_me: "",
-            loai_ct: "Đã ghi sổ cái",
+            loai_ct: "1",
             mst: "",
             ma_nt: "VND",
             ty_gia: "1",
-            ma_nx: "", // THÊM MỚI
+            ma_nx: "",
         });
         setHangHoaData(INITIAL_HANG_HOA_DATA);
+        setChiPhiData([]); // Reset chi phí data
         setOriginalMaVt({});
         setSelectedAccount(null);
         setMaTaiKhoanSearch("");
@@ -1147,7 +1250,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             showMainCustomerPopup: false,
             showDmvtPopup: false,
             showDmkhoPopup: false,
-            showMainAccountPopup: false, // THÊM MỚI
+            showMainAccountPopup: false,
         });
     }, []);
 
@@ -1168,8 +1271,8 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 so_ct: formData.so_ct?.trim() || "",
                 ma_nt: formData.ma_nt?.trim() || "VND",
                 ty_gia: Number(formData.ty_gia) || 1,
-                loai_ct: formData.loai_ct?.trim() || "",
-                ma_nx: formData.ma_nx?.trim() || "", // THÊM MỚI
+                loai_ct: formData.loai_ct?.trim() || "1",
+                ma_nx: formData.ma_nx?.trim() || "",
 
                 // Updated hang_hoa_list với tất cả các trường mới
                 hang_hoa_list: hangHoaData
@@ -1177,7 +1280,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     .map(({
                         ma_vt,
                         ten_vt,
-                        // dvt,
                         ma_kho_i,
                         so_luong,
                         gia_nt0,
@@ -1190,15 +1292,13 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                         gia,
                         tien,
                         ma_thue,
-                        tien_nt0, // THÊM MỚI
-                        thue_suat, // Tiền VNĐ
-                        thue, // THÊM MỚI
-                        tien0, // Tiền hàng VNĐ
-                        // ma_nx_i
+                        tien_nt0,
+                        thue_suat,
+                        thue,
+                        tien0,
                     }) => ({
                         ma_vt: ma_vt?.trim() || "",
                         ten_vt: ten_vt?.trim() || "",
-                        // dvt: dvt?.trim() || "",
                         ma_kho_i: ma_kho_i?.trim() || "",
                         so_luong: Number(so_luong) || 0,
                         gia_nt0: Number(gia_nt0) || 0,
@@ -1211,12 +1311,14 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                         cp: Number(cp) || 0,
                         gia: Number(gia) || 0,
                         tien: Number(tien) || 0,
-                        ma_thue: Number(ma_thue) || 0, // THÊM MỚI
-                        thue_suat: Number(thue_suat) || 0, // Tiền VNĐ
-                        thue: Number(thue) || 0, // THÊM MỚI
-                        tien0: Number(tien0) || 0, // Tiền hàng VNĐ
-                        // ma_nx_i: ma_nx_i?.trim() || "",
+                        ma_thue: ma_thue.trim() || "",
+                        thue_suat: Number(thue_suat) || 0,
+                        thue: Number(thue) || 0,
+                        tien0: Number(tien0) || 0,
                     })),
+
+                // THÊM CHI PHÍ DATA VÀO PAYLOAD
+                t_cp: chiPhiData.reduce((sum, item) => sum + (parseFloat(item.cp) || 0), 0),
             };
 
             await updateDonHangMua({
@@ -1229,7 +1331,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
         } catch (err) {
             console.error(err);
         }
-    }, [formData, hangHoaData, totals, updateDonHangMua, closeModalEdit, resetForm, navigate, validateForm, selectedDonHangMua]);
+    }, [formData, hangHoaData, chiPhiData, totals, updateDonHangMua, closeModalEdit, resetForm, navigate, validateForm, selectedDonHangMua]);
 
     return (
         <Modal isOpen={isOpenEdit} onClose={handleClose} title="Cập nhật đơn hàng kho" className="w-full max-w-7xl m-1 border-2">
@@ -1257,16 +1359,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                             <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-3">
                                 <div className="p-3 flex-1 overflow-y-auto">
                                     <div className="space-y-2">
-                                        {/* <div className="flex items-center gap-2">
-                                            <Label className="text-xs min-w-[110px]">Loại đơn hàng</Label>
-                                            <Input
-                                                value={formData.ma_gd}
-                                                onChange={e => handleChange("ma_gd", e.target.value)}
-                                                placeholder="2"
-                                                className="h-8 text-sm flex-1 bg-white"
-                                            />
-                                        </div> */}
-
                                         <div className="flex items-center gap-2 grid-cols-12">
                                             <Label className="text-xs min-w-[110px] col-span-2">Mã khách</Label>
                                             <div className="col-span-6">
@@ -1373,7 +1465,7 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                                     <div className="space-y-2">
                                         <div className="grid gap-2 items-center grid-cols-12">
                                             <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px] col-span-6">
-                                                Ngày hạch toán <span className="text-red-500">*</span>
+                                                Ngày dh <span className="text-red-500">*</span>
                                             </Label>
                                             <div className="col-span-5">
                                                 <div className="flex-1">
@@ -1381,31 +1473,13 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                                                         value={formData.ngay_ky}
                                                         onChange={(date) => handleDateChange(date, "ngay_ky")}
                                                         options={FLATPICKR_OPTIONS}
-                                                        placeholder="Chọn ngày hạch toán"
+                                                        placeholder="Chọn Ngày dh"
                                                         className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="col-span-1"></div>
                                         </div>
-                                        {/* <div className="grid gap-2 items-center grid-cols-12">
-                                            <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px] col-span-6">
-                                                Ngày lập chứng từ <span className="text-red-500">*</span>
-                                            </Label>
-                                            <div className="col-span-5">
-                                                <div className="relative flex-1">
-                                                    <Flatpickr
-                                                        value={formData.ngay_lct}
-                                                        onChange={(date) => handleDateChange(date, "ngay_lct")}
-                                                        options={FLATPICKR_OPTIONS}
-                                                        placeholder="Chọn ngày lập chứng từ"
-                                                        className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                                                    />
-                                                    <CalenderIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                                </div>
-                                            </div>
-                                            <div className="col-span-1"></div>
-                                        </div> */}
 
                                         <div className="grid grid-cols-12 items-center gap-2">
                                             <Label className="text-xs col-span-6 text-left">Quyển số</Label>
@@ -1510,11 +1584,33 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                                         </div>
                                     ),
                                 },
+                                {
+                                    label: "Chi phí",
+                                    content: (
+                                        <div className="">
+                                            <TableBasic
+                                                data={chiPhiDataWithTotal}
+                                                columns={chiPhiColumns}
+                                                onDeleteRow={deleteHangHoaRow} // Sử dụng cùng function để đồng bộ
+                                                showAddButton={true} // Cho phép thêm từ tab Chi phí
+                                                addButtonText="Thêm dòng"
+                                                onAddRow={(e) => {
+                                                    if (e) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                    }
+                                                    addHangHoaRow(e); // Sử dụng cùng function để đồng bộ
+                                                }}
+                                                maxHeight="max-h-72"
+                                                className="w-full"
+                                            />
+                                        </div>
+                                    ),
+                                },
                             ]}
                             onAddRow={(activeTab) => {
-                                if (activeTab === 0) {
-                                    addHangHoaRow();
-                                }
+                                // Cả hai tab đều sử dụng cùng function addHangHoaRow
+                                addHangHoaRow();
                             }}
                         />
                     </div>
