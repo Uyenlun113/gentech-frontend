@@ -648,7 +648,7 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
-                        <div className="text-right text-lg text-blue-600 p-2 rounded font-bold">
+                        <div className="text-center text-sm text-blue-600 p-2 rounded ">
                             {formatNumber(totals.totalSoLuong)}
                         </div>
                     );
@@ -688,7 +688,7 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
-                        <div className="text-right text-lg text-blue-600 p-2 rounded font-bold">
+                        <div className="text-right text-sm text-blue-600 rounded">
                             {formatNumber(totals.totalThanhTien)}
                         </div>
                     );

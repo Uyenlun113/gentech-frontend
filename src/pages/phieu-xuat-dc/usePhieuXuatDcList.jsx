@@ -365,12 +365,6 @@ export const usePhieuXuatDcList = () => {
             render: (val) => <div className="font-mono text-center">{val || "-"}</div>,
         },
         {
-            key: "ma_nx_i",
-            title: "Mã kho",
-            width: 100,
-            render: (val) => <div className="text-center">{val || "-"}</div>,
-        },
-        {
             key: "so_luong",
             title: "Số lượng",
             width: 120,

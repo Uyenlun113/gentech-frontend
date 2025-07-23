@@ -37,6 +37,7 @@ import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
 import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
@@ -45,6 +46,7 @@ import SoDuDauKyTable from "./pages/Sddk/SoDuDauKyTable";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
 import SystemPage from "./pages/System/System";
 import BasicTables from "./pages/Tables/BasicTables";
+import CdvtListPage from "./pages/TonkhoDK/CdvtListPage";
 import ToolsPage from "./pages/Tools/Tools";
 import Alerts from "./pages/UiElements/Alerts";
 import Avatars from "./pages/UiElements/Avatars";
@@ -82,7 +84,7 @@ export default function App() {
               <Route path="/quick-report" element={<QuickReport />} />
               {/* Phiếu kế toán */}
               <Route path="/general-ledger" element={<GeneralLedgerPage />} />
-              
+
               <Route path="/general-ledger/list" element={<GeneralLedgerListPage />} />
               {/* Vốn bằng tiền */}
               <Route path="/cash-receipt" element={<CashCapitalPage />} />
@@ -92,7 +94,11 @@ export default function App() {
               {/* Giáy bao cố ngan hang */}
               <Route path="/dau-ky/sodu-tk/table" element={<SoDuDauKyTable />} />
 
+              <Route path="/tonkho-dk" element={<CdvtListPage />} />
+
               <Route path="/phieu-xuat-dc" element={<PhieuXuatDcListPage />} />
+
+              <Route path="/phieu-mua" element={<PhieuMuaListPage />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}

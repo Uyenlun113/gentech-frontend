@@ -33,7 +33,7 @@ export default function Sales() {
         window.location.href = '/chung-tu/don-dat-hang-mua';
         break;
       case 'bank-payment':
-        window.location.href = '/phieu-xuat';
+        window.location.href = '/phieu-mua';
         break;
       case 'cash-receipt':
         window.location.href = '/chung-tu/phieu-thu';
