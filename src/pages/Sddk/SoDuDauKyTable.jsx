@@ -17,7 +17,7 @@ const SoDuDauKyTable = () => {
 
   const yearFromUrl = searchParams.get("nam");
   const [selectedYear, setSelectedYear] = useState(yearFromUrl ? parseInt(yearFromUrl) : new Date().getFullYear());
-
+  console.log(setSelectedYear);
   const { data: cdtkData, isLoading, error } = useListCdtk(selectedYear);
   const { data: accounts } = useAccounts();
   const accountsData = accounts?.data;
@@ -117,29 +117,12 @@ const SoDuDauKyTable = () => {
   if (error) {
     return <div className="text-center py-10 text-red-600">Lỗi khi tải dữ liệu: {error.message}</div>;
   }
-
-  console.log("cdtkData:", selectedAccountDetail);
   return (
     <div className="px-4 bg-white dark:bg-gray-900 pt-2">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vào số dư ban đầu của các tài khoản</h1>
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Năm:</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md 
-                                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-            >
-              {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Vào số dư ban đầu của các tài khoản</h1>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -154,7 +137,7 @@ const SoDuDauKyTable = () => {
 
       {/* Table Container */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="overflow-x-auto max-h-[calc(100vh-280px)]">
+        <div className="overflow-x-auto max-h-[calc(100vh-220px)]">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
               <tr>
@@ -321,7 +304,7 @@ const SoDuDauKyTable = () => {
                    border-t border-blue-200 dark:border-blue-700 text-sm"
               >
                 <tr className="font-semibold text-gray-900 dark:text-white">
-                  <td className="px-2 py-1 w-[40px]">
+                  <td className="px-2 py-3 w-[40px]">
                     <span className="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded text-blue-800 dark:text-blue-200">
                       Tổng
                     </span>

@@ -37,6 +37,7 @@ import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
 import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
@@ -95,6 +96,8 @@ export default function App() {
               <Route path="/tonkho-dk" element={<CdvtListPage />} />
 
               <Route path="/phieu-xuat-dc" element={<PhieuXuatDcListPage />} />
+
+              <Route path="/phieu-mua" element={<PhieuMuaListPage />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}
