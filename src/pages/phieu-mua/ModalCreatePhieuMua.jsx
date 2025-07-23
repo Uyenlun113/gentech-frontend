@@ -83,6 +83,23 @@ const FLATPICKR_OPTIONS = {
     locale: Vietnamese,
 };
 
+// Debounce hook để tránh gọi API liên tục
+const useDebounce = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
+
 export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
     const navigate = useNavigate();
 
@@ -114,6 +131,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         tong_chi_phi: "",
     });
 
+    // Search states với debounce
     const [searchStates, setSearchStates] = useState({
         tkSearch: "",
         tkSearchRowId: null,
@@ -135,24 +153,33 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
     const chiPhiTableRef = useRef(null);
     const hdThueTableRef = useRef(null);
 
-    const [searchParams, setSearchParams] = useState({});
+    // Debounced search values để tránh gọi API liên tục
+    const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
+    const debouncedMaKhSearch = useDebounce(searchStates.maKhSearch, 600);
+    const debouncedVtSearch = useDebounce(searchStates.vtSearch, 600);
+    const debouncedKhoSearch = useDebounce(searchStates.khoSearch, 600);
 
-    useEffect(() => {
-        setSearchParams({
-            search: searchStates.tkSearch || "",
-        });
-    }, [searchStates.tkSearch]);
+    // React Query calls với enabled condition để tránh gọi API không cần thiết
+    const { data: accountRawData = {} } = useAccounts(
+        { search: debouncedTkSearch || "" },
+        { enabled: !!debouncedTkSearch && debouncedTkSearch.length > 0 }
+    );
 
-    const { data: accountRawData = {} } = useAccounts(searchParams);
     const { data: customerData = [] } = useCustomers(
-        searchStates.maKhSearch ? { search: searchStates.maKhSearch } : {}
+        { search: debouncedMaKhSearch || "" },
+        { enabled: !!debouncedMaKhSearch && debouncedMaKhSearch.length > 0 }
     );
+
     const { data: vatTuData = [] } = useDmvt(
-        searchStates.vtSearch ? { search: searchStates.vtSearch } : {}
+        { search: debouncedVtSearch || "" },
+        { enabled: !!debouncedVtSearch && debouncedVtSearch.length > 0 }
     );
+
     const { data: khoData = [] } = useDmkho(
-        searchStates.khoSearch ? { search: searchStates.khoSearch } : {}
+        { search: debouncedKhoSearch || "" },
+        { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
     );
+
     const { mutateAsync: createPhieuMua, isPending } = useCreatePhieuMua();
 
     // Tính tổng tiền
@@ -182,45 +209,91 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
     }, [hangHoaData, chiPhiData, hdThueData]);
 
+    // Auto show/hide popups khi có search term
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearchStates(prev => ({
-                ...prev,
-                showAccountPopup: prev.tkSearch !== "",
-            }));
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [searchStates.tkSearch]);
+        setSearchStates(prev => ({
+            ...prev,
+            showAccountPopup: !!debouncedTkSearch && debouncedTkSearch.length > 0
+        }));
+    }, [debouncedTkSearch]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearchStates(prev => ({
-                ...prev,
-                showCustomerPopup: prev.maKhSearch !== "",
-            }));
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [searchStates.maKhSearch]);
+        setSearchStates(prev => ({
+            ...prev,
+            showCustomerPopup: !!debouncedMaKhSearch && debouncedMaKhSearch.length > 0
+        }));
+    }, [debouncedMaKhSearch]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearchStates(prev => ({
-                ...prev,
-                showVatTuPopup: prev.vtSearch !== "",
-            }));
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [searchStates.vtSearch]);
+        setSearchStates(prev => ({
+            ...prev,
+            showVatTuPopup: !!debouncedVtSearch && debouncedVtSearch.length > 0
+        }));
+    }, [debouncedVtSearch]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setSearchStates(prev => ({
-                ...prev,
-                showKhoPopup: prev.khoSearch !== "",
-            }));
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [searchStates.khoSearch]);
+        setSearchStates(prev => ({
+            ...prev,
+            showKhoPopup: !!debouncedKhoSearch && debouncedKhoSearch.length > 0
+        }));
+    }, [debouncedKhoSearch]);
+
+    // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
+    useEffect(() => {
+        const tongChiPhi = parseFloat(chiPhiFormData.tong_chi_phi) || 0;
+
+        if (tongChiPhi > 0) {
+            // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
+            const validChiPhiRows = chiPhiData.filter(row =>
+                row.ma_vt && parseFloat(row.tien_hang) > 0
+            );
+
+            if (validChiPhiRows.length > 0) {
+                const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
+
+                setChiPhiData(prev => prev.map(row => {
+                    if (row.ma_vt && parseFloat(row.tien_hang) > 0) {
+                        return {
+                            ...row,
+                            tien_chi_phi: chiPhiPerRow.toFixed(0)
+                        };
+                    }
+                    return row;
+                }));
+            }
+        }
+    }, [chiPhiFormData.tong_chi_phi]); // Chỉ depend vào tong_chi_phi
+
+    // Auto fill tiền hàng vào HĐ thuế - với flag để tránh infinite loop
+    const [hasAutoFilledHdThue, setHasAutoFilledHdThue] = useState(false);
+
+    useEffect(() => {
+        const tongTienHangVaChiPhi = totals.totalTienHang + totals.totalChiPhi;
+
+        // Chỉ auto fill lần đầu và khi có thay đổi đáng kể
+        if (tongTienHangVaChiPhi > 0 && hdThueData.length > 0 && !hasAutoFilledHdThue) {
+            const firstRow = hdThueData[0];
+            if (!firstRow.t_tien || parseFloat(firstRow.t_tien) === 0) {
+                setHdThueData(prev => prev.map((row, index) => {
+                    if (index === 0) {
+                        const tTien = tongTienHangVaChiPhi;
+                        const thueSuat = parseFloat(row.thue_suat) || 0;
+                        const tThue = (tTien * thueSuat) / 100;
+                        const tTt = tTien + tThue;
+
+                        return {
+                            ...row,
+                            t_tien: tTien.toString(),
+                            t_thue: tThue.toString(),
+                            t_tt: tTt.toString()
+                        };
+                    }
+                    return row;
+                }));
+                setHasAutoFilledHdThue(true);
+            }
+        }
+    }, [totals.totalTienHang, totals.totalChiPhi, hasAutoFilledHdThue]);
 
     // Handlers
     const handleFormChange = useCallback((field, value) => {
@@ -263,7 +336,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                             ten_vt: updatedRow.ten_vt || "",
                             so_luong: updatedRow.so_luong || "",
                             tien_hang: updatedRow.tien_nt || "",
-                            tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "", // Giữ nguyên chi phí đã nhập
+                            tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
                             tk_no: updatedRow.tk_vt || "",
                         };
 
@@ -311,13 +384,16 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             return newData;
         });
 
-        // Search logic
+        // Search logic - Clear previous search và set search mới
         if (field === "ma_vt") {
             setSearchStates(prev => ({
                 ...prev,
                 vtSearch: value,
                 vtSearchRowId: id,
-                searchContext: "hangHoa"
+                searchContext: "hangHoa",
+                // Clear other searches
+                tkSearch: prev.searchContext === "hangHoa" && prev.tkSearchRowId === id ? prev.tkSearch : "",
+                khoSearch: prev.searchContext === "hangHoa" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "ma_kho_i") {
@@ -325,7 +401,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 ...prev,
                 khoSearch: value,
                 khoSearchRowId: id,
-                searchContext: "hangHoa"
+                searchContext: "hangHoa",
+                // Clear other searches
+                vtSearch: prev.searchContext === "hangHoa" && prev.vtSearchRowId === id ? prev.vtSearch : "",
+                tkSearch: prev.searchContext === "hangHoa" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
         if (field === "tk_vt") {
@@ -334,7 +413,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 tkSearch: value,
                 tkSearchRowId: id,
                 tkSearchField: "tk_vt",
-                searchContext: "hangHoa"
+                searchContext: "hangHoa",
+                // Clear other searches
+                vtSearch: prev.searchContext === "hangHoa" && prev.vtSearchRowId === id ? prev.vtSearch : "",
+                khoSearch: prev.searchContext === "hangHoa" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
     }, []);
@@ -347,13 +429,15 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             return newData;
         });
 
-        // Search logic
+        // Search logic - Clear previous search và set search mới
         if (field === "ma_vt") {
             setSearchStates(prev => ({
                 ...prev,
                 vtSearch: value,
                 vtSearchRowId: id,
-                searchContext: "chiPhi"
+                searchContext: "chiPhi",
+                // Clear other searches
+                tkSearch: prev.searchContext === "chiPhi" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
         if (field === "tk_no") {
@@ -362,7 +446,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 tkSearch: value,
                 tkSearchRowId: id,
                 tkSearchField: "tk_no",
-                searchContext: "chiPhi"
+                searchContext: "chiPhi",
+                // Clear other searches
+                vtSearch: prev.searchContext === "chiPhi" && prev.vtSearchRowId === id ? prev.vtSearch : "",
             }));
         }
     }, []);
@@ -419,13 +505,16 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
-        // Search logic
+        // Search logic - Clear previous search và set search mới
         if (field === "ma_kh") {
             setSearchStates(prev => ({
                 ...prev,
                 maKhSearch: value,
                 maKhSearchRowId: id,
-                searchContext: "hdThue"
+                searchContext: "hdThue",
+                // Clear other searches
+                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
+                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "tk_thue_no") {
@@ -434,7 +523,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 tkSearch: value,
                 tkSearchRowId: id,
                 tkSearchField: "tk_thue_no",
-                searchContext: "hdThue"
+                searchContext: "hdThue",
+                // Clear other searches
+                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
+                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "ma_kho") {
@@ -442,7 +534,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 ...prev,
                 khoSearch: value,
                 khoSearchRowId: id,
-                searchContext: "hdThue"
+                searchContext: "hdThue",
+                // Clear other searches
+                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
+                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
     }, [formData]);
@@ -454,7 +549,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             tkSearch: value,
             tkSearchRowId: "main-form",
             tkSearchField: "tk_thue_no",
-            searchContext: "mainForm"
+            searchContext: "mainForm",
+            // Clear other searches
+            maKhSearch: prev.searchContext === "mainForm" ? prev.maKhSearch : "",
         }));
     }, []);
 
@@ -463,7 +560,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             ...prev,
             maKhSearch: value,
             maKhSearchRowId: "main-form",
-            searchContext: "mainForm"
+            searchContext: "mainForm",
+            // Clear other searches
+            tkSearch: prev.searchContext === "mainForm" ? prev.tkSearch : "",
         }));
     }, []);
 
@@ -473,7 +572,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             ...prev,
             maKhSearch: value,
             maKhSearchRowId: "chi-phi-form",
-            searchContext: "chiPhiForm"
+            searchContext: "chiPhiForm",
+            // Clear other searches
+            tkSearch: prev.searchContext === "chiPhiForm" ? prev.tkSearch : "",
         }));
     }, []);
 
@@ -483,7 +584,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             tkSearch: value,
             tkSearchRowId: "chi-phi-form",
             tkSearchField: "tk_co",
-            searchContext: "chiPhiForm"
+            searchContext: "chiPhiForm",
+            // Clear other searches
+            maKhSearch: prev.searchContext === "chiPhiForm" ? prev.maKhSearch : "",
         }));
     }, []);
 
@@ -518,6 +621,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
+        // Clear search state
         setSearchStates(prev => ({
             ...prev,
             showAccountPopup: false,
@@ -551,6 +655,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
+        // Clear search state
         setSearchStates(prev => ({
             ...prev,
             showCustomerPopup: false,
@@ -588,6 +693,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
+        // Clear search state
         setSearchStates(prev => ({
             ...prev,
             showVatTuPopup: false,
@@ -623,6 +729,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
+        // Clear search state
         setSearchStates(prev => ({
             ...prev,
             showKhoPopup: false,
@@ -727,14 +834,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 }
             }
         }, 100);
-        setTimeout(() => {
-            if (hdThueTableRef.current) {
-                const tableContainer = hdThueTableRef.current.querySelector('.overflow-x-auto');
-                if (tableContainer) {
-                    tableContainer.scrollTop = tableContainer.scrollHeight;
-                }
-            }
-        }, 100);
     }, [formData]);
 
     const deleteHdThueRow = useCallback((id) => {
@@ -743,10 +842,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
     // Phân bổ tự động chi phí
     const handlePhanBoTuDong = useCallback(() => {
-        const tongChiPhi = totals.totalChiPhi; // Sử dụng tổng chi phí từ totals
+        const tongChiPhi = parseFloat(chiPhiFormData.tong_chi_phi) || 0;
 
         if (tongChiPhi === 0) {
-            toast.warning("Chưa có chi phí để phân bổ");
+            toast.warning("Vui lòng nhập tổng chi phí để phân bổ");
             return;
         }
 
@@ -806,7 +905,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }
 
         toast.success("Phân bổ chi phí tự động thành công!");
-    }, [hangHoaData, formData.loai_pb, totals.totalChiPhi]);
+    }, [hangHoaData, formData.loai_pb, chiPhiFormData.tong_chi_phi]);
 
     const resetForm = useCallback(() => {
         setFormData({
@@ -849,6 +948,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             showVatTuPopup: false,
             showKhoPopup: false,
         });
+        setHasAutoFilledHdThue(false); // Reset flag
     }, []);
 
     const validateForm = useCallback(() => {
@@ -1472,7 +1572,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
-                    readOnly
                 />
             ),
         },
@@ -1667,26 +1766,32 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày HT
                                         </Label>
-                                        <Flatpickr
-                                            value={formData.ngay_ct}
-                                            onChange={(date) => handleDateChange(date, "ngay_ct")}
-                                            options={FLATPICKR_OPTIONS}
-                                            placeholder="Chọn ngày..."
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
+                                        <div className="relative flex-1">
+                                            <Flatpickr
+                                                value={formData.ngay_ct}
+                                                onChange={(date) => handleDateChange(date, "ngay_ct")}
+                                                options={FLATPICKR_OPTIONS}
+                                                placeholder="Chọn ngày..."
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                            <CalendarIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày lập phiếu <span className="text-red-500">*</span>
                                         </Label>
-                                        <Flatpickr
-                                            value={formData.ngay_lct}
-                                            onChange={(date) => handleDateChange(date, "ngay_lct")}
-                                            options={FLATPICKR_OPTIONS}
-                                            placeholder="Chọn ngày..."
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
+                                        <div className="relative flex-1">
+                                            <Flatpickr
+                                                value={formData.ngay_lct}
+                                                onChange={(date) => handleDateChange(date, "ngay_lct")}
+                                                options={FLATPICKR_OPTIONS}
+                                                placeholder="Chọn ngày..."
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                            <CalendarIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
@@ -1846,7 +1951,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                                 </div>
                                             </div>
 
-
                                             {/* Bảng chi phí ở dưới */}
                                             <div className="bg-white rounded-lg border border-gray-200" ref={chiPhiTableRef}>
                                                 <TableBasic
@@ -1960,7 +2064,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 {searchStates.showAccountPopup && (
                     <AccountSelectionPopup
                         isOpen={true}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false }))}
+                        onClose={() => setSearchStates(prev => ({ ...prev, showAccountPopup: false, tkSearch: "" }))}
                         onSelect={(account) => {
                             if (searchStates.searchContext === "mainForm") {
                                 handleAccountSelect("main-form", account);
@@ -1979,7 +2083,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 {searchStates.showCustomerPopup && (
                     <CustomerSelectionPopup
                         isOpen={true}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false }))}
+                        onClose={() => setSearchStates(prev => ({ ...prev, showCustomerPopup: false, maKhSearch: "" }))}
                         onSelect={(customer) => {
                             if (searchStates.searchContext === "mainForm") {
                                 handleCustomerSelect("main-form", customer);
@@ -1997,7 +2101,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 {searchStates.showVatTuPopup && (
                     <MaterialSelectionPopup
                         isOpen={searchStates.showVatTuPopup}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
+                        onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false, vtSearch: "" }))}
                         onSelect={(vatTu) => {
                             console.log('🎯 Material selected from popup:', vatTu);
                             handleVatTuSelect(searchStates.vtSearchRowId, vatTu);
@@ -2011,7 +2115,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 {searchStates.showKhoPopup && (
                     <WarehouseSelectionPopup
                         isOpen={searchStates.showKhoPopup}
-                        onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
+                        onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false, khoSearch: "" }))}
                         onSelect={(kho) => {
                             console.log('🏠 Warehouse selected from popup:', kho);
                             handleKhoSelect(searchStates.khoSearchRowId, kho);
