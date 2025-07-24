@@ -29,7 +29,6 @@ export const useListAccount = () => {
 
   // Fetch data
   const { data: accountData, isLoading, error, refetch } = useAccounts(queryParams);
-  console.log(accountData);
   const deleteAccountMutation = useDeleteAccount();
 
   // Thêm STT vào data

@@ -173,23 +173,14 @@ export const usePhieuXuatDcList = () => {
                         return null;
                     })
                     .filter(Boolean);
-
                 if (sttRecList.length === 0) {
                     console.warn("Không có stt_rec hợp lệ");
                     setSoLuongMap({});
                     return;
                 }
-
-                // Remove duplicates
                 const uniqueSttRecList = [...new Set(sttRecList)];
-                console.log("Fetching CT85 data for quantity calculation:", uniqueSttRecList);
-
                 const res = await phieuXuatDcApi.getCt85Data(uniqueSttRecList);
-                console.log("CT85 bulk API response:", res);
-
                 let ct85Data = [];
-
-                // Handle different response formats
                 if (res?.status === 200 && Array.isArray(res.data)) {
                     ct85Data = res.data;
                 } else if (Array.isArray(res)) {
@@ -201,8 +192,6 @@ export const usePhieuXuatDcList = () => {
                     setSoLuongMap({});
                     return;
                 }
-
-                // Calculate quantity sum for each stt_rec with better validation
                 const newSoLuongMap = {};
                 ct85Data.forEach((item) => {
                     const key = item.stt_rec?.toString()?.trim();
@@ -215,18 +204,13 @@ export const usePhieuXuatDcList = () => {
                         newSoLuongMap[key] += soLuongValue;
                     }
                 });
-
-                console.log("Calculated soLuongMap:", newSoLuongMap);
                 setSoLuongMap(newSoLuongMap);
 
             } catch (err) {
                 console.error("Lỗi khi fetch CT85 all:", err);
-
-                // Don't show toast for bulk fetch errors to avoid spam
                 if (err.response?.status === 500) {
                     console.warn("Lỗi máy chủ khi tính tổng số lượng. Sử dụng giá trị mặc định.");
                 }
-
                 setSoLuongMap({});
             }
         };

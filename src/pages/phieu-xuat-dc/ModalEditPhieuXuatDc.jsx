@@ -223,7 +223,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (searchStates.maVtSearch && searchStates.maVtSearch.length > 0) {
-                console.log('🔍 Searching for material:', searchStates.maVtSearch);
                 setDmvtSearchTerm(searchStates.maVtSearch);
                 fetchDmvtData(searchStates.maVtSearch);
                 setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
@@ -239,7 +238,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (searchStates.maKhoTableSearch && searchStates.maKhoTableSearch.length > 0) {
-                console.log('🔍 Searching for warehouse:', searchStates.maKhoTableSearch);
                 setMaKhoSearch(searchStates.maKhoTableSearch);
                 setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
             } else {
@@ -424,19 +422,15 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
     }, [searchStates.maKhoTableSearchRowId]);
 
     const handleDmvtSearch = useCallback((searchTerm) => {
-        console.log('🔍 DMVT search from popup:', searchTerm);
         setDmvtSearchTerm(searchTerm);
         fetchDmvtData(searchTerm);
     }, [fetchDmvtData]);
 
     const handleDmkhoSearch = useCallback((searchTerm) => {
-        console.log('🔍 Dmkho search from popup:', searchTerm);
         setMaKhoSearch(searchTerm);
     }, []);
 
     const addCt85Row = useCallback(() => {
-        console.log('🆕 Adding new CT85 row');
-
         setCt85Data(prev => {
             const newRowId = Math.max(...prev.map(item => item.id), 0) + 1;
             const newRow = {
@@ -450,8 +444,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                 don_gia: "",
                 ma_nx_i: "",
             };
-
-            console.log('🆕 New row created:', newRow);
             return [...prev, newRow];
         });
 
@@ -466,7 +458,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
     }, []);
 
     const deleteCt85Row = useCallback((id) => {
-        console.log('🗑️ Deleting CT85 row:', id);
         setCt85Data(prev => prev.filter(item => item.id !== id));
     }, []);
 
@@ -566,8 +557,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                         so_luong: Number(so_luong) || 0,
                     })),
             };
-            console.log('editingId:', editingId);
-            console.log('payload:', payload);
             await updatePhieuXuatDc({ stt_rec: editingId, data: payload });
             closeModalEdit();
             resetForm();
@@ -1053,7 +1042,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                             isOpen={searchStates.showVatTuPopup}
                             onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
                             onSelect={(vatTu) => {
-                                console.log('🎯 Material selected from popup:', vatTu);
                                 handleVatTuSelect(searchStates.vtSearchRowId, vatTu);
                             }}
                             materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
@@ -1068,7 +1056,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                             isOpen={searchStates.showKhoPopup}
                             onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
                             onSelect={(kho) => {
-                                console.log('🏠 Warehouse selected from popup:', kho);
                                 handleKhoSelect(searchStates.khoSearchRowId, kho);
                             }}
                             warehouses={Array.isArray(khoData?.data) ? khoData.data : []}
@@ -1093,7 +1080,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                                 setDmvtData({ data: [] });
                             }}
                             onSelect={(dmvt) => {
-                                console.log('🎯 DMVT selected from table popup:', dmvt);
                                 handleDmvtSelect(dmvt);
                             }}
                             onSearch={handleDmvtSearch}
@@ -1118,7 +1104,6 @@ export const ModalEditPhieuXuatDc = ({ isOpenEdit, closeModalEdit, editingId }) 
                                 setMaKhoSearch("");
                             }}
                             onSelect={(kho) => {
-                                console.log('🏠 DMKHO selected from table popup:', kho);
                                 handleDmkhoSelect(kho);
                             }}
                             onSearch={handleDmkhoSearch}

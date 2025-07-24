@@ -166,7 +166,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (searchStates.maVtSearch && searchStates.maVtSearch.length > 0) {
-                console.log('🔍 Searching for material:', searchStates.maVtSearch);
                 setDmvtSearchTerm(searchStates.maVtSearch);
                 fetchDmvtData(searchStates.maVtSearch);
                 setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
@@ -182,7 +181,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (searchStates.maKhoTableSearch && searchStates.maKhoTableSearch.length > 0) {
-                console.log('🔍 Searching for warehouse:', searchStates.maKhoTableSearch);
                 setMaKhoSearch(searchStates.maKhoTableSearch);
                 setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
             } else {
@@ -367,22 +365,17 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     }, [searchStates.maKhoTableSearchRowId]);
 
     const handleDmvtSearch = useCallback((searchTerm) => {
-        console.log('🔍 DMVT search from popup:', searchTerm);
         setDmvtSearchTerm(searchTerm);
         fetchDmvtData(searchTerm);
     }, [fetchDmvtData]);
 
     const handleDmkhoSearch = useCallback((searchTerm) => {
-        console.log('🔍 Dmkho search from popup:', searchTerm);
         setMaKhoSearch(searchTerm);
     }, []);
 
-    // FIX: Sửa hàm addCt85Row để tránh preventDefault khi không cần thiết
     const addCt85Row = useCallback(() => {
-        console.log('🆕 Adding new CT85 row');
-
         setCt85Data(prev => {
-            const newRowId = Math.max(...prev.map(item => item.id), 0) + 1; // FIX: Tính ID mới chính xác hơn
+            const newRowId = Math.max(...prev.map(item => item.id), 0) + 1;
             const newRow = {
                 id: newRowId,
                 ma_vt: "",
@@ -390,12 +383,10 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 tk_vt: "",
                 don_vi_tinh: "",
                 ton_kho: 0,
-                so_luong: "",      // FIX: Dùng so_luong thay vì t_so_luong
+                so_luong: "",     
                 don_gia: "",
                 ma_nx_i: "",
             };
-
-            console.log('🆕 New row created:', newRow);
             return [...prev, newRow];
         });
 
@@ -410,7 +401,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     }, []);
 
     const deleteCt85Row = useCallback((id) => {
-        console.log('🗑️ Deleting CT85 row:', id);
         setCt85Data(prev => prev.filter(item => item.id !== id));
     }, []);
 
@@ -982,7 +972,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                             isOpen={searchStates.showVatTuPopup}
                             onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false }))}
                             onSelect={(vatTu) => {
-                                console.log('🎯 Material selected from popup:', vatTu);
                                 handleVatTuSelect(searchStates.vtSearchRowId, vatTu);
                             }}
                             materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
@@ -997,7 +986,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                             isOpen={searchStates.showKhoPopup}
                             onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false }))}
                             onSelect={(kho) => {
-                                console.log('🏠 Warehouse selected from popup:', kho);
                                 handleKhoSelect(searchStates.khoSearchRowId, kho);
                             }}
                             warehouses={Array.isArray(khoData?.data) ? khoData.data : []}
@@ -1022,7 +1010,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                 setDmvtData({ data: [] });
                             }}
                             onSelect={(dmvt) => {
-                                console.log('🎯 DMVT selected from table popup:', dmvt);
                                 handleDmvtSelect(dmvt);
                             }}
                             onSearch={handleDmvtSearch}
@@ -1047,7 +1034,6 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                 setMaKhoSearch("");
                             }}
                             onSelect={(kho) => {
-                                console.log('🏠 DMKHO selected from table popup:', kho);
                                 handleDmkhoSelect(kho);
                             }}
                             onSearch={handleDmkhoSearch}

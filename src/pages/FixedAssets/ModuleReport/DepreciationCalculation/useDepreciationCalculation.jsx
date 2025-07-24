@@ -10,12 +10,10 @@ export const useDepreciationCalculation = () => {
   const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
 
   const handleSaveCreate = () => {
-    console.log("Saving changes...");
     closeModalCreate();
   };
 
   const handleSaveEdit = () => {
-    console.log("Saving changes...");
     closeModalEdit();
   };
 
