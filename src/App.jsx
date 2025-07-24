@@ -56,6 +56,7 @@ import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
 import DonHangMuaList from "./pages/don-hang-mua/DonHangMuaList";
+import HoaDonMuaDVList from "./pages/hoa-don-mua-dv/HoaDonMuaDVList";
 
 
 export default function App() {
@@ -154,6 +155,7 @@ export default function App() {
               <Route path="/chung-tu/phieu-nhap-kho" element={<PhieuNhapKhoList />} />
               <Route path="/chung-tu/phieu-xuat-kho" element={<PhieuXuatKhoList />} />
               <Route path="/chung-tu/don-dat-hang-mua" element={<DonHangMuaList />} />
+              <Route path="/chung-tu/hoa-don-mua-dv" element={<HoaDonMuaDVList />} />
 
             </Route>
           </Route>
