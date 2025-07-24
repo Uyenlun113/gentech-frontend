@@ -30,7 +30,7 @@ export const useCreateDmkho = () => {
             toast.success("Tạo danh mục kho thành công!");
         },
         onError: (error) => {
-            console.log("Lỗi:", error.response?.data);
+            console.error("Lỗi:", error.response?.data);
         }
     });
 };

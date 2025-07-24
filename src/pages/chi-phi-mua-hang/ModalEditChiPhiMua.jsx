@@ -105,7 +105,7 @@ const useDebounce = (value, delay) => {
     return debouncedValue;
 };
 
-export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => {
+export const ModalEditPhieuPhieuChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -186,17 +186,12 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         { search: debouncedVtSearch || "" },
         { enabled: !!debouncedVtSearch && debouncedVtSearch.length > 0 }
     );
-
     const { data: khoData = [] } = useDmkho(
         { search: debouncedKhoSearch || "" },
         { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
     );
-
     const { mutateAsync: updatePhieuMua, isPending } = useUpdatePhieuMua();
     const { data: editData, isLoading: isLoadingEdit } = usePhieuMuaById(editingId);
-
-
-
     const handleVatTuBlur = useCallback(async (id, ma_vt, context = "hangHoa") => {
         if (!ma_vt || ma_vt.trim() === "") {
             return;
@@ -244,7 +239,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }
     }, []);
 
-
     const handleKhoBlur = useCallback(async (id, ma_kho, context = "hangHoa") => {
         if (!ma_kho || ma_kho.trim() === "") {
             return;
@@ -262,7 +256,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                             ? {
                                 ...item,
                                 ten_kho: khoInfo.ten_kho || "",
-                                // Chỉ set tk_vt từ kho nếu chưa có
                                 tk_vt: item.tk_vt || khoInfo.tk_dl || khoInfo.tk_vt || ""
                             }
                             : item
@@ -333,10 +326,10 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         return {
                             id: index + 1,
                             ma_kho_i: item.ma_kho_i || "",
-                            ten_kho: item.ten_kho || "", 
+                            ten_kho: item.ten_kho || "",
                             ma_vt: item.ma_vt || "",
-                            ten_vt: item.ten_vt || "", 
-                            dvt: item.dvt || "", 
+                            ten_vt: item.ten_vt || "",
+                            dvt: item.dvt || "",
                             so_luong: item.so_luong?.toString() || "",
                             gia: item.gia?.toString() || "",
                             tien_nt: item.tien_nt?.toString() || "",
@@ -415,7 +408,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             enabled: !!ma_vt,
         }))
     });
-
+    // Dùng useQueries cho khoCodes
     const khoDataArray = useQueries({
         queries: detailQueries.khoCodes.map(ma_kho => ({
             queryKey: ["dmkho", ma_kho],
@@ -428,10 +421,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
     });
     const vatTuDetailQueries = vatTuDataArray.map(q => q.data);
     const khoDetailQueries = khoDataArray.map(q => q.data);
+
+
+
     useEffect(() => {
         detailQueries.vatTuCodes.forEach((ma_vt, index) => {
             const vatTuDetail = vatTuDetailQueries[index];
             if (!vatTuDetail) return;
+
             setHangHoaData(prev => {
                 const updated = prev.map(item => {
                     if (item.ma_vt === ma_vt) {
@@ -439,6 +436,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                             vatTuDetail.ten_vt !== item.ten_vt ||
                             vatTuDetail.dvt !== item.dvt ||
                             vatTuDetail.tk_vt !== item.tk_vt;
+
                         if (shouldUpdate) {
                             return {
                                 ...item,
@@ -452,12 +450,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 });
                 return updated;
             });
+
             setChiPhiData(prev => {
                 const updated = prev.map(item => {
                     if (item.ma_vt === ma_vt) {
                         const shouldUpdate =
                             vatTuDetail.ten_vt !== item.ten_vt ||
                             vatTuDetail.dvt !== item.dvt;
+
                         if (shouldUpdate) {
                             return {
                                 ...item,
@@ -473,19 +473,23 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         });
     }, [JSON.stringify(vatTuDetailQueries)]);
 
+    // Effect để cập nhật thông tin chi tiết kho vào hangHoaData và hdThueData
     useEffect(() => {
         if (khoDetailQueries.length > 0) {
             detailQueries.khoCodes.forEach((ma_kho, index) => {
                 const khoDetail = khoDetailQueries[index];
                 if (!khoDetail) return;
+
                 setHangHoaData(prev => {
                     const updated = prev.map(item => {
                         if (item.ma_kho_i === ma_kho) {
                             const newTenKho = khoDetail.data?.ten_kho || item.ten_kho;
                             const newTkVt = item.tk_vt || khoDetail.tk_dl || khoDetail.tk_vt || "";
+
                             const shouldUpdate =
                                 item.ten_kho !== newTenKho ||
                                 item.tk_vt !== newTkVt;
+
                             if (shouldUpdate) {
                                 return {
                                     ...item,
@@ -498,11 +502,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                     });
                     return updated;
                 });
+
                 setHdThueData(prev => {
                     const updated = prev.map(item => {
                         if (item.ma_kho === ma_kho) {
                             const newTenKho = khoDetail.ten_kho || item.ten_kho;
+
                             const shouldUpdate = item.ten_kho !== newTenKho;
+
                             if (shouldUpdate) {
                                 return {
                                     ...item,
@@ -517,28 +524,34 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             });
         }
     }, [JSON.stringify(khoDetailQueries)]);
-
+    // Tính tổng tiền
     const totals = useMemo(() => {
         const totalSoLuong = hangHoaData.reduce((sum, item) => {
             const value = parseFloat(item.so_luong) || 0;
             return sum + value;
         }, 0);
+
         const totalTienHang = hangHoaData.reduce((sum, item) => {
             const value = parseFloat(item.tien_nt) || 0;
             return sum + value;
         }, 0);
+
         const totalChiPhi = chiPhiData.reduce((sum, item) => {
             const value = parseFloat(item.tien_chi_phi) || 0;
             return sum + value;
         }, 0);
+
         const totalThueGtgt = hdThueData.reduce((sum, item) => {
             const value = parseFloat(item.t_thue) || 0;
             return sum + value;
         }, 0);
+
         const totalThanhTien = totalTienHang + totalChiPhi + totalThueGtgt;
+
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
     }, [hangHoaData, chiPhiData, hdThueData]);
 
+    // Auto show/hide popups khi có search term
     useEffect(() => {
         setSearchStates(prev => ({
             ...prev,
@@ -567,14 +580,19 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }));
     }, [debouncedKhoSearch]);
 
+    // Auto fill tổng chi phí từ form xuống bảng chi phí
     useEffect(() => {
         const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
+
         if (tongChiPhi > 0) {
+            // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
             const validChiPhiRows = chiPhiData.filter(row =>
                 row.ma_vt && parseFloat(row.tien_hang) > 0
             );
+
             if (validChiPhiRows.length > 0) {
                 const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
+
                 setChiPhiData(prev => prev.map(row => {
                     if (row.ma_vt && parseFloat(row.tien_hang) > 0) {
                         return {
@@ -588,7 +606,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }
     }, [chiPhiFormData.t_cp_nt]);
 
-
+    // Handlers
     const handleFormChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     }, []);
@@ -603,20 +621,26 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             const newData = prev.map(item =>
                 item.id === id ? { ...item, [field]: value } : item
             );
+
+            // Tự động tính toán tiền hàng
             if (field === "so_luong" || field === "gia") {
                 const currentRow = newData.find(item => item.id === id);
                 const soLuong = parseFloat(currentRow.so_luong) || 0;
                 const gia = parseFloat(currentRow.gia) || 0;
                 const tienNt = soLuong * gia;
+
                 const updatedData = newData.map(item =>
                     item.id === id
                         ? { ...item, tien_nt: tienNt.toString(), tien_nt0: tienNt.toString() }
                         : item
                 );
+
+                // Auto-sync sang chi phí khi có thay đổi tiền hàng
                 const updatedRow = updatedData.find(item => item.id === id);
                 if (updatedRow) {
                     setChiPhiData(prevChiPhi => {
                         const existingIndex = prevChiPhi.findIndex(item => item.id === id);
+
                         const newChiPhiRow = {
                             id: id,
                             ma_vt: updatedRow.ma_vt || "",
@@ -626,6 +650,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                             tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
                             tk_no: updatedRow.tk_vt || "",
                         };
+
                         if (existingIndex >= 0) {
                             return prevChiPhi.map((item, index) =>
                                 index === existingIndex ? newChiPhiRow : item
@@ -638,10 +663,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
                 return updatedData;
             }
+
+            // Auto fill từ hàng hóa sang chi phí cho các field khác
             if (field === "ma_vt" || field === "ten_vt" || field === "tk_vt") {
                 const updatedRow = newData.find(item => item.id === id);
+
                 setChiPhiData(prevChiPhi => {
                     const existingIndex = prevChiPhi.findIndex(item => item.id === id);
+
                     const newChiPhiRow = {
                         id: id,
                         ma_vt: updatedRow.ma_vt || "",
@@ -651,6 +680,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
                         tk_no: updatedRow.tk_vt || "",
                     };
+
                     if (existingIndex >= 0) {
                         return prevChiPhi.map((item, index) =>
                             index === existingIndex ? newChiPhiRow : item
@@ -664,6 +694,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
             return newData;
         });
+
+        // Search logic cho popup (giữ lại cho tìm kiếm)
         if (field === "tk_vt") {
             setSearchStates(prev => ({
                 ...prev,
@@ -682,6 +714,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             );
             return newData;
         });
+
+        // Search logic cho popup
         if (field === "ma_vt") {
             setSearchStates(prev => ({
                 ...prev,
@@ -706,23 +740,28 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             const newData = prev.map(item =>
                 item.id === id ? { ...item, [field]: value } : item
             );
+
+            // Tự động tính toán thuế và tổng tiền
             if (field === "so_luong" || field === "gia") {
                 const currentRow = newData.find(item => item.id === id);
                 const soLuong = parseFloat(currentRow.so_luong) || 0;
                 const gia = parseFloat(currentRow.gia) || 0;
                 const tTien = soLuong * gia;
+
                 return newData.map(item =>
                     item.id === id
                         ? { ...item, t_tien: tTien.toString() }
                         : item
                 );
             }
+
             if (field === "t_tien" || field === "thue_suat") {
                 const currentRow = newData.find(item => item.id === id);
                 const tTien = parseFloat(currentRow.t_tien) || 0;
                 const thueSuat = parseFloat(currentRow.thue_suat) || 0;
                 const tThue = (tTien * thueSuat) / 100;
                 const tTt = tTien + tThue;
+
                 return newData.map(item =>
                     item.id === id
                         ? { ...item, t_thue: tThue.toString(), t_tt: tTt.toString() }
@@ -732,6 +771,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
             return newData;
         });
+
+        // Auto fill thông tin khách hàng từ form chính
         if (field === "ma_kh" && !value) {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -745,6 +786,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 )
             );
         }
+
+        // Search logic cho popup
         if (field === "ma_kh") {
             setSearchStates(prev => ({
                 ...prev,
@@ -772,6 +815,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }
     }, [formData]);
 
+    // Handle search for main form fields
     const handleMainFormAccountSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -791,6 +835,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }));
     }, []);
 
+    // Handle search for chi phí form fields
     const handleChiPhiCustomerSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -2373,4 +2418,4 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             </div>
         </Modal>
     );
-}; 
+};        // Auto fill thông tin khách hàng từ form chính

@@ -31,7 +31,6 @@ export const useCreateDmvt = () => {
             toast.success("Tạo danh mục vật tư thành công!");
         },
         onError: (error) => {
-            console.log("Full error:", error.response?.data);
             toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi tạo danh mục vật tư");
         }
     });

@@ -1,6 +1,6 @@
-import { useQueries } from "@tanstack/react-query";
+// Table columns cho Hàng hóa
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
-import { CalendarIcon, Edit, Save, Trash2, X } from "lucide-react";
+import { CalendarIcon, Plus, Save, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Flatpickr from "react-flatpickr";
 import { useNavigate } from "react-router";
@@ -19,11 +19,8 @@ import { useAccounts } from "../../hooks/useAccounts";
 import { useCustomers } from "../../hooks/useCustomer";
 import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
-import { usePhieuMuaById, useUpdatePhieuMua } from "../../hooks/usePhieumua";
-import { default as dmkhoService, default as DmkhoService } from "../../services/dmkho";
-import dmvtService from "../../services/dmvt";
+import { useCreatePhieuMua } from "../../hooks/usePhieumua";
 
-// Constants cho Phiếu mua
 const INITIAL_HANG_HOA_DATA = [
     {
         id: 1,
@@ -37,7 +34,6 @@ const INITIAL_HANG_HOA_DATA = [
         tien_nt0: "",
         tk_vt: "",
         thue_nt: "",
-        dvt: "",
     },
 ];
 
@@ -48,7 +44,7 @@ const INITIAL_CHI_PHI_DATA = [
         ten_vt: "",
         so_luong: "",
         tien_hang: "",
-        tien_chi_phi: "",
+        cp: "",
         tk_no: "",
     },
 ];
@@ -105,7 +101,7 @@ const useDebounce = (value, delay) => {
     return debouncedValue;
 };
 
-export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => {
+export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -122,28 +118,20 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         tk_thue_no: "",
         status: "1",
         ma_dvcs: "",
-        loai_pb: "1", // Default: 1 - Tiền
+        loai_pb: "1",
     });
 
     const [hangHoaData, setHangHoaData] = useState(INITIAL_HANG_HOA_DATA);
     const [chiPhiData, setChiPhiData] = useState(INITIAL_CHI_PHI_DATA);
     const [hdThueData, setHdThueData] = useState(INITIAL_HD_THUE_DATA);
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // State để lưu trữ các mã cần lấy thông tin chi tiết
-    const [detailQueries, setDetailQueries] = useState({
-        vatTuCodes: [], // Mảng các mã vật tư cần lấy chi tiết
-        khoCodes: []    // Mảng các mã kho cần lấy chi tiết
-    });
-
-    // State riêng cho form chi phí
     const [chiPhiFormData, setChiPhiFormData] = useState({
         ma_kh_i: "",
         tk_i: "",
         t_cp_nt: "",
     });
 
-    // Search states với debounce cho popup search (giữ lại cho tìm kiếm)
+    // Search states với debounce
     const [searchStates, setSearchStates] = useState({
         tkSearch: "",
         tkSearchRowId: null,
@@ -192,353 +180,36 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
     );
 
-    const { mutateAsync: updatePhieuMua, isPending } = useUpdatePhieuMua();
-    const { data: editData, isLoading: isLoadingEdit } = usePhieuMuaById(editingId);
+    const { mutateAsync: createPhieuMua, isPending } = useCreatePhieuMua();
 
-
-
-    const handleVatTuBlur = useCallback(async (id, ma_vt, context = "hangHoa") => {
-        if (!ma_vt || ma_vt.trim() === "") {
-            return;
-        }
-        try {
-            const response = await dmvtService.getDmvtById(ma_vt.trim());
-            const vatTuInfo = response?.data || response;
-            if (!vatTuInfo) {
-                return;
-            }
-            if (context === "hangHoa") {
-                setHangHoaData(prev => {
-                    const newData = prev.map(item =>
-                        item.id === id
-                            ? {
-                                ...item,
-                                ten_vt: vatTuInfo.ten_vt || "",
-                                dvt: vatTuInfo.don_vi_tinh || vatTuInfo.dvt || "",
-                                tk_vt: vatTuInfo.tk_vt || "",
-                            }
-                            : item
-                    );
-                    return newData;
-                });
-            } else if (context === "chiPhi") {
-                setChiPhiData(prev =>
-                    prev.map(item =>
-                        item.id === id
-                            ? {
-                                ...item,
-                                ten_vt: vatTuInfo.ten_vt || "",
-                                dvt: vatTuInfo.don_vi_tinh || vatTuInfo.dvt || "",
-                            }
-                            : item
-                    )
-                );
-            }
-        } catch (error) {
-            console.error("❌ Error in handleVatTuBlur:", error);
-            console.error("Error details:", {
-                message: error.message,
-                status: error.status,
-                response: error.response
-            });
-        }
-    }, []);
-
-
-    const handleKhoBlur = useCallback(async (id, ma_kho, context = "hangHoa") => {
-        if (!ma_kho || ma_kho.trim() === "") {
-            return;
-        }
-        try {
-            const response = await dmkhoService.getDmkhoById(ma_kho.trim());
-            const khoInfo = response?.data || response;
-            if (!khoInfo) {
-                return;
-            }
-            if (context === "hangHoa") {
-                setHangHoaData(prev => {
-                    const newData = prev.map(item =>
-                        item.id === id
-                            ? {
-                                ...item,
-                                ten_kho: khoInfo.ten_kho || "",
-                                // Chỉ set tk_vt từ kho nếu chưa có
-                                tk_vt: item.tk_vt || khoInfo.tk_dl || khoInfo.tk_vt || ""
-                            }
-                            : item
-                    );
-                    return newData;
-                });
-            } else if (context === "hdThue") {
-                setHdThueData(prev =>
-                    prev.map(item =>
-                        item.id === id
-                            ? {
-                                ...item,
-                                ten_kho: khoInfo.ten_kho || ""
-                            }
-                            : item
-                    )
-                );
-            }
-        } catch (error) {
-            console.error("❌ Error in handleKhoBlur:", error);
-            console.error("Error details:", {
-                message: error.message,
-                status: error.status,
-                response: error.response
-            });
-        }
-    }, []);
-
-
-    useEffect(() => {
-        if (editData && editingId && isOpenEdit && !isDataLoaded) {
-            const phieuData = editData || {};
-            const hangHoaDataFromAPI = editData.ct71 || [];
-            const hdThueDataFromAPI = editData.ct71gt || [];
-
-            if (phieuData) {
-                setFormData({
-                    ma_kh: phieuData.ma_kh || "",
-                    ten_kh: phieuData.ten_kh || "",
-                    dia_chi: phieuData.dia_chi || "",
-                    ma_so_thue: phieuData.ma_so_thue || "",
-                    ong_ba: phieuData.ong_ba || "",
-                    dien_giai: phieuData.dien_giai || "",
-                    ma_qs: phieuData.ma_qs || "",
-                    so_ct: phieuData.so_ct || "",
-                    ngay_ct: phieuData.ngay_ct || "",
-                    ngay_lct: phieuData.ngay_lct || "",
-                    tk_thue_no: phieuData.tk_thue_no || "",
-                    status: phieuData.status || "1",
-                    ma_dvcs: phieuData.ma_dvcs || "",
-                    loai_pb: phieuData.loai_pb || "1",
-                });
-                setChiPhiFormData({
-                    ma_kh_i: phieuData.ma_kh_i || "",
-                    tk_i: phieuData.tk_i || "",
-                    t_cp_nt: phieuData.t_cp_nt || "",
-                });
-                const vatTuCodes = [];
-                const khoCodes = [];
-                if (hangHoaDataFromAPI.length > 0) {
-                    const mappedHangHoa = hangHoaDataFromAPI.map((item, index) => {
-                        if (item.ma_vt && !vatTuCodes.includes(item.ma_vt)) {
-                            vatTuCodes.push(item.ma_vt);
-                        }
-                        if (item.ma_kho_i && !khoCodes.includes(item.ma_kho_i)) {
-                            khoCodes.push(item.ma_kho_i);
-                        }
-                        return {
-                            id: index + 1,
-                            ma_kho_i: item.ma_kho_i || "",
-                            ten_kho: item.ten_kho || "", 
-                            ma_vt: item.ma_vt || "",
-                            ten_vt: item.ten_vt || "", 
-                            dvt: item.dvt || "", 
-                            so_luong: item.so_luong?.toString() || "",
-                            gia: item.gia?.toString() || "",
-                            tien_nt: item.tien_nt?.toString() || "",
-                            tien_nt0: item.tien_nt0?.toString() || "",
-                            tk_vt: item.tk_vt || "",
-                            thue_nt: item.thue_nt?.toString() || "",
-                        };
-                    });
-                    setHangHoaData(mappedHangHoa);
-                    const mappedChiPhi = mappedHangHoa.map((item, index) => ({
-                        id: index + 1,
-                        ma_vt: item.ma_vt,
-                        ten_vt: item.ten_vt,
-                        so_luong: item.so_luong,
-                        tien_hang: item.tien_nt,
-                        tien_chi_phi: "",
-                        tk_no: item.tk_vt,
-                    }));
-                    setChiPhiData(mappedChiPhi);
-                }
-                if (hdThueDataFromAPI.length > 0) {
-                    const mappedHdThue = hdThueDataFromAPI.map((item, index) => {
-                        if (item.ma_kho && !khoCodes.includes(item.ma_kho)) {
-                            khoCodes.push(item.ma_kho);
-                        }
-                        return {
-                            id: index + 1,
-                            so_ct0: item.so_ct0 || "",
-                            so_seri0: item.so_seri0 || "",
-                            ma_gd: item.ma_gd || "",
-                            ma_hd: item.ma_hd || "",
-                            ngay_ct0: item.ngay_ct0 || "",
-                            ma_kh: item.ma_kh || "",
-                            ten_kh: item.ten_kh || "",
-                            dia_chi: item.dia_chi || "",
-                            ma_so_thue: item.ma_so_thue || "",
-                            ma_kho: item.ma_kho || "",
-                            ten_vt: item.ten_vt || "",
-                            gia: item.gia?.toString() || "",
-                            so_luong: item.so_luong?.toString() || "",
-                            t_tien: item.t_tien?.toString() || "",
-                            thue_suat: item.thue_suat?.toString() || "",
-                            t_thue: item.t_thue?.toString() || "",
-                            han_tt: item.han_tt?.toString() || "",
-                            t_tt: item.t_tt?.toString() || "",
-                            tk_thue_no: item.tk_thue_no || "",
-                        };
-                    });
-                    setHdThueData(mappedHdThue);
-                }
-                setDetailQueries({
-                    vatTuCodes: [...new Set(vatTuCodes)],
-                    khoCodes: [...new Set(khoCodes)]
-                });
-
-                setIsDataLoaded(true);
-            }
-        }
-    }, [editData, editingId, isOpenEdit, isDataLoaded]);
-
-    useEffect(() => {
-        if (!isOpenEdit) {
-            setIsDataLoaded(false);
-            setDetailQueries({ vatTuCodes: [], khoCodes: [] });
-            resetForm();
-        } else if (isOpenEdit && editingId) {
-            setIsDataLoaded(false);
-        }
-    }, [isOpenEdit, editingId]);
-    const vatTuDataArray = useQueries({
-        queries: detailQueries.vatTuCodes.map(ma_vt => ({
-            queryKey: ["dmvt", ma_vt],
-            queryFn: () => dmvtService.getDmvtById(ma_vt),
-            staleTime: 0,
-            refetchOnWindowFocus: false,
-            enabled: !!ma_vt,
-        }))
-    });
-
-    const khoDataArray = useQueries({
-        queries: detailQueries.khoCodes.map(ma_kho => ({
-            queryKey: ["dmkho", ma_kho],
-            queryFn: () => DmkhoService.getDmkhoById(ma_kho),
-            staleTime: Infinity,
-            staleTime: 0,
-            refetchOnWindowFocus: false,
-            enabled: !!ma_kho,
-        }))
-    });
-    const vatTuDetailQueries = vatTuDataArray.map(q => q.data);
-    const khoDetailQueries = khoDataArray.map(q => q.data);
-    useEffect(() => {
-        detailQueries.vatTuCodes.forEach((ma_vt, index) => {
-            const vatTuDetail = vatTuDetailQueries[index];
-            if (!vatTuDetail) return;
-            setHangHoaData(prev => {
-                const updated = prev.map(item => {
-                    if (item.ma_vt === ma_vt) {
-                        const shouldUpdate =
-                            vatTuDetail.ten_vt !== item.ten_vt ||
-                            vatTuDetail.dvt !== item.dvt ||
-                            vatTuDetail.tk_vt !== item.tk_vt;
-                        if (shouldUpdate) {
-                            return {
-                                ...item,
-                                ten_vt: vatTuDetail.ten_vt || item.ten_vt,
-                                dvt: vatTuDetail.don_vi_tinh || vatTuDetail.dvt || item.dvt,
-                                tk_vt: vatTuDetail.tk_vt || item.tk_vt,
-                            };
-                        }
-                    }
-                    return item;
-                });
-                return updated;
-            });
-            setChiPhiData(prev => {
-                const updated = prev.map(item => {
-                    if (item.ma_vt === ma_vt) {
-                        const shouldUpdate =
-                            vatTuDetail.ten_vt !== item.ten_vt ||
-                            vatTuDetail.dvt !== item.dvt;
-                        if (shouldUpdate) {
-                            return {
-                                ...item,
-                                ten_vt: vatTuDetail.ten_vt || item.ten_vt,
-                                dvt: vatTuDetail.don_vi_tinh || vatTuDetail.dvt || item.dvt,
-                            };
-                        }
-                    }
-                    return item;
-                });
-                return updated;
-            });
-        });
-    }, [JSON.stringify(vatTuDetailQueries)]);
-
-    useEffect(() => {
-        if (khoDetailQueries.length > 0) {
-            detailQueries.khoCodes.forEach((ma_kho, index) => {
-                const khoDetail = khoDetailQueries[index];
-                if (!khoDetail) return;
-                setHangHoaData(prev => {
-                    const updated = prev.map(item => {
-                        if (item.ma_kho_i === ma_kho) {
-                            const newTenKho = khoDetail.data?.ten_kho || item.ten_kho;
-                            const newTkVt = item.tk_vt || khoDetail.tk_dl || khoDetail.tk_vt || "";
-                            const shouldUpdate =
-                                item.ten_kho !== newTenKho ||
-                                item.tk_vt !== newTkVt;
-                            if (shouldUpdate) {
-                                return {
-                                    ...item,
-                                    ten_kho: newTenKho,
-                                    tk_vt: newTkVt,
-                                };
-                            }
-                        }
-                        return item;
-                    });
-                    return updated;
-                });
-                setHdThueData(prev => {
-                    const updated = prev.map(item => {
-                        if (item.ma_kho === ma_kho) {
-                            const newTenKho = khoDetail.ten_kho || item.ten_kho;
-                            const shouldUpdate = item.ten_kho !== newTenKho;
-                            if (shouldUpdate) {
-                                return {
-                                    ...item,
-                                    ten_kho: newTenKho,
-                                };
-                            }
-                        }
-                        return item;
-                    });
-                    return updated;
-                });
-            });
-        }
-    }, [JSON.stringify(khoDetailQueries)]);
-
+    // Tính tổng tiền
     const totals = useMemo(() => {
         const totalSoLuong = hangHoaData.reduce((sum, item) => {
             const value = parseFloat(item.so_luong) || 0;
             return sum + value;
         }, 0);
+
         const totalTienHang = hangHoaData.reduce((sum, item) => {
             const value = parseFloat(item.tien_nt) || 0;
             return sum + value;
         }, 0);
+
         const totalChiPhi = chiPhiData.reduce((sum, item) => {
-            const value = parseFloat(item.tien_chi_phi) || 0;
+            const value = parseFloat(item.cp) || 0;
             return sum + value;
         }, 0);
+
         const totalThueGtgt = hdThueData.reduce((sum, item) => {
             const value = parseFloat(item.t_thue) || 0;
             return sum + value;
         }, 0);
+
         const totalThanhTien = totalTienHang + totalChiPhi + totalThueGtgt;
+
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
     }, [hangHoaData, chiPhiData, hdThueData]);
 
+    // Auto show/hide popups khi có search term
     useEffect(() => {
         setSearchStates(prev => ({
             ...prev,
@@ -567,28 +238,64 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }));
     }, [debouncedKhoSearch]);
 
+    // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
     useEffect(() => {
-        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
+        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0; // Đổi từ tong_chi_phi thành t_cp_nt
+
         if (tongChiPhi > 0) {
+            // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
             const validChiPhiRows = chiPhiData.filter(row =>
                 row.ma_vt && parseFloat(row.tien_hang) > 0
             );
+
             if (validChiPhiRows.length > 0) {
                 const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
+
                 setChiPhiData(prev => prev.map(row => {
                     if (row.ma_vt && parseFloat(row.tien_hang) > 0) {
                         return {
                             ...row,
-                            tien_chi_phi: chiPhiPerRow.toFixed(0)
+                            cp: chiPhiPerRow.toFixed(0)
                         };
                     }
                     return row;
                 }));
             }
         }
-    }, [chiPhiFormData.t_cp_nt]);
+    }, [chiPhiFormData.t_cp_nt]); // Chỉ depend vào t_cp_nt
 
+    // Auto fill tiền hàng vào HĐ thuế - với flag để tránh infinite loop
+    const [hasAutoFilledHdThue, setHasAutoFilledHdThue] = useState(false);
 
+    useEffect(() => {
+        const tongTienHangVaChiPhi = totals.totalTienHang + totals.totalChiPhi;
+
+        // Chỉ auto fill lần đầu và khi có thay đổi đáng kể
+        if (tongTienHangVaChiPhi > 0 && hdThueData.length > 0 && !hasAutoFilledHdThue) {
+            const firstRow = hdThueData[0];
+            if (!firstRow.t_tien || parseFloat(firstRow.t_tien) === 0) {
+                setHdThueData(prev => prev.map((row, index) => {
+                    if (index === 0) {
+                        const tTien = tongTienHangVaChiPhi;
+                        const thueSuat = parseFloat(row.thue_suat) || 0;
+                        const tThue = (tTien * thueSuat) / 100;
+                        const tTt = tTien + tThue;
+
+                        return {
+                            ...row,
+                            t_tien: tTien.toString(),
+                            t_thue: tThue.toString(),
+                            t_tt: tTt.toString()
+                        };
+                    }
+                    return row;
+                }));
+                setHasAutoFilledHdThue(true);
+            }
+        }
+    }, [totals.totalTienHang, totals.totalChiPhi, hasAutoFilledHdThue]);
+
+    // Handlers
     const handleFormChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     }, []);
@@ -598,83 +305,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         handleFormChange(field, formattedDate);
     }, [handleFormChange]);
 
-    const handleHangHoaChange = useCallback((id, field, value) => {
-        setHangHoaData(prev => {
-            const newData = prev.map(item =>
-                item.id === id ? { ...item, [field]: value } : item
-            );
-            if (field === "so_luong" || field === "gia") {
-                const currentRow = newData.find(item => item.id === id);
-                const soLuong = parseFloat(currentRow.so_luong) || 0;
-                const gia = parseFloat(currentRow.gia) || 0;
-                const tienNt = soLuong * gia;
-                const updatedData = newData.map(item =>
-                    item.id === id
-                        ? { ...item, tien_nt: tienNt.toString(), tien_nt0: tienNt.toString() }
-                        : item
-                );
-                const updatedRow = updatedData.find(item => item.id === id);
-                if (updatedRow) {
-                    setChiPhiData(prevChiPhi => {
-                        const existingIndex = prevChiPhi.findIndex(item => item.id === id);
-                        const newChiPhiRow = {
-                            id: id,
-                            ma_vt: updatedRow.ma_vt || "",
-                            ten_vt: updatedRow.ten_vt || "",
-                            so_luong: updatedRow.so_luong || "",
-                            tien_hang: updatedRow.tien_nt || "",
-                            tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
-                            tk_no: updatedRow.tk_vt || "",
-                        };
-                        if (existingIndex >= 0) {
-                            return prevChiPhi.map((item, index) =>
-                                index === existingIndex ? newChiPhiRow : item
-                            );
-                        } else {
-                            return [...prevChiPhi, newChiPhiRow];
-                        }
-                    });
-                }
-
-                return updatedData;
-            }
-            if (field === "ma_vt" || field === "ten_vt" || field === "tk_vt") {
-                const updatedRow = newData.find(item => item.id === id);
-                setChiPhiData(prevChiPhi => {
-                    const existingIndex = prevChiPhi.findIndex(item => item.id === id);
-                    const newChiPhiRow = {
-                        id: id,
-                        ma_vt: updatedRow.ma_vt || "",
-                        ten_vt: updatedRow.ten_vt || "",
-                        so_luong: updatedRow.so_luong || "",
-                        tien_hang: updatedRow.tien_nt || "",
-                        tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
-                        tk_no: updatedRow.tk_vt || "",
-                    };
-                    if (existingIndex >= 0) {
-                        return prevChiPhi.map((item, index) =>
-                            index === existingIndex ? newChiPhiRow : item
-                        );
-                    } else if (updatedRow.ma_vt || updatedRow.tien_nt) {
-                        return [...prevChiPhi, newChiPhiRow];
-                    }
-                    return prevChiPhi;
-                });
-            }
-
-            return newData;
-        });
-        if (field === "tk_vt") {
-            setSearchStates(prev => ({
-                ...prev,
-                tkSearch: value,
-                tkSearchRowId: id,
-                tkSearchField: "tk_vt",
-                searchContext: "hangHoa",
-            }));
-        }
-    }, []);
-
     const handleChiPhiChange = useCallback((id, field, value) => {
         setChiPhiData(prev => {
             const newData = prev.map(item =>
@@ -682,12 +312,16 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             );
             return newData;
         });
+
+        // Search logic - Clear previous search và set search mới
         if (field === "ma_vt") {
             setSearchStates(prev => ({
                 ...prev,
                 vtSearch: value,
                 vtSearchRowId: id,
                 searchContext: "chiPhi",
+                // Clear other searches
+                tkSearch: prev.searchContext === "chiPhi" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
         if (field === "tk_no") {
@@ -697,6 +331,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 tkSearchRowId: id,
                 tkSearchField: "tk_no",
                 searchContext: "chiPhi",
+                // Clear other searches
+                vtSearch: prev.searchContext === "chiPhi" && prev.vtSearchRowId === id ? prev.vtSearch : "",
             }));
         }
     }, []);
@@ -706,23 +342,28 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             const newData = prev.map(item =>
                 item.id === id ? { ...item, [field]: value } : item
             );
+
+            // Tự động tính toán thuế và tổng tiền
             if (field === "so_luong" || field === "gia") {
                 const currentRow = newData.find(item => item.id === id);
                 const soLuong = parseFloat(currentRow.so_luong) || 0;
                 const gia = parseFloat(currentRow.gia) || 0;
                 const tTien = soLuong * gia;
+
                 return newData.map(item =>
                     item.id === id
                         ? { ...item, t_tien: tTien.toString() }
                         : item
                 );
             }
+
             if (field === "t_tien" || field === "thue_suat") {
                 const currentRow = newData.find(item => item.id === id);
                 const tTien = parseFloat(currentRow.t_tien) || 0;
                 const thueSuat = parseFloat(currentRow.thue_suat) || 0;
                 const tThue = (tTien * thueSuat) / 100;
                 const tTt = tTien + tThue;
+
                 return newData.map(item =>
                     item.id === id
                         ? { ...item, t_thue: tThue.toString(), t_tt: tTt.toString() }
@@ -732,6 +373,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
             return newData;
         });
+
+        // Auto fill thông tin khách hàng từ form chính khi nhập mã khách hàng
         if (field === "ma_kh" && !value) {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -745,12 +388,17 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 )
             );
         }
+
+        // Search logic - Clear previous search và set search mới
         if (field === "ma_kh") {
             setSearchStates(prev => ({
                 ...prev,
                 maKhSearch: value,
                 maKhSearchRowId: id,
                 searchContext: "hdThue",
+                // Clear other searches
+                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
+                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "tk_thue_no") {
@@ -760,6 +408,9 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 tkSearchRowId: id,
                 tkSearchField: "tk_thue_no",
                 searchContext: "hdThue",
+                // Clear other searches
+                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
+                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "ma_kho") {
@@ -768,10 +419,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 khoSearch: value,
                 khoSearchRowId: id,
                 searchContext: "hdThue",
+                // Clear other searches
+                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
+                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
     }, [formData]);
 
+    // Handle search for main form fields
     const handleMainFormAccountSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -779,6 +434,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             tkSearchRowId: "main-form",
             tkSearchField: "tk_thue_no",
             searchContext: "mainForm",
+            // Clear other searches
+            maKhSearch: prev.searchContext === "mainForm" ? prev.maKhSearch : "",
         }));
     }, []);
 
@@ -788,25 +445,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             maKhSearch: value,
             maKhSearchRowId: "main-form",
             searchContext: "mainForm",
-        }));
-    }, []);
-
-    const handleChiPhiCustomerSearch = useCallback((value) => {
-        setSearchStates(prev => ({
-            ...prev,
-            maKhSearch: value,
-            maKhSearchRowId: "chi-phi-form",
-            searchContext: "chiPhiForm",
-        }));
-    }, []);
-
-    const handleChiPhiAccountSearch = useCallback((value) => {
-        setSearchStates(prev => ({
-            ...prev,
-            tkSearch: value,
-            tkSearchRowId: "chi-phi-form",
-            tkSearchField: "tk_i",
-            searchContext: "chiPhiForm",
+            // Clear other searches
+            tkSearch: prev.searchContext === "mainForm" ? prev.tkSearch : "",
         }));
     }, []);
 
@@ -973,7 +613,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 tien_nt0: "",
                 tk_vt: "",
                 thue_nt: "",
-                dvt: "",
             }
         ]);
 
@@ -987,10 +626,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         }, 100);
     }, []);
 
-    const deleteHangHoaRow = useCallback((id) => {
-        setHangHoaData(prev => prev.filter(item => item.id !== id));
-        setChiPhiData(prev => prev.filter(item => item.id !== id));
-    }, []);
 
     const addChiPhiRow = useCallback(() => {
         setChiPhiData(prev => [
@@ -1001,7 +636,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 ten_vt: "",
                 so_luong: "",
                 tien_hang: "",
-                tien_chi_phi: "",
+                cp: "",
                 tk_no: "",
             }
         ]);
@@ -1030,10 +665,10 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 ma_gd: "",
                 ma_hd: "",
                 ngay_ct0: "",
-                ma_kh: formData.ma_kh || "",
-                ten_kh: formData.ten_kh || "",
-                dia_chi: formData.dia_chi || "",
-                ma_so_thue: formData.ma_so_thue || "",
+                ma_kh: formData.ma_kh || "", // Auto fill từ đầu phiếu
+                ten_kh: formData.ten_kh || "", // Auto fill từ đầu phiếu
+                dia_chi: formData.dia_chi || "", // Auto fill từ đầu phiếu
+                ma_so_thue: formData.ma_so_thue || "", // Auto fill từ đầu phiếu
                 ma_kho: "",
                 ten_vt: "",
                 gia: "",
@@ -1064,7 +699,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
     // Phân bổ tự động chi phí
     const handlePhanBoTuDong = useCallback(() => {
         const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
-
         if (tongChiPhi === 0) {
             toast.warning("Vui lòng nhập tổng chi phí để phân bổ");
             return;
@@ -1095,7 +729,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
                         return {
                             ...chiPhiRow,
-                            tien_chi_phi: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -1117,7 +751,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
 
                         return {
                             ...chiPhiRow,
-                            tien_chi_phi: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -1169,8 +803,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             showVatTuPopup: false,
             showKhoPopup: false,
         });
-        setDetailQueries({ vatTuCodes: [], khoCodes: [] });
-        setIsDataLoaded(false);
+        setHasAutoFilledHdThue(false); // Reset flag
     }, []);
 
     const validateForm = useCallback(() => {
@@ -1222,6 +855,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
+                    ma_kh_i: chiPhiFormData.ma_kh_i?.trim() || "",
+                    tk_i: chiPhiFormData.tk_i?.trim() || "",
                     ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
                     ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : new Date().toISOString(),
                 },
@@ -1267,235 +902,24 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                     })),
             };
 
-            await updatePhieuMua({ stt_rec: editingId, data: payload });
-            closeModalEdit();
+            await createPhieuMua(payload);
+            closeModalCreate();
             resetForm();
             navigate("/phieu-mua");
-            toast.success("Cập nhật phiếu mua thành công!");
+            toast.success("Tạo phiếu mua thành công!");
         } catch (err) {
             console.error(err);
-            toast.error("Lỗi khi cập nhật phiếu mua: " + (err?.message || "Không xác định"));
+            toast.error("Lỗi khi tạo phiếu mua: " + (err?.message || "Không xác định"));
         }
-    }, [formData, hangHoaData, hdThueData, totals, updatePhieuMua, closeModalEdit, resetForm, navigate, validateForm, editingId]);
+    }, [formData, hangHoaData, hdThueData, totals, createPhieuMua, closeModalCreate, resetForm, navigate, validateForm]);
 
     const handleClose = useCallback(() => {
         resetForm();
-        closeModalEdit();
-    }, [resetForm, closeModalEdit]);
-
-    // Table columns cho Hàng hóa - THÊM onBlur cho mã vật tư và mã kho
-    const hangHoaColumns = [
-        {
-            key: "ma_vt",
-            title: "Mã vật tư",
-            width: 120,
-            fixed: "left",
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_vt}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_vt", e.target.value)}
-                        onBlur={(e) => {
-                            handleVatTuBlur(row.id, e.target.value, "hangHoa");
-                        }}
-                        placeholder="Nhập mã VT..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "ten_vt",
-            title: "Tên vật tư",
-            fixed: "left",
-            width: 200,
-            render: (val, row) => (
-                <div className={`text-gray-800 ${row.id === 'total' ? 'font-bold' : 'font-medium'}`}>
-                    {row.ten_vt}
-                </div>
-            )
-        },
-        {
-            key: "dvt",
-            title: "ĐVT",
-            width: 80,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <div className="text-center text-gray-600">
-                        {row.dvt || "-"}
-                    </div>
-                );
-            },
-        },
-        {
-            key: "ma_kho_i",
-            title: "Mã kho",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_kho_i}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_kho_i", e.target.value)}
-                        onBlur={(e) => {
-                            handleKhoBlur(row.id, e.target.value, "hangHoa");
-                        }}
-                        placeholder="Nhập mã kho..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "ten_kho",
-            title: "Tên kho",
-            width: 150,
-            render: (val, row) => (
-                <div className="text-gray-600 text-center">
-                    {row.ten_kho || "-"}
-                </div>
-            )
-        },
-        {
-            key: "so_luong",
-            title: "Số lượng",
-            width: 100,
-            render: (val, row) => {
-                if (row.id === 'total') {
-                    return (
-                        <div className="text-right text-lg text-blue-600 p-2 rounded">
-                            {totals.totalSoLuong.toLocaleString('vi-VN')}
-                        </div>
-                    );
-                }
-                return (
-                    <Input
-                        type="number"
-                        value={row.so_luong}
-                        onChange={(e) => handleHangHoaChange(row.id, "so_luong", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "gia",
-            title: "Đơn giá",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        type="number"
-                        value={row.gia}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
-                );
-            },
-        },
-        {
-            key: "tien_nt",
-            title: "Tiền hàng",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') {
-                    return (
-                        <div className="text-right text-lg text-green-600 p-2 rounded">
-                            {totals.totalTienHang.toLocaleString('vi-VN')}
-                        </div>
-                    );
-                }
-                return (
-                    <Input
-                        type="number"
-                        value={row.tien_nt}
-                        onChange={(e) => handleHangHoaChange(row.id, "tien_nt", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                        readOnly
-                    />
-                );
-            },
-        },
-        {
-            key: "tk_vt",
-            title: "TK nợ",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.tk_vt}
-                        onChange={(e) => handleHangHoaChange(row.id, "tk_vt", e.target.value)}
-                        placeholder="Nhập TK..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "ma_du_an",
-            title: "Mã dự án",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_du_an}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_du_an", e.target.value)}
-                        placeholder="Mã dự án..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
-            key: "action",
-            title: "Hành động",
-            fixed: "right",
-            width: 80,
-            render: (_, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <div className="flex items-center justify-center">
-                        <button
-                            onClick={() => deleteHangHoaRow(row.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Xóa dòng"
-                        >
-                            <Trash2 size={16} />
-                        </button>
-                    </div>
-                );
-            },
-        },
-    ];
-
+        closeModalCreate();
+    }, [resetForm, closeModalCreate]);
     // Thêm dòng tổng vào data Hàng hóa
-    const hangHoaDataWithTotal = useMemo(() => {
-        return [
-            ...hangHoaData,
-            {
-                id: 'total',
-                ma_vt: '',
-                ten_vt: '',
-                dvt: '',
-                ma_kho_i: '',
-                ten_kho: '',
-                so_luong: totals.totalSoLuong,
-                gia: '',
-                tien_nt: totals.totalTienHang,
-                tk_vt: '',
-                ma_du_an: ''
-            }
-        ];
-    }, [hangHoaData, totals]);
 
+    // Table columns cho Chi phí
     const chiPhiColumns = [
         {
             key: "stt",
@@ -1517,9 +941,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 <Input
                     value={row.ma_vt}
                     onChange={(e) => handleChiPhiChange(row.id, "ma_vt", e.target.value)}
-                    onBlur={(e) => {
-                        handleVatTuBlur(row.id, e.target.value, "chiPhi");
-                    }}
                     placeholder="Nhập mã VT..."
                     className="w-full"
                 />
@@ -1565,14 +986,14 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             ),
         },
         {
-            key: "tien_chi_phi",
+            key: "cp",
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
                 <Input
                     type="number"
-                    value={row.tien_chi_phi}
-                    onChange={(e) => handleChiPhiChange(row.id, "tien_chi_phi", e.target.value)}
+                    value={row.cp}
+                    onChange={(e) => handleChiPhiChange(row.id, "cp", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -1610,7 +1031,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         },
     ];
 
-    // Table columns cho HĐ Thuế - THÊM onBlur cho mã kho
+    // Table columns cho HĐ Thuế
     const hdThueColumns = [
         {
             key: "stt",
@@ -1745,9 +1166,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 <Input
                     value={row.ma_kho}
                     onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
-                    onBlur={(e) => {
-                        handleKhoBlur(row.id, e.target.value, "hdThue");
-                    }}
                     placeholder="Mã kho..."
                     className="w-full"
                 />
@@ -1869,22 +1287,8 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
         },
     ];
 
-    // Loading state
-    if (isLoadingEdit) {
-        return (
-            <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
-                <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex items-center justify-center">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải dữ liệu...</p>
-                    </div>
-                </div>
-            </Modal>
-        );
-    }
-
     return (
-        <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
+        <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
                 {/* Header */}
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
@@ -1892,12 +1296,12 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         <div>
                             <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                                    <Edit className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                    <Plus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                 </div>
-                                Chỉnh sửa phiếu nhập mua
+                                Tạo phiếu nhập chi phí mua hàng
                             </h4>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                Cập nhật thông tin phiếu nhập mua #{formData.so_ct}
+                                Nhập thông tin phiếu chi phí mua hàng với giao diện tối ưu
                             </p>
                         </div>
                         <button
@@ -1959,7 +1363,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
                                             placeholder="Mã số thuế"
-                                            readOnly
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                         />
                                     </div>
@@ -2003,6 +1406,31 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                             }}
                                             placeholder="1111"
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3 items-center">
+                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                                            Số phiếu nhập <span className="text-red-500">*</span>
+                                        </Label>
+                                        <input
+                                            type="text"
+                                            value={formData.ma_kh}
+                                            onChange={(e) => {
+                                                handleFormChange("ma_kh", e.target.value);
+                                                handleMainFormCustomerSearch(e.target.value);
+                                            }}
+                                            placeholder="KH005"
+                                            className="w-32 h-9 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
+                                            Ngày phiếu nhập <span className="text-red-500">*</span>
+                                        </Label>
+                                        <input
+                                            type="date"
+                                            value={formData.ten_kh}
+                                            onChange={(e) => handleFormChange("ten_kh", e.target.value)}
+                                            readOnly
+                                            className="flex-1 h-9 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600 ml-4"
                                         />
                                     </div>
                                 </div>
@@ -2107,58 +1535,13 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         <Tabs
                             tabs={[
                                 {
-                                    label: "1. Hàng hóa",
-                                    content: (
-                                        <div className="bg-white rounded-lg border border-gray-200" ref={hangHoaTableRef}>
-                                            <TableBasic
-                                                data={hangHoaDataWithTotal}
-                                                columns={hangHoaColumns}
-                                                onDeleteRow={deleteHangHoaRow}
-                                                showAddButton={true}
-                                                maxHeight="max-h-80"
-                                                className="w-full"
-                                            />
-                                        </div>
-                                    ),
-                                },
-                                {
-                                    label: "2. Chi phí",
+                                    label: "1. Chi phí",
                                     content: (
                                         <div className="space-y-4">
                                             {/* Form fields ở trên - 1 hàng ngang */}
-                                            <div className="bg-white rounded-lg border border-gray-200 p-2">
-                                                <div className="grid grid-cols-5 gap-4">
-                                                    {/* Mã khách */}
-                                                    <div className="flex flex-col gap-1">
-                                                        <Label className="text-sm font-medium text-gray-700">Mã khách</Label>
-                                                        <input
-                                                            type="text"
-                                                            value={chiPhiFormData.ma_kh_i}
-                                                            onChange={(e) => {
-                                                                setChiPhiFormData((prev) => ({ ...prev, ma_kh_i: e.target.value }));
-                                                                handleChiPhiCustomerSearch(e.target.value);
-                                                            }}
-                                                            placeholder="Nhập mã KH..."
-                                                            className="h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                        />
-                                                    </div>
-
-                                                    {/* Tài khoản có */}
-                                                    <div className="flex flex-col gap-1">
-                                                        <Label className="text-sm font-medium text-gray-700">TK có</Label>
-                                                        <input
-                                                            type="text"
-                                                            value={chiPhiFormData.tk_i}
-                                                            onChange={(e) => {
-                                                                setChiPhiFormData((prev) => ({ ...prev, tk_i: e.target.value }));
-                                                                handleChiPhiAccountSearch(e.target.value);
-                                                            }}
-                                                            placeholder="Nhập TK..."
-                                                            className="h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                        />
-                                                    </div>
-
-                                                    {/* Tổng chi phí */}
+                                            <div className="bg-blue-50  p-2">
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    {/* Tổng chi phí - đã cập nhật từ tong_chi_phi thành t_cp_nt */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
                                                         <input
@@ -2215,7 +1598,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                     ),
                                 },
                                 {
-                                    label: "3. HĐ Thuế",
+                                    label: "2. HĐ Thuế",
                                     content: (
                                         <div className="bg-white rounded-lg border border-gray-200" ref={hdThueTableRef}>
                                             <TableBasic
@@ -2247,6 +1630,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         />
                     </div>
                 </div>
+
                 {/* Footer */}
                 <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex justify-between items-center">
@@ -2306,7 +1690,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                     </div>
                 </div>
 
-                {/* Popups - CHỈ GIỮ LẠI CHO TÌM KIẾM */}
+                {/* Popups */}
                 {searchStates.showAccountPopup && (
                     <AccountSelectionPopup
                         isOpen={true}
@@ -2373,4 +1757,4 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             </div>
         </Modal>
     );
-}; 
+};

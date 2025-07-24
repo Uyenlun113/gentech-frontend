@@ -34,6 +34,7 @@ import CashCapitalPage from "./pages/Cash Capital/CashCapitalPage";
 import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
+import PhieuPhieuChiPhiMuaHangPage from "./pages/chi-phi-mua-hang/PhieuMuaChiPhiPage";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
@@ -100,6 +101,8 @@ export default function App() {
               <Route path="/phieu-xuat-dc" element={<PhieuXuatDcListPage />} />
 
               <Route path="/phieu-mua" element={<PhieuMuaListPage />} />
+
+              <Route path="/chi-phi-mua-hang" element={<PhieuPhieuChiPhiMuaHangPage />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}

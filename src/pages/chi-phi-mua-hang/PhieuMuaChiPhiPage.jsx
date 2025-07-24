@@ -12,11 +12,11 @@ import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../icons";
-import { ModalCreatePhieuMua } from "./ModalCreatePhieuMua";
-import { ModalEditPhieuMua } from "./ModalEditPhieuMua";
-import { usePhieuMuaList } from "./usePhieuMuaList";
+import { ModalCreatePhieuChiPhiMuaHang } from "./ModalCreateChiPhiMua";
+import { ModalEditPhieuPhieuChiPhiMuaHang } from "./ModalEditChiPhiMua";
+import { usePhieuPhieuChiPhiMuaHangList } from "./usePhieuChiPhiList";
 
-export default function PhieuMuaListPage() {
+export default function PhieuPhieuChiPhiMuaHangPage() {
     const {
         dataTable,
         columnsTable,
@@ -39,7 +39,7 @@ export default function PhieuMuaListPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
-    } = usePhieuMuaList();
+    } = usePhieuPhieuChiPhiMuaHangList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
 
@@ -57,18 +57,18 @@ export default function PhieuMuaListPage() {
 
     return (
         <>
-            <ModalCreatePhieuMua
+            <ModalCreatePhieuChiPhiMuaHang
                 isOpenCreate={isOpenCreate}
                 closeModalCreate={closeModalCreate}
             />
-            <ModalEditPhieuMua
+            <ModalEditPhieuPhieuChiPhiMuaHang
                 isOpenEdit={isOpenEdit}
                 closeModalEdit={closeModalEdit}
                 editingId={selectedEditId}
             />
             <div className="px-4">
-                <PageMeta title="Danh sách phiếu nhập mua" description="Danh sách phiếu nhập mua" />
-                <PageBreadcrumb pageTitle="Danh sách phiếu nhập mua" />
+                <PageMeta title="Danh sách phiếu nhập chi phí mua hàng" description="Danh sách phiếu nhập chi phí mua hàng" />
+                <PageBreadcrumb pageTitle="Danh sách phiếu nhập chi phí mua hàng" />
                 <div className="space-y-6">
                     <ComponentCard>
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

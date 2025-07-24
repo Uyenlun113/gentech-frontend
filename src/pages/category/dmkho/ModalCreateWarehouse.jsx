@@ -77,8 +77,6 @@ export const ModalCreateWarehouse = ({ isOpenCreate, closeModalCreate, onSaveCre
         }
 
         if (hasError) return;
-        console.log(formData);
-        console.log("typeof ma_kho:", typeof formData.ma_kho);
         try {
             await createWarehouseMutation.mutateAsync({
                 ma_kho: formData.ma_kho.trim(),
