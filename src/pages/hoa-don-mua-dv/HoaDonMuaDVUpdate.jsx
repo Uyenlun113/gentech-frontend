@@ -1034,9 +1034,6 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
         so_ct: formData.so_ct?.trim() || "",
         ma_nt: formData.ma_nt?.trim() || "VND",
         ty_gia: Number(formData.ty_gia) || 1,
-        // loai_ct: formData.loai_ct?.trim() || "",
-        // tong_tien: totals.totalPsCo || 0,
-        // han_thanh_toan: 0,
         ma_nx: formData.ma_nx?.trim() || "",
 
         hachToanList: hachToanData

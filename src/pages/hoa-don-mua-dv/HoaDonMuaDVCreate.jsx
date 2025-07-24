@@ -24,15 +24,15 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     ong_ba: "",
     ngay_lct: "",
     ngay_ct: "",
-    tk: "",
+    ma_nx: "",        // đổi từ tk sang ma_nx cho đồng bộ
     ma_gd: "",
     ma_kh: "",
     dia_chi: "",
     dien_giai: "",
     ma_qs: "",
     loai_ct: "Đã ghi sổ cái",
-    mst: "",
-    ma_nt: "",
+    mst: "",          // thêm trường mst
+    ma_nt: "VND",
     ty_gia: "",
   });
 
@@ -68,11 +68,9 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     {
       id: 1,
       stt_rec: "1",
-      tk_i: "",
-      tk_me: "",
-      ten_tk: "",
-      ps_co: "",
-      dien_giai: ""
+      tk_vt: "",
+      tien: 0,
+      dien_giaii: "",
     },
   ];
   const FLATPICKR_OPTIONS = {
@@ -150,9 +148,21 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
 
   const handleHopDongThueChange = useCallback((id, field, value) => {
     setHopDongThueData(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
+      prev.map(item => {
+        if (item.id !== id) return item;
+
+        const updatedItem = { ...item, [field]: value };
+
+        // Tự động tính tiền thuế nếu thay đổi "thue_suat" hoặc "t_tien"
+        const t_tien = parseFloat(field === "t_tien" ? value : item.t_tien) || 0;
+        const thue_suat = parseFloat(field === "thue_suat" ? value : item.thue_suat) || 0;
+
+        if (field === "t_tien" || field === "thue_suat") {
+          updatedItem.t_thue = (t_tien * thue_suat) / 100;
+        }
+
+        return updatedItem;
+      })
     );
     if (field === "ma_kh") {
       setSearchStates(prev => ({
@@ -215,7 +225,7 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     }
 
     const validAccountingRows = hachToanData.filter(row =>
-      row.tk_i && (parseFloat(row.ps_co) > 0)
+      row.tk_vt && (parseFloat(row.tien) > 0)
     );
     if (validAccountingRows.length === 0) {
       console.error("Vui lòng nhập ít nhất một dòng hạch toán hợp lệ");
@@ -238,8 +248,8 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     setFormData(prev => ({
       ...prev,
       mst: customer.ma_so_thue || "",
-      ma_kh: customer.ma_kh || "",
-      ong_ba: customer.ten_kh || "",
+      ma_kh: customer.ma_kh.trim() || "",
+      ong_ba: customer.ten_kh.trim() || "",
       dia_chi: customer.dia_chi || ""
     }));
 
@@ -257,9 +267,9 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   const handleMainAccountSelect = (account) => {
     setFormData(prev => ({
       ...prev,
-      tk: account.tk.trim()
+      ma_nx: account.tk.trim()
     }));
-    setSelectedAccount(account); // Lưu thông tin tài khoản đã chọn
+    setSelectedAccount(account);
     setMaTaiKhoanSearch(account.tk.trim());
     setSearchStates(prev => ({
       ...prev,
@@ -268,11 +278,11 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   };
 
   const handleAccountSelect = useCallback((id, account) => {
-    if (searchStates.tkSearchField === "tk_i") {
+    if (searchStates.tkSearchField === "tk_vt") {
       setHachToanData(prev =>
         prev.map(item =>
           item.id === id
-            ? { ...item, tk_i: account.tk.trim(), ten_tk: account.ten_tk, tk_me: account.tk_me.trim() }
+            ? { ...item, tk_vt: account.tk.trim(), ten_tk: account.ten_tk, tk_me: account.tk_me.trim() }
             : item
         )
       );
@@ -317,7 +327,7 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   // Tính tổng PS Có
   const totals = useMemo(() => {
     const totalPsCo = hachToanData.reduce((sum, item) => {
-      const value = parseFloat(item.ps_co) || 0;
+      const value = parseFloat(item.tien) || 0;
       return sum + value;
     }, 0);
 
@@ -345,11 +355,9 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
       const newRow = {
         id: newRowId,
         stt_rec: newRowId.toString(),
-        tk_i: "",
-        tk_me: "",
-        ten_tk: "",
-        ps_co: "",
-        dien_giai: "",
+        tk_vt: "",
+        tien: 0,
+        dien_giaii: "",
       };
 
       return [...prev, newRow];
@@ -367,23 +375,24 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   }, []);
 
   const hachToanDataWithTotal = useMemo(() => {
+    const totalTien = hachToanData.reduce((sum, item) => {
+      const value = parseFloat(item.tien) || 0;
+      return sum + value;
+    }, 0);
+
     return [
       ...hachToanData,
       {
         id: 'total',
         stt_rec: 'Tổng',
-        tk_i: '',
-        ten_tk: '',
-        ma_kh: '',
-        ten_kh: '',
-        ps_co: totals.totalPsCo,
-        nh_dk: '',
-        dien_giai: ''
+        tk_vt: "",
+        ten_tk: "",
+        tien: totalTien,
+        dien_giaii: "",
       }
     ];
-  }, [hachToanData, totals]);
+  }, [hachToanData])
 
-  // Table columns với dòng tổng
   const hachToanColumns = [
     {
       key: "stt_rec",
@@ -397,7 +406,7 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
       )
     },
     {
-      key: "tk_i",
+      key: "tk_vt",
       title: "Tài khoản",
       width: 150,
       fixed: "left",
@@ -407,8 +416,8 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         }
         return (
           <Input
-            value={row.tk_i}
-            onChange={(e) => handleHachToanChange(row.id, "tk_i", e.target.value)}
+            value={row.tk_vt}
+            onChange={(e) => handleHachToanChange(row.id, "tk_vt", e.target.value)}
             placeholder="Nhập mã TK..."
             className="w-full"
           />
@@ -425,39 +434,30 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         </div>
       )
     },
+
     {
-      key: "ps_co",
-      title: "PS Có",
+      key: "tien",
+      title: "Tiền hàng",
       width: 120,
-      render: (val, row) => {
-        if (row.id === 'total') {
-          return (
-            <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
-              {totals.totalPsCo.toLocaleString('vi-VN')}
-            </div>
-          );
-        }
-        return (
-          <Input
-            type="number"
-            value={row.ps_co}
-            onChange={(e) => handleHachToanChange(row.id, "ps_co", e.target.value)}
-            placeholder="0"
-            className="w-full text-right"
-          />
-        );
-      },
+      render: (val, row) => (
+        <Input
+          value={row.tien}
+          onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
+          placeholder="0"
+          className="w-full text-right"
+        />
+      ),
     },
     {
-      key: "dien_giai",
+      key: "dien_giaii",
       title: "Diễn giải",
       width: 200,
       render: (val, row) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            value={row.dien_giai}
-            onChange={(e) => handleHachToanChange(row.id, "dien_giai", e.target.value)}
+            value={row.dien_giaii}
+            onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
             placeholder="Nhập diễn giải..."
             className="w-full"
             title="Mỗi dòng có thể có diễn giải riêng"
@@ -475,9 +475,9 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         return (
           <div className="flex items-center justify-center">
             <button
-              type="button" // QUAN TRỌNG: Luôn là button
+              type="button"
               onClick={(e) => {
-                e.preventDefault(); // Ngăn form submit
+                e.preventDefault();
                 e.stopPropagation();
                 deleteHachToanRow(row.id, e);
               }}
@@ -491,7 +491,8 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
       },
     },
   ];
-  // Bảng hợp đồng thuế với tìm kiếm tài khoản
+
+  // Thêm hopDongThueColumns - COPY từ ModalCreateHoaDonMuaDV
   const hopDongThueColumns = [
     {
       key: "stt",
@@ -505,28 +506,28 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
       )
     },
     {
-      key: "so_ct0",
+      key: "ma_ms",
       title: "Nhóm",
       fixed: "left",
-      width: 150,
+      width: 80,
       render: (val, row) => (
         <Input
-          value={row.so_ct0}
-          onChange={(e) => handleHopDongThueChange(row.id, "so_ct0", e.target.value)}
+          value={row.ma_ms}
+          onChange={(e) => handleHopDongThueChange(row.id, "ma_ms", e.target.value)}
           placeholder="Nhập nhóm..."
           className="w-full"
         />
       ),
     },
     {
-      key: "ma_ms",
+      key: "so_ct0",
       title: "Số hóa đơn",
       width: 150,
       fixed: "left",
       render: (val, row) => (
         <Input
-          value={row.ma_ms}
-          onChange={(e) => handleHopDongThueChange(row.id, "ma_ms", e.target.value)}
+          value={row.so_ct0}
+          onChange={(e) => handleHopDongThueChange(row.id, "so_ct0", e.target.value)}
           placeholder="Nhập số hóa đơn..."
           className="w-full"
         />
@@ -674,7 +675,7 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     },
     {
       key: "thue_suat",
-      title: "%",
+      title: "Thuế suất (%)",
       width: 80,
       render: (val, row) => (
         <Input
@@ -700,20 +701,20 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         />
       ),
     },
-    {
-      key: "t_tt",
-      title: "TT",
-      width: 120,
-      render: (val, row) => (
-        <Input
-          type="number"
-          value={row.t_tt}
-          onChange={(e) => handleHopDongThueChange(row.id, "t_tt", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
-      ),
-    },
+    // {
+    //   key: "t_tt",
+    //   title: "TT",
+    //   width: 120,
+    //   render: (val, row) => (
+    //     <Input
+    //       type="number"
+    //       value={row.t_tt}
+    //       onChange={(e) => handleHopDongThueChange(row.id, "t_tt", e.target.value)}
+    //       placeholder="0"
+    //       className="w-full text-right"
+    //     />
+    //   ),
+    // },
     {
       key: "tk_thue_no",
       title: "Tài khoản thuế",
@@ -727,19 +728,19 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         />
       ),
     },
-    {
-      key: "tk_du",
-      title: "Tài khoản đối ứng",
-      width: 150,
-      render: (val, row) => (
-        <Input
-          value={row.tk_du}
-          onChange={(e) => handleHopDongThueChange(row.id, "tk_du", e.target.value)}
-          placeholder="Nhập TK đối ứng..."
-          className="w-full"
-        />
-      ),
-    },
+    // {
+    //   key: "tk_du",
+    //   title: "Tài khoản đối ứng",
+    //   width: 150,
+    //   render: (val, row) => (
+    //     <Input
+    //       value={row.tk_du}
+    //       onChange={(e) => handleHopDongThueChange(row.id, "tk_du", e.target.value)}
+    //       placeholder="Nhập TK đối ứng..."
+    //       className="w-full"
+    //     />
+    //   ),
+    // },
     {
       key: "action",
       title: "Hành động",
@@ -782,12 +783,12 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
     });
 
     // Search logic
-    if (field === "tk_i") {
+    if (field === "tk_vt") {
       setSearchStates(prev => ({
         ...prev,
         tkSearch: value,
         tkSearchRowId: id,
-        tkSearchField: "tk_i"
+        tkSearchField: "tk_vt"
       }));
     }
     if (field === "ma_kh_i") {
@@ -843,7 +844,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
 
     try {
       const payload = {
-        ma_gd: formData.ma_gd?.trim() || "",
         ma_kh: formData.ma_kh?.trim() || "",
         dia_chi: formData.dia_chi?.trim() || "",
         ong_ba: formData.ong_ba?.trim() || "",
@@ -853,26 +853,24 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
         ma_qs: formData.ma_qs?.trim() || "",
         so_ct: formData.so_ct?.trim() || "",
         ma_nt: formData.ma_nt?.trim() || "VND",
-        ty_gia: Number(formData.ty_gia) || 0,
-        loai_ct: formData.loai_ct?.trim() || "",
-        tong_tien: totals.totalPsCo || 0,
-        han_thanh_toan: 0, // Gán mặc định 0 nếu bạn chưa có trường này trong form
-        tk: formData.tk?.trim() || "",
+        ty_gia: Number(formData.ty_gia) || 1,
+        ma_nx: formData.ma_nx?.trim() || "",
 
-        tai_khoan_list: hachToanData
-          .filter(row => row.tk_i && parseFloat(row.ps_co) > 0)
-          .map(({ tk_i, ps_co, dien_giai, tk_me }) => ({
-            tk_i: tk_i?.trim() || "",
-            tk_me: tk_me?.trim() || "",
-            ps_co: Number(ps_co) || 0,
-            dien_giai: dien_giai?.trim() || "",
+        hachToanList: hachToanData
+          .filter(row => row.tk_vt && parseFloat(row.tien) > 0)
+          .map(({ tk_vt, tien, dien_giaii }) => ({
+            tk_vt: tk_vt?.trim() || "",
+            tien: Number(tien) || 0,
+            dien_giaii: dien_giaii?.trim() || "",
           })),
+        // Thêm hopDongThue vào payload
         hopDongThue: hopDongThueData
           .filter(row => row.ma_kh || row.ma_ms)
           .map(({
             so_ct0, ma_ms, kh_mau_hd, so_seri0, ngay_ct,
-            ma_kh, ten_kh, dia_chi, ma_so_thue, ten_vt,
-            t_tien, ma_thue, thue_suat, t_thue, tk_thue_no, tk_du, t_tt
+            ma_kh, ten_vt,
+            t_tien, ma_thue, thue_suat, t_thue, tk_thue_no, dien_giai,
+            ten_kh, dia_chi, ma_so_thue
           }) => ({
             so_ct0: so_ct0?.trim() || "",
             ma_ms: ma_ms?.trim() || "",
@@ -881,16 +879,15 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
             ngay_ct,
             ma_kh: ma_kh?.trim() || "",
             ten_kh: ten_kh?.trim() || "",
-            dia_chi: dia_chi?.trim() || "",
-            ma_so_thue: ma_so_thue?.trim() || "",
             ten_vt: ten_vt?.trim() || "",
             t_tien,
             ma_thue: ma_thue?.trim() || "",
             thue_suat,
             t_thue,
             tk_thue_no: tk_thue_no?.trim() || "",
-            tk_du: tk_du?.trim() || "",
-            t_tt,
+            ghi_chu: dien_giai?.trim() || "",
+            dia_chi: dia_chi?.trim() || "",
+            ma_so_thue: ma_so_thue?.trim() || "",
           })),
       };
 
@@ -993,28 +990,17 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
 
         {/* Content area - KHÔNG scroll, chia thành 2 phần cố định */}
         <div className="flex-1 min-h-0 flex flex-col bg-blue-50">
-
-          {/* Phần 1: 2 khung thông tin - 60% chiều cao */}
+          {/* Form fields section */}
           <div className="h-[45%] px-6 py-4 flex-shrink-0">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
-              {/* Khung trái - Thông tin chung */}
+              {/* Left panel - General info */}
               <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-3">
                 <div className="p-3 flex-1 overflow-y-auto">
                   <div className="space-y-2">
 
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs min-w-[110px]">Loại phiếu thu</Label>
-                      <Input
-                        value={formData.ma_gd}
-                        onChange={e => handleChange("ma_gd", e.target.value)}
-                        placeholder="2"
-                        className="h-8 text-sm flex-1 bg-white"
-                      />
-                    </div>
-
                     <div className="flex items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Mã khách</Label>
-                      <div className="col-span-6" >
+                      <div className="col-span-6">
                         <div className="relative flex-1">
                           <Input
                             value={maKhSearch}
@@ -1022,7 +1008,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                               const value = e.target.value;
                               setMaKhSearch(value);
                               handleChange("ma_kh", value);
-                              // Hiển thị popup khi có giá trị
                               if (value.length > 0) {
                                 setSearchStates(prev => ({ ...prev, showMainCustomerPopup: true }));
                               } else {
@@ -1076,20 +1061,15 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                       </div>
                     </div>
 
-                    {/* CẬP NHẬT phần Tk nợ */}
                     <div className="grid grid-cols-12 items-center gap-2">
-                      {/* Label */}
-                      <Label className="text-xs col-span-2">Tk nợ</Label>
-
-                      {/* Input chọn tài khoản */}
+                      <Label className="text-xs col-span-2">Tk có</Label>
                       <div className="relative col-span-6">
                         <Input
                           value={maTaiKhoanSearch}
                           onChange={e => {
                             const value = e.target.value;
                             setMaTaiKhoanSearch(value);
-                            handleChange("tk", value);
-                            // Hiển thị popup khi có giá trị
+                            handleChange("ma_nx", value);
                             if (value.length > 0) {
                               setSearchStates(prev => ({ ...prev, showMainAccountPopup: true }));
                             } else {
@@ -1105,8 +1085,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                           className="h-8 text-sm w-full bg-white"
                         />
                       </div>
-
-                      {/* Text hiển thị tên tài khoản động */}
                       <div className="col-span-3 flex items-center justify-center">
                         <span className="text-xs text-gray-600 dark:text-gray-400">
                           {selectedAccount ? selectedAccount.ten_tk : "Chưa chọn tài khoản"}
@@ -1114,16 +1092,14 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                       </div>
                       <div className="col-span-1"></div>
                     </div>
-
                   </div>
                 </div>
               </div>
 
-              {/* Khung phải - Chứng từ */}
+              {/* Right panel - Document info */}
               <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-2">
                 <div className="p-3 flex-1 overflow-y-auto">
                   <div className="space-y-2">
-
                     <div className="grid gap-2 items-center grid-cols-12">
                       <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px] col-span-6">
                         Ngày hạch toán <span className="text-red-500">*</span>
@@ -1141,13 +1117,12 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                       </div>
                       <div className="col-span-1"></div>
                     </div>
-
                     <div className="grid gap-2 items-center grid-cols-12">
                       <Label className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[120px] col-span-6">
                         Ngày lập chứng từ <span className="text-red-500">*</span>
                       </Label>
                       <div className="col-span-5">
-                        <div className="relative flex-1 ">
+                        <div className="relative flex-1">
                           <Flatpickr
                             value={formData.ngay_lct}
                             onChange={(date) => handleDateChange(date, "ngay_lct")}
@@ -1156,40 +1131,37 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                             className="w-full h-9 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                           />
                           <CalenderIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        </div></div>
+                        </div>
+                      </div>
                       <div className="col-span-1"></div>
                     </div>
-                    {/* Quyển số */}
+
                     <div className="grid grid-cols-12 items-center gap-2">
                       <Label className="text-xs col-span-6 text-left">Quyển số</Label>
                       <div className="col-span-5">
                         <Input
                           value={formData.ma_qs}
                           onChange={e => handleChange("ma_qs", e.target.value)}
-                          className="h-8 text-sm col-span-8 bg-white"
+                          className="h-8 text-sm bg-white"
                         />
                       </div>
                       <div className="col-span-1"></div>
                     </div>
 
-                    {/* Số phiếu thu */}
                     <div className="grid grid-cols-12 items-center gap-2">
                       <Label className="text-xs col-span-6 text-left">Số phiếu thu</Label>
                       <div className="col-span-5">
                         <Input
                           value={formData.so_ct}
                           onChange={e => handleChange("so_ct", e.target.value)}
-                          className="h-8 text-sm col-span-8 bg-white"
+                          className="h-8 text-sm bg-white"
                         />
                       </div>
                       <div className="col-span-1"></div>
                     </div>
 
                     <div className="grid grid-cols-12 items-center gap-2">
-                      {/* Label TGGD */}
                       <Label className="text-xs col-span-4 text-left">TGGD</Label>
-
-                      {/* Select VND (4 phần) */}
                       <div className="col-span-2 flex items-center">
                         <select
                           value={formData.ma_nt || "VND"}
@@ -1200,20 +1172,17 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                           <option value="USD">USD</option>
                         </select>
                       </div>
-
-                      {/* Input tỷ giá (5 phần còn lại) */}
                       <div className="col-span-5">
                         <Input
                           value={formData.ty_gia}
                           onChange={e => handleChange("ty_gia", e.target.value)}
                           disabled
                           placeholder="1,00"
-                          className="h-8 w-full text-sm text-right bg-gray-50 dark:bg-gray-800 bg-white"
+                          className="h-8 w-full text-sm text-right bg-gray-50 dark:bg-gray-800"
                         />
                       </div>
                     </div>
 
-                    {/* Trạng thái */}
                     <div className="grid grid-cols-12 items-center gap-2">
                       <Label className="text-xs col-span-6 text-left">Trạng thái</Label>
                       <select
@@ -1225,16 +1194,13 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                         <option value="Chưa ghi sổ cái">Chưa ghi sổ cái</option>
                       </select>
                     </div>
-
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
-          {/* Phần 2: Hạch toán - 40% chiều cao */}
-          {/* Tabs */}
+          {/* Accounting section */}
           <div className="flex justify-between shadow-lg border-0 px-6">
             <Tabs
               tabs={[
@@ -1249,14 +1215,12 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                         showAddButton={true}
                         addButtonText="Thêm dòng"
                         onAddRow={(e) => {
-                          // QUAN TRỌNG: Truyền event và ngăn form submit
                           if (e) {
                             e.preventDefault();
                             e.stopPropagation();
                           }
                           addHachToanRow(e);
                         }}
-
                         maxHeight="max-h-72"
                         className="w-full"
                       />
@@ -1282,11 +1246,10 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
                 },
               ]}
               onAddRow={(activeTab) => {
-                // Xử lý thêm dòng dựa trên tab đang active
                 if (activeTab === 0) {
-                  addHachToanRow(); // Tab Hạch toán
+                  addHachToanRow();
                 } else if (activeTab === 1) {
-                  addHopDongThueRow(); // Tab Hợp đồng thuế
+                  addHopDongThueRow();
                 }
               }}
             />
