@@ -48,20 +48,26 @@ export const usePhieuMuaList = () => {
     const deleteMutation = useDeletePhieuMua();
 
     const dataTable = useMemo(() => {
+        let rawData = [];
+
         if (fetchPhieuMuaData?.data?.items && Array.isArray(fetchPhieuMuaData.data.items)) {
-            return fetchPhieuMuaData.data.items;
+            rawData = fetchPhieuMuaData.data.items;
         }
         else if (fetchPhieuMuaData?.items && Array.isArray(fetchPhieuMuaData.items)) {
-            return fetchPhieuMuaData.items;
+            rawData = fetchPhieuMuaData.items;
         }
         else if (fetchPhieuMuaData?.data && Array.isArray(fetchPhieuMuaData.data)) {
-            return fetchPhieuMuaData.data;
+            rawData = fetchPhieuMuaData.data;
         }
         else if (Array.isArray(fetchPhieuMuaData)) {
-            return fetchPhieuMuaData;
+            rawData = fetchPhieuMuaData;
         }
 
-        return [];
+        // Thêm stt
+        return rawData.map((item, index) => ({
+            ...item,
+            stt: index + 1,
+        }));
     }, [fetchPhieuMuaData]);
 
     // Get total items and total pages from API response
@@ -82,10 +88,10 @@ export const usePhieuMuaList = () => {
     }, [fetchPhieuMuaData, dataTable.length]);
 
     const totalPages = Math.ceil(totalItems / pageSize);
-
     const dataDetailTable = useMemo(() => {
-        if (selectedRecord?.hangHoa && Array.isArray(selectedRecord.hangHoa)) {
-            return selectedRecord.hangHoa.map((item, index) => ({
+        const list = selectedRecord?.ct71;
+        if (Array.isArray(list)) {
+            return list.map((item, index) => ({
                 ...item,
                 stt: index + 1,
             }));
@@ -101,7 +107,6 @@ export const usePhieuMuaList = () => {
         if (!dateString) return "";
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
-
     const formatCurrency = (amount) => {
         if (!amount) return "0";
         return new Intl.NumberFormat("vi-VN").format(amount);
@@ -122,12 +127,11 @@ export const usePhieuMuaList = () => {
         try {
             await deleteMutation.mutateAsync(recordToDelete.stt_rec);
             toast.success("Xóa thành công!");
-            if (selectedRecord?.stt_rec === recordToDelete.stt_rec) {
-                handleCloseDetailTable();
-            }
+            handleCloseDetailTable();
+            setSelectedRecord(null);
+
             closeModalDelete();
             setRecordToDelete(null);
-
             // If current page becomes empty after deletion, go to previous page
             const newTotalItems = totalItems - 1;
             const newTotalPages = Math.ceil(newTotalItems / pageSize);
@@ -149,6 +153,15 @@ export const usePhieuMuaList = () => {
 
     const handleRowClick = async (record) => {
         try {
+            const ct71WithSTT = Array.isArray(record.ct71)
+                ? record.ct71.map((item, index) => ({
+                    ...item,
+                    stt: index + 1,
+                }))
+                : [];
+
+            record.ct71 = ct71WithSTT;
+            record.children = ct71WithSTT;
             setSelectedRecord(record);
             setShowDetailTable(true);
         } catch (error) {
@@ -220,12 +233,11 @@ export const usePhieuMuaList = () => {
         {
             key: "stt",
             title: "STT",
-            width: 50,
+            dataIndex: "stt",
+            width: 60,
             fixed: "left",
-            render: (_, record, index) => {
-                const globalIndex = (currentPage - 1) * pageSize + index + 1;
-                return <div className="font-medium text-center">{globalIndex}</div>;
-            },
+            align: "center",
+            render: (text, record) => record.stt,
         },
         {
             key: "ngay_lct",
@@ -242,6 +254,26 @@ export const usePhieuMuaList = () => {
             fixed: "left",
             width: 120,
             render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
+        },
+        {
+            key: "t_tien_nt",
+            title: "Tiền hàng",
+            width: 140,
+            render: (val) => (
+                <div className="font-mono text-sm text-center text-blue-600">
+                    {formatCurrency(val)}
+                </div>
+            ),
+        },
+        {
+            key: "t_cp_nt",
+            title: "Tiền chi phí",
+            width: 140,
+            render: (val) => (
+                <div className="font-mono text-sm text-center text-blue-600">
+                    {formatCurrency(val)}
+                </div>
+            ),
         },
         {
             key: "t_tt_nt",
@@ -284,15 +316,12 @@ export const usePhieuMuaList = () => {
             ),
         },
         {
-            key: "status",
-            title: "Trạng thái",
-            width: 120,
+            key: "ma_dvcs",
+            title: "Mã DVCS",
+            width: 200,
             render: (val) => (
-                <div className="text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${val === "1" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                        {val === "1" ? "Đã ghi sổ cái" : "Chưa ghi sổ cái"}
-                    </span>
+                <div className="max-w-xs truncate text-center" title={val}>
+                    {val || "-"}
                 </div>
             ),
         },
@@ -390,6 +419,26 @@ export const usePhieuMuaList = () => {
             width: 120,
             render: (val) => (
                 <span className="text-center block text-red-600 font-medium">
+                    {formatCurrency(val)}
+                </span>
+            ),
+        },
+        {
+            key: "cp_nt",
+            title: "Chi phí",
+            width: 120,
+            render: (val) => (
+                <span className="text-center block">
+                    {formatCurrency(val)}
+                </span>
+            ),
+        },
+        {
+            key: "tk_vt",
+            title: "TK vật tư",
+            width: 120,
+            render: (val) => (
+                <span className="text-center block ">
                     {formatCurrency(val)}
                 </span>
             ),

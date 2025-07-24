@@ -48,7 +48,6 @@ export const useDeletePhieuMua = () => {
         mutationFn: phieuMuaApi.deletePhieuMua,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["phieu-mua-list"] });
-            queryClient.invalidateQueries({ queryKey: ["phieu-mua-detail"] });
         },
     });
 };
