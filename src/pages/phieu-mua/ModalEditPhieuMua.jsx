@@ -333,10 +333,10 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         return {
                             id: index + 1,
                             ma_kho_i: item.ma_kho_i || "",
-                            ten_kho: item.ten_kho || "", 
+                            ten_kho: item.ten_kho || "",
                             ma_vt: item.ma_vt || "",
-                            ten_vt: item.ten_vt || "", 
-                            dvt: item.dvt || "", 
+                            ten_vt: item.ten_vt || "",
+                            dvt: item.dvt || "",
                             so_luong: item.so_luong?.toString() || "",
                             gia: item.gia?.toString() || "",
                             tien_nt: item.tien_nt?.toString() || "",
@@ -421,7 +421,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             queryKey: ["dmkho", ma_kho],
             queryFn: () => DmkhoService.getDmkhoById(ma_kho),
             staleTime: Infinity,
-            staleTime: 0,
             refetchOnWindowFocus: false,
             enabled: !!ma_kho,
         }))

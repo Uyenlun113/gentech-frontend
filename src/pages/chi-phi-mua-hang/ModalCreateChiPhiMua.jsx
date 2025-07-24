@@ -1,6 +1,7 @@
-// Table columns cho Hàng hóa
+import { useQueries } from "@tanstack/react-query";
+import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
-import { CalendarIcon, Plus, Save, Trash2, X } from "lucide-react";
+import { CalendarIcon, Plus, Save, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Flatpickr from "react-flatpickr";
 import { useNavigate } from "react-router";
@@ -12,20 +13,22 @@ import AccountSelectionPopup from "../../components/general/AccountSelectionPopu
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
 import WarehouseSelectionPopup from "../../components/general/dmkPopup";
 import MaterialSelectionPopup from "../../components/general/dmvtPopup";
+import PhieuNhapSelectionPopup from "../../components/PhieuNhapSelectionPopup";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import { Modal } from "../../components/ui/modal";
 import { Tabs } from "../../components/ui/tabs";
 import { useAccounts } from "../../hooks/useAccounts";
+import { useCreateChiPhiMuaHang } from "../../hooks/useChiPhiMuaHang";
 import { useCustomers } from "../../hooks/useCustomer";
 import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
-import { useCreatePhieuMua } from "../../hooks/usePhieumua";
+import DmkhoService from "../../services/dmkho";
+import dmvtService from "../../services/dmvt";
 
-const INITIAL_HANG_HOA_DATA = [
+const INITIAL_CHI_PHI_DATA = [
     {
         id: 1,
         ma_kho_i: "",
-        ten_kho: "",
         ma_vt: "",
         ten_vt: "",
         so_luong: "",
@@ -34,18 +37,10 @@ const INITIAL_HANG_HOA_DATA = [
         tien_nt0: "",
         tk_vt: "",
         thue_nt: "",
-    },
-];
-
-const INITIAL_CHI_PHI_DATA = [
-    {
-        id: 1,
-        ma_vt: "",
-        ten_vt: "",
-        so_luong: "",
-        tien_hang: "",
+        cp_nt: "",
         cp: "",
-        tk_no: "",
+        dvt: "",
+        ten_kho: "",
     },
 ];
 
@@ -69,8 +64,8 @@ const INITIAL_HD_THUE_DATA = [
         thue_suat: "",
         t_thue: "",
         han_tt: "",
-        t_tt: "",
         tk_thue_no: "",
+        ten_kho: "",
     },
 ];
 
@@ -84,7 +79,7 @@ const FLATPICKR_OPTIONS = {
     locale: Vietnamese,
 };
 
-// Debounce hook để tránh gọi API liên tục
+// Debounce hook
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -101,7 +96,7 @@ const useDebounce = (value, delay) => {
     return debouncedValue;
 };
 
-export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => {
+export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -115,21 +110,30 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         so_ct: "",
         ngay_ct: "",
         ngay_lct: "",
+        ngay_pn: "",
+        so_pn: "",
         tk_thue_no: "",
         status: "1",
         ma_dvcs: "",
         loai_pb: "1",
+        ty_gia: "1.00",
     });
 
-    const [hangHoaData, setHangHoaData] = useState(INITIAL_HANG_HOA_DATA);
     const [chiPhiData, setChiPhiData] = useState(INITIAL_CHI_PHI_DATA);
     const [hdThueData, setHdThueData] = useState(INITIAL_HD_THUE_DATA);
 
     const [chiPhiFormData, setChiPhiFormData] = useState({
-        ma_kh_i: "",
-        tk_i: "",
         t_cp_nt: "",
     });
+
+    // State cho detail queries
+    const [detailQueries, setDetailQueries] = useState({
+        vatTuCodes: [],
+        khoCodes: []
+    });
+
+    // Popup states
+    const [showPhieuNhapPopup, setShowPhieuNhapPopup] = useState(false);
 
     // Search states với debounce
     const [searchStates, setSearchStates] = useState({
@@ -149,17 +153,16 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         showKhoPopup: false,
     });
 
-    const hangHoaTableRef = useRef(null);
     const chiPhiTableRef = useRef(null);
     const hdThueTableRef = useRef(null);
 
-    // Debounced search values để tránh gọi API liên tục
+    // Debounced search values
     const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
     const debouncedMaKhSearch = useDebounce(searchStates.maKhSearch, 600);
     const debouncedVtSearch = useDebounce(searchStates.vtSearch, 600);
     const debouncedKhoSearch = useDebounce(searchStates.khoSearch, 600);
 
-    // React Query calls với enabled condition để tránh gọi API không cần thiết
+    // React Query calls
     const { data: accountRawData = {} } = useAccounts(
         { search: debouncedTkSearch || "" },
         { enabled: !!debouncedTkSearch && debouncedTkSearch.length > 0 }
@@ -180,22 +183,123 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
     );
 
-    const { mutateAsync: createPhieuMua, isPending } = useCreatePhieuMua();
+    const { mutateAsync: createChiPhiMuaHang, isPending } = useCreateChiPhiMuaHang();
+
+    // useQueries để fetch thông tin vật tư và kho
+    const vatTuDataArray = useQueries({
+        queries: detailQueries.vatTuCodes.map(ma_vt => ({
+            queryKey: ["dmvt", ma_vt],
+            queryFn: () => dmvtService.getDmvtById(ma_vt),
+            staleTime: 0,
+            refetchOnWindowFocus: false,
+            enabled: !!ma_vt,
+        }))
+    });
+
+    const khoDataArray = useQueries({
+        queries: detailQueries.khoCodes.map(ma_kho => ({
+            queryKey: ["dmkho", ma_kho],
+            queryFn: () => DmkhoService.getDmkhoById(ma_kho),
+            staleTime: Infinity,
+            refetchOnWindowFocus: false,
+            enabled: !!ma_kho,
+        }))
+    });
+
+    const vatTuDetailQueries = vatTuDataArray.map(q => q.data);
+    const khoDetailQueries = khoDataArray.map(q => q.data);
+
+    // Effect để update thông tin vật tư khi có data
+    useEffect(() => {
+        detailQueries.vatTuCodes.forEach((ma_vt, index) => {
+            const vatTuDetail = vatTuDetailQueries[index];
+            if (!vatTuDetail) return;
+
+            setChiPhiData(prev => {
+                const updated = prev.map(item => {
+                    if (item.ma_vt === ma_vt) {
+                        const shouldUpdate =
+                            vatTuDetail.ten_vt !== item.ten_vt ||
+                            vatTuDetail.dvt !== item.dvt ||
+                            vatTuDetail.tk_vt !== item.tk_vt;
+                        if (shouldUpdate) {
+                            return {
+                                ...item,
+                                ten_vt: vatTuDetail.ten_vt || item.ten_vt,
+                                dvt: vatTuDetail.don_vi_tinh || vatTuDetail.dvt || item.dvt,
+                                tk_vt: vatTuDetail.tk_vt || item.tk_vt,
+                            };
+                        }
+                    }
+                    return item;
+                });
+                return updated;
+            });
+        });
+    }, [JSON.stringify(vatTuDetailQueries)]);
+
+    // Effect để update thông tin kho khi có data
+    useEffect(() => {
+        if (khoDetailQueries.length > 0) {
+            detailQueries.khoCodes.forEach((ma_kho, index) => {
+                const khoDetail = khoDetailQueries[index];
+                if (!khoDetail) return;
+
+                setChiPhiData(prev => {
+                    const updated = prev.map(item => {
+                        if (item.ma_kho_i === ma_kho) {
+                            const newTenKho = khoDetail.data?.ten_kho || item.ten_kho;
+                            const newTkVt = item.tk_vt || khoDetail.tk_dl || khoDetail.tk_vt || "";
+                            const shouldUpdate =
+                                item.ten_kho !== newTenKho ||
+                                item.tk_vt !== newTkVt;
+                            if (shouldUpdate) {
+                                return {
+                                    ...item,
+                                    ten_kho: newTenKho,
+                                    tk_vt: newTkVt,
+                                };
+                            }
+                        }
+                        return item;
+                    });
+                    return updated;
+                });
+
+                setHdThueData(prev => {
+                    const updated = prev.map(item => {
+                        if (item.ma_kho === ma_kho) {
+                            const newTenKho = khoDetail.ten_kho || item.ten_kho;
+                            const shouldUpdate = item.ten_kho !== newTenKho;
+                            if (shouldUpdate) {
+                                return {
+                                    ...item,
+                                    ten_kho: newTenKho,
+                                };
+                            }
+                        }
+                        return item;
+                    });
+                    return updated;
+                });
+            });
+        }
+    }, [JSON.stringify(khoDetailQueries)]);
 
     // Tính tổng tiền
     const totals = useMemo(() => {
-        const totalSoLuong = hangHoaData.reduce((sum, item) => {
+        const totalSoLuong = chiPhiData.reduce((sum, item) => {
             const value = parseFloat(item.so_luong) || 0;
             return sum + value;
         }, 0);
 
-        const totalTienHang = hangHoaData.reduce((sum, item) => {
+        const totalTienHang = chiPhiData.reduce((sum, item) => {
             const value = parseFloat(item.tien_nt) || 0;
             return sum + value;
         }, 0);
 
         const totalChiPhi = chiPhiData.reduce((sum, item) => {
-            const value = parseFloat(item.cp) || 0;
+            const value = parseFloat(item.cp_nt) || 0;
             return sum + value;
         }, 0);
 
@@ -207,9 +311,9 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         const totalThanhTien = totalTienHang + totalChiPhi + totalThueGtgt;
 
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
-    }, [hangHoaData, chiPhiData, hdThueData]);
+    }, [chiPhiData, hdThueData]);
 
-    // Auto show/hide popups khi có search term
+    // Auto show/hide popups
     useEffect(() => {
         setSearchStates(prev => ({
             ...prev,
@@ -238,62 +342,30 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         }));
     }, [debouncedKhoSearch]);
 
-    // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
+    // Auto fill tổng chi phí từ form xuống bảng chi phí
     useEffect(() => {
-        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0; // Đổi từ tong_chi_phi thành t_cp_nt
+        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
 
         if (tongChiPhi > 0) {
-            // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
             const validChiPhiRows = chiPhiData.filter(row =>
-                row.ma_vt && parseFloat(row.tien_hang) > 0
+                row.ma_vt && parseFloat(row.tien_nt) > 0
             );
 
             if (validChiPhiRows.length > 0) {
                 const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
 
                 setChiPhiData(prev => prev.map(row => {
-                    if (row.ma_vt && parseFloat(row.tien_hang) > 0) {
+                    if (row.ma_vt && parseFloat(row.tien_nt) > 0) {
                         return {
                             ...row,
-                            cp: chiPhiPerRow.toFixed(0)
+                            cp_nt: chiPhiPerRow.toFixed(0)
                         };
                     }
                     return row;
                 }));
             }
         }
-    }, [chiPhiFormData.t_cp_nt]); // Chỉ depend vào t_cp_nt
-
-    // Auto fill tiền hàng vào HĐ thuế - với flag để tránh infinite loop
-    const [hasAutoFilledHdThue, setHasAutoFilledHdThue] = useState(false);
-
-    useEffect(() => {
-        const tongTienHangVaChiPhi = totals.totalTienHang + totals.totalChiPhi;
-
-        // Chỉ auto fill lần đầu và khi có thay đổi đáng kể
-        if (tongTienHangVaChiPhi > 0 && hdThueData.length > 0 && !hasAutoFilledHdThue) {
-            const firstRow = hdThueData[0];
-            if (!firstRow.t_tien || parseFloat(firstRow.t_tien) === 0) {
-                setHdThueData(prev => prev.map((row, index) => {
-                    if (index === 0) {
-                        const tTien = tongTienHangVaChiPhi;
-                        const thueSuat = parseFloat(row.thue_suat) || 0;
-                        const tThue = (tTien * thueSuat) / 100;
-                        const tTt = tTien + tThue;
-
-                        return {
-                            ...row,
-                            t_tien: tTien.toString(),
-                            t_thue: tThue.toString(),
-                            t_tt: tTt.toString()
-                        };
-                    }
-                    return row;
-                }));
-                setHasAutoFilledHdThue(true);
-            }
-        }
-    }, [totals.totalTienHang, totals.totalChiPhi, hasAutoFilledHdThue]);
+    }, [chiPhiFormData.t_cp_nt]);
 
     // Handlers
     const handleFormChange = useCallback((field, value) => {
@@ -305,34 +377,104 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         handleFormChange(field, formattedDate);
     }, [handleFormChange]);
 
+    // Handle phiếu nhập selection - CHỈ FILL VÀO TAB CHI PHÍ
+    const handlePhieuNhapSelect = useCallback((phieuNhap) => {
+        // Fill thông tin số phiếu nhập và ngày phiếu nhập
+        setFormData(prev => ({
+            ...prev,
+            ngay_pn: phieuNhap.ngay_ct ? new Date(phieuNhap.ngay_ct).toLocaleDateString("en-CA") : "",
+            so_pn: phieuNhap.so_ct || "",
+        }));
+
+        // CHỈ fill thông tin vào tab chi phí nếu có dữ liệu chi tiết
+        if (phieuNhap.ct71 && phieuNhap.ct71.length > 0) {
+            const vatTuCodes = [];
+            const khoCodes = [];
+
+            const newChiPhiData = phieuNhap.ct71.map((item, index) => {
+                // Collect mã vật tư và mã kho để fetch thông tin
+                if (item.ma_vt && !vatTuCodes.includes(item.ma_vt)) {
+                    vatTuCodes.push(item.ma_vt);
+                }
+                if (item.ma_kho_i && !khoCodes.includes(item.ma_kho_i)) {
+                    khoCodes.push(item.ma_kho_i);
+                }
+
+                return {
+                    id: index + 1,
+                    ma_kho_i: item.ma_kho_i || "",
+                    ma_vt: item.ma_vt || "",
+                    ten_vt: item.ten_vt || "",
+                    so_luong: item.so_luong || "",
+                    gia: item.gia || "",
+                    tien_nt: item.tien_nt || "",
+                    tien_nt0: item.tien_nt0 || "",
+                    tk_vt: item.tk_vt || "",
+                    thue_nt: item.thue_nt || "",
+                    cp_nt: "",
+                    cp: "",
+                    dvt: item.dvt || "",
+                    ten_kho: item.ten_kho || "",
+                };
+            });
+
+            setChiPhiData(newChiPhiData);
+
+            // Set detail queries để fetch thông tin
+            setDetailQueries({
+                vatTuCodes: [...new Set(vatTuCodes)],
+                khoCodes: [...new Set(khoCodes)]
+            });
+        }
+
+        setShowPhieuNhapPopup(false);
+    }, []);
+
     const handleChiPhiChange = useCallback((id, field, value) => {
         setChiPhiData(prev => {
-            const newData = prev.map(item =>
-                item.id === id ? { ...item, [field]: value } : item
-            );
+            const newData = prev.map(item => {
+                if (item.id === id) {
+                    const updatedItem = { ...item, [field]: value };
+
+                    // Tự động tính tiền nếu thay đổi số lượng hoặc giá
+                    if (field === "so_luong" || field === "gia") {
+                        const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
+                        const gia = parseFloat(field === "gia" ? value : item.gia) || 0;
+                        updatedItem.tien_nt = (soLuong * gia).toString();
+                        updatedItem.tien_nt0 = updatedItem.tien_nt;
+                    }
+
+                    return updatedItem;
+                }
+                return item;
+            });
             return newData;
         });
 
-        // Search logic - Clear previous search và set search mới
+        // Search logic
         if (field === "ma_vt") {
             setSearchStates(prev => ({
                 ...prev,
                 vtSearch: value,
                 vtSearchRowId: id,
                 searchContext: "chiPhi",
-                // Clear other searches
-                tkSearch: prev.searchContext === "chiPhi" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
-        if (field === "tk_no") {
+        if (field === "tk_vt") {
             setSearchStates(prev => ({
                 ...prev,
                 tkSearch: value,
                 tkSearchRowId: id,
-                tkSearchField: "tk_no",
+                tkSearchField: "tk_vt",
                 searchContext: "chiPhi",
-                // Clear other searches
-                vtSearch: prev.searchContext === "chiPhi" && prev.vtSearchRowId === id ? prev.vtSearch : "",
+            }));
+        }
+        if (field === "ma_kho_i") {
+            setSearchStates(prev => ({
+                ...prev,
+                khoSearch: value,
+                khoSearchRowId: id,
+                searchContext: "chiPhi",
             }));
         }
     }, []);
@@ -362,11 +504,10 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 const tTien = parseFloat(currentRow.t_tien) || 0;
                 const thueSuat = parseFloat(currentRow.thue_suat) || 0;
                 const tThue = (tTien * thueSuat) / 100;
-                const tTt = tTien + tThue;
 
                 return newData.map(item =>
                     item.id === id
-                        ? { ...item, t_thue: tThue.toString(), t_tt: tTt.toString() }
+                        ? { ...item, t_thue: tThue.toString() }
                         : item
                 );
             }
@@ -374,7 +515,7 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             return newData;
         });
 
-        // Auto fill thông tin khách hàng từ form chính khi nhập mã khách hàng
+        // Auto fill thông tin khách hàng từ form chính
         if (field === "ma_kh" && !value) {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -389,16 +530,13 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             );
         }
 
-        // Search logic - Clear previous search và set search mới
+        // Search logic
         if (field === "ma_kh") {
             setSearchStates(prev => ({
                 ...prev,
                 maKhSearch: value,
                 maKhSearchRowId: id,
                 searchContext: "hdThue",
-                // Clear other searches
-                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
-                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "tk_thue_no") {
@@ -408,9 +546,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 tkSearchRowId: id,
                 tkSearchField: "tk_thue_no",
                 searchContext: "hdThue",
-                // Clear other searches
-                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
-                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "ma_kho") {
@@ -419,9 +554,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 khoSearch: value,
                 khoSearchRowId: id,
                 searchContext: "hdThue",
-                // Clear other searches
-                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
-                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
     }, [formData]);
@@ -434,8 +566,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             tkSearchRowId: "main-form",
             tkSearchField: "tk_thue_no",
             searchContext: "mainForm",
-            // Clear other searches
-            maKhSearch: prev.searchContext === "mainForm" ? prev.maKhSearch : "",
         }));
     }, []);
 
@@ -445,24 +575,12 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             maKhSearch: value,
             maKhSearchRowId: "main-form",
             searchContext: "mainForm",
-            // Clear other searches
-            tkSearch: prev.searchContext === "mainForm" ? prev.tkSearch : "",
         }));
     }, []);
 
     const handleAccountSelect = useCallback((id, account) => {
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("tk_thue_no", account.tk.trim());
-        } else if (searchStates.searchContext === "chiPhiForm") {
-            setChiPhiFormData(prev => ({ ...prev, tk_i: account.tk.trim() }));
-        } else if (searchStates.searchContext === "hangHoa") {
-            setHangHoaData(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? { ...item, [searchStates.tkSearchField]: account.tk.trim() }
-                        : item
-                )
-            );
         } else if (searchStates.searchContext === "chiPhi") {
             setChiPhiData(prev =>
                 prev.map(item =>
@@ -497,8 +615,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             handleFormChange("dia_chi", customer.dia_chi || "");
             handleFormChange("ma_so_thue", customer.ma_so_thue || "");
             handleFormChange("ten_kh", customer.ten_kh || "");
-        } else if (searchStates.searchContext === "chiPhiForm") {
-            setChiPhiFormData(prev => ({ ...prev, ma_kh_i: customer.ma_kh.trim() || "" }));
         } else if (searchStates.searchContext === "hdThue") {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -525,20 +641,7 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
     }, [searchStates.searchContext, handleFormChange]);
 
     const handleVatTuSelect = useCallback((id, vatTu) => {
-        if (searchStates.searchContext === "hangHoa") {
-            setHangHoaData(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? {
-                            ...item,
-                            ma_vt: vatTu.ma_vt || "",
-                            ten_vt: vatTu.ten_vt || "",
-                            dvt: vatTu.dvt || ""
-                        }
-                        : item
-                )
-            );
-        } else if (searchStates.searchContext === "chiPhi") {
+        if (searchStates.searchContext === "chiPhi") {
             setChiPhiData(prev =>
                 prev.map(item =>
                     item.id === id
@@ -563,8 +666,8 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
     }, [searchStates.searchContext]);
 
     const handleKhoSelect = useCallback((id, kho) => {
-        if (searchStates.searchContext === "hangHoa") {
-            setHangHoaData(prev =>
+        if (searchStates.searchContext === "chiPhi") {
+            setChiPhiData(prev =>
                 prev.map(item =>
                     item.id === id
                         ? {
@@ -582,7 +685,8 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                     item.id === id
                         ? {
                             ...item,
-                            ma_kho: kho.ma_kho || ""
+                            ma_kho: kho.ma_kho || "",
+                            ten_kho: kho.ten_kho || ""
                         }
                         : item
                 )
@@ -598,13 +702,12 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         }));
     }, [searchStates.searchContext]);
 
-    const addHangHoaRow = useCallback(() => {
-        setHangHoaData(prev => [
+    const addChiPhiRow = useCallback(() => {
+        setChiPhiData(prev => [
             ...prev,
             {
                 id: prev.length + 1,
                 ma_kho_i: "",
-                ten_kho: "",
                 ma_vt: "",
                 ten_vt: "",
                 so_luong: "",
@@ -613,31 +716,10 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 tien_nt0: "",
                 tk_vt: "",
                 thue_nt: "",
-            }
-        ]);
-
-        setTimeout(() => {
-            if (hangHoaTableRef.current) {
-                const tableContainer = hangHoaTableRef.current.querySelector('.overflow-x-auto');
-                if (tableContainer) {
-                    tableContainer.scrollTop = tableContainer.scrollHeight;
-                }
-            }
-        }, 100);
-    }, []);
-
-
-    const addChiPhiRow = useCallback(() => {
-        setChiPhiData(prev => [
-            ...prev,
-            {
-                id: prev.length + 1,
-                ma_vt: "",
-                ten_vt: "",
-                so_luong: "",
-                tien_hang: "",
+                cp_nt: "",
                 cp: "",
-                tk_no: "",
+                dvt: "",
+                ten_kho: "",
             }
         ]);
 
@@ -665,10 +747,10 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 ma_gd: "",
                 ma_hd: "",
                 ngay_ct0: "",
-                ma_kh: formData.ma_kh || "", // Auto fill từ đầu phiếu
-                ten_kh: formData.ten_kh || "", // Auto fill từ đầu phiếu
-                dia_chi: formData.dia_chi || "", // Auto fill từ đầu phiếu
-                ma_so_thue: formData.ma_so_thue || "", // Auto fill từ đầu phiếu
+                ma_kh: formData.ma_kh || "",
+                ten_kh: formData.ten_kh || "",
+                dia_chi: formData.dia_chi || "",
+                ma_so_thue: formData.ma_so_thue || "",
                 ma_kho: "",
                 ten_vt: "",
                 gia: "",
@@ -677,8 +759,8 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                 thue_suat: "",
                 t_thue: "",
                 han_tt: "",
-                t_tt: "",
                 tk_thue_no: "",
+                ten_kho: "",
             }
         ]);
 
@@ -704,32 +786,31 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             return;
         }
 
-        const validHangHoaRows = hangHoaData.filter(row =>
+        const validChiPhiRows = chiPhiData.filter(row =>
             row.ma_vt && parseFloat(row.tien_nt) > 0
         );
 
-        if (validHangHoaRows.length === 0) {
-            toast.warning("Không có dòng hàng hóa hợp lệ để phân bổ chi phí");
+        if (validChiPhiRows.length === 0) {
+            toast.warning("Không có dòng chi phí hợp lệ để phân bổ chi phí");
             return;
         }
 
         if (formData.loai_pb === "1") {
             // Phân bổ theo tiền
-            const tongTienHang = validHangHoaRows.reduce((sum, row) =>
+            const tongTienHang = validChiPhiRows.reduce((sum, row) =>
                 sum + (parseFloat(row.tien_nt) || 0), 0
             );
 
             setChiPhiData(prevChiPhi => {
                 return prevChiPhi.map(chiPhiRow => {
-                    const hangHoaRow = validHangHoaRows.find(h => h.id === chiPhiRow.id);
-                    if (hangHoaRow) {
-                        const tienHang = parseFloat(hangHoaRow.tien_nt) || 0;
+                    const tienHang = parseFloat(chiPhiRow.tien_nt) || 0;
+                    if (tienHang > 0) {
                         const tyLe = tongTienHang > 0 ? tienHang / tongTienHang : 0;
                         const chiPhiPhanBo = tongChiPhi * tyLe;
 
                         return {
                             ...chiPhiRow,
-                            cp: chiPhiPhanBo.toFixed(0),
+                            cp_nt: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -737,21 +818,20 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             });
         } else {
             // Phân bổ theo số lượng
-            const tongSoLuong = validHangHoaRows.reduce((sum, row) =>
+            const tongSoLuong = validChiPhiRows.reduce((sum, row) =>
                 sum + (parseFloat(row.so_luong) || 0), 0
             );
 
             setChiPhiData(prevChiPhi => {
                 return prevChiPhi.map(chiPhiRow => {
-                    const hangHoaRow = validHangHoaRows.find(h => h.id === chiPhiRow.id);
-                    if (hangHoaRow) {
-                        const soLuong = parseFloat(hangHoaRow.so_luong) || 0;
+                    const soLuong = parseFloat(chiPhiRow.so_luong) || 0;
+                    if (soLuong > 0) {
                         const tyLe = tongSoLuong > 0 ? soLuong / tongSoLuong : 0;
                         const chiPhiPhanBo = tongChiPhi * tyLe;
 
                         return {
                             ...chiPhiRow,
-                            cp: chiPhiPhanBo.toFixed(0),
+                            cp_nt: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -760,7 +840,7 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         }
 
         toast.success("Phân bổ chi phí tự động thành công!");
-    }, [hangHoaData, formData.loai_pb, chiPhiFormData.t_cp_nt]);
+    }, [chiPhiData, formData.loai_pb, chiPhiFormData.t_cp_nt]);
 
     const resetForm = useCallback(() => {
         setFormData({
@@ -774,18 +854,22 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             so_ct: "",
             ngay_ct: "",
             ngay_lct: "",
+            ngay_pn: "",
+            so_pn: "",
             tk_thue_no: "",
             status: "1",
             ma_dvcs: "",
             loai_pb: "1",
+            ty_gia: "1.00",
         });
-        setHangHoaData(INITIAL_HANG_HOA_DATA);
         setChiPhiData(INITIAL_CHI_PHI_DATA);
         setHdThueData(INITIAL_HD_THUE_DATA);
         setChiPhiFormData({
-            ma_kh_i: "",
-            tk_i: "",
             t_cp_nt: "",
+        });
+        setDetailQueries({
+            vatTuCodes: [],
+            khoCodes: []
         });
         setSearchStates({
             tkSearch: "",
@@ -803,7 +887,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             showVatTuPopup: false,
             showKhoPopup: false,
         });
-        setHasAutoFilledHdThue(false); // Reset flag
     }, []);
 
     const validateForm = useCallback(() => {
@@ -820,16 +903,16 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             return false;
         }
 
-        const validHangHoaRows = hangHoaData.filter(row =>
+        const validChiPhiRows = chiPhiData.filter(row =>
             row.ma_vt && parseFloat(row.tien_nt) > 0
         );
-        if (validHangHoaRows.length === 0) {
-            toast.error("Vui lòng nhập ít nhất một dòng hàng hóa hợp lệ");
+        if (validChiPhiRows.length === 0) {
+            toast.error("Vui lòng nhập ít nhất một dòng chi phí hợp lệ");
             return false;
         }
 
         return true;
-    }, [formData, hangHoaData]);
+    }, [formData, chiPhiData]);
 
     const handleSave = useCallback(async () => {
         if (!validateForm()) {
@@ -837,6 +920,7 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
         }
         try {
             const payload = {
+                // Ph73 - Đầu phiếu
                 phieu: {
                     ma_kh: formData.ma_kh?.trim() || "",
                     dia_chi: formData.dia_chi?.trim() || "",
@@ -845,7 +929,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                     ma_qs: formData.ma_qs?.trim() || "",
                     t_so_luong: totals.totalSoLuong,
                     t_tien_nt: totals.totalTienHang,
-                    t_tien_nt0: totals.totalTienHang,
                     t_cp_nt: totals.totalChiPhi,
                     t_thue: totals.totalThueGtgt,
                     t_tt_nt: totals.totalThanhTien,
@@ -855,29 +938,32 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
-                    ma_kh_i: chiPhiFormData.ma_kh_i?.trim() || "",
-                    tk_i: chiPhiFormData.tk_i?.trim() || "",
+                    ty_gia: formData.ty_gia?.trim() || "1.00",
+                    so_pn: formData.so_pn?.trim() || "",
                     ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
                     ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : new Date().toISOString(),
+                    ngay_pn: formData.ngay_pn ? new Date(formData.ngay_pn).toISOString() : new Date().toISOString(),
                 },
-                hangHoa: hangHoaData
+                // Ct73 - Chi phí
+                chiPhi: chiPhiData
                     .filter(row => row.ma_vt && parseFloat(row.tien_nt) > 0)
-                    .map(({ ma_kho_i, ma_vt, gia, thue_nt, tien_nt, tien_nt0, tk_vt, so_luong }) => ({
+                    .map(({ ma_kho_i, ma_vt, thue_nt, tien_nt, tien_nt0, tk_vt, so_luong, cp_nt }) => ({
                         ma_kho_i: ma_kho_i?.trim() || "",
                         ma_vt: ma_vt?.trim() || "",
                         ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
-                        gia: Number(gia) || 0,
                         thue_nt: Number(thue_nt) || 0,
                         tien_nt: Number(tien_nt) || 0,
                         tien_nt0: Number(tien_nt0) || 0,
                         tk_vt: tk_vt?.trim() || "",
                         so_luong: Number(so_luong) || 0,
+                        cp_nt: Number(cp_nt) || 0
                     })),
+                // Ct73gt - HĐ Thuế
                 hdThue: hdThueData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
                         so_ct0, ma_gd, ma_hd, ma_kho, ten_vt, so_luong, gia, t_thue,
-                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, t_tt, tk_thue_no
+                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, tk_thue_no
                     }) => ({
                         ma_gd: ma_gd?.trim() || "",
                         ma_hd: ma_hd?.trim() || "",
@@ -890,34 +976,31 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                         so_seri0: so_seri0?.trim() || "",
                         ma_kh: ma_kh?.trim() || "",
                         ten_kh: ten_kh?.trim() || "",
-                        ma_dvcs: formData.ma_dvcs?.trim() || "",
                         ngay_ct0: ngay_ct0 ? new Date(ngay_ct0).toISOString() : undefined,
                         dia_chi: dia_chi?.trim() || "",
                         ma_so_thue: ma_so_thue?.trim() || "",
                         t_tien: Number(t_tien) || 0,
                         thue_suat: Number(thue_suat) || 0,
                         han_tt: Number(han_tt) || 0,
-                        t_tt: Number(t_tt) || 0,
                         tk_thue_no: tk_thue_no?.trim() || "",
                     })),
             };
 
-            await createPhieuMua(payload);
+            await createChiPhiMuaHang(payload);
             closeModalCreate();
             resetForm();
-            navigate("/phieu-mua");
-            toast.success("Tạo phiếu mua thành công!");
+            navigate("/chi-phi-mua-hang");
+            toast.success("Tạo phiếu nhập chi phí mua hàng thành công!");
         } catch (err) {
             console.error(err);
-            toast.error("Lỗi khi tạo phiếu mua: " + (err?.message || "Không xác định"));
+            toast.error("Lỗi khi tạo phiếu nhập chi phí mua hàng: " + (err?.message || "Không xác định"));
         }
-    }, [formData, hangHoaData, hdThueData, totals, createPhieuMua, closeModalCreate, resetForm, navigate, validateForm]);
+    }, [formData, chiPhiData, hdThueData, totals, createChiPhiMuaHang, closeModalCreate, resetForm, navigate, validateForm]);
 
     const handleClose = useCallback(() => {
         resetForm();
         closeModalCreate();
     }, [resetForm, closeModalCreate]);
-    // Thêm dòng tổng vào data Hàng hóa
 
     // Table columns cho Chi phí
     const chiPhiColumns = [
@@ -933,9 +1016,32 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             )
         },
         {
+            key: "ma_kho_i",
+            title: "Mã kho",
+            fixed: "left",
+            width: 120,
+            render: (val, row) => (
+                <Input
+                    value={row.ma_kho_i}
+                    onChange={(e) => handleChiPhiChange(row.id, "ma_kho_i", e.target.value)}
+                    placeholder="Nhập mã kho..."
+                    className="w-full"
+                />
+            ),
+        },
+        {
+            key: "ten_kho",
+            title: "Tên kho",
+            width: 150,
+            render: (val, row) => (
+                <div className="text-gray-800 font-medium">
+                    {row.ten_kho || "-"}
+                </div>
+            )
+        },
+        {
             key: "ma_vt",
             title: "Mã vật tư",
-            fixed: "left",
             width: 120,
             render: (val, row) => (
                 <Input
@@ -952,9 +1058,19 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             width: 200,
             render: (val, row) => (
                 <div className="text-gray-800 font-medium">
-                    {row.ten_vt}
+                    {row.ten_vt || "-"}
                 </div>
             )
+        },
+        {
+            key: "dvt",
+            title: "ĐVT",
+            width: 80,
+            render: (val, row) => (
+                <div className="text-center text-gray-600">
+                    {row.dvt || "-"}
+                </div>
+            ),
         },
         {
             key: "so_luong",
@@ -971,14 +1087,28 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             ),
         },
         {
-            key: "tien_hang",
+            key: "gia",
+            title: "Đơn giá",
+            width: 120,
+            render: (val, row) => (
+                <Input
+                    type="number"
+                    value={row.gia}
+                    onChange={(e) => handleChiPhiChange(row.id, "gia", e.target.value)}
+                    placeholder="0"
+                    className="w-full text-right"
+                />
+            ),
+        },
+        {
+            key: "tien_nt",
             title: "Tiền hàng",
             width: 120,
             render: (val, row) => (
                 <Input
                     type="number"
-                    value={row.tien_hang}
-                    onChange={(e) => handleChiPhiChange(row.id, "tien_hang", e.target.value)}
+                    value={row.tien_nt}
+                    onChange={(e) => handleChiPhiChange(row.id, "tien_nt", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
                     readOnly
@@ -986,27 +1116,27 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             ),
         },
         {
-            key: "cp",
+            key: "cp_nt",
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
                 <Input
                     type="number"
-                    value={row.cp}
-                    onChange={(e) => handleChiPhiChange(row.id, "cp", e.target.value)}
+                    value={row.cp_nt}
+                    onChange={(e) => handleChiPhiChange(row.id, "cp_nt", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
                 />
             ),
         },
         {
-            key: "tk_no",
-            title: "TK nợ",
+            key: "tk_vt",
+            title: "TK vật tư",
             width: 120,
             render: (val, row) => (
                 <Input
-                    value={row.tk_no}
-                    onChange={(e) => handleChiPhiChange(row.id, "tk_no", e.target.value)}
+                    value={row.tk_vt}
+                    onChange={(e) => handleChiPhiChange(row.id, "tk_vt", e.target.value)}
                     placeholder="Nhập TK..."
                     className="w-full"
                 />
@@ -1172,6 +1302,16 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             ),
         },
         {
+            key: "ten_kho",
+            title: "Tên kho",
+            width: 150,
+            render: (val, row) => (
+                <div className="text-gray-800 font-medium">
+                    {row.ten_kho || "-"}
+                </div>
+            )
+        },
+        {
             key: "ten_vt",
             title: "Hàng hóa, dịch vụ",
             width: 200,
@@ -1286,7 +1426,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
             ),
         },
     ];
-
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
@@ -1408,29 +1547,36 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         />
                                     </div>
+
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Số phiếu nhập <span className="text-red-500">*</span>
+                                            Số phiếu nhập
                                         </Label>
                                         <input
                                             type="text"
-                                            value={formData.ma_kh}
-                                            onChange={(e) => {
-                                                handleFormChange("ma_kh", e.target.value);
-                                                handleMainFormCustomerSearch(e.target.value);
-                                            }}
-                                            placeholder="KH005"
-                                            className="w-32 h-9 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            value={formData.so_pn}
+                                            onChange={(e) => handleFormChange("so_pn", e.target.value)}
+                                            placeholder="PN001"
+                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            readOnly
                                         />
-                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
-                                            Ngày phiếu nhập <span className="text-red-500">*</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPhieuNhapPopup(true)}
+                                            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                        >
+                                            <Search size={16} />
+                                            Chọn PN
+                                        </button>
+                                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] ml-4">
+                                            Ngày phiếu nhập
                                         </Label>
                                         <input
                                             type="date"
-                                            value={formData.ten_kh}
-                                            onChange={(e) => handleFormChange("ten_kh", e.target.value)}
+                                            value={formData.ngay_pn}
+                                            onChange={(e) => handleFormChange("ngay_pn", e.target.value)}
+                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                             readOnly
-                                            className="flex-1 h-9 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600 ml-4"
                                         />
                                     </div>
                                 </div>
@@ -1505,9 +1651,9 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                                             </span>
                                             <input
                                                 type="number"
-                                                value="1.00"
-                                                readOnly
-                                                className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none bg-gray-50"
+                                                value={formData.ty_gia}
+                                                onChange={(e) => handleFormChange("ty_gia", e.target.value)}
+                                                className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
                                             />
                                         </div>
                                     </div>
@@ -1539,9 +1685,9 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                                     content: (
                                         <div className="space-y-4">
                                             {/* Form fields ở trên - 1 hàng ngang */}
-                                            <div className="bg-blue-50  p-2">
+                                            <div className="bg-blue-50 p-2">
                                                 <div className="grid grid-cols-3 gap-4">
-                                                    {/* Tổng chi phí - đã cập nhật từ tong_chi_phi thành t_cp_nt */}
+                                                    {/* Tổng chi phí */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
                                                         <input
@@ -1617,10 +1763,8 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                             ]}
                             onAddRow={(activeTab) => {
                                 if (activeTab === 0) {
-                                    addHangHoaRow();
-                                } else if (activeTab === 1) {
                                     addChiPhiRow();
-                                } else if (activeTab === 2) {
+                                } else if (activeTab === 1) {
                                     addHdThueRow();
                                 }
                             }}
@@ -1698,8 +1842,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                         onSelect={(account) => {
                             if (searchStates.searchContext === "mainForm") {
                                 handleAccountSelect("main-form", account);
-                            } else if (searchStates.searchContext === "chiPhiForm") {
-                                handleAccountSelect("chi-phi-form", account);
                             } else {
                                 handleAccountSelect(searchStates.tkSearchRowId, account);
                             }
@@ -1717,8 +1859,6 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                         onSelect={(customer) => {
                             if (searchStates.searchContext === "mainForm") {
                                 handleCustomerSelect("main-form", customer);
-                            } else if (searchStates.searchContext === "chiPhiForm") {
-                                handleCustomerSelect("chi-phi-form", customer);
                             } else {
                                 handleCustomerSelect(searchStates.maKhSearchRowId, customer);
                             }
@@ -1752,6 +1892,15 @@ export const ModalCreatePhieuChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }
                         searchValue={searchStates.khoSearch}
                         rowId={searchStates.khoSearchRowId}
                         onSearch={(value) => setSearchStates(prev => ({ ...prev, khoSearch: value }))}
+                    />
+                )}
+
+                {/* Popup chọn phiếu nhập */}
+                {showPhieuNhapPopup && (
+                    <PhieuNhapSelectionPopup
+                        isOpen={showPhieuNhapPopup}
+                        onClose={() => setShowPhieuNhapPopup(false)}
+                        onSelect={handlePhieuNhapSelect}
                     />
                 )}
             </div>

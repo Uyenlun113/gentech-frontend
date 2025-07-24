@@ -2,9 +2,9 @@ import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useModal } from "../../hooks/useModal";
-import { useDeletePhieuMua, useListPhieuMua } from "../../hooks/usePhieumua";
+import { useDeleteChiPhiMuaHang, useListChiPhiMuaHang } from "../../hooks/useChiPhiMuaHang";
 
-export const usePhieuPhieuChiPhiMuaHangList = () => {
+export const useChiPhiMuaHangList = () => {
     const [selectedEditId, setSelectedEditId] = useState();
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
@@ -43,24 +43,24 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
         return params;
     }, [currentPage, pageSize, searchTerm, rangePickerValue]);
 
-    const { data: fetchPhieuMuaData, isLoading: isLoadingPhieuMua, refetch: refetchPhieuMuaData } = useListPhieuMua(searchParams);
+    const { data: fetchChiPhiMuaHangData, isLoading: isLoadingChiPhiMuaHang, refetch: refetchChiPhiMuaHangData } = useListChiPhiMuaHang(searchParams);
 
-    const deleteMutation = useDeletePhieuMua();
+    const deleteMutation = useDeleteChiPhiMuaHang();
 
     const dataTable = useMemo(() => {
         let rawData = [];
 
-        if (fetchPhieuMuaData?.data?.items && Array.isArray(fetchPhieuMuaData.data.items)) {
-            rawData = fetchPhieuMuaData.data.items;
+        if (fetchChiPhiMuaHangData?.data?.items && Array.isArray(fetchChiPhiMuaHangData.data.items)) {
+            rawData = fetchChiPhiMuaHangData.data.items;
         }
-        else if (fetchPhieuMuaData?.items && Array.isArray(fetchPhieuMuaData.items)) {
-            rawData = fetchPhieuMuaData.items;
+        else if (fetchChiPhiMuaHangData?.items && Array.isArray(fetchChiPhiMuaHangData.items)) {
+            rawData = fetchChiPhiMuaHangData.items;
         }
-        else if (fetchPhieuMuaData?.data && Array.isArray(fetchPhieuMuaData.data)) {
-            rawData = fetchPhieuMuaData.data;
+        else if (fetchChiPhiMuaHangData?.data && Array.isArray(fetchChiPhiMuaHangData.data)) {
+            rawData = fetchChiPhiMuaHangData.data;
         }
-        else if (Array.isArray(fetchPhieuMuaData)) {
-            rawData = fetchPhieuMuaData;
+        else if (Array.isArray(fetchChiPhiMuaHangData)) {
+            rawData = fetchChiPhiMuaHangData;
         }
 
         // Thêm stt
@@ -68,28 +68,28 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
             ...item,
             stt: index + 1,
         }));
-    }, [fetchPhieuMuaData]);
+    }, [fetchChiPhiMuaHangData]);
 
     // Get total items and total pages from API response
     const totalItems = useMemo(() => {
-        if (fetchPhieuMuaData?.data?.totalItems) {
-            return fetchPhieuMuaData.data.totalItems;
+        if (fetchChiPhiMuaHangData?.data?.totalItems) {
+            return fetchChiPhiMuaHangData.data.totalItems;
         }
-        if (fetchPhieuMuaData?.totalItems) {
-            return fetchPhieuMuaData.totalItems;
+        if (fetchChiPhiMuaHangData?.totalItems) {
+            return fetchChiPhiMuaHangData.totalItems;
         }
-        if (fetchPhieuMuaData?.data?.total) {
-            return fetchPhieuMuaData.data.total;
+        if (fetchChiPhiMuaHangData?.data?.total) {
+            return fetchChiPhiMuaHangData.data.total;
         }
-        if (fetchPhieuMuaData?.total) {
-            return fetchPhieuMuaData.total;
+        if (fetchChiPhiMuaHangData?.total) {
+            return fetchChiPhiMuaHangData.total;
         }
         return dataTable.length;
-    }, [fetchPhieuMuaData, dataTable.length]);
+    }, [fetchChiPhiMuaHangData, dataTable.length]);
 
     const totalPages = Math.ceil(totalItems / pageSize);
     const dataDetailTable = useMemo(() => {
-        const list = selectedRecord?.ct71;
+        const list = selectedRecord?.ct73;
         if (Array.isArray(list)) {
             return list.map((item, index) => ({
                 ...item,
@@ -100,8 +100,8 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
     }, [selectedRecord]);
 
     useEffect(() => {
-        setLoading(isLoadingPhieuMua || deleteMutation.isPending);
-    }, [isLoadingPhieuMua, deleteMutation.isPending]);
+        setLoading(isLoadingChiPhiMuaHang || deleteMutation.isPending);
+    }, [isLoadingChiPhiMuaHang, deleteMutation.isPending]);
 
     const formatDate = (dateString) => {
         if (!dateString) return "";
@@ -138,7 +138,7 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
             if (currentPage > newTotalPages && newTotalPages > 0) {
                 setCurrentPage(newTotalPages);
             } else {
-                refetchPhieuMuaData();
+                refetchChiPhiMuaHangData();
             }
         } catch (error) {
             console.error("Error deleting record:", error);
@@ -153,15 +153,15 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
 
     const handleRowClick = async (record) => {
         try {
-            const ct71WithSTT = Array.isArray(record.ct71)
-                ? record.ct71.map((item, index) => ({
+            const ct73WithSTT = Array.isArray(record.ct73)
+                ? record.ct73.map((item, index) => ({
                     ...item,
                     stt: index + 1,
                 }))
                 : [];
 
-            record.ct71 = ct71WithSTT;
-            record.children = ct71WithSTT;
+            record.ct73 = ct73WithSTT;
+            record.children = ct73WithSTT;
             setSelectedRecord(record);
             setShowDetailTable(true);
         } catch (error) {
@@ -254,6 +254,20 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
             fixed: "left",
             width: 120,
             render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
+        },
+        {
+            key: "so_pn",
+            title: "Số PN",
+            width: 120,
+            render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
+        },
+        {
+            key: "ngay_pn",
+            title: "Ngày PN",
+            width: 120,
+            render: (val) => {
+                return <div className="font-medium text-center">{formatDate(val)}</div>;
+            },
         },
         {
             key: "t_tien_nt",
@@ -439,7 +453,7 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
             width: 120,
             render: (val) => (
                 <span className="text-center block ">
-                    {formatCurrency(val)}
+                    {val || "-"}
                 </span>
             ),
         },
@@ -511,7 +525,7 @@ export const usePhieuPhieuChiPhiMuaHangList = () => {
         handleCancelDelete,
         setSelectedRecord,
         deleteMutation,
-        fetchPhieuMuaData,
+        fetchChiPhiMuaHangData,
 
         // Modals
         isOpenCreate,

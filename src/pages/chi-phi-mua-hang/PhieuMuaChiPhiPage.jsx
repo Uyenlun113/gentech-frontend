@@ -12,11 +12,13 @@ import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../icons";
-import { ModalCreatePhieuChiPhiMuaHang } from "./ModalCreateChiPhiMua";
-import { ModalEditPhieuPhieuChiPhiMuaHang } from "./ModalEditChiPhiMua";
-import { usePhieuPhieuChiPhiMuaHangList } from "./usePhieuChiPhiList";
 
-export default function PhieuPhieuChiPhiMuaHangPage() {
+
+import { ModalCreateChiPhiMuaHang } from "./ModalCreateChiPhiMua";
+import { ModalEditChiPhiMuaHang } from "./ModalEditChiPhiMua";
+import { useChiPhiMuaHangList } from "./usePhieuChiPhiList";
+
+export default function ChiPhiMuaHangPage() {
     const {
         dataTable,
         columnsTable,
@@ -39,7 +41,7 @@ export default function PhieuPhieuChiPhiMuaHangPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
-    } = usePhieuPhieuChiPhiMuaHangList();
+    } = useChiPhiMuaHangList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
 
@@ -57,11 +59,11 @@ export default function PhieuPhieuChiPhiMuaHangPage() {
 
     return (
         <>
-            <ModalCreatePhieuChiPhiMuaHang
+            <ModalCreateChiPhiMuaHang
                 isOpenCreate={isOpenCreate}
                 closeModalCreate={closeModalCreate}
             />
-            <ModalEditPhieuPhieuChiPhiMuaHang
+            <ModalEditChiPhiMuaHang
                 isOpenEdit={isOpenEdit}
                 closeModalEdit={closeModalEdit}
                 editingId={selectedEditId}
@@ -80,7 +82,7 @@ export default function PhieuPhieuChiPhiMuaHangPage() {
                                     Quay lại
                                 </Link>
                                 <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
-                                    Thêm phiếu nhập
+                                    Thêm phiếu nhập chi phí
                                 </Button>
                             </div>
 
@@ -138,7 +140,7 @@ export default function PhieuPhieuChiPhiMuaHangPage() {
                     <ConfirmModal
                         isOpen={isOpenDelete}
                         title="Xác nhận xóa"
-                        message={`Bạn có chắc chắn muốn xóa phiếu nhập "${recordToDelete?.so_ct || recordToDelete?.stt_rec
+                        message={`Bạn có chắc chắn muốn xóa phiếu nhập chi phí "${recordToDelete?.so_ct || recordToDelete?.stt_rec
                             }" không?`}
                         onConfirm={handleConfirmDelete}
                         onCancel={handleCancelDelete}
