@@ -13,7 +13,6 @@ export const ShowMoreTables = ({ dataTable, columnsTable, columnsSubTable, handl
     setSelectedRow(row);
     handleRowClick(row);
   };
-
   return (
     <>
       <div className={`${isShowMore ? "max-h-[40vh] overflow-y-scroll" : "h-full"}`}>

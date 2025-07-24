@@ -1,3 +1,4 @@
+// Table columns cho Hàng hóa
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalendarIcon, Plus, Save, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -43,7 +44,7 @@ const INITIAL_CHI_PHI_DATA = [
         ten_vt: "",
         so_luong: "",
         tien_hang: "",
-        tien_chi_phi: "",
+        cp: "",
         tk_no: "",
     },
 ];
@@ -117,18 +118,17 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         tk_thue_no: "",
         status: "1",
         ma_dvcs: "",
-        loai_pb: "1", // Default: 1 - Tiền
+        loai_pb: "1",
     });
 
     const [hangHoaData, setHangHoaData] = useState(INITIAL_HANG_HOA_DATA);
     const [chiPhiData, setChiPhiData] = useState(INITIAL_CHI_PHI_DATA);
     const [hdThueData, setHdThueData] = useState(INITIAL_HD_THUE_DATA);
 
-    // State riêng cho form chi phí
     const [chiPhiFormData, setChiPhiFormData] = useState({
-        ma_kh: "",
-        tk_co: "",
-        tong_chi_phi: "",
+        ma_kh_i: "",
+        tk_i: "",
+        t_cp_nt: "",
     });
 
     // Search states với debounce
@@ -195,7 +195,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }, 0);
 
         const totalChiPhi = chiPhiData.reduce((sum, item) => {
-            const value = parseFloat(item.tien_chi_phi) || 0;
+            const value = parseFloat(item.cp) || 0;
             return sum + value;
         }, 0);
 
@@ -240,7 +240,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
     // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
     useEffect(() => {
-        const tongChiPhi = parseFloat(chiPhiFormData.tong_chi_phi) || 0;
+        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0; // Đổi từ tong_chi_phi thành t_cp_nt
 
         if (tongChiPhi > 0) {
             // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
@@ -255,14 +255,14 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     if (row.ma_vt && parseFloat(row.tien_hang) > 0) {
                         return {
                             ...row,
-                            tien_chi_phi: chiPhiPerRow.toFixed(0)
+                            cp: chiPhiPerRow.toFixed(0)
                         };
                     }
                     return row;
                 }));
             }
         }
-    }, [chiPhiFormData.tong_chi_phi]); // Chỉ depend vào tong_chi_phi
+    }, [chiPhiFormData.t_cp_nt]); // Chỉ depend vào t_cp_nt
 
     // Auto fill tiền hàng vào HĐ thuế - với flag để tránh infinite loop
     const [hasAutoFilledHdThue, setHasAutoFilledHdThue] = useState(false);
@@ -336,7 +336,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                             ten_vt: updatedRow.ten_vt || "",
                             so_luong: updatedRow.so_luong || "",
                             tien_hang: updatedRow.tien_nt || "",
-                            tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
+                            cp: prevChiPhi[existingIndex]?.cp || "",
                             tk_no: updatedRow.tk_vt || "",
                         };
 
@@ -366,7 +366,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                         ten_vt: updatedRow.ten_vt || "",
                         so_luong: updatedRow.so_luong || "",
                         tien_hang: updatedRow.tien_nt || "",
-                        tien_chi_phi: prevChiPhi[existingIndex]?.tien_chi_phi || "",
+                        cp: prevChiPhi[existingIndex]?.cp || "",
                         tk_no: updatedRow.tk_vt || "",
                     };
 
@@ -566,7 +566,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }));
     }, []);
 
-    // Handle search for chi phí form fields
+    // Handle search for chi phí form fields - đã cập nhật
     const handleChiPhiCustomerSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -583,7 +583,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             ...prev,
             tkSearch: value,
             tkSearchRowId: "chi-phi-form",
-            tkSearchField: "tk_co",
+            tkSearchField: "tk_i",
             searchContext: "chiPhiForm",
             // Clear other searches
             maKhSearch: prev.searchContext === "chiPhiForm" ? prev.maKhSearch : "",
@@ -594,7 +594,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("tk_thue_no", account.tk.trim());
         } else if (searchStates.searchContext === "chiPhiForm") {
-            setChiPhiFormData(prev => ({ ...prev, tk_co: account.tk.trim() }));
+            setChiPhiFormData(prev => ({ ...prev, tk_i: account.tk.trim() }));
         } else if (searchStates.searchContext === "hangHoa") {
             setHangHoaData(prev =>
                 prev.map(item =>
@@ -638,7 +638,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             handleFormChange("ma_so_thue", customer.ma_so_thue || "");
             handleFormChange("ten_kh", customer.ten_kh || "");
         } else if (searchStates.searchContext === "chiPhiForm") {
-            setChiPhiFormData(prev => ({ ...prev, ma_kh: customer.ma_kh.trim() || "" }));
+            setChiPhiFormData(prev => ({ ...prev, ma_kh_i: customer.ma_kh.trim() || "" }));
         } else if (searchStates.searchContext === "hdThue") {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -780,7 +780,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 ten_vt: "",
                 so_luong: "",
                 tien_hang: "",
-                tien_chi_phi: "",
+                cp: "",
                 tk_no: "",
             }
         ]);
@@ -842,8 +842,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
     // Phân bổ tự động chi phí
     const handlePhanBoTuDong = useCallback(() => {
-        const tongChiPhi = parseFloat(chiPhiFormData.tong_chi_phi) || 0;
-
+        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
         if (tongChiPhi === 0) {
             toast.warning("Vui lòng nhập tổng chi phí để phân bổ");
             return;
@@ -874,7 +873,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
                         return {
                             ...chiPhiRow,
-                            tien_chi_phi: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -896,7 +895,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
                         return {
                             ...chiPhiRow,
-                            tien_chi_phi: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0),
                         };
                     }
                     return chiPhiRow;
@@ -905,7 +904,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }
 
         toast.success("Phân bổ chi phí tự động thành công!");
-    }, [hangHoaData, formData.loai_pb, chiPhiFormData.tong_chi_phi]);
+    }, [hangHoaData, formData.loai_pb, chiPhiFormData.t_cp_nt]);
 
     const resetForm = useCallback(() => {
         setFormData({
@@ -928,9 +927,9 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         setChiPhiData(INITIAL_CHI_PHI_DATA);
         setHdThueData(INITIAL_HD_THUE_DATA);
         setChiPhiFormData({
-            ma_kh: "",
-            tk_co: "",
-            tong_chi_phi: "",
+            ma_kh_i: "",
+            tk_i: "",
+            t_cp_nt: "",
         });
         setSearchStates({
             tkSearch: "",
@@ -1000,6 +999,8 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
+                    ma_kh_i: chiPhiFormData.ma_kh_i?.trim() || "",
+                    tk_i: chiPhiFormData.tk_i?.trim() || "",
                     ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
                     ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : new Date().toISOString(),
                 },
@@ -1060,8 +1061,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         resetForm();
         closeModalCreate();
     }, [resetForm, closeModalCreate]);
-
-    // Table columns cho Hàng hóa
     const hangHoaColumns = [
         {
             key: "ma_vt",
@@ -1211,22 +1210,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             },
         },
         {
-            key: "ma_du_an",
-            title: "Mã dự án",
-            width: 120,
-            render: (val, row) => {
-                if (row.id === 'total') return <div></div>;
-                return (
-                    <Input
-                        value={row.ma_du_an}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_du_an", e.target.value)}
-                        placeholder="Mã dự án..."
-                        className="w-full"
-                    />
-                );
-            },
-        },
-        {
             key: "action",
             title: "Hành động",
             fixed: "right",
@@ -1335,14 +1318,14 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             ),
         },
         {
-            key: "tien_chi_phi",
+            key: "cp",
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
                 <Input
                     type="number"
-                    value={row.tien_chi_phi}
-                    onChange={(e) => handleChiPhiChange(row.id, "tien_chi_phi", e.target.value)}
+                    value={row.cp}
+                    onChange={(e) => handleChiPhiChange(row.id, "cp", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -1712,7 +1695,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
                                             placeholder="Mã số thuế"
-                                            readOnly
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                         />
                                     </div>
@@ -1843,7 +1825,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                         </Label>
                                         <div className="flex-1">
                                             <Select
-                                                value={formData.status}
+                                                defaultValue={formData.status}
                                                 options={STATUS_OPTIONS}
                                                 onChange={(value) => handleFormChange("status", value)}
                                                 className="w-full h-9 text-sm bg-white"
@@ -1881,14 +1863,13 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                             {/* Form fields ở trên - 1 hàng ngang */}
                                             <div className="bg-white rounded-lg border border-gray-200 p-2">
                                                 <div className="grid grid-cols-5 gap-4">
-                                                    {/* Mã khách */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Mã khách</Label>
                                                         <input
                                                             type="text"
-                                                            value={chiPhiFormData.ma_kh}
+                                                            value={chiPhiFormData.ma_kh_i}
                                                             onChange={(e) => {
-                                                                setChiPhiFormData((prev) => ({ ...prev, ma_kh: e.target.value }));
+                                                                setChiPhiFormData((prev) => ({ ...prev, ma_kh_i: e.target.value }));
                                                                 handleChiPhiCustomerSearch(e.target.value);
                                                             }}
                                                             placeholder="Nhập mã KH..."
@@ -1896,14 +1877,14 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                                         />
                                                     </div>
 
-                                                    {/* Tài khoản có */}
+                                                    {/* Tài khoản có - đã cập nhật từ tk_co thành tk_i */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">TK có</Label>
                                                         <input
                                                             type="text"
-                                                            value={chiPhiFormData.tk_co}
+                                                            value={chiPhiFormData.tk_i}
                                                             onChange={(e) => {
-                                                                setChiPhiFormData((prev) => ({ ...prev, tk_co: e.target.value }));
+                                                                setChiPhiFormData((prev) => ({ ...prev, tk_i: e.target.value }));
                                                                 handleChiPhiAccountSearch(e.target.value);
                                                             }}
                                                             placeholder="Nhập TK..."
@@ -1911,14 +1892,14 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                                         />
                                                     </div>
 
-                                                    {/* Tổng chi phí */}
+                                                    {/* Tổng chi phí - đã cập nhật từ tong_chi_phi thành t_cp_nt */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
                                                         <input
                                                             type="number"
-                                                            value={chiPhiFormData.tong_chi_phi}
+                                                            value={chiPhiFormData.t_cp_nt}
                                                             onChange={(e) =>
-                                                                setChiPhiFormData((prev) => ({ ...prev, tong_chi_phi: e.target.value }))
+                                                                setChiPhiFormData((prev) => ({ ...prev, t_cp_nt: e.target.value }))
                                                             }
                                                             placeholder="0"
                                                             className="h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right"
