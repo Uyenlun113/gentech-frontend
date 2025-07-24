@@ -2201,7 +2201,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                         </Label>
                                         <div className="flex-1">
                                             <Select
-                                                value={formData.status}
+                                                defaultValue={formData.status}
                                                 options={STATUS_OPTIONS}
                                                 onChange={(value) => handleFormChange("status", value)}
                                                 className="w-full h-9 text-sm bg-white"
