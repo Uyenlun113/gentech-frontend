@@ -30,7 +30,7 @@ export default function Sales() {
   const handleIconClick = (type) => {
     switch (type) {
       case 'bank-receipt':
-        window.location.href = '/general-ledger/list';
+        window.location.href = '/chung-tu/don-dat-hang-mua';
         break;
       case 'bank-payment':
         window.location.href = '/phieu-mua';
@@ -39,7 +39,7 @@ export default function Sales() {
         window.location.href = '/chi-phi-mua-hang';
         break;
       case 'cash-payment':
-        window.location.href = '/phieu-chi-tien-mat';
+        window.location.href = '/chung-tu/hoa-don-mua-dv';
         break;
       default:
         break;
