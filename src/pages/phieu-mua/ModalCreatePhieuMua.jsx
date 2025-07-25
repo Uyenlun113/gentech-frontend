@@ -1,4 +1,3 @@
-// Table columns cho Hàng hóa
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { CalendarIcon, Plus, Save, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -34,6 +33,7 @@ const INITIAL_HANG_HOA_DATA = [
         tien_nt0: "",
         tk_vt: "",
         thue_nt: "",
+        cp_nt: "", // Thêm trường chi phí vào hàng hóa
     },
 ];
 
@@ -129,6 +129,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         ma_kh_i: "",
         tk_i: "",
         t_cp_nt: "",
+        cp_nt: "",
     });
 
     // Search states với debounce
@@ -154,10 +155,10 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
     const hdThueTableRef = useRef(null);
 
     // Debounced search values để tránh gọi API liên tục
-    const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
-    const debouncedMaKhSearch = useDebounce(searchStates.maKhSearch, 600);
-    const debouncedVtSearch = useDebounce(searchStates.vtSearch, 600);
-    const debouncedKhoSearch = useDebounce(searchStates.khoSearch, 600);
+    const debouncedTkSearch = useDebounce(searchStates.tkSearch, 300);
+    const debouncedMaKhSearch = useDebounce(searchStates.maKhSearch, 300);
+    const debouncedVtSearch = useDebounce(searchStates.vtSearch, 300);
+    const debouncedKhoSearch = useDebounce(searchStates.khoSearch, 300);
 
     // React Query calls với enabled condition để tránh gọi API không cần thiết
     const { data: accountRawData = {} } = useAccounts(
@@ -195,7 +196,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }, 0);
 
         const totalChiPhi = chiPhiData.reduce((sum, item) => {
-            const value = parseFloat(item.cp) || 0;
+            const value = parseFloat(item.cp || item.tien_chi_phi) || 0;
             return sum + value;
         }, 0);
 
@@ -204,6 +205,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             return sum + value;
         }, 0);
 
+        // Tổng thanh toán = tiền hàng + chi phí + thuế
         const totalThanhTien = totalTienHang + totalChiPhi + totalThueGtgt;
 
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
@@ -240,7 +242,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
     // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
     useEffect(() => {
-        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0; // Đổi từ tong_chi_phi thành t_cp_nt
+        const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
 
         if (tongChiPhi > 0) {
             // Tự động phân bổ đều chi phí cho các dòng có dữ liệu
@@ -260,40 +262,20 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     }
                     return row;
                 }));
-            }
-        }
-    }, [chiPhiFormData.t_cp_nt]); // Chỉ depend vào t_cp_nt
 
-    // Auto fill tiền hàng vào HĐ thuế - với flag để tránh infinite loop
-    const [hasAutoFilledHdThue, setHasAutoFilledHdThue] = useState(false);
-
-    useEffect(() => {
-        const tongTienHangVaChiPhi = totals.totalTienHang + totals.totalChiPhi;
-
-        // Chỉ auto fill lần đầu và khi có thay đổi đáng kể
-        if (tongTienHangVaChiPhi > 0 && hdThueData.length > 0 && !hasAutoFilledHdThue) {
-            const firstRow = hdThueData[0];
-            if (!firstRow.t_tien || parseFloat(firstRow.t_tien) === 0) {
-                setHdThueData(prev => prev.map((row, index) => {
-                    if (index === 0) {
-                        const tTien = tongTienHangVaChiPhi;
-                        const thueSuat = parseFloat(row.thue_suat) || 0;
-                        const tThue = (tTien * thueSuat) / 100;
-                        const tTt = tTien + tThue;
-
+                // Cập nhật cp_nt trong hangHoaData
+                setHangHoaData(prev => prev.map(hangHoa => {
+                    if (hangHoa.ma_vt && parseFloat(hangHoa.tien_nt) > 0) {
                         return {
-                            ...row,
-                            t_tien: tTien.toString(),
-                            t_thue: tThue.toString(),
-                            t_tt: tTt.toString()
+                            ...hangHoa,
+                            cp_nt: chiPhiPerRow.toFixed(0)
                         };
                     }
-                    return row;
+                    return hangHoa;
                 }));
-                setHasAutoFilledHdThue(true);
             }
         }
-    }, [totals.totalTienHang, totals.totalChiPhi, hasAutoFilledHdThue]);
+    }, [chiPhiFormData.t_cp_nt]);
 
     // Handlers
     const handleFormChange = useCallback((field, value) => {
@@ -429,6 +411,13 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             return newData;
         });
 
+        // Sync chi phí vào hangHoaData khi thay đổi cp
+        if (field === "cp") {
+            setHangHoaData(prev => prev.map(hangHoa =>
+                hangHoa.id === id ? { ...hangHoa, cp_nt: value } : hangHoa
+            ));
+        }
+
         // Search logic - Clear previous search và set search mới
         if (field === "ma_vt") {
             setSearchStates(prev => ({
@@ -453,27 +442,69 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }
     }, []);
 
+    // Auto-fill HĐ Thuế chỉ khi user CLICK vào ô cụ thể
+    const handleHdThueClick = useCallback((id, field) => {
+        // Chỉ auto-fill khi user click vào các ô số liệu và có dữ liệu hàng hóa
+        const autoFillFields = ["so_luong", "gia", "t_tien"];
+
+        if (autoFillFields.includes(field) &&
+            totals.totalTienHang > 0 &&
+            totals.totalSoLuong > 0) {
+
+            const firstRow = hdThueData[0];
+            // Auto fill nếu dòng đầu tiên và ô đang click vào chưa có dữ liệu
+            if (id === 1 && (!firstRow[field] || parseFloat(firstRow[field]) === 0)) {
+
+                // Tính tổng đơn giá từ tab hàng hóa
+                const totalGia = hangHoaData.reduce((sum, item) => {
+                    const gia = parseFloat(item.gia) || 0;
+                    return sum + gia;
+                }, 0);
+
+                setHdThueData(prev => prev.map((row, index) => {
+                    if (index === 0) { // Chỉ fill dòng đầu tiên
+                        const updates = { ...row };
+
+                        // Auto fill thông tin khách hàng nếu chưa có
+                        if (!updates.ma_kh) {
+                            updates.ma_kh = formData.ma_kh || "";
+                            updates.ten_kh = formData.ten_kh || "";
+                            updates.dia_chi = formData.dia_chi || "";
+                            updates.ma_so_thue = formData.ma_so_thue || "";
+                        }
+
+                        // Fill theo field được click
+                        if (field === "so_luong") {
+                            updates.so_luong = totals.totalSoLuong.toString();
+                        } else if (field === "gia") {
+                            updates.gia = totalGia.toString();
+                        } else if (field === "t_tien") {
+                            updates.t_tien = totals.totalTienHang.toString();
+                            // Tự động tính thuế khi có tiền hàng
+                            const thueSuat = parseFloat(updates.thue_suat) || 10;
+                            const tThue = (totals.totalTienHang * thueSuat) / 100;
+                            const tTt = totals.totalTienHang + tThue;
+                            updates.thue_suat = thueSuat.toString();
+                            updates.t_thue = tThue.toString();
+                            updates.t_tt = tTt.toString();
+                        }
+
+                        return updates;
+                    }
+                    return row;
+                }));
+            }
+        }
+    }, [totals, hdThueData, hangHoaData, formData]);
+
     const handleHdThueChange = useCallback((id, field, value) => {
         setHdThueData(prev => {
             const newData = prev.map(item =>
                 item.id === id ? { ...item, [field]: value } : item
             );
 
-            // Tự động tính toán thuế và tổng tiền
-            if (field === "so_luong" || field === "gia") {
-                const currentRow = newData.find(item => item.id === id);
-                const soLuong = parseFloat(currentRow.so_luong) || 0;
-                const gia = parseFloat(currentRow.gia) || 0;
-                const tTien = soLuong * gia;
-
-                return newData.map(item =>
-                    item.id === id
-                        ? { ...item, t_tien: tTien.toString() }
-                        : item
-                );
-            }
-
-            if (field === "t_tien" || field === "thue_suat") {
+            // Tự động tính toán thuế và tổng tiền khi thay đổi thuế suất hoặc tiền hàng
+            if (field === "thue_suat" || field === "t_tien") {
                 const currentRow = newData.find(item => item.id === id);
                 const tTien = parseFloat(currentRow.t_tien) || 0;
                 const thueSuat = parseFloat(currentRow.thue_suat) || 0;
@@ -487,10 +518,24 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 );
             }
 
+            // Tự động tính toán tiền hàng từ số lượng và giá (nếu cần thiết)
+            if (field === "so_luong" || field === "gia") {
+                const currentRow = newData.find(item => item.id === id);
+                const soLuong = parseFloat(currentRow.so_luong) || 0;
+                const gia = parseFloat(currentRow.gia) || 0;
+                const tTien = soLuong * gia;
+
+                return newData.map(item =>
+                    item.id === id
+                        ? { ...item, t_tien: tTien.toString() }
+                        : item
+                );
+            }
+
             return newData;
         });
 
-        // Auto fill thông tin khách hàng từ form chính khi nhập mã khách hàng
+        // Auto fill thông tin khách hàng từ form chính
         if (field === "ma_kh" && !value) {
             setHdThueData(prev =>
                 prev.map(item =>
@@ -505,16 +550,13 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             );
         }
 
-        // Search logic - Clear previous search và set search mới
+        // Search logic (giữ nguyên)
         if (field === "ma_kh") {
             setSearchStates(prev => ({
                 ...prev,
                 maKhSearch: value,
                 maKhSearchRowId: id,
                 searchContext: "hdThue",
-                // Clear other searches
-                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
-                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "tk_thue_no") {
@@ -524,9 +566,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 tkSearchRowId: id,
                 tkSearchField: "tk_thue_no",
                 searchContext: "hdThue",
-                // Clear other searches
-                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
-                khoSearch: prev.searchContext === "hdThue" && prev.khoSearchRowId === id ? prev.khoSearch : "",
             }));
         }
         if (field === "ma_kho") {
@@ -535,9 +574,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 khoSearch: value,
                 khoSearchRowId: id,
                 searchContext: "hdThue",
-                // Clear other searches
-                maKhSearch: prev.searchContext === "hdThue" && prev.maKhSearchRowId === id ? prev.maKhSearch : "",
-                tkSearch: prev.searchContext === "hdThue" && prev.tkSearchRowId === id ? prev.tkSearch : "",
             }));
         }
     }, [formData]);
@@ -753,6 +789,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 tien_nt0: "",
                 tk_vt: "",
                 thue_nt: "",
+                cp_nt: "", // Thêm trường chi phí vào hàng hóa mới
             }
         ]);
 
@@ -843,6 +880,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
     // Phân bổ tự động chi phí
     const handlePhanBoTuDong = useCallback(() => {
         const tongChiPhi = parseFloat(chiPhiFormData.t_cp_nt) || 0;
+
         if (tongChiPhi === 0) {
             toast.warning("Vui lòng nhập tổng chi phí để phân bổ");
             return;
@@ -858,7 +896,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         }
 
         if (formData.loai_pb === "1") {
-            // Phân bổ theo tiền
+            // Phân bổ theo tiền hàng (tỉ lệ)
             const tongTienHang = validHangHoaRows.reduce((sum, row) =>
                 sum + (parseFloat(row.tien_nt) || 0), 0
             );
@@ -873,10 +911,29 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
                         return {
                             ...chiPhiRow,
-                            cp: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0), // Cho Create
+                            tien_chi_phi: chiPhiPhanBo.toFixed(0), // Cho Edit
                         };
                     }
                     return chiPhiRow;
+                });
+            });
+
+            // Cập nhật cp_nt trong hangHoaData
+            setHangHoaData(prevHangHoa => {
+                return prevHangHoa.map(hangHoaRow => {
+                    const validRow = validHangHoaRows.find(h => h.id === hangHoaRow.id);
+                    if (validRow) {
+                        const tienHang = parseFloat(validRow.tien_nt) || 0;
+                        const tyLe = tongTienHang > 0 ? tienHang / tongTienHang : 0;
+                        const chiPhiPhanBo = tongChiPhi * tyLe;
+
+                        return {
+                            ...hangHoaRow,
+                            cp_nt: chiPhiPhanBo.toFixed(0)
+                        };
+                    }
+                    return hangHoaRow;
                 });
             });
         } else {
@@ -895,10 +952,29 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
                         return {
                             ...chiPhiRow,
-                            cp: chiPhiPhanBo.toFixed(0),
+                            cp: chiPhiPhanBo.toFixed(0), // Cho Create
+                            tien_chi_phi: chiPhiPhanBo.toFixed(0), // Cho Edit
                         };
                     }
                     return chiPhiRow;
+                });
+            });
+
+            // Cập nhật cp_nt trong hangHoaData
+            setHangHoaData(prevHangHoa => {
+                return prevHangHoa.map(hangHoaRow => {
+                    const validRow = validHangHoaRows.find(h => h.id === hangHoaRow.id);
+                    if (validRow) {
+                        const soLuong = parseFloat(validRow.so_luong) || 0;
+                        const tyLe = tongSoLuong > 0 ? soLuong / tongSoLuong : 0;
+                        const chiPhiPhanBo = tongChiPhi * tyLe;
+
+                        return {
+                            ...hangHoaRow,
+                            cp_nt: chiPhiPhanBo.toFixed(0)
+                        };
+                    }
+                    return hangHoaRow;
                 });
             });
         }
@@ -947,7 +1023,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             showVatTuPopup: false,
             showKhoPopup: false,
         });
-        setHasAutoFilledHdThue(false); // Reset flag
     }, []);
 
     const validateForm = useCallback(() => {
@@ -1006,16 +1081,17 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 },
                 hangHoa: hangHoaData
                     .filter(row => row.ma_vt && parseFloat(row.tien_nt) > 0)
-                    .map(({ ma_kho_i, ma_vt, gia, thue_nt, tien_nt, tien_nt0, tk_vt, so_luong }) => ({
-                        ma_kho_i: ma_kho_i?.trim() || "",
-                        ma_vt: ma_vt?.trim() || "",
+                    .map((hangHoaRow) => ({
+                        ma_kho_i: hangHoaRow.ma_kho_i?.trim() || "",
+                        ma_vt: hangHoaRow.ma_vt?.trim() || "",
                         ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
-                        gia: Number(gia) || 0,
-                        thue_nt: Number(thue_nt) || 0,
-                        tien_nt: Number(tien_nt) || 0,
-                        tien_nt0: Number(tien_nt0) || 0,
-                        tk_vt: tk_vt?.trim() || "",
-                        so_luong: Number(so_luong) || 0,
+                        gia: Number(hangHoaRow.gia) || 0,
+                        thue_nt: Number(hangHoaRow.thue_nt) || 0,
+                        tien_nt: Number(hangHoaRow.tien_nt) || 0,
+                        tien_nt0: Number(hangHoaRow.tien_nt0) || 0,
+                        tk_vt: hangHoaRow.tk_vt?.trim() || "",
+                        so_luong: Number(hangHoaRow.so_luong) || 0,
+                        cp_nt: Number(hangHoaRow.cp_nt) || 0 // Lưu chi phí vào từng dòng hàng hóa
                     })),
                 hdThue: hdThueData
                     .filter(row => row.ma_kh || row.so_ct0)
@@ -1055,12 +1131,13 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             console.error(err);
             toast.error("Lỗi khi tạo phiếu mua: " + (err?.message || "Không xác định"));
         }
-    }, [formData, hangHoaData, hdThueData, totals, createPhieuMua, closeModalCreate, resetForm, navigate, validateForm]);
+    }, [formData, hangHoaData, hdThueData, totals, createPhieuMua, closeModalCreate, resetForm, navigate, validateForm, chiPhiFormData]);
 
     const handleClose = useCallback(() => {
         resetForm();
         closeModalCreate();
     }, [resetForm, closeModalCreate]);
+
     const hangHoaColumns = [
         {
             key: "ma_vt",
@@ -1246,7 +1323,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 gia: '',
                 tien_nt: totals.totalTienHang,
                 tk_vt: '',
-                ma_du_an: ''
+                cp_nt: ''
             }
         ];
     }, [hangHoaData, totals]);
@@ -1318,7 +1395,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             ),
         },
         {
-            key: "cp",
+            key: "cp_nt",
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
@@ -1363,7 +1440,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         },
     ];
 
-    // Table columns cho HĐ Thuế
+    // Table columns cho HĐ Thuế - CHỈ có onClick cho 3 ô cần auto-fill
     const hdThueColumns = [
         {
             key: "stt",
@@ -1403,6 +1480,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                 />
             ),
         },
+
         {
             key: "ma_gd",
             title: "Mẫu hóa đơn",
@@ -1491,19 +1569,6 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             )
         },
         {
-            key: "ma_kho",
-            title: "Mã kho",
-            width: 120,
-            render: (val, row) => (
-                <Input
-                    value={row.ma_kho}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
-                    placeholder="Mã kho..."
-                    className="w-full"
-                />
-            ),
-        },
-        {
             key: "ten_vt",
             title: "Hàng hóa, dịch vụ",
             width: 200,
@@ -1525,6 +1590,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     type="number"
                     value={row.so_luong}
                     onChange={(e) => handleHdThueChange(row.id, "so_luong", e.target.value)}
+                    onClick={() => handleHdThueClick(row.id, "so_luong")}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -1539,6 +1605,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     type="number"
                     value={row.gia}
                     onChange={(e) => handleHdThueChange(row.id, "gia", e.target.value)}
+                    onClick={() => handleHdThueClick(row.id, "gia")}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -1553,6 +1620,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                     type="number"
                     value={row.t_tien}
                     onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
+                    onClick={() => handleHdThueClick(row.id, "t_tien")}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -1877,7 +1945,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                                         />
                                                     </div>
 
-                                                    {/* Tài khoản có - đã cập nhật từ tk_co thành tk_i */}
+                                                    {/* Tài khoản có */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">TK có</Label>
                                                         <input
@@ -1892,7 +1960,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                                         />
                                                     </div>
 
-                                                    {/* Tổng chi phí - đã cập nhật từ tong_chi_phi thành t_cp_nt */}
+                                                    {/* Tổng chi phí */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
                                                         <input
@@ -2013,7 +2081,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-600">Tổng tiền TT:</span>
-                                <span className="font-semibold text-red-600">
+                                <span className="font-semibold text-red-600 text-lg">
                                     {totals.totalThanhTien.toLocaleString('vi-VN')} VND
                                 </span>
                             </div>
@@ -2110,4 +2178,4 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
             </div>
         </Modal>
     );
-};
+}; 
