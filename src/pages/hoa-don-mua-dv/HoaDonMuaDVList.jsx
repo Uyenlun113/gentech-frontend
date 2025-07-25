@@ -73,8 +73,8 @@ export default function HoaDonMuaDVList() {
 
     return (
         <div className="px-4">
-            <PageMeta title="Giấy báo nợ Ngân Hàng" description="Giấy báo nợ Ngân Hàng" />
-            <PageBreadcrumb pageTitle="Giấy báo nợ Ngân Hàng" />
+            <PageMeta title="Hoá đơn mua Dịch vụ" description="Hoá đơn mua Dịch vụ" />
+            <PageBreadcrumb pageTitle="Hoá đơn mua Dịch vụ" />
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

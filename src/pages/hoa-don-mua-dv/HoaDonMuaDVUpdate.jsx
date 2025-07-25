@@ -1091,10 +1091,10 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Plus className="w-6 h-6 text-blue-600" />
-                Cập nhật Giấy báo nợ Ngân Hàng
+                Cập nhật Hoá đơn mua Dịch vụ
               </h4>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Cập nhật thông tin Giấy báo nợ Ngân Hàng trong hệ thống
+                Cập nhật thông tin Hoá đơn mua Dịch vụ trong hệ thống
               </p>
             </div>
           </div>
