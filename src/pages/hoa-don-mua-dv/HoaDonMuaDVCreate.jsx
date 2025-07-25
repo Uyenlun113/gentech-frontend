@@ -979,10 +979,10 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
             <div>
               <h4 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Plus className="w-6 h-6 text-blue-600" />
-                Tạo Giấy báo nợ Ngân Hàng
+                Tạo Hoá đơn mua Dịch vụ
               </h4>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Nhập thông tin Giấy báo nợ Ngân Hàng mới vào hệ thống
+                Nhập thông tin Hoá đơn mua Dịch vụ mới vào hệ thống
               </p>
             </div>
           </div>
