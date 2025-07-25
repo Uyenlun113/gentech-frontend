@@ -1,8 +1,8 @@
 import { Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { useModal } from "../../hooks/useModal";
 import { useDeleteChiPhiMuaHang, useListChiPhiMuaHang } from "../../hooks/useChiPhiMuaHang";
+import { useModal } from "../../hooks/useModal";
 
 export const useChiPhiMuaHangList = () => {
     const [selectedEditId, setSelectedEditId] = useState();
@@ -43,7 +43,7 @@ export const useChiPhiMuaHangList = () => {
         return params;
     }, [currentPage, pageSize, searchTerm, rangePickerValue]);
 
-    const { data: fetchChiPhiMuaHangData, isLoading: isLoadingChiPhiMuaHang, refetch: refetchChiPhiMuaHangData } = useListChiPhiMuaHang(searchParams);
+    const { data: fetchChiPhiMuaHangData, isLoading: isLoadingChiPhiMuaHang, refetch: refetchChiPhiMuaHangData } = useListChiPhiMuaHang(useMemo(() => searchParams, [JSON.stringify(searchParams)]));
 
     const deleteMutation = useDeleteChiPhiMuaHang();
 

@@ -26,7 +26,7 @@ export const Tabs = ({
   return (
     <div className={`w-full ${className} h-[400px] mt-1`}>
       {/* Tab Headers */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700 justify-between">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 justify-between items-center">
         <div>
           {tabs.map((tab, index) => {
             const isActive = activeTab === index;
@@ -72,12 +72,11 @@ export const Tabs = ({
         </div>
         <button
           onClick={handleAddRow}
-          className="flex items-center p-1 text-sm font-medium text-white bg-blue-600 rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200 border border-blue-700"
+          className="flex items-center gap-1 px-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow hover:bg-blue-700 hover:shadow-md transition-all duration-200 border border-blue-700 h-8"
         >
-          <Plus size={16} />
-          Thêm dòng
+          <Plus size={12} />
+          Thêm
         </button>
-
       </div>
 
       {/* Tab Content */}

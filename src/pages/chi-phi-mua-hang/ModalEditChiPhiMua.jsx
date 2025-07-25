@@ -755,6 +755,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                             ma_kho_i: kho.ma_kho || "",
                             ten_kho: kho.ten_kho || "",
                             tk_vt: kho.tk_dl || ""
+
                         }
                         : item
                 )
@@ -1171,20 +1172,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     type="number"
                     value={row.so_luong}
                     onChange={(e) => handleChiPhiChange(row.id, "so_luong", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
-            ),
-        },
-        {
-            key: "gia",
-            title: "Đơn giá",
-            width: 120,
-            render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.gia}
-                    onChange={(e) => handleChiPhiChange(row.id, "gia", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
                 />
@@ -2010,4 +1997,4 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             </div>
         </Modal>
     );
-};    // Handle search for main form fields
+};   

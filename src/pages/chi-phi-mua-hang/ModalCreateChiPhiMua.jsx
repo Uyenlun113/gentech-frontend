@@ -1087,20 +1087,6 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             ),
         },
         {
-            key: "gia",
-            title: "Đơn giá",
-            width: 120,
-            render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.gia}
-                    onChange={(e) => handleChiPhiChange(row.id, "gia", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
-            ),
-        },
-        {
             key: "tien_nt",
             title: "Tiền hàng",
             width: 120,
@@ -1112,6 +1098,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                     placeholder="0"
                     className="w-full text-right"
                     readOnly
+                    disabled
                 />
             ),
         },
@@ -1560,14 +1547,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                             readOnly
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPhieuNhapPopup(true)}
-                                            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
-                                        >
-                                            <Search size={16} />
-                                            Chọn PN
-                                        </button>
+
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] ml-4">
                                             Ngày phiếu nhập
                                         </Label>
@@ -1578,6 +1558,14 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                             readOnly
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPhieuNhapPopup(true)}
+                                            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                        >
+                                            <Search size={16} />
+                                            Chọn PN
+                                        </button>
                                     </div>
                                 </div>
 
