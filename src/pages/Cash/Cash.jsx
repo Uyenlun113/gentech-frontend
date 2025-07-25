@@ -1,4 +1,4 @@
-import { CarFront, ChevronRight, FileText, FileType, Laptop, Pocket } from 'lucide-react';
+import { CarFront, ChevronRight, FileType, Laptop, Pocket } from 'lucide-react';
 import { useState } from 'react';
 
 export default function CashPage() {
@@ -82,7 +82,7 @@ export default function CashPage() {
           </div>
 
           {/* Phiếu thu tiền mặt */}
-          <div
+          {/* <div
             className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => handleIconClick('cash-receipt')}
           >
@@ -93,7 +93,7 @@ export default function CashPage() {
               </div>
             </div>
             <span className="text-sm text-gray-700 text-center">Phiếu nhập hàng bán, <br /> dịch vụ bị trả lại</span>
-          </div>
+          </div> */}
 
           {/* Phiếu chi tiền mặt */}
           <div
@@ -106,7 +106,7 @@ export default function CashPage() {
                 <span className="text-xs font-bold text-red-800">-</span>
               </div>
             </div>
-            <span className="text-sm text-gray-700 text-center">Hóa đơn giảm giá</span>
+            <span className="text-sm text-gray-700 text-center">Hóa đơn bán hàng dịch vụ</span>
           </div>
 
           <div
