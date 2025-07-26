@@ -30,7 +30,7 @@ export default function CashPage() {
   const handleIconClick = (type) => {
     switch (type) {
       case 'bank-receipt':
-        window.location.href = '/general-ledger/list';
+        window.location.href = '/don-ban-hang';
         break;
       case 'bank-payment':
         window.location.href = '/phieu-xuat';

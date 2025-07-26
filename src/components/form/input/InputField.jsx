@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 
 const Input = ({
   type = "text",
@@ -15,7 +16,24 @@ const Input = ({
   error = false,
   hint,
   onClick,
+  onKeyDown,
+  // Props mới cho navigation
+  tabIndex,
+  autoFocus = false,
+  onEnterPress,
+  nextInputRef,
+  inputRef,
 }) => {
+  const internalRef = useRef(null);
+  const ref = inputRef || internalRef;
+
+  // Auto focus nếu được yêu cầu
+  useEffect(() => {
+    if (autoFocus && ref.current) {
+      ref.current.focus();
+    }
+  }, [autoFocus]);
+
   let inputClasses = ` h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${className}`;
 
   if (disabled) {
@@ -28,21 +46,55 @@ const Input = ({
     inputClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90  dark:focus:border-brand-800`;
   }
 
+  const handleKeyDown = (e) => {
+    // Gọi onKeyDown custom nếu có
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+
+    // Xử lý Enter key
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Ngăn submit form mặc định
+
+      // Gọi onEnterPress callback nếu có
+      if (onEnterPress) {
+        onEnterPress(e);
+      }
+
+      // Tự động chuyển sang input tiếp theo
+      if (nextInputRef && nextInputRef.current) {
+        nextInputRef.current.focus();
+        nextInputRef.current.select(); // Select all text để dễ nhập mới
+      } else {
+        // Nếu không có nextInputRef, tìm input tiếp theo theo tabIndex
+        const currentTabIndex = parseInt(tabIndex) || 0;
+        const nextInput = document.querySelector(`input[tabindex="${currentTabIndex + 1}"]`);
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }
+    }
+  };
+
   return (
     <div className="relative">
       <input
+        ref={ref}
         type={type}
         id={id}
         name={name}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onKeyDown={handleKeyDown}
         min={min}
         max={max}
         step={step}
         disabled={disabled}
         className={inputClasses}
         onClick={onClick}
+        tabIndex={tabIndex}
       />
 
       {hint && (

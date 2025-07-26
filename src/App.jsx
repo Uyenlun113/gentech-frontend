@@ -35,9 +35,12 @@ import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
 import PhieuPhieuChiPhiMuaHangPage from "./pages/chi-phi-mua-hang/PhieuMuaChiPhiPage";
+import DonBanHangPage from "./pages/don-ban-hang/DonBanHangPage";
+import DonHangMuaList from "./pages/don-hang-mua/DonHangMuaList";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import HoaDonMuaDVList from "./pages/hoa-don-mua-dv/HoaDonMuaDVList";
 import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
@@ -56,8 +59,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import DonHangMuaList from "./pages/don-hang-mua/DonHangMuaList";
-import HoaDonMuaDVList from "./pages/hoa-don-mua-dv/HoaDonMuaDVList";
 
 
 export default function App() {
@@ -103,6 +104,8 @@ export default function App() {
               <Route path="/phieu-mua" element={<PhieuMuaListPage />} />
 
               <Route path="/chi-phi-mua-hang" element={<PhieuPhieuChiPhiMuaHangPage />} />
+
+              <Route path="/don-ban-hang" element={<DonBanHangPage />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}
