@@ -36,7 +36,7 @@ export default function CashPage() {
         window.location.href = '/phieu-xuat';
         break;
       case 'cash-receipt':
-        window.location.href = '/chung-tu/phieu-thu';
+        window.location.href = '/hd-ban-dv';
         break;
       case 'cash-payment':
         window.location.href = '/phieu-chi-tien-mat';
@@ -98,7 +98,7 @@ export default function CashPage() {
           {/* Phiếu chi tiền mặt */}
           <div
             className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity px-6"
-            onClick={() => handleIconClick('cash-payment')}
+            onClick={() => handleIconClick('cash-receipt')}
           >
             <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mb-2 relative">
               <Pocket className="w-8 h-8 text-orange-600" />
