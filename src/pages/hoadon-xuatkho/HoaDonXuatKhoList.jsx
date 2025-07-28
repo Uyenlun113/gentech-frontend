@@ -208,8 +208,6 @@ export default function HoaDonXuatKhoList() {
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk d.thu</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk kho</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk giá vốn</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá vốn</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền vốn</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá bán</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền hàng</th>
                                                         {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th> */}
@@ -250,12 +248,6 @@ export default function HoaDonXuatKhoList() {
                                                             </td>
                                                             <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
                                                                 {item.tien || '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
-                                                                {item.gia2 || '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
-                                                                {item.tien2 || '0'}
                                                             </td>
                                                             {/* <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                                                 {item.dien_giaii || 'N/A'}
