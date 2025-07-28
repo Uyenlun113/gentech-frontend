@@ -40,6 +40,7 @@ import DonHangMuaList from "./pages/don-hang-mua/DonHangMuaList";
 import GiayBaoCoList from "./pages/gb-co-nganhang/GiayBaoCoList";
 import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
+import HdBanDvPage from "./pages/hd-ban-dv/HdBanDvPage";
 import HoaDonMuaDVList from "./pages/hoa-don-mua-dv/HoaDonMuaDVList";
 import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
@@ -107,6 +108,10 @@ export default function App() {
               <Route path="/chi-phi-mua-hang" element={<PhieuPhieuChiPhiMuaHangPage />} />
 
               <Route path="/don-ban-hang" element={<DonBanHangPage />} />
+
+              <Route path="/hd-ban-dv" element={<HdBanDvPage />} />
+
+              <Route path="/hoa-don-mua-dv" element={<HoaDonMuaDVList />} />
               {/* Cash Page */}
               <Route path="/cash" element={<CashPage />} />
               {/* Purchases Page */}
