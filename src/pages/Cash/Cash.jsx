@@ -33,7 +33,7 @@ export default function CashPage() {
         window.location.href = '/don-ban-hang';
         break;
       case 'bank-payment':
-        window.location.href = '/phieu-xuat';
+        window.location.href = '/chung-tu/hoa-don-ban-hang';
         break;
       case 'cash-receipt':
         window.location.href = '/chung-tu/phieu-thu';
