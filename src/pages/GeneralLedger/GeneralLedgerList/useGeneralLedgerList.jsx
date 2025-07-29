@@ -1,16 +1,21 @@
-import { Pencil, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, Printer, Trash } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
 import {
   useDeleteGeneralAccounting,
   useFetchCt11Data,
   useGetGeneralAccounting,
+  useGetGeneralAccountingById,
 } from "../../../hooks/useGeneralAccounting.js";
 import { useModal } from "../../../hooks/useModal";
 import generalLedgerApi from "../../../services/generalLedger";
 
 export const useGeneralLedgerList = () => {
   const [selectedEditId, setSelectedEditId] = useState();
+  const printRef = useRef();
+  const [printData, setPrintData] = useState(null);
+  const [selectedPrintId, setSelectedPrintId] = useState(null);
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
   const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
@@ -24,6 +29,15 @@ export const useGeneralLedgerList = () => {
 
   const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
   const { data: fetchPh11Data, isLoading: isLoadingPh11, refetch: refetchPh11Data } = useGetGeneralAccounting();
+
+  // Sử dụng useGetGeneralAccountingById để lấy detail data cho việc in
+  const {
+    data: generalDetailData,
+    isLoading: isLoadingGeneralDetail,
+  } = useGetGeneralAccountingById(selectedPrintId, {
+    enabled: !!selectedPrintId,
+  });
+
   const {
     data: fetchCt11Data,
     isLoading: isLoadingCt11,
@@ -33,6 +47,55 @@ export const useGeneralLedgerList = () => {
   });
 
   const deleteMutation = useDeleteGeneralAccounting();
+
+  // Print functionality - giống như phiếu chi
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Phieu_Ke_Toan_Tong_Hop_${printData?.phieu?.so_ct || 'PK'}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+      }
+    `,
+  });
+
+  const handlePrintClick = async (record, e) => {
+    e.stopPropagation();
+    try {
+      setSelectedPrintId(record.stt_rec);
+
+    } catch (error) {
+      console.error("Error fetching data for print:", error);
+      toast.error("Không thể tải dữ liệu để in");
+    }
+  };
+  useEffect(() => {
+    if (generalDetailData && selectedPrintId) {
+      const phieuData = generalDetailData.phieu;
+      const hachToanData = generalDetailData.hachToan || [];
+
+      if (phieuData) {
+        // Set print data
+        setPrintData({
+          phieu: phieuData,
+          hachToan: hachToanData,
+        });
+
+        // Trigger print
+        setTimeout(() => {
+          handlePrint();
+          setSelectedPrintId(null); // Reset sau khi in
+        }, 100);
+      }
+    }
+  }, [generalDetailData, selectedPrintId]);
 
   const dataTable = useMemo(() => {
     if (fetchPh11Data?.status === 200 && fetchPh11Data?.items) {
@@ -49,8 +112,8 @@ export const useGeneralLedgerList = () => {
   }, [fetchCt11Data?.status, fetchCt11Data?.data]);
 
   useEffect(() => {
-    setLoading(isLoadingPh11 || isLoadingCt11 || deleteMutation.isPending);
-  }, [isLoadingPh11, isLoadingCt11, deleteMutation.isPending]);
+    setLoading(isLoadingPh11 || isLoadingCt11 || isLoadingGeneralDetail || deleteMutation.isPending);
+  }, [isLoadingPh11, isLoadingCt11, isLoadingGeneralDetail, deleteMutation.isPending]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -124,6 +187,7 @@ export const useGeneralLedgerList = () => {
     setSelectedEditId(id);
     openModalEdit();
   };
+
   const [psCoMap, setPsCoMap] = useState({});
 
   useEffect(() => {
@@ -155,7 +219,6 @@ export const useGeneralLedgerList = () => {
 
     fetchAllCt11Data();
   }, [JSON.stringify(dataTable)]);
-
 
   const columnsTable = [
     {
@@ -213,10 +276,18 @@ export const useGeneralLedgerList = () => {
       key: "action",
       title: "Thao tác",
       fixed: "right",
-      width: 100,
+      width: 130,
       render: (_, record) => {
         return (
           <div className="flex items-center gap-2 justify-center">
+            <button
+              className="text-gray-500 hover:text-blue-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="In phiếu"
+              onClick={(e) => handlePrintClick(record, e)}
+              disabled={isLoadingGeneralDetail}
+            >
+              <Printer size={16} />
+            </button>
             <button
               className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Sửa"
@@ -330,6 +401,7 @@ export const useGeneralLedgerList = () => {
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
+
   return {
     dataTable: filteredDataTable,
     dataCt11Table,
@@ -363,5 +435,9 @@ export const useGeneralLedgerList = () => {
     closeModalEdit,
     selectedEditId,
     setSelectedEditId,
+    psCoMap,
+    printRef,
+    printData,
+    handlePrintClick,
   };
 };
