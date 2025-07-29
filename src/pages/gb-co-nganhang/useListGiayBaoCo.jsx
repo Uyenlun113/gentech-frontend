@@ -214,6 +214,8 @@ export const useListGiayBaoCo = () => {
         setCurrentPage(page);
     };
 
+    // Sửa lại trong useListGiayBaoCo.js
+
     return {
         // Modal states
         isOpenCreate,
@@ -237,6 +239,7 @@ export const useListGiayBaoCo = () => {
 
         // Modal handlers
         openModalCreate,
+        openModalEdit, // Thêm dòng này
         closeModalCreate,
         closeModalEdit,
         closeModalDetail,
@@ -252,7 +255,10 @@ export const useListGiayBaoCo = () => {
         refetch,
         setLoaiTk,
         handleInputChange,
+        setSelectedGiayBaoCo, // Thêm dòng này
+        setConfirmDelete, // Thêm dòng này
 
+        // Delete confirmation
         confirmDelete,
         confirmDeleteGiayBaoCo,
         cancelDeleteGiayBaoCo,
