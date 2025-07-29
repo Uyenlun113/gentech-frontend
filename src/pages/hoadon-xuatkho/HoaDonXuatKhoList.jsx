@@ -262,7 +262,7 @@ export default function HoaDonXuatKhoList() {
                                                         </td>
                                                         <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
                                                             {selectedRowForDetail.hachToanList
-                                                                .reduce((total, item) => total + (item.tien2 || 0), 0)
+                                                                .reduce((total, item) => total + (item.tien || 0), 0)
                                                                 .toLocaleString()
                                                             } VNĐ
                                                         </td>

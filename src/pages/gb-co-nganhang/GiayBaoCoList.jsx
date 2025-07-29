@@ -1,5 +1,5 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search } from "lucide-react";
+import { FilePlus, Search, Pencil, Trash, Printer } from "lucide-react";
 
 import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
@@ -8,19 +8,183 @@ import Pagination from "../../components/pagination/Pagination";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import Button from "../../components/ui/button/Button";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useRef } from "react";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { ModalCreateGiayBaoCo } from "./GiayBaoCoCreate";
 import { ModalEditGiayBaoCo } from "./GiayBaoCoUpdate";
 import { useListGiayBaoCo } from "./useListGiayBaoCo";
+import { useReactToPrint } from "react-to-print";
+import toWords from 'vn-num2words';
 
+
+// Component nội dung in được tách riêng - Format nửa tờ A4
+const PrintContent = forwardRef(({ data }, ref) => {
+    return (
+        <div
+            ref={ref}
+            className="w-[210mm] h-[148.5mm] p-3 text-sm text-black bg-white"
+            style={{ fontFamily: 'Times New Roman, serif' }}
+        >
+            {/* Header với thông tin tổ chức và mã số thuế */}
+            <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 pr-4">
+                    <div className="text-xs leading-tight">Công ty công nghệ Gentech</div>
+                    <div className="text-xs leading-tight">Tầng 02, chung cư CT3 Nghĩa Đô, ngõ 106 Hoàng Quốc Việt, Cổ Nhuế, Cầu Giấy, Hà Nội</div>
+                </div>
+                <div className="text-center text-xs w-48">
+                    <div className="font-bold">Mã số thuế: {data?.MST || ""}</div>
+                    <div className="font-bold">Mẫu số: 01-TT</div>
+                    <div className="text-[10px]">
+                        (Ban hành theo Thông tư số 133/2016/TT-BTC<br />
+                        ngày 26/8/2016 của Bộ Tài chính)
+                    </div>
+                </div>
+            </div>
+
+            {/* Tiêu đề phiếu thu và thông tin kế toán */}
+            <div className="flex justify-between items-start mb-4">
+                {/* Khoảng trống bên trái */}
+                <div className="w-48"></div>
+
+                {/* Tiêu đề phiếu thu ở giữa */}
+                <div className="flex-1 text-center">
+                    <h2 className="font-bold text-xl mb-2">PHIẾU THU</h2>
+                    <div className="text-center text-sm mb-4">
+                        NGÀY {formatDateVN(data?.ngay_ct || data?.ngay_lct || new Date("2025-05-30"))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-x-4 text-xs" style={{ gridTemplateRows: 'repeat(5, 1fr)' }}>
+                    {/* Cột 1: Label */}
+                    <div className="text-left font-medium" style={{ gridColumn: 1, gridRow: 1 }}>Liên số:</div>
+                    <div className="text-left font-medium" style={{ gridColumn: 1, gridRow: 2 }}>Quyển số:</div>
+                    <div className="text-left font-medium" style={{ gridColumn: 1, gridRow: 3 }}>Số phiếu:</div>
+                    <div className="text-left font-medium" style={{ gridColumn: 1, gridRow: 4 }}>Nợ:</div>
+                    <div className="text-left font-medium" style={{ gridColumn: 1, gridRow: 5 }}>Có:</div>
+
+                    {/* Cột 2: Giá trị dữ liệu */}
+                    <div style={{ gridColumn: 2, gridRow: 1 }}>{data?.lien_so || "1"}</div>
+                    <div style={{ gridColumn: 2, gridRow: 2 }}>{data?.ma_qs || "PT001"}</div>
+                    <div style={{ gridColumn: 2, gridRow: 3 }}>{data?.so_ct || "PT0008"}</div>
+                    <div style={{ gridColumn: 2, gridRow: 4 }}>{data?.tk}</div>
+                    <div style={{ gridColumn: 2, gridRow: 5 }}>{data?.tai_khoan_list?.[0]?.tk_so}</div>
+
+                    {/* Cột 3: Số tiền - chỉ ở dòng 4 và 5 */}
+                    <div className="text-right" style={{ gridColumn: 3, gridRow: 4 }}>{data?.tong_tien?.toLocaleString('vi-VN')}</div>
+                    <div className="text-right" style={{ gridColumn: 3, gridRow: 5 }}>{data?.tai_khoan_list?.[0]?.ps_co?.toLocaleString('vi-VN')}</div>
+                </div>
+
+
+            </div>
+
+            {/* Thông tin chính - nằm hoàn toàn bên trái và sát với phiếu thu */}
+            <div className="mb-3">
+                <div className="w-96 space-y-1">
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Họ, tên người nộp tiền:</span>
+                        <span className="flex-1 text-xs ml-2">{data?.ong_ba || ""}</span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Đơn vị:</span>
+                        <span className="flex-1 text-xs ml-2">{data?.don_vi || data?.ma_kh || ""}</span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Địa chỉ:</span>
+                        <span className="flex-1 text-xs ml-2">{data?.dia_chi || ""}</span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Lý do nộp:</span>
+                        <span className="flex-1 text-xs ml-2">{data?.dien_giai || ""}</span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Số tiền:</span>
+                        <span className="flex-1 text-xs ml-2 font-bold">
+                            {`${data.tong_tien?.toLocaleString('vi-VN')} VND`}
+                        </span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Bằng chữ:</span>
+                        <span className="flex-1 text-xs ml-2">
+                            {data?.tong_tien ? `${capitalizeFirstLetter(toWords(data.tong_tien))} đồng` : ""}
+                        </span>
+                    </div>
+                    <div className="flex items-baseline">
+                        <span className="text-xs font-medium w-32 flex-shrink-0">Kèm theo:</span>
+                        <span className="flex-1 text-xs ml-2"></span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Phần ngày ký ở góc phải */}
+            <div className="text-right mb-4 text-xs">
+                Ngày.....tháng.....năm.........
+            </div>
+
+            {/* Phần ký tên - 5 cột - center */}
+            <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-5 text-center text-[10px] gap-x-1 mb-8">
+                    <div>
+                        <div className="font-bold">CHỦ TÀI KHOẢN</div>
+                        <div>(Ký, họ tên, đóng dấu)</div>
+                    </div>
+                    <div>
+                        <div className="font-bold">PHỤ TRÁCH KẾ TOÁN</div>
+                        <div>(Ký, họ tên)</div>
+                    </div>
+                    <div>
+                        <div className="font-bold">NGƯỜI NỘP TIỀN</div>
+                        <div>(Ký, họ tên)</div>
+                    </div>
+                    <div>
+                        <div className="font-bold">NGƯỜI LẬP PHIẾU</div>
+                        <div>(Ký, họ tên)</div>
+                    </div>
+                    <div>
+                        <div className="font-bold">THỦ QUỸ</div>
+                        <div>(Ký, họ tên)</div>
+                    </div>
+                </div>
+
+                {/* Chữ ký - Hiển thị tên từ data */}
+                <div className="grid grid-cols-5 text-center text-xs mb-6">
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+
+            {/* Phần cuối - đã nhận đủ số tiền - center */}
+            <div className="text-xs w-full">
+                <div className="flex items-start mb-2 w-full">
+                    <span className="font-bold whitespace-nowrap mr-2">
+                        Đã nhận đủ số tiền (viết bằng chữ):
+                    </span>
+                    <div className="border-b border-dashed border-black flex-1 min-h-[16px]">
+                        {data?.so_tien_bang_chu || ""}
+                    </div>
+                </div>
+                <div className="min-h-[16px]"></div>
+            </div>
+        </div>
+    );
+});
+const capitalizeFirstLetter = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+const formatDateVN = (dateInput) => {
+    const date = new Date(dateInput);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day} THÁNG ${month} NĂM ${year}`;
+};
 export default function GiayBaoCoList() {
     const {
         isOpenCreate,
         isOpenEdit,
         selectedGiayBaoCo,
         dataTable,
-        columnsTable,
         pagination,
         searchValue,
         isLoading,
@@ -35,12 +199,175 @@ export default function GiayBaoCoList() {
         confirmDelete,
         confirmDeleteGiayBaoCo,
         cancelDeleteGiayBaoCo,
+        setSelectedGiayBaoCo,
+        openModalEdit,
+        setConfirmDelete
     } = useListGiayBaoCo();
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
-    const [setShowDetailPanel] = useState(false);
+    const [showDetailPanel, setShowDetailPanel] = useState(false);
 
+    // Ref cho component in
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Phiếu_thu_${printData?.so_ct || 'PT001'}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
+
+    // Function để xử lý in phiếu thu
+    const handlePrintCashReceipt = (record) => {
+        console.log('Print data being set:', record);
+        setPrintData(record);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
+
+    const handleEditCashReceipt = (record) => {
+        setSelectedGiayBaoCo(record); // Đổi từ setSelectedCashReceipt thành setSelectedGiayBaoCo
+        openModalEdit();
+    };
+
+    const handleDeleteCashReceipt = (record) => {
+        setConfirmDelete({
+            open: true,
+            cashReceipt: record, // Hoặc có thể đổi thành giayBaoCo: record
+        });
+    };
+    // Định nghĩa columns với actions
+    const columnsTable = [
+        {
+            key: "so_ct",
+            title: "Số phiếu thu",
+            fixed: "left",
+            width: 100,
+        },
+        {
+            key: "ong_ba",
+            title: "Đối tác",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "ngay_lct",
+            title: "Ngày lập phiếu thu",
+            width: 150,
+        },
+        {
+            key: "ngay_ct",
+            title: "Ngày hạch toán",
+            width: 150,
+        },
+        {
+            key: "tk",
+            title: "Tài khoản nợ",
+            width: 150,
+        },
+        {
+            key: "ma_gd",
+            title: "Loại phiếu thu",
+            width: 100,
+        },
+        {
+            key: "ma_kh",
+            title: "Mã khách",
+            width: 150,
+        },
+        {
+            key: "dia_chi",
+            title: "Địa chỉ",
+            width: 250,
+        },
+        {
+            key: "dien_giai",
+            title: "Lý do nộp",
+            width: 200,
+        },
+        {
+            key: "ma_qs",
+            title: "Quyển số",
+            width: 100,
+        },
+        {
+            key: "loai_ct",
+            title: "Trạng thái",
+            width: 100,
+        },
+        {
+            key: "MST",
+            title: "MST",
+            width: 80,
+        },
+        {
+            key: "ma_nt",
+            title: "TGGD(Tỷ giá giao dịch)",
+            width: 50,
+        },
+        {
+            key: "ty_gia",
+            title: "Mức tỷ giá giao dịch",
+            width: 50,
+        },
+        {
+            key: "action",
+            title: "Thao tác",
+            fixed: "right",
+            width: 120,
+            render: (_, record) => (
+                <div className="flex items-center gap-3 justify-center">
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="In"
+                        onClick={() => handlePrintCashReceipt(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="Sửa"
+                        onClick={() => handleEditCashReceipt(record)}
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteCashReceipt(record)}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Xoá"
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
     useEffect(() => {
         const timer = setTimeout(() => {
             handleSearch(searchInput);
@@ -75,6 +402,9 @@ export default function GiayBaoCoList() {
         <div className="px-4">
             <PageMeta title="Giấy báo có Ngân Hàng" description="Giấy báo có Ngân Hàng" />
             <PageBreadcrumb pageTitle="Giấy báo có Ngân Hàng" />
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                {printData && <PrintContent ref={printRef} data={printData} />}
+            </div>
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -158,7 +488,7 @@ export default function GiayBaoCoList() {
                 </ComponentCard>
 
                 {/* Detail Panel với spacing đẹp hơn và cách đáy xa hơn */}
-                {selectedRowForDetail && (
+                {selectedRowForDetail && showDetailPanel && (
                     <div className="mt-8 mb-20 pb-8">
                         <ComponentCard>
                             <div className="space-y-6">
