@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import SoDuDauKyModal from "../pages/Sddk/SoDuDauKyModal";
 import TonKhoDauKyModal from "../components/TonKhoDauKyModal";
+import SoDuDauKyModal from "../pages/Sddk/SoDuDauKyModal";
 
 const AppHeader = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -210,10 +210,10 @@ const AppHeader = () => {
             <div className="items-center space-x-2">
               <div className="flex items-center space-x-3">
                 <Link to="/">
-                  <img src="/images/logo/logo-icon.svg" alt="Logo" className="w-5 h-5" />
+                  <img src="/images/logo/GenTech-logo.png" alt="Logo" className="w-8 h-8" />
                 </Link>
                 <div className="text-sl font-medium text-gray-900 dark:text-white">
-                  <div>Công ty TNHH Vật tài thương mại Việt Trung Phú Thọ</div>
+                  <div>Công ty TNHH Công Nghệ GenTech</div>
                 </div>
               </div>
               <div className="hidden lg:flex flex-1 justify-center mt-2">
@@ -227,8 +227,9 @@ const AppHeader = () => {
                         <span>{item.label}</span>
                         {item.hasDropdown && (
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform ${activeDropdown === `menu-${index}` ? "rotate-180" : ""
-                              }`}
+                            className={`w-4 h-4 transition-transform ${
+                              activeDropdown === `menu-${index}` ? "rotate-180" : ""
+                            }`}
                           />
                         )}
                       </button>
@@ -292,18 +293,12 @@ const AppHeader = () => {
             ))}
           </div>
         </div>
-      </header >
+      </header>
 
       {/* Modals */}
-      <SoDuDauKyModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-      />
+      <SoDuDauKyModal isOpen={isModalOpen} onClose={closeModal} />
 
-      <TonKhoDauKyModal
-        isOpen={isTonKhoModalOpen}
-        onClose={closeTonKhoModal}
-      />
+      <TonKhoDauKyModal isOpen={isTonKhoModalOpen} onClose={closeTonKhoModal} />
     </>
   );
 };
