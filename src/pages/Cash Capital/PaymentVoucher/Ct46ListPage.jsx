@@ -14,7 +14,7 @@ import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../../icons";
 import { ModalCreateCt46PaymentVoucher } from "./ModalCreateCt46PaymentVoucher";
 import { ModalEditCt46PaymentVoucher } from "./ModalEditCt46PaymentVoucher";
-import PaymentVoucherChiPrint from "./PaymentVoucherPrint";
+import PaymentExpensePrint from "./PaymentExpensePrint";
 import { usePaymentVoucherList } from "./usePaymentVoucherList";
 
 export default function Ct46ListPage() {
@@ -61,16 +61,18 @@ export default function Ct46ListPage() {
 
   return (
     <>
-      <div style={{ display: "none" }}>
-        {printData && (
-          <PaymentVoucherChiPrint
+
+      {printData && (
+        <div style={{ display: 'none' }}>
+          <PaymentExpensePrint
             ref={printRef}
-            voucherData={printData.voucherData}
-            ct46Data={printData.ct46Data}
-            tienTotal={printData.tienTotal}
+            phieuData={printData.phieuData}
+            hachToanData={printData.hachToanData}
+            totalAmount={printData.totalAmount}
           />
-        )}
-      </div>
+        </div>
+      )}
+
       <ModalCreateCt46PaymentVoucher isOpenCreate={isOpenCreate} closeModalCreate={closeModalCreate} />
       <ModalEditCt46PaymentVoucher isOpenEdit={isOpenEdit} closeModalEdit={closeModalEdit} editingId={selectedEditId} />
       <div className="px-4">

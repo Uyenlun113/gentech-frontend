@@ -1,4 +1,3 @@
-// pages/GeneralLedgerListPage.jsx
 import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
 import { FilePlus, Search } from "lucide-react";
@@ -14,6 +13,7 @@ import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../../icons";
 import { ModalCreateGeneralLedger } from "./ModalCreateGeneralLedger";
 import { ModalEditGeneralLedger } from "./ModalEditGeneralLedger";
+import PrintableGeneralLedger from "./PrintableGeneralLedger";
 import { useGeneralLedgerList } from "./useGeneralLedgerList";
 
 export default function GeneralLedgerListPage() {
@@ -40,6 +40,8 @@ export default function GeneralLedgerListPage() {
     isOpenEdit,
     closeModalEdit,
     selectedEditId,
+    printRef,
+    printData,
   } = useGeneralLedgerList();
 
   const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -58,12 +60,23 @@ export default function GeneralLedgerListPage() {
 
   return (
     <>
+      {printData && (
+        <div style={{ display: 'none' }}>
+          <PrintableGeneralLedger
+            ref={printRef}
+            data={printData.phieu}
+            subData={printData.hachToan}
+          />
+        </div>
+      )}
+
       <ModalCreateGeneralLedger isOpenCreate={isOpenCreate} closeModalCreate={closeModalCreate} />
       <ModalEditGeneralLedger
         isOpenEdit={isOpenEdit}
         closeModalEdit={closeModalEdit}
         editingId={selectedEditId}
       />
+
       <div className="px-4">
         <PageMeta title="Danh sách phiếu kế toán tổng hợp" description="Danh sách phiếu kế toán tổng hợp" />
         <PageBreadcrumb pageTitle="Danh sách phiếu kế toán tổng hợp" />

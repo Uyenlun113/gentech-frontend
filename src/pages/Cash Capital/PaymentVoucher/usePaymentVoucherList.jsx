@@ -1,5 +1,5 @@
 import { Pencil, Printer, Trash } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
 import { useModal } from "../../../hooks/useModal";
@@ -11,7 +11,7 @@ export const usePaymentVoucherList = () => {
   const [selectedEditId, setSelectedEditId] = useState();
   const printRef = useRef();
   const [printData, setPrintData] = useState(null);
-  const [selectedPrintRecord, setSelectedPrintRecord] = useState(null);
+  const [selectedPrintId, setSelectedPrintId] = useState(null);
 
   const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
   const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
@@ -26,16 +26,19 @@ export const usePaymentVoucherList = () => {
   const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
   const { data: fetchPh46Data, isLoading: isLoadingPh46, refetch: refetchPh46Data } = useCt46List();
 
-  // Hook để lấy chi tiết CT46 cho in
-  const { data: ct46DetailData, isLoading: isLoadingCt46Detail } = useCt46ById(selectedPrintRecord?.stt_rec, {
-    enabled: !!selectedPrintRecord?.stt_rec,
+  // Sử dụng useCt46ById để lấy detail data cho việc in
+  const {
+    data: ct46DetailData,
+    isLoading: isLoadingCt46Detail,
+  } = useCt46ById(selectedPrintId, {
+    enabled: !!selectedPrintId,
   });
 
   const {
     data: fetchCt46Data,
     isLoading: isLoadingCt46,
     error: errorCt46,
-  } = useFetchCt46Data(selectedRecord?.stt_rec || "", {
+  } = useCt46ById(selectedRecord?.stt_rec || "", {
     enabled: !!selectedRecord?.stt_rec,
   });
 
@@ -44,64 +47,84 @@ export const usePaymentVoucherList = () => {
   // Print functionality
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: `Phiếu Chi - ${printData?.phieuData?.so_ct || printData?.phieuData?.ma_ct || "PC"}`,
+    documentTitle: `Phiếu Chi - ${printData?.phieuData?.so_ct || 'PC'}`,
   });
 
   const handlePrintClick = async (record, e) => {
     e.stopPropagation();
 
     try {
-      // Set record để trigger useCt46ById
-      setSelectedPrintRecord(record);
+      // Set selected print ID để trigger useCt46ById
+      setSelectedPrintId(record.stt_rec);
+
+      // Đợi data load xong
+      setTimeout(() => {
+        if (ct46DetailData) {
+          const phieuData = ct46DetailData.phieu || record;
+          const hachToanData = ct46DetailData.hachToan || [];
+
+          // Tính tổng tiền từ hachToan
+          const totalAmount = hachToanData.reduce((sum, item) => {
+            return sum + (parseFloat(item.tien) || parseFloat(item.tt) || 0);
+          }, 0);
+
+          // Set print data
+          setPrintData({
+            phieuData: phieuData,
+            hachToanData: hachToanData,
+            totalAmount: totalAmount || phieuData?.t_tien || 0
+          });
+
+          // Trigger print
+          setTimeout(() => {
+            handlePrint();
+          }, 100);
+        }
+      }, 500);
+
     } catch (error) {
-      console.error("Error preparing print data:", error);
-      toast.error("Không thể chuẩn bị dữ liệu để in");
+      console.error("Error fetching data for print:", error);
+      toast.error("Không thể tải dữ liệu để in");
     }
   };
 
-  // Effect để xử lý khi có data từ useCt46ById
+  // Effect để xử lý khi có ct46DetailData mới
   useEffect(() => {
-    if (ct46DetailData && selectedPrintRecord) {
-      // Cấu trúc data theo format trả về từ useCt46ById
-      const phieuData = ct46DetailData.phieu || {};
+    if (ct46DetailData && selectedPrintId) {
+      const phieuData = ct46DetailData.phieu;
       const hachToanData = ct46DetailData.hachToan || [];
 
       // Tính tổng tiền từ hachToan
       const totalAmount = hachToanData.reduce((sum, item) => {
-        return sum + (parseFloat(item.tien) || 0);
+        return sum + (parseFloat(item.tien) || parseFloat(item.tt) || 0);
       }, 0);
 
       // Set print data
       setPrintData({
-        phieuData: {
-          ...phieuData,
-          ...selectedPrintRecord, // Merge với data từ list
-        },
+        phieuData: phieuData,
         hachToanData: hachToanData,
-        totalAmount: totalAmount,
+        totalAmount: totalAmount || phieuData?.t_tien || 0
       });
 
       // Trigger print
       setTimeout(() => {
         handlePrint();
+        setSelectedPrintId(null); // Reset sau khi in
       }, 100);
-
-      // Reset sau khi in
-      setTimeout(() => {
-        setSelectedPrintRecord(null);
-        setPrintData(null);
-      }, 500);
     }
-  }, [ct46DetailData, selectedPrintRecord]);
+  }, [ct46DetailData, selectedPrintId]);
 
   const dataTable = useMemo(() => {
     if (fetchPh46Data?.data?.items && Array.isArray(fetchPh46Data.data.items)) {
       return fetchPh46Data.data.items;
-    } else if (fetchPh46Data?.items && Array.isArray(fetchPh46Data.items)) {
+    }
+    else if (fetchPh46Data?.items && Array.isArray(fetchPh46Data.items)) {
       return fetchPh46Data.items;
-    } else if (fetchPh46Data?.data && Array.isArray(fetchPh46Data.data)) {
+    }
+    else if (fetchPh46Data?.data && Array.isArray(fetchPh46Data.data)) {
       return fetchPh46Data.data;
-    } else if (Array.isArray(fetchPh46Data)) {
+    }
+    else if (Array.isArray(fetchPh46Data)) {
       return fetchPh46Data;
     }
 
@@ -109,11 +132,14 @@ export const usePaymentVoucherList = () => {
   }, [fetchPh46Data]);
 
   const dataCt46Table = useMemo(() => {
-    if (fetchCt46Data?.status === 200 && Array.isArray(fetchCt46Data.data)) {
-      return fetchCt46Data.data;
+    if (fetchCt46Data?.hachToan && Array.isArray(fetchCt46Data.hachToan)) {
+      return fetchCt46Data.hachToan.map((item, index) => ({
+        ...item,
+        stt: index + 1,
+      }));
     }
     return [];
-  }, [fetchCt46Data?.status, fetchCt46Data?.data]);
+  }, [fetchCt46Data]);
 
   useEffect(() => {
     setLoading(isLoadingPh46 || isLoadingCt46 || isLoadingCt46Detail || deleteMutation.isPending);
@@ -162,24 +188,8 @@ export const usePaymentVoucherList = () => {
   };
 
   const handleRowClick = async (record) => {
-    try {
-      const res = await ct46Api.fetchCt46Data(record.stt_rec);
-      if (Array.isArray(res)) {
-        const children = res.map((item, index) => ({
-          ...item,
-          stt: index + 1,
-        }));
-        record.children = children;
-      } else {
-        record.children = [];
-      }
-
-      setSelectedRecord(record);
-      setShowCt46Table(true);
-    } catch (error) {
-      console.error("Failed to fetch CT46 data:", error);
-      toast.error("Không thể tải dữ liệu chi tiết");
-    }
+    setSelectedRecord(record);
+    setShowCt46Table(true);
   };
 
   const handleCloseCt46Table = () => {
@@ -194,7 +204,7 @@ export const usePaymentVoucherList = () => {
 
   const [tienMap, setTienMap] = useState({});
 
-  // FIX: Improved tienMap calculation
+  // Tính tổng tiền cho từng phiếu từ hachToan
   useEffect(() => {
     const fetchAllCt46Data = async () => {
       if (!dataTable?.length) {
@@ -204,50 +214,28 @@ export const usePaymentVoucherList = () => {
       }
 
       try {
-        // Filter out invalid stt_rec values
-        const sttRecList = dataTable
-          .map((item) => item.stt_rec?.toString()?.trim())
-          .filter(Boolean)
-          .filter((item) => item !== "");
-
-        if (sttRecList.length === 0) {
-          console.warn("Không có stt_rec hợp lệ");
-          setTienMap({});
-          return;
-        }
-        // Remove duplicates
-        const uniqueSttRecList = [...new Set(sttRecList)];
-        const res = await ct46Api.fetchCt46Data(uniqueSttRecList);
-
-        let ct46Data = [];
-
-        // Handle different response formats
-        if (res?.status === 200 && Array.isArray(res.data)) {
-          ct46Data = res.data;
-        } else if (Array.isArray(res)) {
-          ct46Data = res;
-        } else if (res?.data && Array.isArray(res.data)) {
-          ct46Data = res.data;
-        } else {
-          console.warn("CT46 API không trả về dữ liệu hợp lệ:", res);
-          setTienMap({});
-          return;
-        }
-
-        // Calculate tien sum for each stt_rec
         const newTienMap = {};
-        ct46Data.forEach((item) => {
-          const key = item.stt_rec?.toString()?.trim();
-          const tienValue = parseFloat(item.tien) || 0;
 
-          if (key) {
-            if (!newTienMap[key]) {
-              newTienMap[key] = 0;
+        // Với mỗi record, fetch detail để tính tổng
+        for (const record of dataTable) {
+          const sttRec = record.stt_rec?.toString()?.trim();
+          if (sttRec) {
+            try {
+              const detailData = await ct46Api.getCt46ById(sttRec);
+              if (detailData?.hachToan && Array.isArray(detailData.hachToan)) {
+                const total = detailData.hachToan.reduce((sum, item) => {
+                  return sum + (parseFloat(item.tien) || parseFloat(item.tt) || 0);
+                }, 0);
+                newTienMap[sttRec] = total;
+              }
+            } catch (err) {
+              console.warn(`Không thể fetch detail cho ${sttRec}:`, err);
             }
-            newTienMap[key] += tienValue;
           }
-        });
+        }
+
         setTienMap(newTienMap);
+
       } catch (err) {
         console.error("Lỗi khi fetch CT46 all:", err);
         setTienMap({});
@@ -255,7 +243,7 @@ export const usePaymentVoucherList = () => {
     };
 
     fetchAllCt46Data();
-  }, [dataTable]); // Changed dependency to just dataTable
+  }, [dataTable]);
 
   const columnsTable = [
     {
@@ -288,13 +276,16 @@ export const usePaymentVoucherList = () => {
       title: "Tổng tiền tt ngoại tệ",
       width: 140,
       render: (_, record) => {
-        // FIX: Improved total calculation with better fallback
         const sttRecKey = record.stt_rec?.toString()?.trim();
         const calculatedTotal = tienMap[sttRecKey];
         const fallbackTotal = record.t_tien || record.tien_total || 0;
         const displayTotal = calculatedTotal !== undefined ? calculatedTotal : fallbackTotal;
 
-        return <div className="font-mono text-sm text-center text-blue-600">{formatCurrency(displayTotal)}</div>;
+        return (
+          <div className="font-mono text-sm text-center text-blue-600">
+            {formatCurrency(displayTotal)}
+          </div>
+        );
       },
     },
     {
@@ -317,7 +308,6 @@ export const usePaymentVoucherList = () => {
         </div>
       ),
     },
-
     {
       key: "tk",
       title: "Tài khoản",
@@ -371,7 +361,7 @@ export const usePaymentVoucherList = () => {
     },
   ];
 
-  // Columns for Ct46 sub-table
+  // Columns for hachToan sub-table
   const columnsSubTable = [
     {
       key: "stt",
@@ -389,12 +379,36 @@ export const usePaymentVoucherList = () => {
     },
     {
       key: "tien",
-      title: "Phát sinh nợ ngoại tệ",
-      width: 200,
-      render: (val) => <span className="text-center block text-blue-600">{formatCurrency(val)}</span>,
+      title: "Số tiền",
+      width: 150,
+      render: (val) => (
+        <span className="text-center block text-blue-600">
+          {formatCurrency(val)}
+        </span>
+      ),
     },
     {
-      key: "dien_giaii",
+      key: "thue",
+      title: "Thuế",
+      width: 150,
+      render: (val) => (
+        <span className="text-center block text-green-600">
+          {formatCurrency(val)}
+        </span>
+      ),
+    },
+    {
+      key: "tt",
+      title: "Tổng thanh toán",
+      width: 150,
+      render: (val) => (
+        <span className="text-center block text-red-600 font-semibold">
+          {formatCurrency(val)}
+        </span>
+      ),
+    },
+    {
+      key: "dien_giai",
       title: "Diễn giải",
       width: 200,
       render: (val) => (
@@ -481,12 +495,8 @@ export const usePaymentVoucherList = () => {
     selectedEditId,
     setSelectedEditId,
     tienMap,
-    // Print functionality
     printRef,
     printData,
-    PaymentVoucherChiPrint,
     handlePrintClick,
-    ct46DetailData,
-    isLoadingCt46Detail,
   };
 };
