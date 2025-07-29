@@ -13,12 +13,15 @@ import ConfirmModal from "../../../components/ui/modal/ConfirmModal";
 import { ModalCreateCashReceipt } from "./CashReceiptCreate";
 import { ModalEditCashReceipt } from "./CashReceipUpdate";
 import { useListCashReceipt } from "./useListCashReceipt";
+import CashReceiptPrint from "../../../components/common/templatePhieuthu";
 
 export default function CashReceiptList() {
     const {
         isOpenCreate,
         isOpenEdit,
+        isOpenPrint,
         selectedCashReceipt,
+        selectedPrintReceipt,
         dataTable,
         columnsTable,
         pagination,
@@ -28,6 +31,7 @@ export default function CashReceiptList() {
         openModalCreate,
         closeModalCreate,
         closeModalEdit,
+        handleClosePrint,
         handleSearch,
         handleChangePage,
         handleSaveCreate,
@@ -39,7 +43,7 @@ export default function CashReceiptList() {
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
-    const [setShowDetailPanel] = useState(false);
+    const [showDetailPanel, setShowDetailPanel] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -158,12 +162,11 @@ export default function CashReceiptList() {
                 </ComponentCard>
 
                 {/* Detail Panel với spacing đẹp hơn và cách đáy xa hơn */}
-                {selectedRowForDetail && (
+                {selectedRowForDetail && showDetailPanel && (
                     <div className="mt-8 mb-20 pb-8">
                         <ComponentCard>
                             <div className="space-y-6">
                                 {/* Header */}
-
 
                                 {/* Danh sách tài khoản */}
                                 <div className="space-y-4">
@@ -177,9 +180,7 @@ export default function CashReceiptList() {
                                             </span>
                                         </div>
 
-
                                         <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
-
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -200,7 +201,6 @@ export default function CashReceiptList() {
                                                     <tr>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK số</th>
-                                                        {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th> */}
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên tài khoản</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Phát sinh có</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th>
@@ -215,9 +215,6 @@ export default function CashReceiptList() {
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                                                                 {item.tk_so || 'N/A'}
                                                             </td>
-                                                            {/* <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.tk_me || 'N/A'}
-                                                            </td> */}
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                                                 {item.ten_tai_khoan || 'N/A'}
                                                             </td>
@@ -241,7 +238,6 @@ export default function CashReceiptList() {
                                                                 .toLocaleString()
                                                             } VNĐ
                                                         </td>
-                                                        <td className="border-t border-gray-200 dark:border-gray-600"></td>
                                                     </tr>
                                                 </tfoot>
                                             </table>
@@ -274,6 +270,13 @@ export default function CashReceiptList() {
                     closeModalEdit={closeModalEdit}
                     onSaveEdit={handleSaveEdit}
                     selectedCashReceipt={selectedCashReceipt}
+                />
+
+                {/* Component Print - Sử dụng đúng props */}
+                <CashReceiptPrint
+                    isOpen={isOpenPrint}
+                    onClose={handleClosePrint}
+                    data={selectedPrintReceipt}
                 />
 
                 <ConfirmModal

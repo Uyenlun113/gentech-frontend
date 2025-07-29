@@ -1,4 +1,4 @@
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash, Printer } from "lucide-react";
 import { useState } from "react";
 
 import { useCashReceipts, useDeleteCashReceipt } from "../../../hooks/useCashReceipt";
@@ -13,6 +13,8 @@ export const useListCashReceipt = () => {
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
     const { isOpen: isOpenDetail, openModal: openModalDetail, closeModal: closeModalDetail } = useModal();
+    // Thêm modal cho chức năng in
+    const { isOpen: isOpenPrint, openModal: openModalPrint, closeModal: closeModalPrint } = useModal();
 
     // Parse date range
     const dateRange = rangePickerValue ? rangePickerValue.split(" to ") : [];
@@ -50,6 +52,9 @@ export const useListCashReceipt = () => {
         cashReceipt: null,
     });
 
+    // Thêm state cho chức năng in
+    const [selectedPrintReceipt, setSelectedPrintReceipt] = useState(null);
+
     const handleSaveCreate = () => {
         refetch();
         closeModalCreate();
@@ -70,6 +75,18 @@ export const useListCashReceipt = () => {
             open: true,
             cashReceipt: record,
         });
+    };
+
+    // Thêm handler cho chức năng in
+    const handlePrintCashReceipt = (record) => {
+        console.log('Print data:', record); // Debug để kiểm tra data
+        setSelectedPrintReceipt(record);
+        openModalPrint();
+    };
+
+    const handleClosePrint = () => {
+        setSelectedPrintReceipt(null);
+        closeModalPrint();
     };
 
     const confirmDeleteCashReceipt = async () => {
@@ -104,13 +121,11 @@ export const useListCashReceipt = () => {
         {
             key: "ngay_lct",
             title: "Ngày lập phiếu thu",
-            // fixed: "left",
             width: 150,
         },
         {
             key: "ngay_ct",
             title: "Ngày hạch toán",
-            // fixed: "left",
             width: 150,
         },
         {
@@ -172,6 +187,13 @@ export const useListCashReceipt = () => {
                 <div className="flex items-center gap-3 justify-center">
                     <button
                         className="text-gray-500 hover:text-amber-500"
+                        title="In"
+                        onClick={() => handlePrintCashReceipt(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
                         title="Sửa"
                         onClick={() => handleEditCashReceipt(record)}
                     >
@@ -219,7 +241,9 @@ export const useListCashReceipt = () => {
         isOpenCreate,
         isOpenEdit,
         isOpenDetail,
+        isOpenPrint, // Thêm state cho modal in
         selectedCashReceipt,
+        selectedPrintReceipt, // Thêm data cho phiếu thu được chọn để in
 
         // Data
         dataTable: cashReceiptData?.data || [],
@@ -240,6 +264,8 @@ export const useListCashReceipt = () => {
         closeModalCreate,
         closeModalEdit,
         closeModalDetail,
+        handlePrintCashReceipt,
+        handleClosePrint,
 
         // Form handlers
         handleRangePicker,
@@ -253,6 +279,7 @@ export const useListCashReceipt = () => {
         setLoaiTk,
         handleInputChange,
 
+        // Delete confirmation
         confirmDelete,
         confirmDeleteCashReceipt,
         cancelDeleteCashReceipt,
