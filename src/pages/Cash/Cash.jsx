@@ -39,7 +39,7 @@ export default function CashPage() {
         window.location.href = '/hd-ban-dv';
         break;
       case 'cash-payment':
-        window.location.href = '/phieu-chi-tien-mat';
+        window.location.href = '/hd-dien-tu';
         break;
       default:
         break;

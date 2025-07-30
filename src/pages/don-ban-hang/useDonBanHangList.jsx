@@ -1,11 +1,15 @@
-import { Pencil, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, Printer, Trash } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
-import { useDeletePhieu, useListDonBanHang } from "../../hooks/useDonBanHang";
+import { useDeletePhieu, useGetDonBanHangBySttRec, useListDonBanHang } from "../../hooks/useDonBanHang";
 import { useModal } from "../../hooks/useModal";
 
 export const useDonBanHangList = () => {
     const [selectedEditId, setSelectedEditId] = useState();
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
+    const [selectedPrintId, setSelectedPrintId] = useState(null);
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
@@ -45,7 +49,90 @@ export const useDonBanHangList = () => {
 
     const { data: fetchDonBanHangData, isLoading: isLoadingDonBanHang, refetch: refetchDonBanHangData, error } = useListDonBanHang(searchParams);
 
+    // Sử dụng useGetDonBanHangBySttRec để lấy detail data cho việc in
+    const {
+        data: donBanHangDetailData,
+        isLoading: isLoadingDonBanHangDetail,
+    } = useGetDonBanHangBySttRec(selectedPrintId, {
+        enabled: !!selectedPrintId,
+    });
+
     const deleteMutation = useDeletePhieu();
+
+    // Print functionality
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Đơn Bán Hàng - ${printData?.donHangData?.so_ct || 'DBH'}`,
+        onAfterPrint: () => {
+            // Clear print data sau khi in xong
+            setPrintData(null);
+            setSelectedPrintId(null);
+        }
+    });
+
+    const handlePrintClick = async (record, e) => {
+        e.stopPropagation();
+
+        try {
+            // Set selected print ID để trigger useGetDonBanHangBySttRec
+            setSelectedPrintId(record.stt_rec);
+
+            // Đợi data load xong
+            setTimeout(() => {
+                if (donBanHangDetailData) {
+                    const donHangData = donBanHangDetailData;
+                    const hangHoaData = donBanHangDetailData.hangHoa || [];
+
+                    // Set print data
+                    setPrintData({
+                        donHangData: donHangData,
+                        hangHoaData: hangHoaData,
+                    });
+
+                    // Trigger print
+                    setTimeout(() => {
+                        handlePrint();
+                    }, 100);
+                }
+            }, 500);
+
+        } catch (error) {
+            console.error("Error fetching data for print:", error);
+            toast.error("Không thể tải dữ liệu để in");
+        }
+    };
+
+    // Effect để xử lý khi có donBanHangDetailData mới
+    useEffect(() => {
+        if (donBanHangDetailData && selectedPrintId) {
+            const donHangData = donBanHangDetailData;
+            const hangHoaData = donBanHangDetailData.hangHoa || [];
+
+            // Tính tổng tiền từ hangHoa
+            const tongTienHang = hangHoaData.reduce((sum, item) => {
+                return sum + (parseFloat(item.tien_nt2) || parseFloat(item.tien_nt) || 0);
+            }, 0);
+
+            const tongTienThue = hangHoaData.reduce((sum, item) => {
+                return sum + (parseFloat(item.thue_nt) || 0);
+            }, 0);
+
+            // Set print data
+            setPrintData({
+                donHangData: donHangData,
+                hangHoaData: hangHoaData,
+                tongTienHang: tongTienHang || donHangData?.t_tien_nt2 || 0,
+                tongTienThue: tongTienThue || donHangData?.t_thue || 0,
+                tongThanhToan: (tongTienHang + tongTienThue) || donHangData?.t_tt_nt || 0
+            });
+
+            // Trigger print
+            setTimeout(() => {
+                handlePrint();
+                setSelectedPrintId(null); // Reset sau khi in
+            }, 100);
+        }
+    }, [donBanHangDetailData, selectedPrintId]);
 
     const dataTable = useMemo(() => {
         let rawData = [];
@@ -110,8 +197,8 @@ export const useDonBanHangList = () => {
     }, [selectedRecord]);
 
     useEffect(() => {
-        setLoading(isLoadingDonBanHang || deleteMutation.isPending);
-    }, [isLoadingDonBanHang, deleteMutation.isPending]);
+        setLoading(isLoadingDonBanHang || isLoadingDonBanHangDetail || deleteMutation.isPending);
+    }, [isLoadingDonBanHang, isLoadingDonBanHangDetail, deleteMutation.isPending]);
 
     // Log error nếu không phải AbortError
     useEffect(() => {
@@ -372,10 +459,18 @@ export const useDonBanHangList = () => {
             key: "action",
             title: "Thao tác",
             fixed: "right",
-            width: 100,
+            width: 130,
             render: (_, record) => {
                 return (
                     <div className="flex items-center gap-2 justify-center">
+                        <button
+                            className="text-gray-500 hover:text-blue-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="In đơn bán hàng"
+                            onClick={(e) => handlePrintClick(record, e)}
+                            disabled={isLoadingDonBanHangDetail}
+                        >
+                            <Printer size={16} />
+                        </button>
                         <button
                             className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Sửa"
@@ -606,5 +701,10 @@ export const useDonBanHangList = () => {
         closeModalEdit,
         selectedEditId,
         setSelectedEditId,
+
+        // Print functionality
+        printRef,
+        printData,
+        handlePrintClick,
     };
 };

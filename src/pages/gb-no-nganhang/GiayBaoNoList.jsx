@@ -11,6 +11,8 @@ import Button from "../../components/ui/button/Button";
 import { useEffect, useState } from "react";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { ModalCreateGiayBaoNo } from "./GiayBaoNoCreate";
+import GiayBaoNoPrintModal from "./GiayBaoNoPrintModal";
+import GiayBaoNoPrintTemplate from "./GiayBaoNoPrintTemplate";
 import { ModalEditGiayBaoNo } from "./GiayBaoNoUpdate";
 import { useListGiayBaoNo } from "./useListGiayBaoNo";
 
@@ -35,6 +37,14 @@ export default function GiayBaoNoList() {
         confirmDelete,
         confirmDeleteGiayBaoNo,
         cancelDeleteGiayBaoNo,
+
+        // Print related
+        isPrintModalOpen,
+        selectedForPrint,
+        printData,
+        printRef,
+        handlePrintModalClose,
+        handlePrintConfirm,
     } = useListGiayBaoNo();
 
     const [searchInput, setSearchInput] = useState(searchValue);
@@ -164,7 +174,6 @@ export default function GiayBaoNoList() {
                             <div className="space-y-6">
                                 {/* Header */}
 
-
                                 {/* Danh sách tài khoản */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
@@ -177,9 +186,7 @@ export default function GiayBaoNoList() {
                                             </span>
                                         </div>
 
-
                                         <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
-
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -200,7 +207,6 @@ export default function GiayBaoNoList() {
                                                     <tr>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK số</th>
-                                                        {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th> */}
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên tài khoản</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Phát sinh có</th>
                                                         <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th>
@@ -215,9 +221,6 @@ export default function GiayBaoNoList() {
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                                                                 {item.tk_so || 'N/A'}
                                                             </td>
-                                                            {/* <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.tk_me || 'N/A'}
-                                                            </td> */}
                                                             <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                                                 {item.ten_tai_khoan || 'N/A'}
                                                             </td>
@@ -283,7 +286,25 @@ export default function GiayBaoNoList() {
                     onConfirm={confirmDeleteGiayBaoNo}
                     onCancel={cancelDeleteGiayBaoNo}
                 />
+
+                {/* Print Modal */}
+                <GiayBaoNoPrintModal
+                    isOpen={isPrintModalOpen}
+                    selectedGiayBaoNo={selectedForPrint}
+                    onClose={handlePrintModalClose}
+                    onPrint={handlePrintConfirm}
+                />
+
+                {/* Print Template - Hidden */}
+                {printData && (
+                    <div style={{ display: 'none' }}>
+                        <GiayBaoNoPrintTemplate
+                            ref={printRef}
+                            printData={printData}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
-}
+};

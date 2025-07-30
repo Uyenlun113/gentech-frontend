@@ -73,7 +73,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         ma_dvcs: "",
         loai_pb: "1",
         ty_gia: "1.00",
-        ma_kh_i: "",
         tk_i: "",
     });
 
@@ -273,8 +272,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 status: data.status || "1",
                 ma_dvcs: data.ma_dvcs || "",
                 loai_pb: data.loai_pb || "1",
-                ty_gia: data.ty_gia || "1.00",
-                ma_kh_i: data.ma_kh_i || "",
+                ty_gia: data.ty_gia || "1",
                 tk_i: data.tk_i || "",
             });
 
@@ -943,7 +941,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             ma_dvcs: "",
             loai_pb: "1",
             ty_gia: "1.00",
-            ma_kh_i: "",
             tk_i: "",
         });
         setChiPhiData([]);
@@ -1024,7 +1021,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
-                    ma_kh_i: formData.ma_kh_i?.trim() || "",
                     tk_i: formData.tk_i?.trim() || "",
                     ty_gia: formData.ty_gia?.trim() || "1.00",
                     so_pn: formData.so_pn?.trim() || "",

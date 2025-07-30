@@ -13,6 +13,7 @@ import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../icons";
 
+import DonBanHangPrintTemplate from "./DonBanHangPrintTemplate"; // Import component in
 import { ModalCreateDonBanHang } from "./ModalCreateDonBanHang";
 import { ModalEditDonBanHang } from "./ModalEditDonBanHang";
 import { useDonBanHangList } from "./useDonBanHangList";
@@ -40,6 +41,8 @@ export default function DonBanHangPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
+        printRef,
+        printData,
     } = useDonBanHangList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -58,6 +61,16 @@ export default function DonBanHangPage() {
 
     return (
         <>
+            {printData && (
+                <div style={{ display: 'none' }}>
+                    <DonBanHangPrintTemplate
+                        ref={printRef}
+                        donHangData={printData.donHangData}
+                        hangHoaData={printData.hangHoaData}
+                    />
+                </div>
+            )}
+
             <ModalCreateDonBanHang
                 isOpenCreate={isOpenCreate}
                 closeModalCreate={closeModalCreate}
@@ -67,6 +80,7 @@ export default function DonBanHangPage() {
                 closeModalEdit={closeModalEdit}
                 editingId={selectedEditId}
             />
+
             <div className="px-4">
                 <PageMeta title="Danh sách đơn bán hàng" description="Danh sách đơn bán hàng" />
                 <PageBreadcrumb pageTitle="Danh sách đơn bán hàng" />
@@ -75,7 +89,7 @@ export default function DonBanHangPage() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
                                 <Link
-                                    to="/sales"
+                                    to="/cash"
                                     className="flex items-center border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
                                 >
                                     Quay lại
