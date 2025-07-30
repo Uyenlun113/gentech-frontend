@@ -207,10 +207,14 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                         const gia = parseFloat(field === "gia0" ? value : item.gia0) || 0;
                         updatedItem.tien0 = soLuong * gia;
                     }
-                    //thue_suat
-                    if (field === "thue_suat") {
-                        const thueSuat = parseFloat(field === "thue_suat" ? value : item.thue_suat) || 0;
 
+                    // Auto calculate thue when thue_suat changes OR when tien0 changes
+                    if (field === "thue_suat") {
+                        const thueSuat = parseFloat(value) || 0;
+                        updatedItem.thue = (updatedItem.tien0 * thueSuat) / 100;
+                    } else if (field === "so_luong" || field === "gia0") {
+                        // Recalculate thue when tien0 changes (due to so_luong or gia0 change)
+                        const thueSuat = parseFloat(item.thue_suat) || 0;
                         updatedItem.thue = (updatedItem.tien0 * thueSuat) / 100;
                     }
 
@@ -1050,15 +1054,16 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    // <Input
-                    //     value={row.thue}
-                    //     onChange={(e) => handleHangHoaChange(row.id, "thue", e.target.value)}
-                    //     placeholder="Tiền thuế"
-                    //     className="w-full"
-                    // />
-                    <div className="w-full text-right p-2">
-                        {(row.thue || 0).toLocaleString('vi-VN')}
-                    </div>
+                    <Input
+                        value={row.thue}
+                        onChange={(e) => handleHangHoaChange(row.id, "thue", e.target.value)}
+                        placeholder="Tiền thuế"
+                        className="w-full"
+                        disabled:true
+                    />
+                    // <div className="w-full text-right p-2">
+                    //     {(row.thue || 0).toLocaleString('vi-VN')}
+                    // </div>
                 );
             },
         },

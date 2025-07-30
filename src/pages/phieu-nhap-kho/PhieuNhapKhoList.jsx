@@ -1,5 +1,4 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search } from "lucide-react";
 
 import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
@@ -7,21 +6,251 @@ import PageMeta from "../../components/common/PageMeta";
 import Pagination from "../../components/pagination/Pagination";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import Button from "../../components/ui/button/Button";
-
-import { useEffect, useState, useCallback } from "react";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { ModalCreatePhieuNhapKho } from "./PhieuNhapKhoCreate";
 import { ModalEditPhieuNhapKho } from "./PhieuNhapKhoUpdate";
 import { useListPhieuNhapKho } from "./useListPhieuNhapKho";
 import dmvtService from "../../services/dmvt";
+import toWords from 'vn-num2words';
+import { FilePlus, Search, Pencil, Trash, Printer } from "lucide-react";
+import { useRef, forwardRef, useState, useEffect, useCallback } from "react";
+import { useReactToPrint } from "react-to-print";
 
+const PrintContent = forwardRef(({ data }, ref) => {
+    return (
+        <div
+            ref={ref}
+            className="w-[210mm] h-[297mm] p-4 text-sm text-black bg-white"
+            style={{ fontFamily: "Times New Roman, serif" }}
+        >
+            {/* Header với thông tin phần mềm và mã số thuế */}
+            <div className="flex justify-between items-start mb-2">
+                <div className="text-xs text-center">
+                    <div className="text-xs leading-tight">Công ty công nghệ Gentech</div>
+                    <div className="text-xs leading-tight">Tầng 02, chung cư CT3 Nghĩa Đô, ngõ 106 Hoàng Quốc Việt, Cổ Nhuế, Cầu Giấy, Hà Nội</div>
+                </div>
+                <div className="text-xs text-center">
+                    <div>Mã số thuế: {data?.ma_so_thue}</div>
+                    <div>Mẫu số: 01-VT</div>
+                    <div className="text-[10px]">
+                        (Ban hành theo Thông tư số 133/2016/TT-BTC
+                        <br />
+                        ngày 26/8/2016 của Bộ Tài chính)
+                    </div>
+                </div>
+            </div>
+
+            {/* Tiêu đề và thông tin phiếu */}
+
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex-1"></div>
+                <div className="text-center flex-1">
+                    <h1 className="font-bold text-xl mb-2">PHIẾU NHẬP KHO</h1>
+                    <div className="text-sm">NGÀY {formatDateVN(data?.ngay_ct || new Date())}</div>
+                    <div className="text-sm">Số: {data?.so_ct || "PN0002"}</div>
+                </div>
+                <div className="flex-1 text-xs">
+                    <div className="flex justify-center">
+                        {/* Cột 1: Nhãn */}
+                        <div className="text-right pr-2">
+                            <div><strong>Nợ:</strong></div>
+                            {data?.hang_hoa_list?.slice(1).map((_, index) => (
+                                <div key={`n-label-${index}`}>&nbsp;</div>
+                            ))}
+                            <div className="mt-2"><strong>Có:</strong></div>
+                            {data?.hang_hoa_list?.slice(1).map((_, index) => (
+                                <div key={`c-label-${index}`}>&nbsp;</div>
+                            ))}
+                        </div>
+
+                        {/* Cột 2: Dữ liệu */}
+                        <div className="pl-2">
+                            {data?.hang_hoa_list?.map((item, index) => (
+                                <div key={`n-${index}`}>{item.tk_vt}</div>
+                            ))}
+                            <div className="mt-2" />
+                            {data?.hang_hoa_list?.map((item, index) => (
+                                <div key={`c-${index}`}>{item.ma_nx_i}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Thông tin giao hàng */}
+            <div className="mb-4 space-y-1 text-xs">
+                <div className="flex">
+                    <span className="font-medium">- Họ và tên người giao hàng: {data?.ong_ba}</span>
+                </div>
+                <div className="flex">
+                    <span className="font-medium">- Theo: </span>
+                    <span className="ml-20">số</span>
+                    <span className="ml-8">ngày</span>
+                    <span className="ml-8">tháng</span>
+                    <span className="ml-8">năm</span>
+                    <span className="ml-16">của</span>
+                </div>
+                <div className="flex">
+                    <span className="font-medium">- Nhập tại kho: {data?.ma_kho || "KH01"}, địa điểm:</span>
+                </div>
+            </div>
+
+            {/* Bảng chi tiết phiếu nhập kho */}
+            <div className="mb-4">
+                <table className="w-full border-collapse border border-black text-xs">
+                    <thead>
+                        <tr className="bg-green-50">
+                            <th className="border border-black p-1 w-8" rowSpan="2">
+                                STT
+                            </th>
+                            <th className="border border-black p-1" rowSpan="2">
+                                TÊN, NHÃN HIỆU, QUY CÁCH, PHẨM CHẤT
+                                <br />
+                                VẬT TƯ, DỤNG CỤ, SẢN PHẨM HÀNG HÓA
+                            </th>
+                            <th className="border border-black p-1 w-16" rowSpan="2">
+                                MÃ SỐ
+                            </th>
+                            <th className="border border-black p-1 w-12" rowSpan="2">
+                                ĐVT
+                            </th>
+                            <th className="border border-black p-1" colSpan="2">
+                                SỐ LƯỢNG
+                            </th>
+                            <th className="border border-black p-1 w-20" rowSpan="2">
+                                ĐƠN GIÁ
+                            </th>
+                            <th className="border border-black p-1 w-24" rowSpan="2">
+                                THÀNH TIỀN
+                            </th>
+                        </tr>
+                        <tr className="bg-green-50">
+                            <th className="border border-black p-1 w-16">THEO CTƯ</th>
+                            <th className="border border-black p-1 w-16">THỰC NHẬP</th>
+                        </tr>
+                        <tr className="bg-green-50">
+                            <th className="border border-black p-1 text-center">A</th>
+                            <th className="border border-black p-1 text-center">B</th>
+                            <th className="border border-black p-1 text-center">C</th>
+                            <th className="border border-black p-1 text-center">D</th>
+                            <th className="border border-black p-1 text-center">1</th>
+                            <th className="border border-black p-1 text-center">2</th>
+                            <th className="border border-black p-1 text-center">3</th>
+                            <th className="border border-black p-1 text-center">4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data?.hang_hoa_list?.map((item, index) => (
+                            <tr key={index}>
+                                <td className="border border-black p-1 text-center">{index + 1}</td>
+                                <td className="border border-black p-1">{item?.ten_vt || "noname"}</td>
+                                <td className="border border-black p-1">{item?.ma_vt}</td>
+                                <td className="border border-black p-1 text-center">{item?.dvt || "nodvt"}</td>
+                                <td className="border border-black p-1 text-right">
+                                    {/* {item?.so_luong?.toLocaleString("vi-VN") || "10.000"} */}
+                                </td>
+                                <td className="border border-black p-1 text-right">
+                                    {item?.so_luong?.toLocaleString("vi-VN") || "10.000"}
+                                </td>
+                                <td className="border border-black p-1 text-right">{item?.gia?.toLocaleString("vi-VN") || "20.00"}</td>
+                                <td className="border border-black p-1 text-right">
+                                    {item?.tien?.toLocaleString("vi-VN") || "1.434"}
+                                </td>
+                            </tr>
+                        ))}
+
+                        {/* Các dòng trống */}
+                        {Array.from({ length: Math.max(0, 10 - (data?.hang_hoa_list?.length || 1)) }, (_, i) => (
+                            <tr key={`empty-${i}`}>
+                                <td className="border border-black p-1 py-3 text-center"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                                <td className="border border-black p-1 py-3"></td>
+                            </tr>
+                        ))}
+
+                        {/* Dòng tổng cộng */}
+                        <tr>
+                            <td colSpan="7" className="border border-black p-1 text-center font-bold">
+                                CỘNG:
+                            </td>
+                            <td className="border border-black p-1 text-right font-bold">
+                                {data?.tong_tien?.toLocaleString("vi-VN") || "1.434"}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Ghi chú */}
+            <div className="text-xs mb-4 space-y-1">
+                <div>{data?.tong_tien ? `- Số tiền (viết bằng chữ): ${capitalizeFirstLetter(toWords(data.tong_tien))} đồng` : ""}</div>
+                <div>- Số chứng từ gốc kèm theo: 0</div>
+            </div>
+
+            <div className="grid grid-cols-4 grid-rows-6 text-center text-xs gap-x-4 gap-y-1 min-h-[120px]">
+                {/* Hàng 1 - Ngày tháng */}
+                <div></div> {/* Cột 1 trống */}
+                <div></div> {/* Cột 2 trống */}
+                <div></div> {/* Cột 3 trống */}
+                <div className="text-xs">Ngày ..... tháng ..... năm .........</div> {/* Cột 4 */}
+
+                {/* Hàng 2 - Tiêu đề chính */}
+                <div className="font-bold">NGƯỜI LẬP PHIẾU</div>
+                <div className="font-bold">NGƯỜI GIAO HÀNG</div>
+                <div className="font-bold">THỦ KHO</div>
+                <div className="font-bold">KẾ TOÁN TRƯỞNG</div>
+
+                {/* Hàng 3 - Ghi chú ký tên */}
+                <div className="text-[10px]">(Ký, họ tên)</div>
+                <div className="text-[10px]">(Ký, họ tên)</div>
+                <div className="text-[10px]">(Ký, họ tên)</div>
+                <div className="text-[10px]">(Hoặc bộ phận có nhu cầu nhập)</div>
+
+                {/* Hàng 4 - Ký tên KẾ TOÁN TRƯỞNG */}
+                <div></div> {/* Cột 1 trống */}
+                <div></div> {/* Cột 2 trống */}
+                <div></div> {/* Cột 3 trống */}
+                <div className="text-[10px]">(Ký, họ tên)</div>
+
+                {/* Hàng 5 - Thông tin bổ sung */}
+                <div></div> {/* Cột 1 trống */}
+                <div></div> {/* Cột 2 trống */}
+                <div></div> {/* Cột 2 trống */}
+                <div></div> {/* Cột 4 trống */}
+
+                {/* Hàng 5 - Thông tin bổ sung */}
+                <div></div> {/* Cột 1 trống */}
+                <div></div> {/* Cột 2 trống */}
+                <div className="text-xs">Họ và tên thủ kho</div>
+                <div></div> {/* Cột 4 trống */}
+            </div>
+        </div>
+    )
+})
+
+const formatDateVN = (dateInput) => {
+    const date = new Date(dateInput)
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
+    return `${day} THÁNG ${month} NĂM ${year}`
+}
+
+const capitalizeFirstLetter = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 export default function PhieuNhapKhoList() {
     const {
         isOpenCreate,
         isOpenEdit,
         selectedPhieuNhapKho,
         dataTable,
-        columnsTable,
         pagination,
         searchValue,
         isLoading,
@@ -36,12 +265,17 @@ export default function PhieuNhapKhoList() {
         confirmDelete,
         confirmDeletePhieuNhapKho,
         cancelDeletePhieuNhapKho,
+        handleDeletePhieuNhapKho,
+        handleEditPhieuNhapKho,
+        isDeleting,
     } = useListPhieuNhapKho();
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
     const [showDetailPanel, setShowDetailPanel] = useState(false);
     const [isLoadingMaterialNames, setIsLoadingMaterialNames] = useState(false);
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -53,9 +287,9 @@ export default function PhieuNhapKhoList() {
     // Hook để lấy tên vật tư cho từng dòng hàng hóa
     const fetchMaterialNames = useCallback(async (hangHoaArray) => {
         if (!hangHoaArray || hangHoaArray.length === 0) return hangHoaArray;
-        
+
         setIsLoadingMaterialNames(true);
-        
+
         try {
             const promises = hangHoaArray.map(async (item) => {
                 if (item.ma_vt && !item.ten_vt) {
@@ -121,10 +355,155 @@ export default function PhieuNhapKhoList() {
         );
     }
 
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Phiếu_nhập_kho_${printData?.so_ct || 'PT001'}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
+
+
+    // Function để xử lý in phiếu thu
+    const handlePrintFun = (record) => {
+        console.log('Print data being set:', record);
+        setPrintData(record);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
+    const columnsTable = [
+        {
+            key: "ngay_ct",
+            title: "Ngày chứng từ",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "so_ct",
+            title: "Số chứng từ",
+            fixed: "left",
+            width: 100,
+        },
+        {
+            key: "ma_gd",
+            title: "Mã giao dịch",
+            width: 100,
+        },
+        {
+            key: "ma_kh",
+            title: "Mã khách hàng",
+            width: 150,
+        },
+        {
+            key: "ong_ba",
+            title: "Tên khách hàng",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "ma_kh",
+            title: "Tổng tiền ngoại tệ",
+            width: 150,
+        },
+        {
+            key: "ma_kh",
+            title: "Tổng tiền VNĐ",
+            width: 150,
+        },
+        {
+            key: "dien_giai",
+            title: "Lý do nộp",
+            width: 200,
+        },
+        {
+            key: "ma_nt",
+            title: "Loại tiền",
+            width: 50,
+        },
+        {
+            key: "ty_gia",
+            title: "Tỷ giá",
+            width: 50,
+        },
+        {
+            key: "date",
+            title: "Ngày cập nhật",
+            width: 150,
+        },
+        {
+            key: "time",
+            title: "Giờ cập nhật",
+            width: 150,
+        },
+        {
+            key: "ma_dvcs",
+            title: "Mã DVCS",
+            width: 150,
+        },
+        {
+            key: "action",
+            title: "Thao tác",
+            fixed: "right",
+            width: 120,
+            render: (_, record) => (
+                <div className="flex items-center gap-3 justify-center">
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="In"
+                        onClick={() => handlePrintFun(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="Sửa"
+                        onClick={() => handleEditPhieuNhapKho(record)}
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <button
+                        onClick={() => handleDeletePhieuNhapKho(record)}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Xoá"
+                        disabled={isDeleting}
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
     return (
         <div className="px-4">
             <PageMeta title="Phiếu nhập kho" description="Phiếu nhập kho" />
             <PageBreadcrumb pageTitle="Phiếu nhập kho" />
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                {printData && <PrintContent ref={printRef} data={printData} />}
+            </div>
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

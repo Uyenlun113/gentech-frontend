@@ -1,5 +1,4 @@
 import "flatpickr/dist/flatpickr.min.css";
-import { FilePlus, Search } from "lucide-react";
 
 import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
@@ -8,19 +7,161 @@ import Pagination from "../../components/pagination/Pagination";
 import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import Button from "../../components/ui/button/Button";
 
-import { useEffect, useState } from "react";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { ModalCreateHoaDonMuaDV } from "./HoaDonMuaDVCreate";
 import { ModalEditHoaDonMuaDV } from "./HoaDonMuaDVUpdate";
 import { useListHoaDonMuaDV } from "./useListHoaDonMuaDV";
+import toWords from 'vn-num2words';
+import { FilePlus, Search, Pencil, Trash, Printer } from "lucide-react";
+import { useRef, forwardRef, useState, useEffect } from "react";
+import { useReactToPrint } from "react-to-print";
 
+const PrintContent = forwardRef(({ data }, ref) => {
+    return (
+        <div
+            ref={ref}
+            className="w-[210mm] h-[297mm] p-4 text-sm text-black bg-white"
+            style={{ fontFamily: "Times New Roman, serif" }}
+        >
+            {/* Header với thông tin phần mềm */}
+            <div className="text-xs text-left mb-4">
+                <div className="text-xs leading-tight">Công ty công nghệ Gentech</div>
+                <div className="text-xs leading-tight">Tầng 02, chung cư CT3 Nghĩa Đô, ngõ 106 Hoàng Quốc Việt, Cổ Nhuế, Cầu Giấy, Hà Nội</div>
+            </div>
+
+            {/* Tiêu đề và số hóa đơn */}
+            <div className="flex justify-between items-start mb-6">
+                <div className="flex-1"></div>
+                <div className="text-center flex-1">
+                    <h1 className="font-bold text-xl mb-2">HÓA ĐƠN MUA DỊCH VỤ</h1>
+                    <div className="text-sm">NGÀY {formatDateVN(data?.ngay_ct || new Date())}</div>
+                </div>
+                <div className="flex-1 text-right">
+                    <div className="text-sm font-medium">Số: {data?.so_ct || "DV0001"}</div>
+                </div>
+            </div>
+
+            {/* Thông tin người bán và đơn vị */}
+            <div className="mb-4 space-y-1 text-xs">
+                <div className="flex">
+                    <span className="font-medium w-40">Họ tên người bán hàng:</span>
+                    <span>{data?.ong_ba}</span>
+                </div>
+                <div className="flex">
+                    <span className="font-medium w-40">Đơn vị:</span>
+                    <span>{data?.ma_kh}</span>
+                </div>
+                <div className="flex">
+                    <span className="font-medium w-40">Địa chỉ:</span>
+                    <span>{data?.dia_chi}</span>
+                </div>
+                <div className="flex">
+                    <span className="font-medium w-40">Tk có:</span>
+                    <span>{data?.ma_nx}</span>
+                </div>
+            </div>
+
+            {/* Bảng dịch vụ */}
+            <div className="mb-4">
+                <table className="w-full border-collapse border border-black text-xs">
+                    <thead>
+                        <tr className="bg-green-50">
+                            <th className="border border-black p-2 text-center">NỘI DUNG</th>
+                            <th className="border border-black p-2 w-24 text-center">TK NỢ</th>
+                            <th className="border border-black p-2 w-32 text-center">TIỀN HÀNG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {/* Dòng dữ liệu từ danh sách dịch vụ */}
+                        {data?.hachToanList?.map((item, index) => (
+                            <tr key={index}>
+                                <td className="border border-black p-2">{item?.dien_giaii || `đây là địa chỉ gì ${index + 1}`}</td>
+                                <td className="border border-black p-2 text-center">{item?.tk_vt}</td>
+                                <td className="border border-black p-2 text-right">
+                                    {item?.tien?.toLocaleString("vi-VN")}
+                                </td>
+                            </tr>
+                        ))}
+
+                        {/* Các dòng trống */}
+                        {Array.from({ length: Math.max(0, 8 - (data?.hachToanList?.length || 2)) }, (_, i) => (
+                            <tr key={`empty-${i}`}>
+                                <td className="border border-black p-2 py-4"></td>
+                                <td className="border border-black p-2 py-4"></td>
+                                <td className="border border-black p-2 py-4"></td>
+                            </tr>
+                        ))}
+
+                        {/* Các dòng tổng kết */}
+                        <tr>
+                            <td colSpan="2" className="border border-black p-2 text-right font-medium">
+                                CỘNG TIỀN HÀNG:
+                            </td>
+                            <td className="border border-black p-2 text-right">
+                                {data?.t_tien?.toLocaleString("vi-VN")}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colSpan="2" className="border border-black p-2 text-right font-medium">
+                                TIỀN THUẾ GTGT:
+                            </td>
+                            <td className="border border-black p-2 text-right">
+                                {data?.t_thue?.toLocaleString("vi-VN")}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colSpan="2" className="border border-black p-2 text-right font-bold">
+                                TỔNG TIỀN THANH TOÁN:
+                            </td>
+                            <td className="border border-black p-2 text-right font-bold">
+                                {data?.t_tt?.toLocaleString("vi-VN")}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Ghi chú số tiền bằng chữ */}
+            <div className="text-xs mb-8 italic text-right">
+                {data?.t_tt ? `Số tiền (viết bằng chữ): ${capitalizeFirstLetter(toWords(data.t_tt))} đồng` : ""}
+            </div>
+
+            {/* Phần ký tên */}
+            <div className="grid grid-cols-3 text-center text-xs gap-8 min-h-[120px]">
+                <div>
+                    <div className="font-bold mb-1">NGƯỜI BÁN HÀNG</div>
+                    <div className="text-[10px] mb-8">(Ký, họ tên)</div>
+                </div>
+                <div>
+                    <div className="font-bold mb-1">KẾ TOÁN TRƯỞNG</div>
+                    <div className="text-[10px] mb-8">(Ký, họ tên)</div>
+                </div>
+                <div>
+                    <div className="font-bold mb-1">GIÁM ĐỐC</div>
+                    <div className="text-[10px] mb-8">(Ký, họ tên)</div>
+                </div>
+            </div>
+        </div>
+    )
+})
+const formatDateVN = (dateInput) => {
+    const date = new Date(dateInput)
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
+    return `${day} THÁNG ${month} NĂM ${year}`
+}
+
+const capitalizeFirstLetter = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 export default function HoaDonMuaDVList() {
     const {
         isOpenCreate,
         isOpenEdit,
         selectedHoaDonMuaDV,
         dataTable,
-        columnsTable,
         pagination,
         searchValue,
         isLoading,
@@ -35,12 +176,16 @@ export default function HoaDonMuaDVList() {
         confirmDelete,
         confirmDeleteHoaDonMuaDV,
         cancelDeleteHoaDonMuaDV,
+        handleDeleteHoaDonMuaDV,
+        handleEditHoaDonMuaDV,
+        isDeleting,
     } = useListHoaDonMuaDV();
 
     const [searchInput, setSearchInput] = useState(searchValue);
     const [selectedRowForDetail, setSelectedRowForDetail] = useState(null);
     const [showDetailPanel, setShowDetailPanel] = useState(false);
-
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
     useEffect(() => {
         const timer = setTimeout(() => {
             handleSearch(searchInput);
@@ -71,10 +216,159 @@ export default function HoaDonMuaDVList() {
         );
     }
 
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Hóa_đơn_mua_dịch_vụ_${printData?.so_ct}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
+
+
+    // Function để xử lý in phiếu thu
+    const handlePrintFun = (record) => {
+        console.log('Print data being set:', record);
+        setPrintData(record);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
+    const columnsTable = [
+        {
+            key: "ngay_ct",
+            title: "Ngày chứng từ",
+            fixed: "left",
+            width: 150,
+        },
+        {
+            key: "so_ct",
+            title: "Số phiếu thu",
+            fixed: "left",
+            width: 100,
+        },
+        {
+            key: "ma_kh",
+            title: "Mã khách",
+            width: 150,
+        },
+        {
+            key: "ten_kh",
+            title: "Tên khách hàng",
+            width: 150,
+        },
+        {
+            key: "dien_giai",
+            title: "Diễn giải",
+            width: 200,
+        },
+        {
+            key: "ma_nx",
+            title: "Mã nx",
+            width: 150,
+        },
+        // {
+        //     key: "tk_thue_no",
+        //     title: "TK Thuế",
+        //     width: 100,
+        // },
+        {
+            key: "t_tien",
+            title: "Tiền hàng VNĐ",
+            width: 250,
+        },
+        {
+            key: "t_thue",
+            title: "Tiền thuế VNĐ",
+            width: 100,
+        },
+        {
+            key: "t_tt",
+            title: "Tổng tiền tt VNĐ",
+            width: 100,
+        },
+        {
+            key: "ma_nt",
+            title: "Mã ngoại tệ",
+            width: 80,
+        },
+        {
+            key: "ty_gia",
+            title: "Tỷ giá",
+            width: 50,
+        },
+        {
+            key: "date",
+            title: "Ngày cập nhật",
+            width: 100,
+        },
+        {
+            key: "time",
+            title: "Giờ cập nhật",
+            width: 100,
+        },
+        {
+            key: "action",
+            title: "Thao tác",
+            fixed: "right",
+            width: 120,
+            render: (_, record) => (
+                <div className="flex items-center gap-3 justify-center">
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="In"
+                        onClick={() => handlePrintFun(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="Sửa"
+                        onClick={() => handleEditHoaDonMuaDV(record)}
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteHoaDonMuaDV(record)}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Xoá"
+                        disabled={isDeleting}
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
     return (
         <div className="px-4">
             <PageMeta title="Hoá đơn mua Dịch vụ" description="Hoá đơn mua Dịch vụ" />
             <PageBreadcrumb pageTitle="Hoá đơn mua Dịch vụ" />
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                {printData && <PrintContent ref={printRef} data={printData} />}
+            </div>
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
