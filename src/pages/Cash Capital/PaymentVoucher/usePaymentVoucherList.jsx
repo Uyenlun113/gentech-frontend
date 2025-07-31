@@ -299,21 +299,10 @@ export const usePaymentVoucherList = () => {
       render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
     },
     {
-      key: "tien_total",
+      key: "t_tt_nt",
       title: "Tổng tiền tt ngoại tệ",
       width: 140,
-      render: (_, record) => {
-        const sttRecKey = record.stt_rec?.toString()?.trim();
-        const calculatedTotal = tienMap[sttRecKey];
-        const fallbackTotal = record.t_tien || record.tien_total || 0;
-        const displayTotal = calculatedTotal !== undefined ? calculatedTotal : fallbackTotal;
-
-        return (
-          <div className="font-mono text-sm text-center text-blue-600">
-            {formatCurrency(displayTotal)}
-          </div>
-        );
-      },
+      render: (val) => <div className="font-medium text-center text-blue-600">{formatCurrency(val)}</div>,
     },
     {
       key: "ma_kh",
