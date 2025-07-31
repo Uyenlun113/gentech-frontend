@@ -352,13 +352,20 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             );
 
             if (validChiPhiRows.length > 0) {
-                const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
+                const tongTienHang = validChiPhiRows.reduce((sum, row) =>
+                    sum + (parseFloat(row.tien_nt) || 0), 0
+                );
 
+                // Phân bổ chi phí theo tỷ lệ tiền hàng
                 setChiPhiData(prev => prev.map(row => {
                     if (row.ma_vt && parseFloat(row.tien_nt) > 0) {
+                        const tienHang = parseFloat(row.tien_nt) || 0;
+                        const tyLe = tongTienHang > 0 ? tienHang / tongTienHang : 0;
+                        const chiPhiPhanBo = tongChiPhi * tyLe;
+
                         return {
                             ...row,
-                            cp_nt: chiPhiPerRow.toFixed(0)
+                            cp_nt: chiPhiPhanBo.toFixed(0)
                         };
                     }
                     return row;
@@ -963,7 +970,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
                         so_ct0, ma_gd, ma_hd, ma_kho, ten_vt, so_luong, gia, t_thue,
-                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, tk_thue_no
+                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, thue_suat, han_tt, tk_thue_no
                     }) => ({
                         ma_gd: ma_gd?.trim() || "",
                         ma_hd: ma_hd?.trim() || "",
@@ -979,7 +986,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                         ngay_ct0: ngay_ct0 ? new Date(ngay_ct0).toISOString() : undefined,
                         dia_chi: dia_chi?.trim() || "",
                         ma_so_thue: ma_so_thue?.trim() || "",
-                        t_tien: Number(t_tien) || 0,
+                        t_tien: Number(so_luong) * Number(gia) || 0,
                         thue_suat: Number(thue_suat) || 0,
                         han_tt: Number(han_tt) || 0,
                         tk_thue_no: tk_thue_no?.trim() || "",

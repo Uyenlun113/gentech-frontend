@@ -388,16 +388,6 @@ export const useChiPhiMuaHangList = () => {
             render: (val) => <div className="font-mono text-center">{val || "-"}</div>,
         },
         {
-            key: "ten_vt",
-            title: "Tên vật tư",
-            width: 200,
-            render: (val) => (
-                <div className="text-center truncate" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
             key: "ma_kho_i",
             title: "Mã kho",
             width: 120,
@@ -405,26 +395,6 @@ export const useChiPhiMuaHangList = () => {
                 <div className="text-center truncate" title={val}>
                     {val || "-"}
                 </div>
-            ),
-        },
-        {
-            key: "so_luong",
-            title: "Số lượng",
-            width: 100,
-            render: (val) => (
-                <span className="text-center block text-blue-600">
-                    {formatCurrency(val)}
-                </span>
-            ),
-        },
-        {
-            key: "gia",
-            title: "Đơn giá",
-            width: 120,
-            render: (val) => (
-                <span className="text-center block text-green-600">
-                    {formatCurrency(val)}
-                </span>
             ),
         },
         {

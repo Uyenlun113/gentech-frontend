@@ -308,8 +308,10 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 setChiPhiData(chiPhiRows);
             }
 
-            // Set HĐ thuế data
-            if (data.ct73gt && Array.isArray(data.ct73gt)) {
+            // Set HĐ thuế data - SỬA PHẦN NÀY
+            if (data.ct73gt && Array.isArray(data.ct73gt) && data.ct73gt.length > 0) {
+                console.log("Loading HĐ thuế data:", data.ct73gt); // Debug log
+
                 const hdThueRows = data.ct73gt.map((item, index) => {
                     // Collect mã kho để fetch thông tin
                     if (item.ma_kho && !khoCodes.includes(item.ma_kho)) {
@@ -339,7 +341,13 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         ten_kho: item.ten_kho || "",
                     };
                 });
+
+                console.log("Mapped HĐ thuế rows:", hdThueRows); // Debug log
                 setHdThueData(hdThueRows);
+            } else {
+                console.log("No HĐ thuế data found or empty array"); // Debug log
+                // Đảm bảo reset hdThueData nếu không có dữ liệu
+                setHdThueData([]);
             }
 
             // Set chi phí form data
@@ -423,13 +431,20 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             );
 
             if (validChiPhiRows.length > 0) {
-                const chiPhiPerRow = tongChiPhi / validChiPhiRows.length;
+                const tongTienHang = validChiPhiRows.reduce((sum, row) =>
+                    sum + (parseFloat(row.tien_nt) || 0), 0
+                );
 
+                // Phân bổ chi phí theo tỷ lệ tiền hàng
                 setChiPhiData(prev => prev.map(row => {
                     if (row.ma_vt && parseFloat(row.tien_nt) > 0) {
+                        const tienHang = parseFloat(row.tien_nt) || 0;
+                        const tyLe = tongTienHang > 0 ? tienHang / tongTienHang : 0;
+                        const chiPhiPhanBo = tongChiPhi * tyLe;
+
                         return {
                             ...row,
-                            cp_nt: chiPhiPerRow.toFixed(0)
+                            cp_nt: chiPhiPhanBo.toFixed(0)
                         };
                     }
                     return row;
@@ -482,7 +497,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     tien_nt0: item.tien_nt0 || "",
                     tk_vt: item.tk_vt || "",
                     thue_nt: item.thue_nt || "",
-                    cp_nt: "",
+                    cp_nt: item.cp_nt || "",
                     cp: "",
                     dvt: item.dvt || "",
                     ten_kho: item.ten_kho || "",
@@ -1034,7 +1049,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
                         so_ct0, ma_gd, ma_hd, ma_kho, ten_vt, so_luong, gia, t_thue,
-                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, tk_thue_no
+                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, thue_suat, han_tt, tk_thue_no
                     }) => ({
                         ma_gd: ma_gd?.trim() || "",
                         ma_hd: ma_hd?.trim() || "",
@@ -1050,7 +1065,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         ngay_ct0: ngay_ct0 ? new Date(ngay_ct0).toISOString() : undefined,
                         dia_chi: dia_chi?.trim() || "",
                         ma_so_thue: ma_so_thue?.trim() || "",
-                        t_tien: Number(t_tien) || 0,
+                        t_tien: Number(so_luong) * Number(gia) || 0,
                         thue_suat: Number(thue_suat) || 0,
                         han_tt: Number(han_tt) || 0,
                         tk_thue_no: tk_thue_no?.trim() || "",
