@@ -7,6 +7,7 @@ export const useAccounts = (params = {}) => {
     queryKey: ["accounts", params],
     queryFn: () => accountDirectoryApi.getAccounts(params),
     staleTime: 0,
+    staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
 };
@@ -16,6 +17,7 @@ export const useAccount = (tk0) => {
     queryKey: ["account", tk0],
     queryFn: () => accountDirectoryApi.getAccount(tk0),
     enabled: !!tk0,
+    staleTime: Infinity,
   });
 };
 
