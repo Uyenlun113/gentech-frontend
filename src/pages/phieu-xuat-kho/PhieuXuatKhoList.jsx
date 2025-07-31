@@ -14,6 +14,7 @@ import { ModalCreatePhieuXuatKho } from "./PhieuXuatKhoCreate";
 import { ModalEditPhieuXuatKho } from "./PhieuXuatKhoUpdate";
 import { useListPhieuXuatKho } from "./useListPhieuXuatKho";
 import dmvtService from "../../services/dmvt";
+import PrintContent from "./printPhieuXuatKho"
 
 export default function PhieuXuatKhoList() {
     const {
@@ -36,6 +37,8 @@ export default function PhieuXuatKhoList() {
         confirmDelete,
         confirmDeletePhieuXuatKho,
         cancelDeletePhieuXuatKho,
+        printRef,
+        printData,
     } = useListPhieuXuatKho();
 
     const [searchInput, setSearchInput] = useState(searchValue);
@@ -53,9 +56,9 @@ export default function PhieuXuatKhoList() {
     // Hook để lấy tên vật tư cho từng dòng hàng hóa
     const fetchMaterialNames = useCallback(async (hangHoaArray) => {
         if (!hangHoaArray || hangHoaArray.length === 0) return hangHoaArray;
-        
+
         setIsLoadingMaterialNames(true);
-        
+
         try {
             const promises = hangHoaArray.map(async (item) => {
                 if (item.ma_vt && !item.ten_vt) {
@@ -125,6 +128,9 @@ export default function PhieuXuatKhoList() {
         <div className="px-4">
             <PageMeta title="Phiếu xuất kho" description="Phiếu xuất kho" />
             <PageBreadcrumb pageTitle="Phiếu xuất kho" />
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                {printData && <PrintContent ref={printRef} data={printData} />}
+            </div>
             <div className="space-y-6 ">
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

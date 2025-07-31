@@ -1,11 +1,12 @@
-import { Pencil, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, Trash, Printer } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "react-toastify";
 
 
 import { useModal } from "../../hooks/useModal";
 import { useDeletePhieuXuatDc, useGetAllPhieuXuatDc } from "../../hooks/usePhieuxuatdc";
 import phieuXuatDcApi from "../../services/phieuxuatdc";
+import { useReactToPrint } from "react-to-print";
 
 export const usePhieuXuatDcList = () => {
     const [selectedEditId, setSelectedEditId] = useState();
@@ -22,6 +23,8 @@ export const usePhieuXuatDcList = () => {
 
     const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
     const { data: fetchPhieuXuatDcData, isLoading: isLoadingPhieuXuatDc, refetch: refetchPhieuXuatDcData } = useGetAllPhieuXuatDc();
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
     const deleteMutation = useDeletePhieuXuatDc();
 
     const dataTable = useMemo(() => {
@@ -217,7 +220,50 @@ export const usePhieuXuatDcList = () => {
 
         fetchAllCt85Data();
     }, [dataTable]);
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Phiếu_xuất_kho_dc_${printData?.so_ct || 'PT001'}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
+    const getData = async (record) => {
+        const res = await phieuXuatDcApi.getPhieuXuatDc(record.stt_rec);
+        return res
+    }
 
+    // Function để xử lý in phiếu thu
+    const handlePrintFun = async (record) => {
+        let data = await getData(record)
+        console.log('Print data being set --------------------------:', data);
+        setPrintData(data);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
     const columnsTable = [
         {
             key: "stt",
@@ -305,6 +351,13 @@ export const usePhieuXuatDcList = () => {
             render: (_, record) => {
                 return (
                     <div className="flex items-center gap-2 justify-center">
+                        <button
+                            className="text-gray-500 hover:text-amber-500"
+                            title="In"
+                            onClick={() => handlePrintFun(record)}
+                        >
+                            <Printer size={18} />
+                        </button>
                         <button
                             className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Sửa"
@@ -453,5 +506,7 @@ export const usePhieuXuatDcList = () => {
         // Additional props for compatibility
         currentPage: 1,
         totalItems: filteredDataTable.length,
+        printRef,
+        printData,
     };
 };
