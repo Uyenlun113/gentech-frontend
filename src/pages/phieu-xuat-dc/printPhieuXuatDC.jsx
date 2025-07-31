@@ -178,7 +178,7 @@ const PrintContent = forwardRef(({ data }, ref) => {
                                 CỘNG:
                             </td>
                             <td className="border border-black p-1 text-right font-bold">
-                                {data?.phieu?.thanh_tien?.toLocaleString("vi-VN") || "1.434"}
+                                {data?.phieu?.t_tien_nt?.toLocaleString("vi-VN") || "1.434"}
                             </td>
                         </tr>
                     </tbody>
@@ -187,7 +187,7 @@ const PrintContent = forwardRef(({ data }, ref) => {
 
             {/* Ghi chú */}
             <div className="text-xs mb-4 space-y-1">
-                <div>{data?.phieu?.thanh_tien ? `- Số tiền (viết bằng chữ): ${capitalizeFirstLetter(toWords(data?.phieu?.thanh_tien))} đồng` : ""}</div>
+                <div>{data?.phieu?.t_tien_nt ? `- Số tiền (viết bằng chữ): ${capitalizeFirstLetter(toWords(data?.phieu?.t_tien_nt))} đồng` : ""}</div>
                 <div>- Số chứng từ gốc kèm theo: 0</div>
             </div>
 

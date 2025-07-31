@@ -1,8 +1,9 @@
-import { Pencil, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, Trash, Printer } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useDeleteChiPhiMuaHang, useListChiPhiMuaHang } from "../../hooks/useChiPhiMuaHang";
 import { useModal } from "../../hooks/useModal";
+import { useReactToPrint } from "react-to-print";
 
 export const useChiPhiMuaHangList = () => {
     const [selectedEditId, setSelectedEditId] = useState();
@@ -22,6 +23,8 @@ export const useChiPhiMuaHangList = () => {
     const [pageSize, setPageSize] = useState(10);
 
     const { isOpen: isOpenDelete, openModal: openModalDelete, closeModal: closeModalDelete } = useModal();
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
 
     // Build search params for API call
     const searchParams = useMemo(() => {
@@ -228,7 +231,50 @@ export const useChiPhiMuaHangList = () => {
         setRangePickerValue("");
         setCurrentPage(1);
     };
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Phiếu_xuất_kho_dc_${printData?.so_ct || 'PT001'}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
+    // const getData = async (record) => {
+    //     const res = await phieuXuatDcApi.getPhieuXuatDc(record.stt_rec);
+    //     return res
+    // }
 
+    // Function để xử lý in phiếu thu
+    const handlePrintFun = async (record) => {
+        // let data = await getData(record)
+        // console.log('Print data being set --------------------------:', data);
+        setPrintData(record);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
     const columnsTable = [
         {
             key: "stt",
@@ -347,6 +393,13 @@ export const useChiPhiMuaHangList = () => {
             render: (_, record) => {
                 return (
                     <div className="flex items-center gap-2 justify-center">
+                        <button
+                            className="text-gray-500 hover:text-amber-500"
+                            title="In"
+                            onClick={() => handlePrintFun(record)}
+                        >
+                            <Printer size={18} />
+                        </button>
                         <button
                             className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Sửa"
@@ -536,5 +589,7 @@ export const useChiPhiMuaHangList = () => {
         closeModalEdit,
         selectedEditId,
         setSelectedEditId,
+        printRef,
+        printData,
     };
 };
