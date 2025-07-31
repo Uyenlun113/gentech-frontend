@@ -121,13 +121,13 @@ const PaymentExpensePrint = React.forwardRef(({ phieuData, hachToanData, totalAm
               <div className="flex compact-row">
                 <span className="w-28 text-xs">Số tiền:</span>
                 <span className="flex-1 px-1 text-xs font-bold">
-                  {formatCurrency(totalAmount || phieuData?.t_tien || 0)} {phieuData?.ma_nt || 'VND'}
+                  {formatCurrency(phieuData?.t_tt_nt)} {phieuData?.ma_nt || 'VND'}
                 </span>
               </div>
               <div className="flex compact-row">
                 <span className="w-28 text-xs">Bằng chữ:</span>
                 <span className="flex-1 px-1 text-xs">
-                  {numToWords(totalAmount || phieuData?.t_tien || 0) + ' đồng'}
+                  {numToWords(phieuData?.t_tt_nt || 0) + ' đồng'}
                 </span>
               </div>
               <div className="flex compact-row">

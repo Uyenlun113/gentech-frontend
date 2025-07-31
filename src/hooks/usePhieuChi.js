@@ -8,7 +8,8 @@ export const useCt46List = (params = {}) => {
     return useQuery({
         queryKey: ["ct46-list", params],
         queryFn: () => ct46Api.getCt46List(params),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
         retry: 2,
     });
 };
@@ -19,7 +20,8 @@ export const useCt46ById = (stt_rec, options = {}) => {
         queryKey: ["ct46-detail", stt_rec],
         queryFn: () => ct46Api.getCt46ById(stt_rec),
         enabled: !!stt_rec,
-        staleTime: 1000 * 60 * 5,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
         retry: 2,
         ...options,
     });
@@ -31,7 +33,8 @@ export const useFetchCt46Data = (stt_rec, options = {}) => {
         queryKey: ["ct46-data", stt_rec],
         queryFn: () => ct46Api.fetchCt46Data(stt_rec),
         enabled: !!stt_rec,
-        staleTime: 1000 * 60 * 5,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
         retry: 2,
         ...options,
     });

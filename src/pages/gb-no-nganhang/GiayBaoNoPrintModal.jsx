@@ -37,21 +37,13 @@ const GiayBaoNoPrintModal = ({ isOpen, onClose, selectedGiayBaoNo, onPrint }) =>
         phiTrong: true,
         noiDung: ''
     });
-    console.log('selectedGiayBaoNo', selectedGiayBaoNo);
+
     const { data } = useCustomer(selectedGiayBaoNo?.ma_kh);
     const userData = data?.data || {};
+
+    // useEffect để reset form khi đóng modal
     useEffect(() => {
-        if (selectedGiayBaoNo && isOpen) {
-            setFormData(prev => ({
-                ...prev,
-                tenDonViNhanTien: userData.ten_kh || 'fdsgsdg',
-                diaChi: userData.dia_chi || 'hanoi',
-                soTaiKhoan: userData.tk_nh || '124124',
-                taiNganHang: userData.ten_nh || 'uyenlun',
-                noiDungThanhToan: selectedGiayBaoNo.dien_giai || 'hihi',
-            }))
-        }
-        else if (!isOpen) {
+        if (!isOpen) {
             setFormData({
                 tiengViet: 'vi',
                 donVi: 'VND',
@@ -87,7 +79,23 @@ const GiayBaoNoPrintModal = ({ isOpen, onClose, selectedGiayBaoNo, onPrint }) =>
                 noiDung: ''
             });
         }
-    }, [selectedGiayBaoNo, isOpen]);
+    }, [isOpen]);
+
+    // useEffect riêng để fill data khi có userData
+    useEffect(() => {
+        if (selectedGiayBaoNo && isOpen && userData && Object.keys(userData).length > 0) {
+            setFormData(prev => ({
+                ...prev,
+                tenDonViNhanTien: userData.ten_kh || 'fdsgsdg',
+                diaChi: userData?.dia_chi || 'hanoi',
+                soTaiKhoan: userData?.tk_nh,
+                taiNganHang: userData?.ten_nh,
+                noiDungThanhToan: selectedGiayBaoNo?.dien_giai || 'hihi',
+                soTienBangSo: selectedGiayBaoNo?.tong_tien || '10.000',
+            }));
+        }
+    }, [selectedGiayBaoNo, isOpen, userData]);
+
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
             ...prev,

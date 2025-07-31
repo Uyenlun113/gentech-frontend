@@ -531,7 +531,9 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     ma_nt: formData.maNgoaiTe,
                     ty_gia: formData.tyGia,
                     tk: formData.taiKhoanCo,
-                    status: formData.trangThai
+                    status: formData.trangThai,
+                    t_tien_nt: totals.totalTien,
+                    t_tt_nt: totals.totalTt,
                 },
                 hachToan: ct46Data
                     .filter(row => row.tk_i && parseFloat(row.tien) > 0)

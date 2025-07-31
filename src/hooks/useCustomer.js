@@ -7,6 +7,7 @@ export const useCustomers = (params) => {
     queryKey: ["customers", params],
     queryFn: () => customerApi.getCustomers(params),
     staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -14,6 +15,8 @@ export const useCustomer = (ma_kh) => {
   return useQuery({
     queryKey: ["customer", ma_kh],
     queryFn: () => customerApi.getCustomer(ma_kh),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
     enabled: !!ma_kh,
   });
 };

@@ -186,11 +186,41 @@ export const usePaymentVoucherList = () => {
     closeModalDelete();
     setRecordToDelete(null);
   };
-
   const handleRowClick = async (record) => {
-    setSelectedRecord(record);
-    setShowCt46Table(true);
+    try {
+      setSelectedRecord(record);
+      setShowCt46Table(true);
+      if (record.hachToan && Array.isArray(record.hachToan)) {
+        const ct46WithSTT = record.hachToan.map((item, index) => ({
+          ...item,
+          stt: index + 1,
+        }));
+        record.hachToan = ct46WithSTT;
+        record.children = ct46WithSTT;
+        setSelectedRecord(record);
+      }
+
+    } catch (error) {
+      console.error("Failed to process record:", error);
+      toast.error("Không thể xử lý dữ liệu: " + (error?.message || "Lỗi không xác định"));
+    }
   };
+
+  useEffect(() => {
+    if (selectedRecord && fetchCt46Data?.hachToan && Array.isArray(fetchCt46Data.hachToan)) {
+      const ct46WithSTT = fetchCt46Data.hachToan.map((item, index) => ({
+        ...item,
+        stt: index + 1,
+      }));
+      selectedRecord.hachToan = ct46WithSTT;
+      selectedRecord.children = ct46WithSTT;
+      setSelectedRecord({ ...selectedRecord });
+    } else if (selectedRecord && fetchCt46Data && (!fetchCt46Data.hachToan || fetchCt46Data.hachToan.length === 0)) {
+      selectedRecord.hachToan = [];
+      selectedRecord.children = [];
+      setSelectedRecord({ ...selectedRecord });
+    }
+  }, [fetchCt46Data]);
 
   const handleCloseCt46Table = () => {
     setShowCt46Table(false);
@@ -204,7 +234,6 @@ export const usePaymentVoucherList = () => {
 
   const [tienMap, setTienMap] = useState({});
 
-  // Tính tổng tiền cho từng phiếu từ hachToan
   useEffect(() => {
     const fetchAllCt46Data = async () => {
       if (!dataTable?.length) {
@@ -215,8 +244,6 @@ export const usePaymentVoucherList = () => {
 
       try {
         const newTienMap = {};
-
-        // Với mỗi record, fetch detail để tính tổng
         for (const record of dataTable) {
           const sttRec = record.stt_rec?.toString()?.trim();
           if (sttRec) {
@@ -272,21 +299,10 @@ export const usePaymentVoucherList = () => {
       render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
     },
     {
-      key: "tien_total",
+      key: "t_tt_nt",
       title: "Tổng tiền tt ngoại tệ",
       width: 140,
-      render: (_, record) => {
-        const sttRecKey = record.stt_rec?.toString()?.trim();
-        const calculatedTotal = tienMap[sttRecKey];
-        const fallbackTotal = record.t_tien || record.tien_total || 0;
-        const displayTotal = calculatedTotal !== undefined ? calculatedTotal : fallbackTotal;
-
-        return (
-          <div className="font-mono text-sm text-center text-blue-600">
-            {formatCurrency(displayTotal)}
-          </div>
-        );
-      },
+      render: (val) => <div className="font-medium text-center text-blue-600">{formatCurrency(val)}</div>,
     },
     {
       key: "ma_kh",
@@ -408,7 +424,7 @@ export const usePaymentVoucherList = () => {
       ),
     },
     {
-      key: "dien_giai",
+      key: "dien_giaii",
       title: "Diễn giải",
       width: 200,
       render: (val) => (

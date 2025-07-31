@@ -284,13 +284,17 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
             const value = parseFloat(item.tien) || 0;
             return sum + value;
         }, 0);
+        const totalThue = ct46Data.reduce((sum, item) => {
+            const value = parseFloat(item.thue) || 0;
+            return sum + value;
+        }, 0);
 
         const totalTt = ct46Data.reduce((sum, item) => {
             const value = parseFloat(item.tt) || 0;
             return sum + value;
         }, 0);
 
-        return { totalTien, totalTt };
+        return { totalTien, totalTt, totalThue };
     }, [ct46Data]);
 
     // Debounced search effects
@@ -655,7 +659,10 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
                     ma_nt: formData.maNgoaiTe || "VND",
                     ty_gia: formData.tyGia || 1,
                     tk: formData.taiKhoanCo?.trim() || "",
-                    status: formData.trangThai
+                    status: formData.trangThai,
+                    t_tien_nt: totals.totalTien,
+                    t_tt_nt: totals.totalTt,
+                    t_thue_nt: totals.totalThue
                 },
                 hachToan: ct46Data
                     .filter(row => row.tk_i && parseFloat(row.tien) > 0)
