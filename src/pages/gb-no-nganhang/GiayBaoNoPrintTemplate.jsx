@@ -68,9 +68,9 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                 </div>
 
                 {/* Main content in 2 columns with border separator */}
-                <div style={{ display: 'flex', border: '1px solid black' }}>
+                <div style={{ display: 'flex', border: '1px solid black', borderRight: 'none', borderLeft: 'none' }}>
                     {/* Left Column */}
-                    <div style={{ flex: 1, padding: '10px', borderRight: '1px solid black', borderLeft: 'none', borderLeft: 'none' }}>
+                    <div style={{ flex: 1, padding: '10px', borderRight: '1px solid black', borderLeft: 'none' }}>
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Tên TK trích nợ/ Dr A/C Name:</strong><br />
                             <span style={{ fontWeight: 'bold' }}>Công ty cổ phần công nghệ Gentech</span>
@@ -91,13 +91,13 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                     </div>
 
                     {/* Right Column */}
-                    <div style={{ flex: 1, padding: '10px', borderRight: 'none' }}>
+                    <div style={{ flex: 1, padding: '10px', borderRight: 'none', }}>
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Người thụ hưởng/ Beneficiary:</strong> {data.tenDonViNhanTien || 'fdsgsdg'}
                         </div>
 
                         <div style={{ marginBottom: '10px' }}>
-                            <strong>Số CMND/HC/ ID/PP:</strong> ......... <strong>Ngày cấp/ Date:</strong> ../../.....
+                            <strong>Số CMND/HC/ ID/PP:</strong> ............. <strong>Ngày cấp/ Date:</strong> ...../...../.......
                         </div>
 
                         <div style={{ marginBottom: '10px' }}>
@@ -129,8 +129,8 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                 }}>
                     <div style={{ width: '70%', padding: '10px', borderRight: '1px solid black' }}>
                         <div style={{ marginBottom: '10px' }}>
-                            <strong>Đề nghị NH quy đổi ra loại tiền/ Request for changing into:</strong> {data.deNghiNhQuyDoi || '..........'}
-                            <strong> Tỷ giá/ Ex rate:</strong> ............
+                            <strong>Đề nghị NH quy đổi ra loại tiền/ Request for changing into:</strong> {data.deNghiNhQuyDoi || '.......'}
+                            <strong> Tỷ giá/ Ex rate:</strong> ........
                         </div>
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Nội dung/ Remarks:</strong> {data.noiDungThanhToan || data.noiDung || 'Pham Thi Uyển'}
