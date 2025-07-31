@@ -25,7 +25,6 @@ const ct46Api = {
 
     getCt46ById: async (stt_rec) => {
         const response = await axios.get(`${API_BASE_URL}/phieu-chi/${stt_rec}`);
-        console.log(response.data);
         return response.data;
     },
 
