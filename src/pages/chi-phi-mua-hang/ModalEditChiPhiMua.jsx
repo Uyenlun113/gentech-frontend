@@ -1009,7 +1009,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
-                    ty_gia: formData.ty_gia?.trim() || "1.00",
+                    ty_gia: "1",
                     so_pn: formData.so_pn?.trim() || "",
                     ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
                     ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : new Date().toISOString(),
@@ -1737,7 +1737,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         </Label>
                                         <div className="flex-1">
                                             <Select
-                                                value={formData.status}
+                                                defaultValue={formData.status}
                                                 options={STATUS_OPTIONS}
                                                 onChange={(value) => handleFormChange("status", value)}
                                                 className="w-full h-9 text-sm bg-white"
