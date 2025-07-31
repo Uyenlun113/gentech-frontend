@@ -17,6 +17,7 @@ import { CalenderIcon } from "../../icons";
 import { ModalCreateChiPhiMuaHang } from "./ModalCreateChiPhiMua";
 import { ModalEditChiPhiMuaHang } from "./ModalEditChiPhiMua";
 import { useChiPhiMuaHangList } from "./usePhieuChiPhiList";
+import PrintContent from "./printChiPhiMua"
 
 export default function ChiPhiMuaHangPage() {
     const {
@@ -41,6 +42,8 @@ export default function ChiPhiMuaHangPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
+        printRef,
+        printData,
     } = useChiPhiMuaHangList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -71,6 +74,9 @@ export default function ChiPhiMuaHangPage() {
             <div className="px-4">
                 <PageMeta title="Danh sách phiếu nhập chi phí mua hàng" description="Danh sách phiếu nhập chi phí mua hàng" />
                 <PageBreadcrumb pageTitle="Danh sách phiếu nhập chi phí mua hàng" />
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                    {printData && <PrintContent ref={printRef} data={printData} />}
+                </div>
                 <div className="space-y-6">
                     <ComponentCard>
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
