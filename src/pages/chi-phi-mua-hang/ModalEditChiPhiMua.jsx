@@ -73,8 +73,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         ma_dvcs: "",
         loai_pb: "1",
         ty_gia: "1.00",
-        ma_kh_i: "",
-        tk_i: "",
     });
 
     const [chiPhiData, setChiPhiData] = useState([]);
@@ -273,9 +271,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 status: data.status || "1",
                 ma_dvcs: data.ma_dvcs || "",
                 loai_pb: data.loai_pb || "1",
-                ty_gia: data.ty_gia || "1.00",
-                ma_kh_i: data.ma_kh_i || "",
-                tk_i: data.tk_i || "",
+                ty_gia: data.ty_gia || "1",
             });
 
             const vatTuCodes = [];
@@ -339,7 +335,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         thue_suat: item.thue_suat || "",
                         t_thue: item.t_thue || "",
                         han_tt: item.han_tt || "",
-                        t_tt: item.t_tt || "",
                         tk_thue_no: item.tk_thue_no || "",
                         ten_kho: item.ten_kho || "",
                     };
@@ -453,21 +448,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         handleFormChange(field, formattedDate);
     }, [handleFormChange]);
 
-    // Handle phiếu nhập selection
+    // Handle phiếu nhập selection - CHỈ FILL VÀO TAB CHI PHÍ (giống create modal)
     const handlePhieuNhapSelect = useCallback((phieuNhap) => {
-        // Fill thông tin từ phiếu nhập được chọn
+        // Fill thông tin số phiếu nhập và ngày phiếu nhập
         setFormData(prev => ({
             ...prev,
             ngay_pn: phieuNhap.ngay_ct ? new Date(phieuNhap.ngay_ct).toLocaleDateString("en-CA") : "",
             so_pn: phieuNhap.so_ct || "",
-            ma_kh: phieuNhap.ma_kh || prev.ma_kh,
-            ten_kh: phieuNhap.ten_kh || prev.ten_kh,
-            dia_chi: phieuNhap.dia_chi || prev.dia_chi,
-            ma_so_thue: phieuNhap.ma_so_thue || prev.ma_so_thue,
-            dien_giai: phieuNhap.dien_giai || prev.dien_giai,
         }));
 
-        // Fill thông tin vào tab chi phí nếu có dữ liệu chi tiết
+        // CHỈ fill thông tin vào tab chi phí nếu có dữ liệu chi tiết
         if (phieuNhap.ct71 && phieuNhap.ct71.length > 0) {
             const vatTuCodes = [];
             const khoCodes = [];
@@ -585,11 +575,10 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 const tTien = parseFloat(currentRow.t_tien) || 0;
                 const thueSuat = parseFloat(currentRow.thue_suat) || 0;
                 const tThue = (tTien * thueSuat) / 100;
-                const tTt = tTien + tThue;
 
                 return newData.map(item =>
                     item.id === id
-                        ? { ...item, t_thue: tThue.toString(), t_tt: tTt.toString() }
+                        ? { ...item, t_thue: tThue.toString() }
                         : item
                 );
             }
@@ -639,6 +628,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             }));
         }
     }, [formData]);
+
     const handleMainFormAccountSearch = useCallback((value) => {
         setSearchStates(prev => ({
             ...prev,
@@ -755,7 +745,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                             ma_kho_i: kho.ma_kho || "",
                             ten_kho: kho.ten_kho || "",
                             tk_vt: kho.tk_dl || ""
-
                         }
                         : item
                 )
@@ -840,7 +829,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 thue_suat: "",
                 t_thue: "",
                 han_tt: "",
-                t_tt: "",
                 tk_thue_no: "",
                 ten_kho: "",
             }
@@ -943,8 +931,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             ma_dvcs: "",
             loai_pb: "1",
             ty_gia: "1.00",
-            ma_kh_i: "",
-            tk_i: "",
         });
         setChiPhiData([]);
         setHdThueData([]);
@@ -1014,7 +1000,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     ma_qs: formData.ma_qs?.trim() || "",
                     t_so_luong: totals.totalSoLuong,
                     t_tien_nt: totals.totalTienHang,
-                    t_tien_nt0: totals.totalTienHang,
                     t_cp_nt: totals.totalChiPhi,
                     t_thue: totals.totalThueGtgt,
                     t_tt_nt: totals.totalThanhTien,
@@ -1024,9 +1009,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     so_ct: formData.so_ct?.trim() || "",
                     ong_ba: formData.ong_ba?.trim() || "",
                     loai_pb: formData.loai_pb?.trim() || "",
-                    ma_kh_i: formData.ma_kh_i?.trim() || "",
-                    tk_i: formData.tk_i?.trim() || "",
-                    ty_gia: formData.ty_gia?.trim() || "1.00",
+                    ty_gia: "1",
                     so_pn: formData.so_pn?.trim() || "",
                     ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
                     ngay_lct: formData.ngay_lct ? new Date(formData.ngay_lct).toISOString() : new Date().toISOString(),
@@ -1035,25 +1018,23 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 // Ct73 - Chi phí
                 chiPhi: chiPhiData
                     .filter(row => row.ma_vt && parseFloat(row.tien_nt) > 0)
-                    .map(({ ma_kho_i, ma_vt, gia, thue_nt, tien_nt, tien_nt0, tk_vt, so_luong, cp_nt, cp }) => ({
+                    .map(({ ma_kho_i, ma_vt, thue_nt, tien_nt, tien_nt0, tk_vt, so_luong, cp_nt }) => ({
                         ma_kho_i: ma_kho_i?.trim() || "",
                         ma_vt: ma_vt?.trim() || "",
                         ngay_ct: formData.ngay_ct ? new Date(formData.ngay_ct).toISOString() : new Date().toISOString(),
-                        gia: Number(gia) || 0,
                         thue_nt: Number(thue_nt) || 0,
                         tien_nt: Number(tien_nt) || 0,
                         tien_nt0: Number(tien_nt0) || 0,
                         tk_vt: tk_vt?.trim() || "",
                         so_luong: Number(so_luong) || 0,
-                        cp_nt: Number(cp_nt) || 0,
-                        cp: Number(cp) || 0,
+                        cp_nt: Number(cp_nt) || 0
                     })),
                 // Ct73gt - HĐ Thuế
                 hdThue: hdThueData
                     .filter(row => row.ma_kh || row.so_ct0)
                     .map(({
                         so_ct0, ma_gd, ma_hd, ma_kho, ten_vt, so_luong, gia, t_thue,
-                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, t_tt, tk_thue_no
+                        so_seri0, ma_kh, ten_kh, ngay_ct0, dia_chi, ma_so_thue, t_tien, thue_suat, han_tt, tk_thue_no
                     }) => ({
                         ma_gd: ma_gd?.trim() || "",
                         ma_hd: ma_hd?.trim() || "",
@@ -1072,7 +1053,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         t_tien: Number(t_tien) || 0,
                         thue_suat: Number(thue_suat) || 0,
                         han_tt: Number(han_tt) || 0,
-                        t_tt: Number(t_tt) || 0,
                         tk_thue_no: tk_thue_no?.trim() || "",
                     })),
             };
@@ -1093,7 +1073,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         closeModalEdit();
     }, [resetForm, closeModalEdit]);
 
-    // Table columns cho Chi phí
+    // Table columns cho Chi phí (giống create modal)
     const chiPhiColumns = [
         {
             key: "stt",
@@ -1189,6 +1169,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     placeholder="0"
                     className="w-full text-right"
                     readOnly
+                    disabled
                 />
             ),
         },
@@ -1238,6 +1219,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         },
     ];
 
+    // Table columns cho HĐ Thuế (giống create modal)
     const hdThueColumns = [
         {
             key: "stt",
@@ -1519,13 +1501,13 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
     return (
         <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
-                {/* Header - similar to create modal but with Edit icon and different color */}
-                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-amber-100 to-orange-50 dark:from-gray-800 dark:to-gray-900">
+                {/* Header */}
+                <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
                             <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg">
-                                    <Edit className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                                <div className="p-2 bg-blue-100 dark:bg-amber-900 rounded-lg">
+                                    <Edit className="w-6 h-6 text-blue-600 dark:text-amber-400" />
                                 </div>
                                 Cập nhật phiếu nhập chi phí mua hàng
                             </h4>
@@ -1542,13 +1524,13 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     </div>
                 </div>
 
-                {/* Content - same structure as create modal */}
+                {/* Content */}
                 <div className="flex-1 overflow-y-auto bg-blue-50">
-                    {/* Form thông tin cơ bản - same as create modal */}
+                    {/* Form thông tin cơ bản */}
                     <div className="border-b border-gray-100">
                         <div className="dark:bg-gray-800 rounded-xl p-4">
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-                                {/* Same form structure as create modal but populated with edit data */}
+                                {/* Cột trái - 70% (7 cột) */}
                                 <div className="lg:col-span-7 space-y-2">
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
@@ -1573,7 +1555,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         />
                                     </div>
 
-                                    {/* Rest of the form fields same as create modal */}
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
@@ -1651,14 +1632,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                             className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                             readOnly
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPhieuNhapPopup(true)}
-                                            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
-                                        >
-                                            <Search size={16} />
-                                            Chọn PN
-                                        </button>
+
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] ml-4">
                                             Ngày phiếu nhập
                                         </Label>
@@ -1669,6 +1643,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                             className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                                             readOnly
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPhieuNhapPopup(true)}
+                                            className="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                        >
+                                            <Search size={16} />
+                                            Chọn PN
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1755,7 +1737,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         </Label>
                                         <div className="flex-1">
                                             <Select
-                                                value={formData.status}
+                                                defaultValue={formData.status}
                                                 options={STATUS_OPTIONS}
                                                 onChange={(value) => handleFormChange("status", value)}
                                                 className="w-full h-9 text-sm bg-white"
@@ -1767,7 +1749,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         </div>
                     </div>
 
-                    {/* Tabs - same structure as create modal */}
+                    {/* Tabs */}
                     <div className="px-6">
                         <Tabs
                             tabs={[
@@ -1866,10 +1848,10 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     </div>
                 </div>
 
-                {/* Footer - same as create modal but with update button styling */}
+                {/* Footer */}
                 <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <div className="flex justify-between items-center">
-                        {/* Summary info same as create modal */}
+                        {/* Summary info */}
                         <div className="flex gap-6 text-sm">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-600">Số lượng:</span>
@@ -1915,7 +1897,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                             <button
                                 onClick={handleSave}
                                 disabled={isPending}
-                                className={`px-6 py-2.5 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-colors flex items-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""
+                                className={`px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""
                                     }`}
                             >
                                 <Save size={16} />
@@ -1925,7 +1907,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     </div>
                 </div>
 
-                {/* Popups - same as create modal */}
+                {/* Popups */}
                 {searchStates.showAccountPopup && (
                     <AccountSelectionPopup
                         isOpen={true}
@@ -1997,4 +1979,4 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             </div>
         </Modal>
     );
-};   
+};

@@ -1,7 +1,8 @@
-import { Pencil, Trash } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, Printer, Trash } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
-import { useDeleteHdBanDv, useListHdBanDv } from "../../hooks/useHdBanDv";
+import { useDeleteHdBanDv, useGetHdBanDvBySttRec, useListHdBanDv } from "../../hooks/useHdBanDv";
 import { useModal } from "../../hooks/useModal";
 
 export const useHdBanDvList = () => {
@@ -9,7 +10,9 @@ export const useHdBanDvList = () => {
 
     const { isOpen: isOpenCreate, openModal: openModalCreate, closeModal: closeModalCreate } = useModal();
     const { isOpen: isOpenEdit, openModal: openModalEdit, closeModal: closeModalEdit } = useModal();
-
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
+    const [selectedPrintId, setSelectedPrintId] = useState(null);
     const [rangePickerValue, setRangePickerValue] = useState("");
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -46,7 +49,42 @@ export const useHdBanDvList = () => {
     const { data: fetchHdBanDvData, isLoading: isLoadingHdBanDv, refetch: refetchHdBanDvData, error } = useListHdBanDv(searchParams);
 
     const deleteMutation = useDeleteHdBanDv();
+    const {
+        data: hdBanDvDetailData,
+        isLoading: isLoadingHdBanDvDetail,
+    } = useGetHdBanDvBySttRec(selectedPrintId, {
+        enabled: !!selectedPrintId,
+    });
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Hóa Đơn Dịch Vụ - ${printData?.hoaDonData?.so_ct || 'HDDV'}`,
+        onAfterPrint: () => {
+            setPrintData(null);
+            setSelectedPrintId(null);
+        }
+    });
 
+    const handlePrintClick = async (record, e) => {
+        e.stopPropagation();
+        setSelectedPrintId(record.stt_rec);
+    };
+
+    useEffect(() => {
+        if (hdBanDvDetailData && selectedPrintId) {
+            const hoaDonData = hdBanDvDetailData;
+            const dichVuData = hdBanDvDetailData.hangHoa || [];
+
+            setPrintData({
+                hoaDonData: hoaDonData,
+                dichVuData: dichVuData,
+            });
+
+            setTimeout(() => {
+                handlePrint();
+                setSelectedPrintId(null);
+            }, 100);
+        }
+    }, [hdBanDvDetailData, selectedPrintId]);
     const dataTable = useMemo(() => {
         let rawData = [];
         if (!fetchHdBanDvData) {
@@ -350,6 +388,14 @@ export const useHdBanDvList = () => {
                 return (
                     <div className="flex items-center gap-2 justify-center">
                         <button
+                            className="text-gray-500 hover:text-blue-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="In hóa đơn dịch vụ"
+                            onClick={(e) => handlePrintClick(record, e)}
+                            disabled={isLoadingHdBanDvDetail}
+                        >
+                            <Printer size={16} />
+                        </button>
+                        <button
                             className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Sửa"
                             onClick={(e) => {
@@ -494,5 +540,9 @@ export const useHdBanDvList = () => {
         closeModalEdit,
         selectedEditId,
         setSelectedEditId,
+
+        printRef,
+        printData,
+        handlePrintClick,
     };
 };

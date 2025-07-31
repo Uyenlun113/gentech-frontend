@@ -26,8 +26,9 @@ const INITIAL_CT85_DATA = [
         tk_vt: "",
         don_vi_tinh: "",
         ton_kho: 0,
-        so_luong: "",      // FIX: Đổi từ t_so_luong thành so_luong
-        don_gia: "",
+        so_luong: "",
+        gia_nt: "",
+        tien_nt: "",
         ma_nx_i: "",
     },
 ];
@@ -135,7 +136,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
 
         const totalThanhTien = ct85Data.reduce((sum, item) => {
             const soLuong = parseFloat(item.so_luong) || 0;
-            const donGia = parseFloat(item.don_gia) || 0;
+            const donGia = parseFloat(item.gia_nt) || 0;
             return sum + (soLuong * donGia);
         }, 0);
 
@@ -208,9 +209,9 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     const updatedItem = { ...item, [field]: value };
 
                     // Auto calculate thanh_tien when so_luong or don_gia changes
-                    if (field === "so_luong" || field === "don_gia") {
+                    if (field === "so_luong" || field === "gia_nt") {
                         const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
-                        const donGia = parseFloat(field === "don_gia" ? value : item.don_gia) || 0;
+                        const donGia = parseFloat(field === "gia_nt" ? value : item.gia_nt) || 0;
                         updatedItem.thanh_tien = soLuong * donGia;
                     }
 
@@ -266,7 +267,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                         tk_vt: vatTu.tk_vt || "",
                         don_vi_tinh: vatTu.don_vi_tinh || vatTu.dvt || vatTu.dv_tinh || "",
                         ton_kho: vatTu.ton_kho || 0,
-                        don_gia: vatTu.don_gia || '',
+                        gia_nt: vatTu.don_gia || '',
                     }
                     : item
             )
@@ -319,7 +320,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                         ma_nx_i: dmvt.tk_ck,
                         don_vi_tinh: dmvt.don_vi_tinh || dmvt.dvt || dmvt.dv_tinh || "",
                         ton_kho: dmvt.ton_kho || 0,
-                        don_gia: dmvt.don_gia || ''
+                        gia_nt: dmvt.don_gia || ''
                     }
                     : item
             )
@@ -383,8 +384,8 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 tk_vt: "",
                 don_vi_tinh: "",
                 ton_kho: 0,
-                so_luong: "",     
-                don_gia: "",
+                so_luong: "",
+                gia_nt: "",
                 ma_nx_i: "",
             };
             return [...prev, newRow];
@@ -490,14 +491,17 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     status: formData.trangThai,
                     hd_lenhdd: formData.hd_lenhdd || "",
                     so_ct: formData.soCt || "",
+                    t_tien_nt: totals.totalThanhTien,
                 },
                 vatTu: ct85Data
-                    .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0) // FIX: Dùng so_luong
-                    .map(({ ma_vt, tk_vt, ma_nx_i, so_luong }) => ({ // FIX: Dùng so_luong
+                    .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
+                    .map(({ ma_vt, tk_vt, ma_nx_i, so_luong, gia_nt }) => ({
                         ma_vt: ma_vt?.toString().trim() || "",
                         tk_vt: tk_vt?.toString().trim() || "",
                         ma_nx_i: ma_nx_i?.toString().trim() || "",
-                        so_luong: Number(so_luong) || 0, // FIX: Map so_luong thành t_so_luong
+                        so_luong: Number(so_luong) || 0,
+                        gia_nt: Number(gia_nt) || 0,
+                        tien_nt: Number(so_luong) * Number(formData.tyGia),
                     })),
             };
 
@@ -591,7 +595,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     <Input
                         type="number"
                         value={row.so_luong || ""} // FIX: Dùng so_luong
-                        onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)} // FIX: Dùng so_luong
+                        onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)}
                         placeholder="0"
                         className="w-full text-right"
                     />
@@ -599,7 +603,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             },
         },
         {
-            key: "don_gia",
+            key: "gia_nt",
             title: "Đơn giá",
             width: 100,
             render: (val, row) => {
@@ -607,8 +611,8 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 return (
                     <Input
                         type="number"
-                        value={row.don_gia || ''}
-                        onChange={(e) => handleCt85Change(row.id, "don_gia", e.target.value)}
+                        value={row.gia_nt || ''}
+                        onChange={(e) => handleCt85Change(row.id, "gia_nt", e.target.value)}
                         placeholder="0"
                         className="w-full text-right"
                     />
@@ -616,7 +620,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             },
         },
         {
-            key: "thanh_tien",
+            key: "tien_nt",
             title: "Thành tiền",
             width: 120,
             render: (val, row) => {
@@ -627,7 +631,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                         </div>
                     );
                 }
-                const thanhTien = (parseFloat(row.so_luong) || 0) * (parseFloat(row.don_gia) || 0); // FIX: Dùng so_luong
+                const thanhTien = (parseFloat(row.so_luong) || 0) * (parseFloat(row.gia_nt) || 0); // FIX: Dùng so_luong
                 return (
                     <div className="text-right text-green-600 font-medium">
                         {formatNumber(thanhTien)}
@@ -696,7 +700,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 don_vi_tinh: '',
                 ton_kho: 0,
                 so_luong: totals.totalSoLuong, // FIX: Dùng so_luong
-                don_gia: '',
+                gia_nt: '',
                 ma_nx_i: '',
             }
         ];

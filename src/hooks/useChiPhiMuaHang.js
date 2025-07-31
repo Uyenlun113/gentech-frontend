@@ -16,6 +16,8 @@ export const useChiPhiMuaHangById = (stt_rec, options = {}) => {
     return useQuery({
         queryKey: ["chi-phi-mua-hang", stt_rec],
         queryFn: () => chiPhiMuaHangApi.getChiPhiMuaHangById(stt_rec),
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
         enabled: !!stt_rec,
         ...options,
     });

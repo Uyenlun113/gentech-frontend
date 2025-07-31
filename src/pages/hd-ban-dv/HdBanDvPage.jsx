@@ -13,6 +13,7 @@ import Button from "../../components/ui/button/Button";
 import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { CalenderIcon } from "../../icons";
 
+import HoaDonDichVuPrintTemplate from "./HoaDonDichVuPrintTemplate";
 import { ModalCreateHdBanDv } from "./ModalCreateHdBanDv";
 import { ModalEditHdBanDv } from "./ModalEditHdBanDv";
 import { useHdBanDvList } from "./useHdBanDvList";
@@ -40,6 +41,8 @@ export default function HdBanDvPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
+        printRef,
+        printData,
     } = useHdBanDvList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -58,6 +61,16 @@ export default function HdBanDvPage() {
 
     return (
         <>
+
+            {printData && (
+                <div style={{ display: 'none' }}>
+                    <HoaDonDichVuPrintTemplate
+                        ref={printRef}
+                        hoaDonData={printData.hoaDonData}
+                        dichVuData={printData.dichVuData}
+                    />
+                </div>
+            )}
             <ModalCreateHdBanDv
                 isOpenCreate={isOpenCreate}
                 closeModalCreate={closeModalCreate}

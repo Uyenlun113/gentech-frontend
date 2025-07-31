@@ -1,7 +1,7 @@
-import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
-
-import { useGiayBaoNos, useDeleteGiayBaoNo } from "../../hooks/usegiaybaono";
+import { Pencil, Printer, Trash } from "lucide-react";
+import { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { useDeleteGiayBaoNo, useGiayBaoNos } from "../../hooks/usegiaybaono";
 import { useModal } from "../../hooks/useModal";
 
 export const useListGiayBaoNo = () => {
@@ -19,8 +19,58 @@ export const useListGiayBaoNo = () => {
     const dateFrom = dateRange[0] || undefined;
     const dateTo = dateRange[1] || undefined;
     const [loaiTk, setLoaiTk] = useState("");
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [selectedForPrint, setSelectedForPrint] = useState(null);
+    const [printData, setPrintData] = useState(null);
+    const printRef = useRef();
 
-    // Query params (Thêm các trường mới vào query)
+    // Handle print functionality
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Giấy Báo Nợ - ${selectedForPrint?.so_ct || 'GBN'}`,
+        onAfterPrint: () => {
+            console.log('✅ Print completed successfully');
+            // Reset print states after successful print
+            setIsPrintModalOpen(false);
+            setSelectedForPrint(null);
+            setPrintData(null);
+        },
+        onPrintError: (error) => {
+            console.error('❌ Print error:', error);
+            alert('Có lỗi xảy ra khi in. Vui lòng thử lại!');
+        }
+    });
+
+    const handlePrintClick = (record) => {
+        console.log('🖨️ Opening print modal for:', record);
+        setSelectedForPrint(record);
+        setIsPrintModalOpen(true);
+    };
+
+    const handlePrintModalClose = () => {
+        console.log('❌ Closing print modal');
+        setIsPrintModalOpen(false);
+        setSelectedForPrint(null);
+        setPrintData(null);
+    };
+
+    const handlePrintConfirm = (formDataFromModal) => {
+        console.log('🎯 Print confirmed with data:', formDataFromModal);
+
+        // Lưu data để truyền vào template
+        setPrintData(formDataFromModal);
+
+        // Đợi một chút để state update rồi mới trigger print
+        setTimeout(() => {
+            console.log('🖨️ Triggering print...');
+            try {
+                handlePrint();
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Có lỗi xảy ra khi in!');
+            }
+        }, 100);
+    };
     const queryParams = {
         search: searchValue || undefined,
         dateFrom,
@@ -171,6 +221,13 @@ export const useListGiayBaoNo = () => {
             render: (_, record) => (
                 <div className="flex items-center gap-3 justify-center">
                     <button
+                        className="text-gray-500 hover:text-blue-500"
+                        title="In"
+                        onClick={() => handlePrintClick(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
                         className="text-gray-500 hover:text-amber-500"
                         title="Sửa"
                         onClick={() => handleEditGiayBaoNo(record)}
@@ -256,5 +313,13 @@ export const useListGiayBaoNo = () => {
         confirmDelete,
         confirmDeleteGiayBaoNo,
         cancelDeleteGiayBaoNo,
+
+        isPrintModalOpen,
+        selectedForPrint,
+        printData,
+        printRef,
+        handlePrintClick,
+        handlePrintModalClose,
+        handlePrintConfirm,
     };
 };

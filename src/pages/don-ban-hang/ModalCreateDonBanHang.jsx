@@ -673,6 +673,7 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                     t_tien_nt2: totals.totalTienSauCK,
                     t_thue: totals.totalThueGtgt,
                     t_tt_nt: totals.totalThanhTien,
+                    t_ck: totals.totalChietKhau,
                     tk_thue_no: formData.tk_thue_no?.trim() || "",
                     status: formData.status,
                     ma_dvcs: formData.ma_dvcs?.trim() || "",

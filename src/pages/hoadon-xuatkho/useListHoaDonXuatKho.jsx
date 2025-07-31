@@ -1,9 +1,8 @@
-import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
-
-import { useHoaDonXuatKhos, useDeleteHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
+import { Pencil, Printer, Trash } from "lucide-react";
+import { useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
+import { useDeleteHoaDonXuatKho, useHoaDonXuatKhos } from "../../hooks/usehoadonxuatkho";
 import { useModal } from "../../hooks/useModal";
-
 export const useListHoaDonXuatKho = () => {
     const [rangePickerValue, setRangePickerValue] = useState("");
     const [searchValue, setSearchValue] = useState("");
@@ -19,7 +18,25 @@ export const useListHoaDonXuatKho = () => {
     const dateFrom = dateRange[0] || undefined;
     const dateTo = dateRange[1] || undefined;
     const [loaiTk, setLoaiTk] = useState("");
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
 
+    // Thêm function print
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Hóa Đơn Xuất Kho - ${printData?.so_ct || 'HDXK'}`,
+        onAfterPrint: () => {
+            setPrintData(null);
+        }
+    });
+
+    // Thêm function handle print click
+    const handlePrintClick = (record) => {
+        setPrintData(record);
+        setTimeout(() => {
+            handlePrint();
+        }, 100);
+    };
     // Query params (Thêm các trường mới vào query)
     const queryParams = {
         search: searchValue || undefined,
@@ -196,6 +213,13 @@ export const useListHoaDonXuatKho = () => {
             render: (_, record) => (
                 <div className="flex items-center gap-3 justify-center">
                     <button
+                        className="text-gray-500 hover:text-blue-500"
+                        title="In"
+                        onClick={() => handlePrintClick(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
+                    <button
                         className="text-gray-500 hover:text-amber-500"
                         title="Sửa"
                         onClick={() => handleEditHoaDonXuatKho(record)}
@@ -281,5 +305,9 @@ export const useListHoaDonXuatKho = () => {
         confirmDelete,
         confirmDeleteHoaDonXuatKho,
         cancelDeleteHoaDonXuatKho,
+
+        printRef,
+        printData,
+        handlePrintClick,
     };
 };

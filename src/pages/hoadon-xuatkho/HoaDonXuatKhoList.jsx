@@ -13,6 +13,7 @@ import ConfirmModal from "../../components/ui/modal/ConfirmModal";
 import { ModalCreateHoaDonXuatKho } from "./HoaDonXuatKhoCreate";
 import { ModalEditHoaDonXuatKho } from "./HoaDonXuatKhoUpdate";
 import { useListHoaDonXuatKho } from "./useListHoaDonXuatKho";
+import HoaDonXuatKhoPrintTemplate from "./HoaDonXuatKhoPrintTemplate";
 
 export default function HoaDonXuatKhoList() {
     const {
@@ -35,6 +36,8 @@ export default function HoaDonXuatKhoList() {
         confirmDelete,
         confirmDeleteHoaDonXuatKho,
         cancelDeleteHoaDonXuatKho,
+        printRef,
+        printData,
     } = useListHoaDonXuatKho();
 
     const [searchInput, setSearchInput] = useState(searchValue);
@@ -47,7 +50,7 @@ export default function HoaDonXuatKhoList() {
         }, 500);
         return () => clearTimeout(timer);
     }, [searchInput]);
-
+    console.log(selectedHoaDonXuatKho)
     // Xử lý chọn row để hiển thị detail với debug logs
     const handleRowSelect = (cashReceipt) => {
         // console.log('🚀 handleRowSelect called with:', cashReceipt);
@@ -308,6 +311,14 @@ export default function HoaDonXuatKhoList() {
                     onConfirm={confirmDeleteHoaDonXuatKho}
                     onCancel={cancelDeleteHoaDonXuatKho}
                 />
+                {printData && (
+                    <div style={{ display: 'none' }}>
+                        <HoaDonXuatKhoPrintTemplate
+                            ref={printRef}
+                            selectedHoaDonXuatKho={printData}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

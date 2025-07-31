@@ -1,24 +1,23 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import { Plus, Save, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "react-datepicker/dist/react-datepicker.css";
+import Flatpickr from "react-flatpickr";
+import { useNavigate } from "react-router";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import { Modal } from "../../components/ui/modal";
-import "react-datepicker/dist/react-datepicker.css";
-import { useCreateHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
-import { useCustomers } from "../../hooks/useCustomer";
-import { useAccounts } from "../../hooks/useAccounts";
-import { useDmvt } from "../../hooks/useDmvt";
-import { useDmkho } from "../../hooks/useDmkho";
-import { useEffect } from "react";
-import { Plus, Trash2, X, Save, CalendarIcon } from "lucide-react";
-import { Tabs } from "../../components/ui/tabs";
-import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
-import DmvtPopup from "../../components/general/dmvtPopup";
 import DmkPopup from "../../components/general/dmkPopup";
-import { useNavigate } from "react-router";
-import Flatpickr from "react-flatpickr";
-import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import DmvtPopup from "../../components/general/dmvtPopup";
+import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
+import { Modal } from "../../components/ui/modal";
+import { Tabs } from "../../components/ui/tabs";
+import { useAccounts } from "../../hooks/useAccounts";
+import { useCustomers } from "../../hooks/useCustomer";
+import { useDmkho } from "../../hooks/useDmkho";
+import { useDmvt } from "../../hooks/useDmvt";
+import { useCreateHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
 import { CalenderIcon } from "../../icons";
 
 export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => {
@@ -804,7 +803,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
     }
   }, [formData, hachToanData, saveHoaDonXuatKho, closeModalCreate, resetForm, navigate, validateForm]);
 
-  const handleCustomerSelect = useCallback((id, customer) => {
+  const handleCustomerSelect = useCallback(() => {
     // Handle customer selection for table rows if needed
     setSearchStates(prev => ({
       ...prev,
