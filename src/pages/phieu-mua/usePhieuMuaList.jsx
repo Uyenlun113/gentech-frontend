@@ -400,7 +400,5 @@ export const usePhieuMuaList = () => {
         handleOpenEdit,
         formatDate,
         formatCurrency,
-        deleteMutation,
-        handleOpenEdit,
     };
 };
