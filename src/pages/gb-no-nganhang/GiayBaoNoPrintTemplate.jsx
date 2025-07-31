@@ -1,5 +1,5 @@
 import React from 'react';
-
+import numToWords from 'vn-num2words';
 const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
     const formatDate = (dateString) => {
         if (!dateString) return "30-07-2025";
@@ -122,7 +122,7 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                     <div>
                         <strong>Số tiền bằng số/ Amount in figures:</strong> {formatCurrency(data.soTienBangSo) || '10.000'} {data.donVi || 'VND'}
                     </div>
-                    <div>  <strong>Số tiền bằng chữ/ Amount in words:</strong> {data.soTienBangChu || 'Mười nghìn đồng chẵn'}</div>
+                    <div>  <strong>Số tiền bằng chữ/ Amount in words:</strong> {numToWords(data?.soTienBangSo) || 'Mười nghìn'} {'đồng'}</div>
                 </div>
 
                 {/* Second section - 2 columns with border */}
