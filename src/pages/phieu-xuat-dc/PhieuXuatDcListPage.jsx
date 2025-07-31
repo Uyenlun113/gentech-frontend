@@ -18,6 +18,7 @@ import { CalenderIcon } from "../../icons";
 import { ModalCreatePhieuXuatDc } from "./ModalCreatePhieuXuatDc";
 import { ModalEditPhieuXuatDc } from "./ModalEditPhieuXuatDc";
 import { usePhieuXuatDcList } from "./usePhieuXuatDcList";
+import PrintContent from "./printPhieuXuatDC"
 
 export default function PhieuXuatDcListPage() {
     const {
@@ -43,6 +44,8 @@ export default function PhieuXuatDcListPage() {
         isOpenEdit,
         closeModalEdit,
         selectedEditId,
+        printRef,
+        printData,
     } = usePhieuXuatDcList();
 
     const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -73,6 +76,9 @@ export default function PhieuXuatDcListPage() {
             <div className="px-4">
                 <PageMeta title="Danh sách phiếu xuất điều chuyển" description="Danh sách phiếu xuất điều chuyển" />
                 <PageBreadcrumb pageTitle="Danh sách phiếu xuất điều chuyển" />
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                    {printData && <PrintContent ref={printRef} data={printData} />}
+                </div>
                 <div className="space-y-6">
                     <ComponentCard>
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

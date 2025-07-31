@@ -1,8 +1,9 @@
-import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { Pencil, Trash, Printer } from "lucide-react";
+import { useState,useRef } from "react";
 
 import { usePhieuXuatKhos, useDeletePhieuXuatKho } from "../../hooks/usephieuxuatkho";
 import { useModal } from "../../hooks/useModal";
+import { useReactToPrint } from "react-to-print";
 
 export const useListPhieuXuatKho = () => {
     const [rangePickerValue, setRangePickerValue] = useState("");
@@ -49,6 +50,8 @@ export const useListPhieuXuatKho = () => {
         open: false,
         cashReceipt: null,
     });
+    const printRef = useRef();
+    const [printData, setPrintData] = useState(null);
 
     const handleSaveCreate = () => {
         refetch();
@@ -86,7 +89,46 @@ export const useListPhieuXuatKho = () => {
     const cancelDeletePhieuXuatKho = () => {
         setConfirmDelete({ open: false, cashReceipt: null });
     };
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: `Phiếu_xuất_kho_${printData?.so_ct || 'PT001'}`,
+        pageStyle: `
+                @page {
+                    size: A4;
+                    margin: 0.5in;
+                }
+                @media print {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        color-adjust: exact;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+        onAfterPrint: () => {
+            console.log('Print completed');
+        },
+        onPrintError: (errorLocation, error) => {
+            console.error('Print error:', errorLocation, error);
+        }
+    });
 
+
+    // Function để xử lý in phiếu thu
+    const handlePrintFun = (record) => {
+        console.log('Print data being set:', record);
+        setPrintData(record);
+        // Delay để đảm bảo data được set và component được render
+        setTimeout(() => {
+            if (printRef.current) {
+                console.log('Print ref found, starting print...');
+                handlePrint();
+            } else {
+                console.error('Print ref not found!');
+            }
+        }, 200);
+    };
     // Định nghĩa các cột của bảng, thêm các trường mới
     const columnsTable = [
         {
@@ -164,6 +206,13 @@ export const useListPhieuXuatKho = () => {
             width: 120,
             render: (_, record) => (
                 <div className="flex items-center gap-3 justify-center">
+                    <button
+                        className="text-gray-500 hover:text-amber-500"
+                        title="In"
+                        onClick={() => handlePrintFun(record)}
+                    >
+                        <Printer size={18} />
+                    </button>
                     <button
                         className="text-gray-500 hover:text-amber-500"
                         title="Sửa"
@@ -250,5 +299,7 @@ export const useListPhieuXuatKho = () => {
         confirmDelete,
         confirmDeletePhieuXuatKho,
         cancelDeletePhieuXuatKho,
+        printRef,
+        printData,
     };
 };
