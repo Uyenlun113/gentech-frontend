@@ -229,133 +229,7 @@ export const usePhieuMuaList = () => {
         setCurrentPage(1);
     };
 
-    const columnsTable = [
-        {
-            key: "stt",
-            title: "STT",
-            dataIndex: "stt",
-            width: 60,
-            fixed: "left",
-            align: "center",
-            render: (text, record) => record.stt,
-        },
-        {
-            key: "ngay_lct",
-            title: "Ngày lập phiếu",
-            fixed: "left",
-            width: 140,
-            render: (val) => {
-                return <div className="font-medium text-center">{formatDate(val)}</div>;
-            },
-        },
-        {
-            key: "so_ct",
-            title: "Số phiếu nhập",
-            fixed: "left",
-            width: 120,
-            render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
-        },
-        {
-            key: "t_tien_nt",
-            title: "Tiền hàng",
-            width: 140,
-            render: (val) => (
-                <div className="font-mono text-sm text-center text-blue-600">
-                    {formatCurrency(val)}
-                </div>
-            ),
-        },
-        {
-            key: "t_cp_nt",
-            title: "Tiền chi phí",
-            width: 140,
-            render: (val) => (
-                <div className="font-mono text-sm text-center text-blue-600">
-                    {formatCurrency(val)}
-                </div>
-            ),
-        },
-        {
-            key: "t_tt_nt",
-            title: "Tổng tiền thanh toán",
-            width: 140,
-            render: (val) => (
-                <div className="font-mono text-sm text-center text-blue-600">
-                    {formatCurrency(val)}
-                </div>
-            ),
-        },
-        {
-            key: "ma_kh",
-            title: "Mã khách hàng",
-            width: 180,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "dien_giai",
-            title: "Diễn giải",
-            width: 200,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "tk_thue_no",
-            title: "Tài khoản có",
-            width: 120,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "ma_dvcs",
-            title: "Mã DVCS",
-            width: 200,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "action",
-            title: "Thao tác",
-            fixed: "right",
-            width: 100,
-            render: (_, record) => {
-                return (
-                    <div className="flex items-center gap-2 justify-center">
-                        <button
-                            className="text-gray-500 hover:text-amber-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Sửa"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenEdit(record?.stt_rec);
-                            }}
-                        >
-                            <Pencil size={16} />
-                        </button>
-                        <button
-                            onClick={(e) => handleDeleteClick(record, e)}
-                            className="text-gray-500 hover:text-red-500 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Xóa"
-                            disabled={deleteMutation.isPending}
-                        >
-                            <Trash size={16} />
-                        </button>
-                    </div>
-                );
-            },
-        },
-    ];
+
 
     // Columns for detail sub-table
     const columnsSubTable = [
@@ -476,7 +350,7 @@ export const usePhieuMuaList = () => {
         // Data
         dataTable: processedDataTable,
         dataDetailTable,
-        columnsTable,
+        // columnsTable,
         columnsSubTable,
 
         // Search & Filter
@@ -522,5 +396,11 @@ export const usePhieuMuaList = () => {
         closeModalEdit,
         selectedEditId,
         setSelectedEditId,
+        handleDeleteClick,
+        handleOpenEdit,
+        formatDate,
+        formatCurrency,
+        deleteMutation,
+        handleOpenEdit,
     };
 };
