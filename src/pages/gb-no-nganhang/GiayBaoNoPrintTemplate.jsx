@@ -9,7 +9,10 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
     };
-
+    const formatCurrency = (amount) => {
+        if (!amount) return "0";
+        return new Intl.NumberFormat("vi-VN").format(amount);
+    };
     // Fallback values nếu printData không có
     const data = printData || {};
 
@@ -77,15 +80,15 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                         </div>
 
                         <div style={{ marginBottom: '10px' }}>
-                            <strong>Số TK trích nợ/ Dr A/C No:</strong> {data.taiKhoan || '0725615888'}
+                            <strong>Số TK trích nợ/ Dr A/C No:</strong> {data?.taiKhoan}
                         </div>
 
                         <div style={{ marginBottom: '10px' }}>
-                            <strong>Tại NH/ At bank:</strong>
+                            <strong>Tại NH/ At bank:</strong>{data?.tenNganHang}
                         </div>
 
                         <div style={{ marginBottom: '10px' }}>
-                            <strong>Chi nhánh/ Branch:</strong> {data.tenNganHang || 'TP Bank'}
+                            <strong>Chi nhánh/ Branch:</strong>
                         </div>
 
                     </div>
@@ -117,7 +120,7 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                 {/* Amount in words - full width with border */}
                 <div style={{ padding: '10px', display: 'flex', gap: '90px' }}>
                     <div>
-                        <strong>Số tiền bằng số/ Amount in figures:</strong> {data.soTienBangSo || '10.000'} {data.donVi || 'VND'}
+                        <strong>Số tiền bằng số/ Amount in figures:</strong> {formatCurrency(data.soTienBangSo) || '10.000'} {data.donVi || 'VND'}
                     </div>
                     <div>  <strong>Số tiền bằng chữ/ Amount in words:</strong> {data.soTienBangChu || 'Mười nghìn đồng chẵn'}</div>
                 </div>
@@ -130,7 +133,7 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                     <div style={{ width: '70%', padding: '10px', borderRight: '1px solid black' }}>
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Đề nghị NH quy đổi ra loại tiền/ Request for changing into:</strong> {data.deNghiNhQuyDoi || '.......'}
-                            <strong> Tỷ giá/ Ex rate:</strong> ........
+                            <strong> Tỷ giá/ Ex rate:</strong> 1.00
                         </div>
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Nội dung/ Remarks:</strong> {data.noiDungThanhToan || data.noiDung || 'Pham Thi Uyển'}

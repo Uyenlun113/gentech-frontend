@@ -14,6 +14,7 @@ export const useCustomer = (ma_kh) => {
   return useQuery({
     queryKey: ["customer", ma_kh],
     queryFn: () => customerApi.getCustomer(ma_kh),
+    staleTime: Infinity,
     enabled: !!ma_kh,
   });
 };

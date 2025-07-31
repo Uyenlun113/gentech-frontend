@@ -37,7 +37,6 @@ const GiayBaoNoPrintModal = ({ isOpen, onClose, selectedGiayBaoNo, onPrint }) =>
         phiTrong: true,
         noiDung: ''
     });
-    console.log('selectedGiayBaoNo', selectedGiayBaoNo);
     const { data } = useCustomer(selectedGiayBaoNo?.ma_kh);
     const userData = data?.data || {};
     useEffect(() => {
@@ -45,10 +44,11 @@ const GiayBaoNoPrintModal = ({ isOpen, onClose, selectedGiayBaoNo, onPrint }) =>
             setFormData(prev => ({
                 ...prev,
                 tenDonViNhanTien: userData.ten_kh || 'fdsgsdg',
-                diaChi: userData.dia_chi || 'hanoi',
-                soTaiKhoan: userData.tk_nh || '124124',
-                taiNganHang: userData.ten_nh || 'uyenlun',
-                noiDungThanhToan: selectedGiayBaoNo.dien_giai || 'hihi',
+                diaChi: userData?.dia_chi || 'hanoi',
+                soTaiKhoan: userData?.tk_nh || '124124',
+                taiNganHang: userData?.ten_nh || 'uyenlun',
+                noiDungThanhToan: selectedGiayBaoNo?.dien_giai || 'hihi',
+                soTienBangSo: selectedGiayBaoNo?.tong_tien || '10.000',
             }))
         }
         else if (!isOpen) {
