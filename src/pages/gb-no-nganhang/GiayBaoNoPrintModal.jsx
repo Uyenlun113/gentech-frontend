@@ -104,7 +104,6 @@ const GiayBaoNoPrintModal = ({ isOpen, onClose, selectedGiayBaoNo, onPrint }) =>
     };
 
     const handlePrint = () => {
-        console.log('🖨️ Printing with data:', formData);
         onPrint(formData);
     };
 

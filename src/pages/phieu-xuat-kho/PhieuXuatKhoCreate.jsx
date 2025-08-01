@@ -69,7 +69,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
   const fetchDmvtData = useCallback(async (searchTerm = "") => {
     setDmvtLoading(true);
     try {
-      console.log('🔍 Fetching DMVT data with search term:', searchTerm);
 
       // Gọi API danh sách vật tư
       const response = await dmvtService.getDmvt({
@@ -77,8 +76,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
         page: 1,
         limit: 20
       });
-
-      console.log('✅ DMVT data received:', response);
 
       // Cập nhật dữ liệu vật tư
       setDmvtData({
@@ -147,7 +144,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
       if (item.ma_vt && !item.ten_vt) {
         try {
           const materialData = await dmvtService.getDmvtById(item.ma_vt);
-          console.log(`Fetched material for ${item.ma_vt}:`, materialData);
           return {
             ...item,
             ten_vt: materialData?.ten_vt || materialData?.name || ""
@@ -185,7 +181,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maKhSearch && maKhSearch.length > 0) {
-        console.log('🔍 Searching for customer:', maKhSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
       }
@@ -197,7 +192,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
-        console.log('🔍 Searching for main account:', maTaiKhoanSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
       }
@@ -209,7 +203,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchStates.maVtSearch && searchStates.maVtSearch.length > 0) {
-        console.log('🔍 Searching for material:', searchStates.maVtSearch);
         setDmvtSearchTerm(searchStates.maVtSearch);
         fetchDmvtData(searchStates.maVtSearch);
         setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
@@ -226,7 +219,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchStates.maKhoSearch && searchStates.maKhoSearch.length > 0) {
-        console.log('🔍 Searching for warehouse:', searchStates.maKhoSearch);
         setMaKhoSearch(searchStates.maKhoSearch);
         setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
       } else {
@@ -295,8 +287,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
       console.error('Customer object is null or undefined');
       return;
     }
-
-    console.log('Selected customer:', customer);
 
     setFormData(prev => ({
       ...prev,
@@ -373,9 +363,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
       return;
     }
 
-    console.log('Selected DMVT:', dmvt);
-    console.log('Row ID:', searchStates.maVtSearchRowId);
-
     // Cập nhật dữ liệu hàng hóa với vật tư đã chọn
     setHangHoaData(prev =>
       prev.map(item =>
@@ -409,9 +396,6 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
       return;
     }
 
-    console.log('Selected Kho:', kho);
-    console.log('Row ID:', searchStates.maKhoSearchRowId);
-
     // Cập nhật dữ liệu hàng hóa với kho đã chọn
     setHangHoaData(prev =>
       prev.map(item =>
@@ -439,14 +423,12 @@ export const ModalCreatePhieuXuatKho = ({ isOpenCreate, closeModalCreate }) => {
 
   // Handle DMVT search từ popup - THÊM MỚI
   const handleDmvtSearch = useCallback((searchTerm) => {
-    console.log('🔍 DMVT search from popup:', searchTerm);
     setDmvtSearchTerm(searchTerm);
     fetchDmvtData(searchTerm);
   }, [fetchDmvtData]);
 
   // Handle Dmkho search từ popup - THÊM MỚI
   const handleDmkhoSearch = useCallback((searchTerm) => {
-    console.log('🔍 Dmkho search from popup:', searchTerm);
     setMaKhoSearch(searchTerm);
   }, []);
 

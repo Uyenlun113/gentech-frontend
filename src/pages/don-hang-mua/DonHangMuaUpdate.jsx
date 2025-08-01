@@ -133,7 +133,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     const fetchDmvtData = useCallback(async (searchTerm = "") => {
         setDmvtLoading(true);
         try {
-            console.log('🔍 Fetching DMVT data with search term:', searchTerm);
 
             // Gọi API danh sách vật tư (kể cả khi searchTerm rỗng)
             const response = await dmvtService.getDmvt({
@@ -141,8 +140,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 page: 1,
                 limit: 20
             });
-
-            console.log('✅ DMVT data received:', response);
 
             // Cập nhật dữ liệu vật tư
             setDmvtData({
@@ -162,7 +159,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             if (item.ma_vt && !item.ten_vt) {
                 try {
                     const materialData = await dmvtService.getDmvtById(item.ma_vt);
-                    console.log(`Fetched material for ${item.ma_vt}:`, materialData);
                     return {
                         ...item,
                         ten_vt: materialData.ten_vt || "",
@@ -194,7 +190,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
     // ĐỊNH NGHĨA handleHangHoaChange TRƯỚC KHI SỬ DỤNG
     const handleHangHoaChange = useCallback((id, field, value) => {
-        console.log(`🔄 handleHangHoaChange: id=${id}, field=${field}, value=${value}`);
 
         setHangHoaData(prev => {
             const newData = prev.map(item => {
@@ -248,7 +243,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
                     // Xử lý tìm kiếm mã vật tư
                     if (field === "ma_vt") {
-                        console.log(`🔍 Triggering material search for: "${value}"`);
                         // Luôn trigger search khi có thay đổi (kể cả xóa text)
                         setSearchStates(prev => ({
                             ...prev,
@@ -415,7 +409,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (maKhSearch && maKhSearch.length > 0) {
-                console.log('🔍 Searching for customer:', maKhSearch);
             } else {
                 setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
             }
@@ -427,7 +420,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
-                console.log('🔍 Searching for main account:', maTaiKhoanSearch);
             } else {
                 setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
             }
@@ -439,7 +431,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             const searchTerm = searchStates.maVtSearch || "";
-            console.log('🔍 Material search effect triggered. Search term:', `"${searchTerm}"`);
 
             // Luôn gọi API, kể cả khi search term rỗng
             setDmvtSearchTerm(searchTerm);
@@ -447,10 +438,8 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
             // Chỉ hiển thị popup khi có ít nhất 1 ký tự
             if (searchTerm.length > 0) {
-                console.log('📋 Showing DMVT popup');
                 setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
             } else {
-                console.log('❌ Hiding DMVT popup (empty search)');
                 setSearchStates(prev => ({ ...prev, showDmvtPopup: false }));
             }
         }, 300);
@@ -462,7 +451,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             if (searchStates.maKhoSearch && searchStates.maKhoSearch.length > 0) {
-                console.log('🔍 Searching for warehouse:', searchStates.maKhoSearch);
                 setMaKhoSearch(searchStates.maKhoSearch);
                 setSearchStates(prev => ({ ...prev, showDmkhoPopup: true }));
             } else {
@@ -532,8 +520,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             return;
         }
 
-        console.log('Selected customer:', customer);
-
         setFormData(prev => ({
             ...prev,
             mst: customer.ma_so_thue || "",
@@ -551,7 +537,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
     };
 
     const handleMainAccountSelect = (account) => {
-        console.log('Selected main account:', account);
 
         setFormData(prev => ({
             ...prev,
@@ -611,9 +596,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             return;
         }
 
-        console.log('Selected DMVT:', dmvt);
-        console.log('Row ID:', searchStates.maVtSearchRowId);
-
         // Cập nhật dữ liệu hàng hóa với vật tư đã chọn
         setHangHoaData(prev => {
             const newData = prev.map(item =>
@@ -657,9 +639,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
             return;
         }
 
-        console.log('Selected Kho:', kho);
-        console.log('Row ID:', searchStates.maKhoSearchRowId);
-
         // Cập nhật dữ liệu hàng hóa với kho đã chọn
         setHangHoaData(prev =>
             prev.map(item =>
@@ -687,14 +666,12 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
 
     // Handle DMVT search từ popup - CẬP NHẬT
     const handleDmvtSearch = useCallback((searchTerm) => {
-        console.log('🔍 DMVT search from popup:', searchTerm);
         setDmvtSearchTerm(searchTerm || "");
         fetchDmvtData(searchTerm || ""); // Luôn gọi API, kể cả khi searchTerm rỗng
     }, [fetchDmvtData]);
 
     // Handle Dmkho search từ popup - THÊM MỚI
     const handleDmkhoSearch = useCallback((searchTerm) => {
-        console.log('🔍 Dmkho search from popup:', searchTerm);
         setMaKhoSearch(searchTerm);
     }, []);
 
@@ -882,11 +859,9 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                     <Input
                         value={row.ma_vt}
                         onChange={(e) => {
-                            console.log(`📝 Input onChange: ${e.target.value}`);
                             handleHangHoaChange(row.id, "ma_vt", e.target.value);
                         }}
                         onFocus={(e) => {
-                            console.log(`🎯 Input onFocus: current value = "${e.target.value}"`);
                             // Lưu giá trị gốc khi focus
                             setOriginalMaVt(prev => ({
                                 ...prev,
@@ -896,12 +871,10 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                             e.target.select();
                         }}
                         onBlur={(e) => {
-                            console.log(`👋 Input onBlur: value = "${e.target.value}", showPopup = ${searchStates.showDmvtPopup}`);
                             // Nếu không có giá trị mới và không đang tìm kiếm
                             if (!e.target.value.trim() && !searchStates.showDmvtPopup) {
                                 // Khôi phục giá trị gốc
                                 const original = originalMaVt[row.id] || "";
-                                console.log(`🔄 Restoring original value: "${original}"`);
                                 handleHangHoaChange(row.id, "ma_vt", original);
                             }
                         }}
@@ -1684,7 +1657,6 @@ export const ModalEditDonHangMua = ({ isOpenEdit, closeModalEdit, selectedDonHan
                 <DmvtPopup
                     isOpen={true}
                     onClose={() => {
-                        console.log('🔴 Closing DMVT popup');
                         setSearchStates(prev => ({
                             ...prev,
                             showDmvtPopup: false,

@@ -136,7 +136,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maKhSearch && maKhSearch.length > 0) {
-        console.log('🔍 Searching for customer:', maKhSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
       }
@@ -147,7 +146,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
-        console.log('🔍 Searching for main account:', maTaiKhoanSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
       }
@@ -168,7 +166,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maVtSearch && maVtSearch.length > 0) {
-        console.log('🔍 Searching for material:', maVtSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showDmvtPopup: false }));
       }
@@ -180,7 +177,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maKho && maKho.length > 0) {
-        console.log('🔍 Searching for warehouse:', maKho);
       } else {
         setSearchStates(prev => ({ ...prev, showDmkPopup: false }));
       }
@@ -274,8 +270,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       console.error('Customer object is null or undefined');
       return;
     }
-
-    console.log('Selected customer:', customer);
 
     setFormData(prev => ({
       ...prev,

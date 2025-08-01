@@ -310,7 +310,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
 
             // Set HĐ thuế data - SỬA PHẦN NÀY
             if (data.ct73gt && Array.isArray(data.ct73gt) && data.ct73gt.length > 0) {
-                console.log("Loading HĐ thuế data:", data.ct73gt); // Debug log
 
                 const hdThueRows = data.ct73gt.map((item, index) => {
                     // Collect mã kho để fetch thông tin
@@ -341,11 +340,8 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                         ten_kho: item.ten_kho || "",
                     };
                 });
-
-                console.log("Mapped HĐ thuế rows:", hdThueRows); // Debug log
                 setHdThueData(hdThueRows);
             } else {
-                console.log("No HĐ thuế data found or empty array"); // Debug log
                 // Đảm bảo reset hdThueData nếu không có dữ liệu
                 setHdThueData([]);
             }
@@ -1857,7 +1853,6 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                 }
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log('Changed to tab:', tabIndex);
                             }}
                         />
                     </div>

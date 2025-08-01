@@ -50,16 +50,12 @@ export default function HoaDonXuatKhoList() {
         }, 500);
         return () => clearTimeout(timer);
     }, [searchInput]);
-    console.log(selectedHoaDonXuatKho)
     // Xử lý chọn row để hiển thị detail với debug logs
     const handleRowSelect = (cashReceipt) => {
-        // console.log('🚀 handleRowSelect called with:', cashReceipt);
         if (cashReceipt) {
             setSelectedRowForDetail(cashReceipt);
             setShowDetailPanel(true);
-            // console.log('🚀 Row selected successfully');
         } else {
-            // console.log('❌ cashReceipt is null/undefined');
         }
     };
 
@@ -121,7 +117,6 @@ export default function HoaDonXuatKhoList() {
                         <div className="space-y-4">
                             <div
                                 onClick={(e) => {
-                                    // console.log('🔍 Table clicked, target:', e.target.tagName);
 
                                     // Tìm row gần nhất
                                     let element = e.target;
@@ -133,12 +128,9 @@ export default function HoaDonXuatKhoList() {
                                     if (element && element.tagName === 'TR') {
                                         // Lấy index từ data attribute hoặc position
                                         const rowIndex = Array.from(element.parentElement.children).indexOf(element);
-                                        // console.log('🔍 Row index found:', rowIndex);
-                                        // console.log('🔍 Data table length:', dataTable.length);
 
                                         if (rowIndex >= 0 && rowIndex < dataTable.length) {
                                             const rowData = dataTable[rowIndex];
-                                            // console.log('🔍 Row data:', rowData);
                                             handleRowSelect(rowData);
                                         }
                                     }
