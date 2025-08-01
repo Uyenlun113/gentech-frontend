@@ -30,6 +30,7 @@ import PayrollPage from "./pages/Payroll/Payroll";
 import PurchasesPage from "./pages/Purchases/Purchases";
 import SalesPage from "./pages/Sales/Sales";
 
+import TableVonBangTien from "./pages/BC-von-bang-tien/TableVonBangTien";
 import CashCapitalPage from "./pages/Cash Capital/CashCapitalPage";
 import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
 import ListAccountPage from "./pages/category/account/ListAccount";
@@ -42,6 +43,7 @@ import GiayBaoNoList from "./pages/gb-no-nganhang/GiayBaoNoList";
 import GeneralLedgerPage from "./pages/GeneralLedger/GeneralLedgerPage";
 import HdBanDvPage from "./pages/hd-ban-dv/HdBanDvPage";
 import HoaDonMuaDVList from "./pages/hoa-don-mua-dv/HoaDonMuaDVList";
+import HoaDonXuatKhoList from "./pages/hoadon-xuatkho/HoaDonXuatKhoList";
 import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
@@ -60,7 +62,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import HoaDonXuatKhoList from "./pages/hoadon-xuatkho/HoaDonXuatKhoList";
 
 
 export default function App() {
@@ -110,6 +111,10 @@ export default function App() {
               <Route path="/don-ban-hang" element={<DonBanHangPage />} />
 
               <Route path="/hd-ban-dv" element={<HdBanDvPage />} />
+
+              <Route path="/bao-cao-von-bang-tien" element={<TableVonBangTien />} />
+
+
 
               <Route path="/hoa-don-mua-dv" element={<HoaDonMuaDVList />} />
               {/* Cash Page */}
