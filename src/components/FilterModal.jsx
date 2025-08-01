@@ -8,7 +8,7 @@ const FilterModal = ({ isOpen, onClose, selectedItem, defaultValues, onSubmit, i
         ngay_ct2: '',
         ma_dvcs: '',
         store: '',
-        gop_tk: 0
+        // gop_tk: 
     });
 
     // Cập nhật filterData khi defaultValues thay đổi
@@ -26,6 +26,7 @@ const FilterModal = ({ isOpen, onClose, selectedItem, defaultValues, onSubmit, i
     const handleInputChange = (field, value) => {
         setFilterData(prev => ({
             ...prev,
+            gop_tk: defaultValues.gop_tk,
             [field]: value
         }));
     };
