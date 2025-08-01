@@ -1,10 +1,133 @@
 import { Building2, ChevronRight, Receipt, Wallet } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FilterModal from '../../components/FilterModal';
+import vonBangTienService from "../../services/baocaovonbangtien";
 
 export default function CashCapitalPage() {
     const [activeTab, setActiveTab] = useState('software');
     const [openModalId, setOpenModalId] = useState(null);
+    const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
+
+    // Định nghĩa giá trị mặc định cho từng menu item
+    const getDefaultValues = (itemId) => {
+        const defaultValues = {
+            'so-quy': {
+                tk: '1111',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY',
+                store: 'Caso1'
+            },
+            'export-plan': {
+                tk: '1112',
+                ngay_ct1: '2025-08-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN01',
+            },
+            'inventory': {
+                tk: '1113',
+                ngay_ct1: '2025-06-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY',
+                store: 'GLSO1D',
+                gop_tk: 0,
+            },
+            'inventory-detail': {
+                tk: '1121',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY',
+                store: 'GLSO1D',
+                gop_tk: 0,
+            },
+            'import-export-summary': {
+                tk: '1131',
+                ngay_ct1: '2025-07-15',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY',
+                store: 'GLSO1',
+                gop_tk: 0,
+            },
+            'import-export-detail': {
+                tk: '1311',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN01'
+            },
+            'inventory-report': {
+                tk: '1111',
+                ngay_ct1: '2025-08-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN03'
+            },
+            'inventory-report-detail': {
+                tk: '1112',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY'
+            },
+            // Default values cho management tab
+            'cost-analysis': {
+                tk: '6211',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY'
+            },
+            'performance-report': {
+                tk: '5111',
+                ngay_ct1: '2025-06-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN01'
+            },
+            'turnover-analysis': {
+                tk: '1561',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY'
+            },
+            'abc-analysis': {
+                tk: '1562',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN02'
+            },
+            'inventory-valuation': {
+                tk: '1571',
+                ngay_ct1: '2025-08-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY'
+            },
+            'budget-control': {
+                tk: '6411',
+                ngay_ct1: '2025-07-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN01'
+            },
+            'variance-analysis': {
+                tk: '5211',
+                ngay_ct1: '2025-07-15',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CTY'
+            },
+            'profitability-report': {
+                tk: '5111',
+                ngay_ct1: '2025-06-01',
+                ngay_ct2: '2025-08-31',
+                ma_dvcs: 'CN03'
+            }
+        };
+
+        return defaultValues[itemId] || {
+            tk: '1111',
+            ngay_ct1: '2025-07-01',
+            ngay_ct2: '2025-08-31',
+            ma_dvcs: 'CTY'
+        };
+    };
+
     const softwareMenuItems = [
         { id: 'so-quy', label: 'Sổ quỹ' },
         { id: 'export-plan', label: 'Sổ quỹ (in từng ngày)' },
@@ -43,6 +166,53 @@ export default function CashCapitalPage() {
                 break;
             default:
                 break;
+        }
+    };
+
+    const handleMenuItemClick = (item) => {
+        setSelectedMenuItem(item);
+        setOpenModalId(item.id);
+    };
+
+    const handleModalSubmit = async (formData) => {
+        try {
+            setIsSubmitting(true);
+
+            // Chuẩn bị data để gọi API
+            const requestData = {
+                ...formData,
+                // reportType: selectedMenuItem?.id,
+                // reportName: selectedMenuItem?.label
+            };
+
+            console.log('Submitting filter data:', requestData);
+
+            // Gọi API để lấy dữ liệu báo cáo
+            const materialData = await vonBangTienService.getData(requestData);
+
+            console.log('API Response:', materialData);
+
+            // Đóng modal
+            setOpenModalId(null);
+            setSelectedMenuItem(null);
+
+            // Kiểm tra dữ liệu trả về
+            // if (materialData && materialData.length > 0) {
+            // Chuyển hướng đến trang hiển thị bảng với dữ liệu
+            navigate('/bao-cao-von-bang-tien', {
+                state: {
+                    data: materialData,
+                    filterData: requestData,
+                    reportName: selectedMenuItem?.label
+                }
+            });
+
+
+        } catch (error) {
+            console.error('Error fetching report data:', error);
+            alert('Có lỗi xảy ra khi tải dữ liệu báo cáo. Vui lòng thử lại.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -135,14 +305,14 @@ export default function CashCapitalPage() {
                 </div>
             </div>
 
-            <div className="py-4">
+            <div>
                 {/* Menu Items */}
-                <div className="py-4 space-y-1">
+                <div className="py-2 space-y-1">
                     {currentMenuItems.map((item) => (
                         <div
                             key={item.id}
                             className="flex items-center p-1 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
-                            onClick={() => setOpenModalId(item.id)}
+                            onClick={() => handleMenuItemClick(item)}
                         >
                             <ChevronRight className="w-4 h-4 text-gray-400 mr-2" />
                             <span>{item.label}</span>
@@ -150,10 +320,19 @@ export default function CashCapitalPage() {
                     ))}
                 </div>
 
-                {openModalId === 'so-quy' && (
-                    <FilterModal isOpen onClose={() => setOpenModalId(null)} />
+                {openModalId && selectedMenuItem && (
+                    <FilterModal
+                        isOpen={true}
+                        onClose={() => {
+                            setOpenModalId(null);
+                            setSelectedMenuItem(null);
+                        }}
+                        selectedItem={selectedMenuItem}
+                        defaultValues={getDefaultValues(selectedMenuItem.id)}
+                        onSubmit={handleModalSubmit}
+                        isSubmitting={isSubmitting}
+                    />
                 )}
-
             </div>
         </div>
     );
