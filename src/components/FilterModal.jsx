@@ -1,13 +1,20 @@
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const FilterModal = ({ isOpen, onClose, selectedItem, onSubmit }) => {
+const FilterModal = ({ isOpen, onClose, selectedItem, defaultValues, onSubmit }) => {
     const [filterData, setFilterData] = useState({
-        tk: '1111',
-        ngay_ct1: '2025-07-01',
-        ngay_ct2: '2025-08-31',
-        ma_dvcs: 'CTY'
+        tk: '',
+        ngay_ct1: '',
+        ngay_ct2: '',
+        ma_dvcs: ''
     });
+
+    // Cập nhật filterData khi defaultValues thay đổi
+    useEffect(() => {
+        if (defaultValues) {
+            setFilterData(defaultValues);
+        }
+    }, [defaultValues]);
 
     if (!isOpen) return null;
 
@@ -19,20 +26,28 @@ const FilterModal = ({ isOpen, onClose, selectedItem, onSubmit }) => {
     };
 
     const handleSubmit = () => {
-        onSubmit({
+        const submitData = {
             ...filterData,
-            reportType: selectedItem?.id,
-            reportName: selectedItem?.label
-        });
+            // reportType: selectedItem?.id,
+            // reportName: selectedItem?.label
+        };
+        console.log("-------------------", defaultValues.type)
+
+        // console.log('Filter data being submitted:', submitData);
+        onSubmit(submitData);
     };
 
     const resetFilter = () => {
-        setFilterData({
-            tk: '',
-            ngay_ct1: '',
-            ngay_ct2: '',
-            ma_dvcs: ''
-        });
+        if (defaultValues) {
+            setFilterData(defaultValues);
+        } else {
+            setFilterData({
+                tk: '',
+                ngay_ct1: '',
+                ngay_ct2: '',
+                ma_dvcs: ''
+            });
+        }
     };
 
     return (
@@ -111,6 +126,16 @@ const FilterModal = ({ isOpen, onClose, selectedItem, onSubmit }) => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
+                        </div>
+
+                        {/* Hiển thị thông tin về giá trị mặc định */}
+                        <div className="mt-4 p-3 bg-blue-50 rounded-md">
+                            <p className="text-sm text-blue-700">
+                                <strong>Báo cáo:</strong> {selectedItem?.label}
+                            </p>
+                            <p className="text-sm text-blue-600 mt-1">
+                                Các trường đã được điền sẵn giá trị mặc định. Bạn có thể chỉnh sửa theo nhu cầu.
+                            </p>
                         </div>
                     </div>
                 </div>
