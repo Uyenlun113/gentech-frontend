@@ -7,6 +7,7 @@ export const useHoaDonMuaDVs = (params) => {
         queryKey: ["hoadonmuadv", params],
         queryFn: () => hoaDonMuaDVApi.getHoaDonMuaDVs(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 
@@ -15,6 +16,7 @@ export const useHoaDonMuaDV = (ma_pt) => {
         queryKey: ["hoadonmuadv", ma_pt],
         queryFn: () => hoaDonMuaDVApi.getHoaDonMuaDV(ma_pt),
         enabled: !!ma_pt,
+        refetchOnWindowFocus: false
     });
 };
 

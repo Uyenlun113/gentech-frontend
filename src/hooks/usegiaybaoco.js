@@ -7,6 +7,7 @@ export const useGiayBaoCos = (params) => {
         queryKey: ["giaybaoco", params],
         queryFn: () => giayBaoCoApi.getGiayBaoCos(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 

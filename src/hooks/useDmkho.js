@@ -8,6 +8,7 @@ export const useDmkho = (params) => {
         queryKey: ["dmkho", params],
         queryFn: () => DmkhoService.getDmkho(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 
@@ -15,7 +16,9 @@ export const useDmkhoById = (ma_kho) => {
     return useQuery({
         queryKey: ["dmkho", ma_kho],
         queryFn: () => DmkhoService.getDmkhoById(ma_kho),
+        enabled: !!ma_kho,
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 

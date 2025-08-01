@@ -83,6 +83,5 @@ export const useGroupAccounts = (searchParams = {}) => {
     queryKey: ["groupAccounts", searchParams],
     queryFn: () => accountDirectoryApi.getAccountGroup(searchParams),
     staleTime: 5 * 60 * 1000, // 5 phút
-    enabled: true,
   });
 };

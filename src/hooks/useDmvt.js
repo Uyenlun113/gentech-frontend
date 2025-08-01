@@ -15,6 +15,7 @@ export const useDmvtById = (ma_vt) => {
     return useQuery({
         queryKey: ["dmvt", ma_vt],
         queryFn: () => dmvtService.getDmvtById(ma_vt),
+        enabled: !!ma_vt,
         staleTime: 0,
         refetchOnWindowFocus: false,
     });
@@ -25,7 +26,7 @@ export const useCreateDmvt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data) => dmvtService.addDmvt(data), 
+        mutationFn: (data) => dmvtService.addDmvt(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["dmvt"] });
             toast.success("Tạo danh mục vật tư thành công!");

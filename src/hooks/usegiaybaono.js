@@ -7,6 +7,7 @@ export const useGiayBaoNos = (params) => {
         queryKey: ["giaybaono", params],
         queryFn: () => giayBaoNoApi.getGiayBaoNos(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 
@@ -15,6 +16,7 @@ export const useGiayBaoNo = (ma_pt) => {
         queryKey: ["cashReceipt", ma_pt],
         queryFn: () => giayBaoNoApi.getGiayBaoNo(ma_pt),
         enabled: !!ma_pt,
+        refetchOnWindowFocus: false
     });
 };
 

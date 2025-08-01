@@ -1,19 +1,19 @@
 import { Building2, ChevronRight, Receipt, Wallet } from 'lucide-react';
 import { useState } from 'react';
+import FilterModal from '../../components/FilterModal';
 
 export default function CashCapitalPage() {
     const [activeTab, setActiveTab] = useState('software');
-
+    const [openModalId, setOpenModalId] = useState(null);
     const softwareMenuItems = [
-        { id: 'import-plan', label: 'Bảng kế phiếu nhập' },
-        { id: 'export-plan', label: 'Bảng kế phiếu xuất' },
-        { id: 'import-export-plan', label: 'Bảng kế phiếu nhập/xuất/hoá đơn' },
-        { id: 'inventory', label: 'Thẻ kho' },
-        { id: 'inventory-detail', label: 'Sổ chi tiết vật tư' },
-        { id: 'import-export-summary', label: 'Tổng hợp Nhập-Xuất-Tồn' },
-        { id: 'import-export-detail', label: 'Tổng hợp Nhập-Xuất-Tồn theo chi tiết' },
-        { id: 'inventory-report', label: 'Báo cáo tồn kho' },
-        { id: 'inventory-report-detail', label: 'Báo cáo tồn kho theo kho' }
+        { id: 'so-quy', label: 'Sổ quỹ' },
+        { id: 'export-plan', label: 'Sổ quỹ (in từng ngày)' },
+        { id: 'inventory', label: 'Sổ kế toán chi tiết quỹ tiền mặt' },
+        { id: 'inventory-detail', label: 'Sổ tiền gửi ngân hàng' },
+        { id: 'import-export-summary', label: 'Sổ chi tiết của một tài khoản' },
+        { id: 'import-export-detail', label: 'Sổ chi tiết công nợ của một khách hàng' },
+        { id: 'inventory-report', label: 'Bảng cân đối số phát sinh theo ngày của một tài khoản' },
+        { id: 'inventory-report-detail', label: 'Bảng số dư tiền tại quỹ và tại các ngân hàng' }
     ];
 
     const managementMenuItems = [
@@ -137,17 +137,23 @@ export default function CashCapitalPage() {
 
             <div className="py-4">
                 {/* Menu Items */}
-                <div className="space-y-1">
+                <div className="py-4 space-y-1">
                     {currentMenuItems.map((item) => (
                         <div
                             key={item.id}
                             className="flex items-center p-1 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                            onClick={() => setOpenModalId(item.id)}
                         >
                             <ChevronRight className="w-4 h-4 text-gray-400 mr-2" />
                             <span>{item.label}</span>
                         </div>
                     ))}
                 </div>
+
+                {openModalId === 'so-quy' && (
+                    <FilterModal isOpen onClose={() => setOpenModalId(null)} />
+                )}
+
             </div>
         </div>
     );

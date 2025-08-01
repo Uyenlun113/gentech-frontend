@@ -7,6 +7,7 @@ export const useCashReceipts = (params) => {
         queryKey: ["cashReceipts", params],
         queryFn: () => cashReceiptApi.getCashReceipts(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 

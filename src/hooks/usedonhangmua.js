@@ -7,6 +7,7 @@ export const useDonHangMuas = (params) => {
         queryKey: ["donhangmua", params],
         queryFn: () => donHangMuaApi.getDonHangMuas(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 
@@ -15,6 +16,7 @@ export const useDonHangMua = (ma_pt) => {
         queryKey: ["donhangmua", ma_pt],
         queryFn: () => donHangMuaApi.getDonHangMua(ma_pt),
         enabled: !!ma_pt,
+        refetchOnWindowFocus: false
     });
 };
 

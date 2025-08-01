@@ -7,6 +7,7 @@ export const useHoaDonXuatKhos = (params) => {
         queryKey: ["hoadonxuatkho", params],
         queryFn: () => hoaDonMuaDVApi.getHoaDonXuatKhos(params),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
 
@@ -15,6 +16,7 @@ export const useHoaDonXuatKho = (ma_pt) => {
         queryKey: ["hoadonxuatkho", ma_pt],
         queryFn: () => hoaDonMuaDVApi.getHoaDonXuatKho(ma_pt),
         enabled: !!ma_pt,
+        refetchOnWindowFocus: false
     });
 };
 

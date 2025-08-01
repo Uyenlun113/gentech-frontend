@@ -7,6 +7,7 @@ export const useListDmstt = () => {
         queryKey: ["dmstt"],
         queryFn: () => dmsttService.getDmstt(),
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 }
 

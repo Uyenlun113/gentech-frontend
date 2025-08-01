@@ -78,19 +78,15 @@ const GiayBaoNoPrintTemplate = React.forwardRef(({ printData }, ref) => {
                             <strong>Tên TK trích nợ/ Dr A/C Name:</strong><br />
                             <span style={{ fontWeight: 'bold' }}>Công ty cổ phần công nghệ Gentech</span>
                         </div>
-
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Số TK trích nợ/ Dr A/C No:</strong> {data?.taiKhoan}
                         </div>
-
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Tại NH/ At bank:</strong>{data?.tenNganHang}
                         </div>
-
                         <div style={{ marginBottom: '10px' }}>
                             <strong>Chi nhánh/ Branch:</strong>
                         </div>
-
                     </div>
 
                     {/* Right Column */}

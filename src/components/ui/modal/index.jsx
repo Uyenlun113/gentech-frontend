@@ -5,7 +5,7 @@ export const Modal = ({
   onClose,
   children,
   className,
-  showCloseButton = true, // Default to true for backwards compatibility
+  showCloseButton = true, 
   isFullscreen = false,
 }) => {
   const modalRef = useRef(null);

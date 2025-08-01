@@ -48,5 +48,6 @@ export const useFindCdtkByTkAndYear = (tk, nam) => {
         queryFn: () => cdtkService.findOne(tk, nam),
         enabled: !!tk && !!nam, 
         staleTime: Infinity,
+        refetchOnWindowFocus: false
     });
 };
