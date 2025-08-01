@@ -1244,7 +1244,6 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                 addHangHoaRow();
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log("Changed to tab:", tabIndex);
                             }}
                         />
                     </div>

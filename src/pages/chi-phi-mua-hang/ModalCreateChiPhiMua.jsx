@@ -1764,7 +1764,6 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                 }
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log('Changed to tab:', tabIndex);
                             }}
                         />
                     </div>

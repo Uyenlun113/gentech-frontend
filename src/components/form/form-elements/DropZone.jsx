@@ -4,7 +4,7 @@ import ComponentCard from "../../common/ComponentCard";
 
 const DropzoneComponent = () => {
   const onDrop = (acceptedFiles) => {
-    console.log("Files dropped:", acceptedFiles);
+    // console.log("Files dropped:", acceptedFiles);
     // Handle file uploads here
   };
 

@@ -195,13 +195,10 @@ export default function HoaDonMuaDVList() {
 
     // Xử lý chọn row để hiển thị detail với debug logs
     const handleRowSelect = (cashReceipt) => {
-        // console.log('🚀 handleRowSelect called with:', cashReceipt);
         if (cashReceipt) {
             setSelectedRowForDetail(cashReceipt);
             setShowDetailPanel(true);
-            // console.log('🚀 Row selected successfully');
         } else {
-            // console.log('❌ cashReceipt is null/undefined');
         }
     };
 
@@ -234,7 +231,6 @@ export default function HoaDonMuaDVList() {
                 }
             `,
         onAfterPrint: () => {
-            console.log('Print completed');
         },
         onPrintError: (errorLocation, error) => {
             console.error('Print error:', errorLocation, error);
@@ -244,12 +240,10 @@ export default function HoaDonMuaDVList() {
 
     // Function để xử lý in phiếu thu
     const handlePrintFun = (record) => {
-        console.log('Print data being set:', record);
         setPrintData(record);
         // Delay để đảm bảo data được set và component được render
         setTimeout(() => {
             if (printRef.current) {
-                console.log('Print ref found, starting print...');
                 handlePrint();
             } else {
                 console.error('Print ref not found!');
@@ -412,8 +406,6 @@ export default function HoaDonMuaDVList() {
                         <div className="space-y-4">
                             <div
                                 onClick={(e) => {
-                                    // console.log('🔍 Table clicked, target:', e.target.tagName);
-
                                     // Tìm row gần nhất
                                     let element = e.target;
                                     while (element && element.tagName !== 'TR') {
@@ -424,12 +416,9 @@ export default function HoaDonMuaDVList() {
                                     if (element && element.tagName === 'TR') {
                                         // Lấy index từ data attribute hoặc position
                                         const rowIndex = Array.from(element.parentElement.children).indexOf(element);
-                                        // console.log('🔍 Row index found:', rowIndex);
-                                        // console.log('🔍 Data table length:', dataTable.length);
 
                                         if (rowIndex >= 0 && rowIndex < dataTable.length) {
                                             const rowData = dataTable[rowIndex];
-                                            // console.log('🔍 Row data:', rowData);
                                             handleRowSelect(rowData);
                                         }
                                     }

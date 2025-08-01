@@ -124,7 +124,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maKhSearch && maKhSearch.length > 0) {
-        console.log('🔍 Searching for customer:', maKhSearch);
         // Chỉ log, không hiển thị popup tự động
       } else {
         setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
@@ -137,7 +136,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
-        console.log('🔍 Searching for main account:', maTaiKhoanSearch);
         // Chỉ hiển thị popup, không hiển thị dropdown
       } else {
         setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
@@ -241,8 +239,6 @@ export const ModalCreateHoaDonMuaDV = ({ isOpenCreate, closeModalCreate }) => {
       console.error('Customer object is null or undefined');
       return;
     }
-
-    console.log('Selected customer:', customer); // Debug log
 
     // Cập nhật form với thông tin khách hàng
     setFormData(prev => ({

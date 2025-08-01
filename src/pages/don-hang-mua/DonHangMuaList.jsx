@@ -258,9 +258,7 @@ export default function DonHangMuaList() {
             const promises = hangHoaArray.map(async (item) => {
                 if (item.ma_vt && !item.ten_vt) {
                     try {
-                        console.log(`🔍 Fetching material for ${item.ma_vt}`);
                         const materialData = await dmvtService.getDmvtById(item.ma_vt);
-                        console.log(`✅ Fetched material data:`, materialData);
                         return {
                             ...item,
                             ten_vt: materialData?.ten_vt || materialData?.name || ""
@@ -274,7 +272,6 @@ export default function DonHangMuaList() {
             });
 
             const updatedList = await Promise.all(promises);
-            console.log(`✅ Updated ${updatedList.length} material names`);
             return updatedList;
         } catch (error) {
             console.error('❌ Error fetching material names:', error);
@@ -286,12 +283,10 @@ export default function DonHangMuaList() {
 
     // Xử lý chọn row để hiển thị detail với debug logs
     const handleRowSelect = useCallback(async (cashReceipt) => {
-        console.log('🚀 handleRowSelect called with:', cashReceipt);
         if (cashReceipt) {
             // Set data ngay lập tức để hiển thị UI
             setSelectedRowForDetail(cashReceipt);
             setShowDetailPanel(true);
-            console.log('🚀 Row selected successfully');
 
             // Fetch tên vật tư trong background
             if (cashReceipt.hang_hoa_list && cashReceipt.hang_hoa_list.length > 0) {
@@ -304,7 +299,6 @@ export default function DonHangMuaList() {
                 }));
             }
         } else {
-            console.log('❌ cashReceipt is null/undefined');
         }
     }, [fetchMaterialNames]);
 
@@ -351,7 +345,6 @@ export default function DonHangMuaList() {
             }
         `,
         onAfterPrint: () => {
-            console.log('Print completed');
         },
         onPrintError: (errorLocation, error) => {
             console.error('Print error:', errorLocation, error);
@@ -361,12 +354,10 @@ export default function DonHangMuaList() {
 
     // Function để xử lý in phiếu thu
     const handlePrintFun = (record) => {
-        console.log('Print data being set:', record);
         setPrintData(record);
         // Delay để đảm bảo data được set và component được render
         setTimeout(() => {
             if (printRef.current) {
-                console.log('Print ref found, starting print...');
                 handlePrint();
             } else {
                 console.error('Print ref not found!');
@@ -561,7 +552,6 @@ export default function DonHangMuaList() {
                         <div className="space-y-4">
                             <div
                                 onClick={(e) => {
-                                    console.log('🔍 Table clicked, target:', e.target.tagName);
 
                                     // Tìm row gần nhất
                                     let element = e.target;
@@ -573,12 +563,9 @@ export default function DonHangMuaList() {
                                     if (element && element.tagName === 'TR') {
                                         // Lấy index từ data attribute hoặc position
                                         const rowIndex = Array.from(element.parentElement.children).indexOf(element);
-                                        console.log('🔍 Row index found:', rowIndex);
-                                        console.log('🔍 Data table length:', dataTable.length);
 
                                         if (rowIndex >= 0 && rowIndex < dataTable.length) {
                                             const rowData = dataTable[rowIndex];
-                                            console.log('🔍 Row data:', rowData);
                                             handleRowSelect(rowData);
                                         }
                                     }

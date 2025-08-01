@@ -300,7 +300,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maKhSearch && maKhSearch.length > 0) {
-        // console.log('🔍 Searching for customer:', maKhSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
       }
@@ -312,7 +311,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (maTaiKhoanSearch && maTaiKhoanSearch.length > 0) {
-        // console.log('🔍 Searching for main account:', maTaiKhoanSearch);
       } else {
         setSearchStates(prev => ({ ...prev, showMainAccountPopup: false }));
       }
@@ -421,8 +419,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       console.error('Customer object is null or undefined');
       return;
     }
-
-    // console.log('Selected customer:', customer);
 
     setFormData(prev => ({
       ...prev,

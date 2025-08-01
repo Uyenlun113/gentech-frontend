@@ -238,7 +238,6 @@ export const usePhieuXuatDcList = () => {
                 }
             `,
         onAfterPrint: () => {
-            console.log('Print completed');
         },
         onPrintError: (errorLocation, error) => {
             console.error('Print error:', errorLocation, error);
@@ -252,12 +251,10 @@ export const usePhieuXuatDcList = () => {
     // Function để xử lý in phiếu thu
     const handlePrintFun = async (record) => {
         let data = await getData(record)
-        console.log('Print data being set --------------------------:', data);
         setPrintData(data);
         // Delay để đảm bảo data được set và component được render
         setTimeout(() => {
             if (printRef.current) {
-                console.log('Print ref found, starting print...');
                 handlePrint();
             } else {
                 console.error('Print ref not found!');
@@ -459,7 +456,6 @@ export const usePhieuXuatDcList = () => {
     };
 
     const handleChangePage = (page) => {
-        console.log("Page changed to:", page);
     };
 
     const handleSearch = (value) => {

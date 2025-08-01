@@ -1196,7 +1196,6 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                 addHangHoaRow();
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log("Changed to tab:", tabIndex);
                             }}
                         />
                     </div>

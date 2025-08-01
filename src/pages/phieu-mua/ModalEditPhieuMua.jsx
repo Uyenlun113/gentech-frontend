@@ -2338,7 +2338,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                 }
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log('Changed to tab:', tabIndex);
                             }}
                         />
                     </div>
@@ -2446,7 +2445,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         isOpen={searchStates.showVatTuPopup}
                         onClose={() => setSearchStates(prev => ({ ...prev, showVatTuPopup: false, vtSearch: "" }))}
                         onSelect={(vatTu) => {
-                            console.log('🎯 Material selected from popup:', vatTu);
                             handleVatTuSelect(searchStates.vtSearchRowId, vatTu);
                         }}
                         materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
@@ -2460,7 +2458,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                         isOpen={searchStates.showKhoPopup}
                         onClose={() => setSearchStates(prev => ({ ...prev, showKhoPopup: false, khoSearch: "" }))}
                         onSelect={(kho) => {
-                            console.log('🏠 Warehouse selected from popup:', kho);
                             handleKhoSelect(searchStates.khoSearchRowId, kho);
                         }}
                         warehouses={Array.isArray(khoData?.data) ? khoData.data : []}

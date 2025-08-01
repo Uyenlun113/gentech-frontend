@@ -29,7 +29,6 @@ export const useListGiayBaoNo = () => {
         contentRef: printRef,
         documentTitle: `Giấy Báo Nợ - ${selectedForPrint?.so_ct || 'GBN'}`,
         onAfterPrint: () => {
-            console.log('✅ Print completed successfully');
             // Reset print states after successful print
             setIsPrintModalOpen(false);
             setSelectedForPrint(null);
@@ -42,27 +41,23 @@ export const useListGiayBaoNo = () => {
     });
 
     const handlePrintClick = (record) => {
-        console.log('🖨️ Opening print modal for:', record);
         setSelectedForPrint(record);
         setIsPrintModalOpen(true);
     };
 
     const handlePrintModalClose = () => {
-        console.log('❌ Closing print modal');
         setIsPrintModalOpen(false);
         setSelectedForPrint(null);
         setPrintData(null);
     };
 
     const handlePrintConfirm = (formDataFromModal) => {
-        console.log('🎯 Print confirmed with data:', formDataFromModal);
 
         // Lưu data để truyền vào template
         setPrintData(formDataFromModal);
 
         // Đợi một chút để state update rồi mới trigger print
         setTimeout(() => {
-            console.log('🖨️ Triggering print...');
             try {
                 handlePrint();
             } catch (error) {

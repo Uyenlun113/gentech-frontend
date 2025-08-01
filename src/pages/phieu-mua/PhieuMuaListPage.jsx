@@ -290,7 +290,6 @@ export default function PhieuMuaListPage() {
                 }
             `,
         onAfterPrint: () => {
-            console.log('Print completed');
         },
         onPrintError: (errorLocation, error) => {
             console.error('Print error:', errorLocation, error);
@@ -300,12 +299,10 @@ export default function PhieuMuaListPage() {
 
     // Function để xử lý in phiếu thu
     const handlePrintFun = (record) => {
-        console.log('Print data being set:', record);
         setPrintData(record);
         // Delay để đảm bảo data được set và component được render
         setTimeout(() => {
             if (printRef.current) {
-                console.log('Print ref found, starting print...');
                 handlePrint();
             } else {
                 console.error('Print ref not found!');
