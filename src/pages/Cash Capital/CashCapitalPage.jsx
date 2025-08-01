@@ -186,9 +186,10 @@ export default function CashCapitalPage() {
             };
 
             console.log('Submitting filter data:', requestData);
-
+            let paramSearch = new URLSearchParams(requestData).toString();
+            console.log("---------------", paramSearch)
             // Gọi API để lấy dữ liệu báo cáo
-            const materialData = await vonBangTienService.getData(requestData);
+            const materialData = await vonBangTienService.getData(paramSearch);
 
             console.log('API Response:', materialData);
 
