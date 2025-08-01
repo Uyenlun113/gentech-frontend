@@ -19,7 +19,8 @@ export default function CashCapitalPage() {
                 ngay_ct1: '2025-07-01',
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
-                store: 'Caso1'
+                store: 'Caso1',
+                gop_tk: '1',
             },
             'export-plan': {
                 tk: '1112',
@@ -33,7 +34,7 @@ export default function CashCapitalPage() {
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
                 store: 'GLSO1D',
-                gop_tk: 0,
+                gop_tk: '0',
             },
             'inventory-detail': {
                 tk: '1121',
@@ -41,7 +42,7 @@ export default function CashCapitalPage() {
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
                 store: 'GLSO1D',
-                gop_tk: 0,
+                gop_tk: '0',
             },
             'import-export-summary': {
                 tk: '1131',
@@ -49,7 +50,7 @@ export default function CashCapitalPage() {
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
                 store: 'GLSO1',
-                gop_tk: 0,
+                gop_tk: '0',
             },
             'import-export-detail': {
                 tk: '1311',
