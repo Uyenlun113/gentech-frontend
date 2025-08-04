@@ -11,14 +11,11 @@ const PrintWrapper = forwardRef(({
 }, ref) => {
     // Chọn template dựa trên reportType
     const getTemplate = (type) => {
+        console.log(type);
         switch (type?.toLowerCase()) {
-            case 'cashbook':
             case 'so-quy':
-            case 'sổ quỹ tiền mặt':
                 return printTemplates.cashBook;
-            case 'balancesheet':
             case 'bang_can_doi':
-            case 'bảng cân đối kế toán':
                 return printTemplates.balanceSheet;
             default:
                 return printTemplates.default;
