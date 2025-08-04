@@ -1,10 +1,12 @@
 import "flatpickr/dist/flatpickr.min.css";
 import { ArrowLeft, PrinterIcon, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import PrintWrapper from "../../components/PrintWrapper";
 import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
 import { useBaoCaoVonList } from "./useTableVonBangTien";
@@ -13,24 +15,57 @@ export default function TableVonBangTien() {
     const location = useLocation();
     const navigate = useNavigate();
     const { columnsTable } = useBaoCaoVonList();
+    const printRef = useRef(); // Ref cho component cần in
 
-    // State để lưu dữ liệu từ filter
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filterInfo, setFilterInfo] = useState(null);
     const [reportName, setReportName] = useState('Danh sách báo cáo');
+    const [reportType, setReportType] = useState('default');
 
-    // Nhận dữ liệu từ navigation state
+    // Hàm in sử dụng react-to-print
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: reportName,
+        pageStyle: `
+            @page {
+                size: A4;
+                margin: 0.5in;
+            }
+            @media print {
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .no-print {
+                    display: none !important;
+                }
+                .print-content {
+                    display: block !important;
+                }
+            }
+            @media screen {
+                .print-content {
+                    display: none !important;
+                }
+            }
+        `,
+        onBeforeGetContent: () => {
+            return Promise.resolve();
+        },
+        onAfterPrint: () => {
+            console.log('Print completed for report type:', reportType);
+        }
+    });
+
     useEffect(() => {
         if (location.state) {
-            const { data, filterData, reportName: name } = location.state;
+            const { data, filterData, reportName: name, reportType: type } = location.state;
 
             if (data && Array.isArray(data)) {
-                // Map data từ API về format phù hợp với bảng
                 const mappedData = data.map((item, index) => ({
                     ...item,
                     stt: index + 1,
-                    // Map theo cấu trúc dữ liệu thực tế
                     ngay_ct: item.ngay_ct,
                     ngay_lct: item.ngay_lct || item.ngay_lap_ct,
                     ma_ct: item.ma_ct,
@@ -52,6 +87,7 @@ export default function TableVonBangTien() {
                 setDataTable(mappedData);
                 setFilterInfo(filterData);
                 setReportName(name || 'Danh sách báo cáo');
+                setReportType(type || 'default');
             } else {
                 setDataTable([]);
             }
@@ -60,69 +96,50 @@ export default function TableVonBangTien() {
         }
     }, [location.state]);
 
-    // Hàm refresh dữ liệu
     const handleRefresh = () => {
         if (filterInfo) {
             setLoading(true);
-            // Simulate loading
             setTimeout(() => {
                 setLoading(false);
             }, 1000);
         }
     };
 
-    // Hàm in báo cáo
-    const handlePrintReport = () => {
-        window.print();
-    };
-
-    // Hàm quay lại trang filter
     const handleGoBack = () => {
         navigate(-1);
     };
 
-
-    // Calculate totals theo logic báo cáo sổ quỹ
     const calculateTotals = () => {
-        let tongThu = 0; // Tổng phát sinh thu (ps_no)
-        let tongChi = 0; // Tổng phát sinh chi (ps_co)
+        let tongThu = 0;
+        let tongChi = 0;
 
-        // Tính tổng thu và chi từ dữ liệu hiện tại
         dataTable.forEach((item) => {
             const psNo = Array.isArray(item.ps_no) ? item.ps_no[0] : item.ps_no;
             const psCo = Array.isArray(item.ps_co) ? item.ps_co[0] : item.ps_co;
 
-            // Tổng thu (ps_no > 0)
             if (psNo && psNo > 0) {
                 tongThu += parseFloat(psNo);
             }
 
-            // Tổng chi (ps_co > 0) 
             if (psCo && psCo > 0) {
                 tongChi += parseFloat(psCo);
             }
         });
 
-        // Tồn đầu kỳ: Lấy sum đến ngày lọc chứng từ (có thể từ filterInfo hoặc tính từ dữ liệu)
-        // Giả sử tồn đầu = tồn cuối của record cuối - tổng thu + tổng chi
         let tonDauKy = 0;
         if (dataTable.length > 0) {
-            // Lấy số tồn từ record đầu tiên (trước khi có các giao dịch)
             const firstRecord = dataTable[0];
             const soTonFirst = Array.isArray(firstRecord.so_ton) ? firstRecord.so_ton[0] : firstRecord.so_ton;
-
-            // Tồn đầu = số tồn hiện tại + tổng chi - tổng thu (ngược lại để tìm số đầu)
             tonDauKy = Math.abs(parseFloat(soTonFirst) || 0) + tongThu - tongChi;
         }
 
-        // Tồn cuối = đầu kỳ + Tổng ps thu - Tổng PS chi
         const tonCuoiKy = tonDauKy + tongThu - tongChi;
 
         return {
             tongThu,
             tongChi,
-            tonDauKy: Math.abs(tonDauKy), // Đảm bảo dương
-            tonCuoiKy: Math.abs(tonCuoiKy) // Đảm bảo dương
+            tonDauKy: Math.abs(tonDauKy),
+            tonCuoiKy: Math.abs(tonCuoiKy)
         };
     };
 
@@ -135,7 +152,6 @@ export default function TableVonBangTien() {
                 <PageBreadcrumb pageTitle={reportName} />
                 <div className="space-y-6">
                     <ComponentCard>
-                        {/* Header với các nút điều khiển */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-2">
                                 <Button
@@ -160,7 +176,13 @@ export default function TableVonBangTien() {
 
                             <div className="flex items-center gap-2">
                                 <Button
-                                    onClick={handlePrintReport}
+                                    onClick={() => {
+                                        if (dataTable.length === 0) {
+                                            alert('Không có dữ liệu để in!');
+                                            return;
+                                        }
+                                        handlePrint();
+                                    }}
                                     size="sm"
                                     variant="secondary"
                                     startIcon={<PrinterIcon className="size-4" />}
@@ -170,7 +192,6 @@ export default function TableVonBangTien() {
                             </div>
                         </div>
 
-                        {/* Hiển thị bảng dữ liệu */}
                         {dataTable.length > 0 ? (
                             <ShowMoreTables
                                 dataTable={dataTable}
@@ -195,53 +216,53 @@ export default function TableVonBangTien() {
                             </div>
                         )}
 
-                        {/* Footer với thông tin tổng kết */}
                         {dataTable.length > 0 && (
-                            <div className="flex justify-center"> <div className="mt-4 w-[500px]">
-                                <div>
-                                    <div className="grid grid-cols-3 text-sm font-medium">
-                                        <div className="px-4 py-2  text-left">
-                                            Số tồn đầu:
+                            <div className="flex justify-center">
+                                <div className="mt-4 w-[500px]">
+                                    <div>
+                                        <div className="grid grid-cols-3 text-sm font-medium">
+                                            <div className="px-4 py-2 text-left">Số tồn đầu:</div>
+                                            <div className="px-4 py-2 text-right">0</div>
+                                            <div className="px-4 py-2 text-right text-red-600">
+                                                {new Intl.NumberFormat('vi-VN').format(tonDauKy)}
+                                            </div>
                                         </div>
-                                        <div className="px-4 py-2  text-right">
-                                            0
+                                    </div>
+                                    <div>
+                                        <div className="grid grid-cols-3 text-sm font-medium">
+                                            <div className="px-4 py-2 text-left">Tổng số thu, chi:</div>
+                                            <div className="px-4 py-2 text-right text-blue-600">
+                                                {new Intl.NumberFormat('vi-VN').format(tongThu)}
+                                            </div>
+                                            <div className="px-4 py-2 text-right text-red-600">
+                                                {new Intl.NumberFormat('vi-VN').format(tongChi)}
+                                            </div>
                                         </div>
-                                        <div className="px-4 py-2 text-right text-red-600">
-                                            {new Intl.NumberFormat('vi-VN').format(tonDauKy)}
+                                    </div>
+                                    <div>
+                                        <div className="grid grid-cols-3 text-sm font-medium">
+                                            <div className="px-4 py-2 text-left">Số tồn cuối:</div>
+                                            <div className="px-4 py-2 text-right">0</div>
+                                            <div className="px-4 py-2 text-right text-red-600">
+                                                {new Intl.NumberFormat('vi-VN').format(tonCuoiKy)}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="">
-                                    <div className="grid grid-cols-3 text-sm font-medium">
-                                        <div className="px-4 py-2  text-left">
-                                            Tổng số thu, chi:
-                                        </div>
-                                        <div className="px-4 py-2  text-right text-blue-600">
-                                            {new Intl.NumberFormat('vi-VN').format(tongThu)}
-                                        </div>
-                                        <div className="px-4 py-2 text-right text-red-600">
-                                            {new Intl.NumberFormat('vi-VN').format(tongChi)}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="">
-                                    <div className="grid grid-cols-3 text-sm font-medium">
-                                        <div className="px-4 py-2  text-left">
-                                            Số tồn cuối:
-                                        </div>
-                                        <div className="px-4 py-2  text-right">
-                                            0
-                                        </div>
-                                        <div className="px-4 py-2 text-right text-red-600">
-                                            {new Intl.NumberFormat('vi-VN').format(tonCuoiKy)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div></div>
+                            </div>
                         )}
-                    </ComponentCard >
-                </div >
-            </div >
+                    </ComponentCard>
+                </div>
+            </div>
+
+
+            <PrintWrapper
+                ref={printRef}
+                reportType={reportType}
+                dataTable={dataTable}
+                filterInfo={filterInfo}
+                totals={{ tongThu, tongChi, tonDauKy, tonCuoiKy }}
+            />
         </>
     );
 }
