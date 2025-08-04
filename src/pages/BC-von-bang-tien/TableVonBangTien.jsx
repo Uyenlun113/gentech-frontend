@@ -79,7 +79,7 @@ export default function TableVonBangTien() {
                     tk_du: item.tk_du,
                     ps_no: item.ps_no,
                     ps_co: item.ps_co,
-                    so_ton: item.so_ton || item.so_tien,
+                    so_ton: item.so_ton || item.so_du,
                     ten_tk_du: item.ten_tk_du || item.ten_tai_khoan_doi_ung,
                     ma_ct_goc: item.ma_ct_goc,
                     stt_rec: item.stt_rec,
