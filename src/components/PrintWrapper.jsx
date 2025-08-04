@@ -17,6 +17,10 @@ const PrintWrapper = forwardRef(({
                 return printTemplates.cashBook;
             case 'inventory':
                 return printTemplates.detailedCashLedger;
+            case 'inventory-detail':
+                return printTemplates.soTienGui;
+            case 'import-export-summary':
+                return printTemplates.soChiTiet;
             default:
                 return printTemplates.default;
         }

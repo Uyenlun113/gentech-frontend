@@ -185,14 +185,9 @@ export default function CashCapitalPage() {
                 // reportType: selectedMenuItem?.id,
                 // reportName: selectedMenuItem?.label
             };
-
-            console.log('Submitting filter data:', requestData);
-            const paramSearch = new URLSearchParams(requestData).toString();
-            console.log("---------------", paramSearch)
+            let paramSearch = new URLSearchParams(requestData).toString();
             // Gọi API để lấy dữ liệu báo cáo
             const materialData = await vonBangTienService.getData(paramSearch);
-
-            console.log('API Response:', materialData);
 
             // Đóng modal
             setOpenModalId(null);
