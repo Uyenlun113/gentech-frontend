@@ -17,7 +17,6 @@ export default function FilterModal({
 }) {
     const [filterData, setFilterData] = useState({
         tk: "",
-        ten_tk: "",
         ngay_ct1: "",
         ngay_ct2: "",
         ma_dvcs: "",
@@ -58,13 +57,13 @@ export default function FilterModal({
         setFilterData((prev) => ({
             ...prev,
             tk: account.tk.trim(),
-            ten_tk: account.ten_tk || "",
         }));
         setTkSearch("");
         setShowAccountPopup(false);
     };
 
     const handleSubmit = () => {
+        console.log(filterData);
         onSubmit(filterData);
     };
 
@@ -98,10 +97,10 @@ export default function FilterModal({
                             </label>
                             <input
                                 type="text"
-                                value={filterData.tk ? `${filterData.tk} - ${filterData.ten_tk || ""}` : tkSearch}
+                                value={filterData.tk ? `${filterData.tk}` : tkSearch}
                                 onChange={(e) => {
                                     setTkSearch(e.target.value);
-                                    setFilterData((prev) => ({ ...prev, tk: "", ten_tk: "" }));
+                                    setFilterData((prev) => ({ ...prev, tk: "" }));
                                 }}
                                 onFocus={() => {
                                     if (tkSearch) setShowAccountPopup(true);
