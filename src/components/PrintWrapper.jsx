@@ -15,8 +15,8 @@ const PrintWrapper = forwardRef(({
         switch (type?.toLowerCase()) {
             case 'so-quy':
                 return printTemplates.cashBook;
-            case 'bang_can_doi':
-                return printTemplates.balanceSheet;
+            case 'inventory':
+                return printTemplates.detailedCashLedger;
             case 'inventory-detail':
                 return printTemplates.soTienGui;
             case 'import-export-summary':

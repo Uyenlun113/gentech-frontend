@@ -29,7 +29,7 @@ export default function TableVonBangTien() {
         documentTitle: reportName,
         pageStyle: `
             @page {
-                size: A4;
+                size: A4 landscape;
                 margin: 0.5in;
             }
             @media print {
@@ -50,6 +50,7 @@ export default function TableVonBangTien() {
                 }
             }
         `,
+
         onBeforeGetContent: () => {
             return Promise.resolve();
         },
