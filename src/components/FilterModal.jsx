@@ -129,7 +129,7 @@ const FilterModal = ({ isOpen, onClose, selectedItem, defaultValues, onSubmit, i
                                         Gộp TK
                                     </label>
                                     <select
-                                        value={filterData.gop_tk || 0}
+                                        value={filterData.gop_tk || '0'}
                                         onChange={(e) => handleInputChange('gop_tk', parseInt(e.target.value))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         disabled={isSubmitting}
