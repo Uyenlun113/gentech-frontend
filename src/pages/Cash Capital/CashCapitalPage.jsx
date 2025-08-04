@@ -15,7 +15,7 @@ export default function CashCapitalPage() {
     const getDefaultValues = (itemId) => {
         const defaultValues = {
             'so-quy': {
-                tk: '1111',
+                tk: '',
                 ngay_ct1: '2025-07-01',
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
@@ -23,13 +23,13 @@ export default function CashCapitalPage() {
                 gop_tk: '1',
             },
             'export-plan': {
-                tk: '1112',
+                tk: '',
                 ngay_ct1: '2025-08-01',
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CN01',
             },
             'inventory': {
-                tk: '1113',
+                tk: '',
                 ngay_ct1: '2025-06-01',
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
