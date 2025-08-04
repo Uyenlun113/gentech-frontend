@@ -164,12 +164,12 @@ export const useBaoCaoVonList = () => {
                 return value ? (
                     <div className="text-center text-blue-600">{formatCurrency(value)}</div>
                 ) : (
-                    <div className="text-center">-</div>
+                    <div className="text-center">0</div>
                 );
             },
         },
         {
-            key: "so_ton",
+            key: "so_du",
             title: "Số tồn",
             width: 120,
             render: (val) => {
@@ -182,7 +182,7 @@ export const useBaoCaoVonList = () => {
             },
         },
         {
-            key: "ten_tk_du",
+            key: "ten_tk",
             title: "Tên tài khoản đối ứng",
             width: 180,
             render: (val) => (

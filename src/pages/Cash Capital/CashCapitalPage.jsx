@@ -192,7 +192,7 @@ export default function CashCapitalPage() {
             // Đóng modal
             setOpenModalId(null);
             setSelectedMenuItem(null);
-
+            console.log(selectedMenuItem?.id)
             // Kiểm tra dữ liệu trả về
             // if (materialData && materialData.length > 0) {
             // Chuyển hướng đến trang hiển thị bảng với dữ liệu
@@ -200,7 +200,8 @@ export default function CashCapitalPage() {
                 state: {
                     data: materialData,
                     filterData: requestData,
-                    reportName: selectedMenuItem?.label
+                    reportName: selectedMenuItem?.label,
+                    reportType: selectedMenuItem?.id
                 }
             });
 
