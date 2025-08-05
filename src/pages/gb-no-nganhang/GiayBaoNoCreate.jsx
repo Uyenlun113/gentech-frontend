@@ -1075,7 +1075,7 @@ export const ModalCreateGiayBaoNo = ({ isOpenCreate, closeModalCreate }) => {
                     {/* CẬP NHẬT phần Tk nợ */}
                     <div className="grid grid-cols-12 items-center gap-2">
                       {/* Label */}
-                      <Label className="text-xs col-span-2">Tk nợ</Label>
+                      <Label className="text-xs col-span-2">Tk có</Label>
 
                       {/* Input chọn tài khoản */}
                       <div className="relative col-span-6">
