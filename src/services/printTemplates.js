@@ -46,7 +46,7 @@ export const printTemplates = {
                 </div>
             </div>
             <div style="text-align: right; font-weight: bold; margin: 4px 0 4px auto; width: 200px; margin-right: 95px;">
-                SỐ TỒN ĐẦU: ${new Intl.NumberFormat('vi-VN').format(totals.tonDauKy)}
+                SỐ TỒN ĐẦU: ${formatCurrency(totals.co_dk || 0)}
             </div>
 
             <!-- Main Table -->
@@ -136,19 +136,19 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG SỐ THU:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #0066cc;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tongThu)}
+                            ${formatCurrency(totals.ps_no || 0)}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG SỐ CHI:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #cc0000;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tongChi)}
+                            ${formatCurrency(totals.ps_co || 0)}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">SỐ TỒN CUỐI:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tonCuoiKy)}
+                            ${formatCurrency(totals.co_ck || 0)}
                         </td>
                     </tr>
                 </table>
@@ -212,7 +212,7 @@ export const printTemplates = {
                         ĐƠN VỊ TÍNH: VND
                     </div>
              <div style="font-weight: bold; margin: 5px 0; text-align: right; margin-right: 95px;">
-                        SỐ DƯ CÓ ĐẦU KỲ: ${new Intl.NumberFormat('vi-VN').format(totals.tonDauKy || 980098)}
+                        SỐ DƯ CÓ ĐẦU KỲ: ${formatCurrency(totals.co_dk || 0)}
                     </div>
                    
 
@@ -309,19 +309,19 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG PHÁT SINH NỢ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #0066cc;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tongThu)}
+                            ${formatCurrency(totals.ps_no || 0)}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG PHÁT SINH CÓ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #cc0000;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tongChi)}
+                            ${formatCurrency(totals.ps_co || 0)}
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">SỐ DƯ CÓ CUỐI KỲ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold;">
-                            ${new Intl.NumberFormat('vi-VN').format(totals.tonCuoiKy)}
+                            ${formatCurrency(totals.co_ck || 0)}
                         </td>
                     </tr>
                 </table>
