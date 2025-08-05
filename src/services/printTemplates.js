@@ -533,26 +533,27 @@ export const printTemplates = {
 
                 <div style="text-align: right; margin-bottom: 20px;">
                     <div style="display: inline-block; text-align: left; font-size: 12px;">
-                        <div style="margin-bottom: 5px;">
-                            <strong>TỔNG PHÁT SINH NỢ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.ps_no
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>TỔNG PHÁT SINH NỢ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.ps_no)}
+                        </span>
                         </div>
-                        <div style="margin-bottom: 5px;">
-                            <strong>TỔNG PHÁT SINH CÓ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.ps_co
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>TỔNG PHÁT SINH CÓ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.ps_co)}
+                        </span>
                         </div>
-                        <div style="margin-bottom: 5px;">
-                            <strong>SỐ DƯ NỢ CUỐI KỲ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.no_ck
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>SỐ DƯ NỢ CUỐI KỲ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.no_ck)}
+                        </span>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <!-- Signatures -->
@@ -730,23 +731,23 @@ export const printTemplates = {
                 
                 <div style="text-align: right; margin-bottom: 20px;">
                     <div style="display: inline-block; text-align: left; font-size: 12px;">
-                        <div style="margin-bottom: 5px;">
-                            <strong>TỔNG PHÁT SINH NỢ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.ps_no
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>TỔNG PHÁT SINH NỢ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.ps_no)}
+                        </span>
                         </div>
-                        <div style="margin-bottom: 5px;">
-                            <strong>TỔNG PHÁT SINH CÓ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.ps_co
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>TỔNG PHÁT SINH CÓ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.ps_co)}
+                        </span>
                         </div>
-                        <div style="margin-bottom: 5px;">
-                            <strong>SỐ DƯ NỢ CUỐI KỲ:</strong> 
-                            <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.no_ck
-                            )}</span>
+                        <div style="display: flex; justify-content: space-between; min-width: 300px; margin-bottom: 5px;">
+                        <strong>SỐ DƯ NỢ CUỐI KỲ:</strong>
+                        <span style="font-weight: bold;">
+                            ${new Intl.NumberFormat("vi-VN").format(totals.no_ck)}
+                        </span>
                         </div>
                     </div>
                 </div>
