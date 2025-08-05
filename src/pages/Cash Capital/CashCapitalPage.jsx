@@ -26,7 +26,7 @@ export default function CashCapitalPage() {
                 tk: '',
                 ngay_ct1: '2025-08-01',
                 ngay_ct2: '2025-08-31',
-                ma_dvcs: 'CN01',
+                ma_dvcs: 'CTY',
             },
             'inventory': {
                 tk: '',
@@ -56,7 +56,7 @@ export default function CashCapitalPage() {
                 tk: '1311',
                 ngay_ct1: '2025-07-01',
                 ngay_ct2: '2025-08-31',
-                ma_dvcs: 'CN01'
+                ma_dvcs: 'CTY'
             },
             'inventory-report': {
                 tk: '1111',
@@ -81,7 +81,7 @@ export default function CashCapitalPage() {
                 tk: '5111',
                 ngay_ct1: '2025-06-01',
                 ngay_ct2: '2025-08-31',
-                ma_dvcs: 'CN01'
+                ma_dvcs: 'CTY'
             },
             'turnover-analysis': {
                 tk: '1561',
@@ -105,7 +105,7 @@ export default function CashCapitalPage() {
                 tk: '6411',
                 ngay_ct1: '2025-07-01',
                 ngay_ct2: '2025-08-31',
-                ma_dvcs: 'CN01'
+                ma_dvcs: 'CTY'
             },
             'variance-analysis': {
                 tk: '5211',
@@ -130,25 +130,25 @@ export default function CashCapitalPage() {
     };
 
     const softwareMenuItems = [
-        { id: 'so-quy', label: 'Sổ quỹ' },
-        { id: 'export-plan', label: 'Sổ quỹ (in từng ngày)' },
-        { id: 'inventory', label: 'Sổ kế toán chi tiết quỹ tiền mặt' },
-        { id: 'inventory-detail', label: 'Sổ tiền gửi ngân hàng' },
-        { id: 'import-export-summary', label: 'Sổ chi tiết của một tài khoản' },
-        { id: 'import-export-detail', label: 'Sổ chi tiết công nợ của một khách hàng' },
-        { id: 'inventory-report', label: 'Bảng cân đối số phát sinh theo ngày của một tài khoản' },
-        { id: 'inventory-report-detail', label: 'Bảng số dư tiền tại quỹ và tại các ngân hàng' }
+        { id: 'so-quy', label: 'Sổ quỹ', isCanUse: true },
+        { id: 'export-plan', label: 'Sổ quỹ (in từng ngày)', isCanUse: false },
+        { id: 'inventory', label: 'Sổ kế toán chi tiết quỹ tiền mặt', isCanUse: true },
+        { id: 'inventory-detail', label: 'Sổ tiền gửi ngân hàng', isCanUse: true },
+        { id: 'import-export-summary', label: 'Sổ chi tiết của một tài khoản', isCanUse: true },
+        { id: 'import-export-detail', label: 'Sổ chi tiết công nợ của một khách hàng', isCanUse: false },
+        { id: 'inventory-report', label: 'Bảng cân đối số phát sinh theo ngày của một tài khoản', isCanUse: false },
+        { id: 'inventory-report-detail', label: 'Bảng số dư tiền tại quỹ và tại các ngân hàng', isCanUse: false }
     ];
 
     const managementMenuItems = [
-        { id: 'cost-analysis', label: 'Phân tích chi phí vật tư' },
-        { id: 'performance-report', label: 'Báo cáo hiệu suất quản trị' },
-        { id: 'turnover-analysis', label: 'Phân tích vòng quay hàng tồn' },
-        { id: 'abc-analysis', label: 'Phân tích ABC vật tư' },
-        { id: 'inventory-valuation', label: 'Định giá tồn kho' },
-        { id: 'budget-control', label: 'Kiểm soát ngân sách' },
-        { id: 'variance-analysis', label: 'Phân tích chênh lệch' },
-        { id: 'profitability-report', label: 'Báo cáo lợi nhuận' }
+        { id: 'cost-analysis', label: 'Phân tích chi phí vật tư', isCanUse: false },
+        { id: 'performance-report', label: 'Báo cáo hiệu suất quản trị', isCanUse: false },
+        { id: 'turnover-analysis', label: 'Phân tích vòng quay hàng tồn', isCanUse: false },
+        { id: 'abc-analysis', label: 'Phân tích ABC vật tư', isCanUse: false },
+        { id: 'inventory-valuation', label: 'Định giá tồn kho', isCanUse: false },
+        { id: 'budget-control', label: 'Kiểm soát ngân sách', isCanUse: false },
+        { id: 'variance-analysis', label: 'Phân tích chênh lệch', isCanUse: false },
+        { id: 'profitability-report', label: 'Báo cáo lợi nhuận', isCanUse: false }
     ];
 
     const handleIconClick = (type) => {
@@ -309,10 +309,14 @@ export default function CashCapitalPage() {
                     {currentMenuItems.map((item) => (
                         <div
                             key={item.id}
-                            className="flex items-center p-1 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
-                            onClick={() => handleMenuItemClick(item)}
+                            className={`flex items-center p-1 text-sm rounded-md transition-colors ${
+                                item.isCanUse === false 
+                                    ? 'text-gray-400 cursor-not-allowed' 
+                                    : 'text-gray-700 hover:bg-gray-50 cursor-pointer'
+                            }`}
+                            onClick={() => item.isCanUse !== false && handleMenuItemClick(item)}
                         >
-                            <ChevronRight className="w-4 h-4 text-gray-400 mr-2" />
+                            <ChevronRight className={`w-4 h-4 mr-2 ${item.isCanUse === false ? 'text-gray-300' : 'text-gray-400'}`} />
                             <span>{item.label}</span>
                         </div>
                     ))}
