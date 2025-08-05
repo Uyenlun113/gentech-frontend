@@ -2,7 +2,6 @@ import { forwardRef } from 'react';
 import { printTemplates } from '../services/printTemplates';
 
 
-// Component wrapper để render template HTML
 const PrintWrapper = forwardRef(({
     reportType,
     dataTable,
@@ -11,7 +10,9 @@ const PrintWrapper = forwardRef(({
 }, ref) => {
     // Chọn template dựa trên reportType
     const getTemplate = (type) => {
-        console.log(type);
+        console.log('Report Type:', type);
+        console.log('Totals received:', totals);
+
         switch (type?.toLowerCase()) {
             case 'so-quy':
                 return printTemplates.cashBook;
@@ -27,6 +28,7 @@ const PrintWrapper = forwardRef(({
     };
 
     const selectedTemplate = getTemplate(reportType);
+
     const htmlContent = selectedTemplate(dataTable, filterInfo, totals);
 
     return (

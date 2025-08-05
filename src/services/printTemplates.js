@@ -48,6 +48,7 @@ export const printTemplates = {
                 </div>
             </div>
             <div style="text-align: right; font-weight: bold; margin: 4px 0 4px auto; width: 200px; margin-right: 95px;">
+                SỐ TỒN ĐẦU: ${formatCurrency(totals.co_dk || 0)}
                 SỐ TỒN ĐẦU: ${new Intl.NumberFormat("vi-VN").format(
                   totals.tonDauKy
                 )}
@@ -160,6 +161,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG SỐ THU:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #0066cc;">
+                            ${formatCurrency(totals.ps_no || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tongThu
                             )}
@@ -168,6 +170,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG SỐ CHI:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #cc0000;">
+                            ${formatCurrency(totals.ps_co || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tongChi
                             )}
@@ -176,6 +179,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">SỐ TỒN CUỐI:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold;">
+                            ${formatCurrency(totals.co_ck || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tonCuoiKy
                             )}
@@ -244,6 +248,7 @@ export const printTemplates = {
                         ĐƠN VỊ TÍNH: VND
                     </div>
              <div style="font-weight: bold; margin: 5px 0; text-align: right; margin-right: 95px;">
+                        SỐ DƯ CÓ ĐẦU KỲ: ${formatCurrency(totals.co_dk || 0)}
                         SỐ DƯ CÓ ĐẦU KỲ: ${new Intl.NumberFormat(
                           "vi-VN"
                         ).format(totals.tonDauKy || 980098)}
@@ -368,6 +373,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG PHÁT SINH NỢ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #0066cc;">
+                            ${formatCurrency(totals.ps_no || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tongThu
                             )}
@@ -376,6 +382,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">TỔNG PHÁT SINH CÓ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold; color: #cc0000;">
+                            ${formatCurrency(totals.ps_co || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tongChi
                             )}
@@ -384,6 +391,7 @@ export const printTemplates = {
                     <tr>
                         <td style="padding: 2px 4px; font-weight: bold;">SỐ DƯ CÓ CUỐI KỲ:</td>
                         <td style="padding: 2px 4px; text-align: right; font-weight: bold;">
+                            ${formatCurrency(totals.co_ck || 0)}
                             ${new Intl.NumberFormat("vi-VN").format(
                               totals.tonCuoiKy
                             )}
@@ -540,19 +548,19 @@ export const printTemplates = {
                         <div style="margin-bottom: 5px;">
                             <strong>TỔNG PHÁT SINH NỢ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tongThu
+                              totals.ps_no
                             )}</span>
                         </div>
                         <div style="margin-bottom: 5px;">
                             <strong>TỔNG PHÁT SINH CÓ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tongChi
+                              totals.ps_co
                             )}</span>
                         </div>
                         <div style="margin-bottom: 5px;">
                             <strong>SỐ DƯ NỢ CUỐI KỲ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tonCuoiKy
+                              totals.no_ck
                             )}</span>
                         </div>
                     </div>
@@ -605,8 +613,8 @@ export const printTemplates = {
                     SỐ HIỆU TÀI KHOẢN TẠI NƠI GỬI:<br/>
                     TÀI KHOẢN: ${filterInfo?.tk || "1111"} - TIỀN MẶT VND<br/>
                     TỪ NGÀY: ${filterInfo?.ngay_ct1 || ""} ĐẾN NGÀY: ${
-    filterInfo?.ngay_ct2 || ""
-  }
+                    filterInfo?.ngay_ct2 || ""
+                }
                 </div>
                 <div style="text-align: right; margin-bottom: 20px; font-weight: bold;">
                     SỐ DƯ ĐẦU KỲ: ${formatCurrency(totals?.soDuDauKy || 0)}
@@ -727,8 +735,8 @@ export const printTemplates = {
                     Số nay có ${
                       Math.ceil(data.length / 25) || 1
                     } trang, đánh số từ trang 01 đến trang ${
-    Math.ceil(data.length / 25) || 1
-  }<br/>
+                        Math.ceil(data.length / 25) || 1
+                    }<br/>
                     Ngày mở sổ: ${filterInfo?.ngay_ct1 || "01-07-2025"}
                 </div>
                 
@@ -737,19 +745,19 @@ export const printTemplates = {
                         <div style="margin-bottom: 5px;">
                             <strong>TỔNG PHÁT SINH NỢ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tongThu
+                              totals.ps_no
                             )}</span>
                         </div>
                         <div style="margin-bottom: 5px;">
                             <strong>TỔNG PHÁT SINH CÓ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tongChi
+                              totals.ps_co
                             )}</span>
                         </div>
                         <div style="margin-bottom: 5px;">
                             <strong>SỐ DƯ NỢ CUỐI KỲ:</strong> 
                             <span style="margin-left: 20px; font-weight: bold;">${new Intl.NumberFormat("vi-VN").format(
-                              totals.tonCuoiKy
+                              totals.no_ck
                             )}</span>
                         </div>
                     </div>

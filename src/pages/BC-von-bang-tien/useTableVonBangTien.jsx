@@ -169,7 +169,7 @@ export const useBaoCaoVonList = () => {
             },
         },
         {
-            key: "so_du",
+            key: "so_ton",
             title: "Số tồn",
             width: 120,
             render: (val) => {

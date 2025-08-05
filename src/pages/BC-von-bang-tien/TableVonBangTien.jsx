@@ -15,13 +15,14 @@ export default function TableVonBangTien() {
     const location = useLocation();
     const navigate = useNavigate();
     const { columnsTable } = useBaoCaoVonList();
-    const printRef = useRef(); // Ref cho component cần in
+    const printRef = useRef();
 
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filterInfo, setFilterInfo] = useState(null);
     const [reportName, setReportName] = useState('Danh sách báo cáo');
     const [reportType, setReportType] = useState('default');
+    const [totals, setTotals] = useState({});
 
     // Hàm in sử dụng react-to-print
     const handlePrint = useReactToPrint({
@@ -50,7 +51,6 @@ export default function TableVonBangTien() {
                 }
             }
         `,
-
         onBeforeGetContent: () => {
             return Promise.resolve();
         },
@@ -60,11 +60,20 @@ export default function TableVonBangTien() {
     });
 
     useEffect(() => {
-        if (location.state) {
-            const { data, filterData, reportName: name, reportType: type } = location.state;
+        console.log("DATA:", location.state);
 
-            if (data && Array.isArray(data)) {
-                const mappedData = data.map((item, index) => ({
+        if (location.state) {
+            const {
+                data: wrappedData,
+                filterData,
+                reportName: name,
+                reportType: type,
+            } = location.state;
+            const rawData = wrappedData?.data || [];
+            const totalsData = wrappedData?.totals?.[0] || {};
+
+            if (Array.isArray(rawData)) {
+                const mappedData = rawData.map((item, index) => ({
                     ...item,
                     stt: index + 1,
                     ngay_ct: item.ngay_ct,
@@ -79,7 +88,7 @@ export default function TableVonBangTien() {
                     tk_du: item.tk_du,
                     ps_no: item.ps_no,
                     ps_co: item.ps_co,
-                    so_ton: item.so_ton || item.so_tien,
+                    so_ton: item.so_ton || item.so_du,
                     ten_tk_du: item.ten_tk_du || item.ten_tai_khoan_doi_ung,
                     ma_ct_goc: item.ma_ct_goc,
                     stt_rec: item.stt_rec,
@@ -87,8 +96,11 @@ export default function TableVonBangTien() {
 
                 setDataTable(mappedData);
                 setFilterInfo(filterData);
-                setReportName(name || 'Danh sách báo cáo');
-                setReportType(type || 'default');
+                setReportName(name || "Danh sách báo cáo");
+                setReportType(type || "default");
+
+                // Lưu totals từ API
+                setTotals(totalsData);
             } else {
                 setDataTable([]);
             }
@@ -110,41 +122,15 @@ export default function TableVonBangTien() {
         navigate(-1);
     };
 
-    const calculateTotals = () => {
-        let tongThu = 0;
-        let tongChi = 0;
-
-        dataTable.forEach((item) => {
-            const psNo = Array.isArray(item.ps_no) ? item.ps_no[0] : item.ps_no;
-            const psCo = Array.isArray(item.ps_co) ? item.ps_co[0] : item.ps_co;
-
-            if (psNo && psNo > 0) {
-                tongThu += parseFloat(psNo);
-            }
-
-            if (psCo && psCo > 0) {
-                tongChi += parseFloat(psCo);
-            }
-        });
-
-        let tonDauKy = 0;
-        if (dataTable.length > 0) {
-            const firstRecord = dataTable[0];
-            const soTonFirst = Array.isArray(firstRecord.so_ton) ? firstRecord.so_ton[0] : firstRecord.so_ton;
-            tonDauKy = Math.abs(parseFloat(soTonFirst) || 0) + tongThu - tongChi;
-        }
-
-        const tonCuoiKy = tonDauKy + tongThu - tongChi;
-
-        return {
-            tongThu,
-            tongChi,
-            tonDauKy: Math.abs(tonDauKy),
-            tonCuoiKy: Math.abs(tonCuoiKy)
-        };
-    };
-
-    const { tongThu, tongChi, tonDauKy, tonCuoiKy } = dataTable.length > 0 ? calculateTotals() : { tongThu: 0, tongChi: 0, tonDauKy: 0, tonCuoiKy: 0 };
+    // Lấy trực tiếp các giá trị từ totals API (đã được tính sẵn)
+    const {
+        no_dk = 0,      // Số dư đầu kỳ bên Nợ
+        co_dk = 0,      // Số dư đầu kỳ bên Có
+        ps_no = 0,      // Phát sinh bên Nợ
+        ps_co = 0,      // Phát sinh bên Có
+        no_ck = 0,      // Số dư cuối kỳ bên Nợ
+        co_ck = 0       // Số dư cuối kỳ bên Có
+    } = totals;
 
     return (
         <>
@@ -220,32 +206,37 @@ export default function TableVonBangTien() {
                         {dataTable.length > 0 && (
                             <div className="flex justify-center">
                                 <div className="mt-4 w-[500px]">
-                                    <div>
-                                        <div className="grid grid-cols-3 text-sm font-medium">
-                                            <div className="px-4 py-2 text-left">Số tồn đầu:</div>
-                                            <div className="px-4 py-2 text-right">0</div>
-                                            <div className="px-4 py-2 text-right text-red-600">
-                                                {new Intl.NumberFormat('vi-VN').format(tonDauKy)}
+                                    <div className=" p-4 rounded-lg">
+                                        <div className="space-y-2">
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Số tồn đầu kỳ:</div>
+                                                <div className="px-4 py-2 text-right">
+                                                    {new Intl.NumberFormat('vi-VN').format(no_dk)}
+                                                </div>
+                                                <div className="px-4 py-2 text-right text-red-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(co_dk)}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="grid grid-cols-3 text-sm font-medium">
-                                            <div className="px-4 py-2 text-left">Tổng số thu, chi:</div>
-                                            <div className="px-4 py-2 text-right text-blue-600">
-                                                {new Intl.NumberFormat('vi-VN').format(tongThu)}
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tổng phát sinh:</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(ps_no)}
+                                                </div>
+                                                <div className="px-4 py-2 text-right text-red-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(ps_co)}
+                                                </div>
                                             </div>
-                                            <div className="px-4 py-2 text-right text-red-600">
-                                                {new Intl.NumberFormat('vi-VN').format(tongChi)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="grid grid-cols-3 text-sm font-medium">
-                                            <div className="px-4 py-2 text-left">Số tồn cuối:</div>
-                                            <div className="px-4 py-2 text-right">0</div>
-                                            <div className="px-4 py-2 text-right text-red-600">
-                                                {new Intl.NumberFormat('vi-VN').format(tonCuoiKy)}
+
+                                            <div className="grid grid-cols-3 text-sm border-t pt-2">
+                                                <div className="px-4 py-2 text-left font-medium">Số tồn cuối kỳ:</div>
+                                                <div className="px-4 py-2 text-right font-medium">
+                                                    {new Intl.NumberFormat('vi-VN').format(no_ck)}
+                                                </div>
+                                                <div className="px-4 py-2 text-right text-red-600 font-medium">
+                                                    {new Intl.NumberFormat('vi-VN').format(co_ck)}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -253,16 +244,15 @@ export default function TableVonBangTien() {
                             </div>
                         )}
                     </ComponentCard>
-                </div>
-            </div>
-
+                </div >
+            </div >
 
             <PrintWrapper
                 ref={printRef}
                 reportType={reportType}
                 dataTable={dataTable}
                 filterInfo={filterInfo}
-                totals={{ tongThu, tongChi, tonDauKy, tonCuoiKy }}
+                totals={{ ps_no, ps_co, no_dk, co_dk, no_ck, co_ck }}
             />
         </>
     );
