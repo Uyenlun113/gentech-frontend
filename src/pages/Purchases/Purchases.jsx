@@ -1,8 +1,78 @@
-import { ChevronRight, FileText, FileType, Users } from 'lucide-react';
+import { Calculator, ChevronRight, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
+import LoadingModal from '../../components/LoadingModal';
+import PricingModal from '../../components/PricingModal';
 
 export default function PurChases() {
   const [activeTab, setActiveTab] = useState('software');
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTask, setCurrentTask] = useState('');
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [hasError, setHasError] = useState(false)
+  const [pricingData, setPricingData] = useState({
+    ky: '',
+    nam: '',
+    maKho: '',
+    maVatTu: '',
+    maDuAn: '',
+    taiKhoanVatTu: '',
+    nhomVatTu1: '',
+    nhomVatTu2: '',
+    nhomVatTu3: '',
+    taoPxChenhLech: '0',
+    capNhatGiaTrungBinh: '1',
+    xuLyKhiHoachToan: '0',
+    ngayBatDau: '31-12-2020',
+    maDVCS: 'CTY'
+  });
+
+  const processingSteps = [
+    { progress: 10, task: 'Đang khởi tạo quá trình tính giá...' },
+    { progress: 20, task: 'Đang tính toán giá trung bình...' },
+    { progress: 45, task: 'Đang cập nhật phiếu xuất...' },
+    { progress: 75, task: 'Đang tạo phiếu xuất chênh lệch...' },
+    { progress: 100, task: 'Hoàn tất!' }
+  ];
+
+  const handlePricingSubmit = () => {
+    setShowPricingModal(false);
+    setShowLoadingModal(true);
+    setProgress(0);
+    setIsCompleted(false);
+    setHasError(false);
+    simulateProcessing();
+  };
+
+  const simulateProcessing = async () => {
+    for (let i = 0; i < processingSteps.length; i++) {
+      const step = processingSteps[i];
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+      setProgress(step.progress);
+      setCurrentTask(step.task);
+    }
+
+    setIsCompleted(true);
+    setTimeout(() => {
+      setShowLoadingModal(false);
+      setProgress(0);
+      setIsCompleted(false);
+    }, 3000);
+  };
+
+  const handleCloseLoading = () => {
+    setShowLoadingModal(false);
+    setProgress(0);
+    setIsCompleted(false);
+    setHasError(false);
+  };
+
+  const handleRetry = () => {
+    setHasError(false);
+    setProgress(0);
+    simulateProcessing();
+  };
 
   const softwareMenuItems = [
     { id: 'import-plan', label: 'Bảng kế phiếu nhập' },
@@ -41,12 +111,22 @@ export default function PurChases() {
       case 'cash-payment':
         window.location.href = '/phieu-xuat-dc';
         break;
+      case 'pricing':
+        setShowPricingModal(true);
+        break;
       default:
         break;
     }
   };
 
   const currentMenuItems = activeTab === 'software' ? softwareMenuItems : managementMenuItems;
+
+  const handleInputChange = (field, value) => {
+    setPricingData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   return (
     <div className="w-full h-full ">
@@ -93,6 +173,20 @@ export default function PurChases() {
             </div>
             <span className="text-sm text-gray-700 text-center">Phiếu xuất điều chuyển kho</span>
           </div>
+
+          {/* Tính giá */}
+          <div
+            className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity px-6"
+            onClick={() => handleIconClick('pricing')}
+          >
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-2 relative">
+              <Calculator className="w-8 h-8 text-blue-600" />
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-blue-800">$</span>
+              </div>
+            </div>
+            <span className="text-sm text-gray-700 text-center">Tính giá trung bình tháng</span>
+          </div>
         </div>
       </div>
 
@@ -134,6 +228,25 @@ export default function PurChases() {
           ))}
         </div>
       </div>
+
+      {/* Modals */}
+      <PricingModal
+        showModal={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        onSubmit={handlePricingSubmit}
+        pricingData={pricingData}
+        onInputChange={handleInputChange}
+      />
+
+      <LoadingModal
+        showModal={showLoadingModal}
+        progress={progress}
+        currentTask={currentTask}
+        isCompleted={isCompleted}
+        hasError={hasError}
+        onClose={handleCloseLoading}
+        onRetry={handleRetry}
+      />
     </div>
   );
 }
