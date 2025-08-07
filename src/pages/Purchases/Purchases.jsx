@@ -1,5 +1,4 @@
-import { Calculator, ChevronRight, FileText, FileType, Users } from 'lucide-react';
-import { Building2, ChevronRight, Receipt, Wallet, FileText, FileType, Users } from 'lucide-react';
+import { Calculator ,Building2, ChevronRight, Receipt, Wallet, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
 import LoadingModal from '../../components/LoadingModal';
 import PricingModal from '../../components/PricingModal';
@@ -41,6 +40,11 @@ export default function PurChases() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [openModalId, setOpenModalId] = useState(null);
+  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
 
   // Initialize API mutation hook
   const postInGiaMutation = usePostInGia();
@@ -175,22 +179,6 @@ export default function PurChases() {
     handlePricingSubmit();
   };
 
-  const softwareMenuItems = [
-    { id: 'import-plan', label: 'Bảng kế phiếu nhập' },
-    { id: 'export-plan', label: 'Bảng kế phiếu xuất' },
-    { id: 'import-export-plan', label: 'Bảng kế phiếu nhập/xuất/hoá đơn' },
-    { id: 'inventory', label: 'Thẻ kho' },
-    { id: 'inventory-detail', label: 'Sổ chi tiết vật tư' },
-    { id: 'import-export-summary', label: 'Tổng hợp Nhập-Xuất-Tồn' },
-    { id: 'import-export-detail', label: 'Tổng hợp Nhập-Xuất-Tồn theo chi tiết' },
-    { id: 'inventory-report', label: 'Báo cáo tồn kho' },
-    { id: 'inventory-report-detail', label: 'Báo cáo tồn kho theo kho' }
-  const [activeTab, setActiveTab] = useState('reportIn');
-  const [openModalId, setOpenModalId] = useState(null);
-  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
-
   const reportInMenuItems = [
     { id: 'bang_ke_phieu_nhap', label: 'Bảng kê phiếu nhập', isCanUse: true },
     { id: 'bang_ke_phieu_nhap_mat_hang', label: 'Bảng kê phiếu nhập của một mặt hàng', isCanUse: true },
@@ -264,8 +252,6 @@ export default function PurChases() {
         break;
     }
   };
-
-  const currentMenuItems = activeTab === 'software' ? softwareMenuItems : managementMenuItems;
 
   const handleInputChange = (field, value) => {
     setPricingData(prev => ({
