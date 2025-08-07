@@ -1,24 +1,24 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import { Plus, Save, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "react-datepicker/dist/react-datepicker.css";
+import Flatpickr from "react-flatpickr";
+import { useNavigate } from "react-router";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import { Modal } from "../../components/ui/modal";
-import "react-datepicker/dist/react-datepicker.css";
-import { useUpdatePhieuXuatKho } from "../../hooks/usephieuxuatkho";
-import { useCustomers } from "../../hooks/useCustomer";
-import { useAccounts } from "../../hooks/useAccounts";
-import { Plus, Trash2, X, Save, CalendarIcon } from "lucide-react";
-import { Tabs } from "../../components/ui/tabs";
-import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
-import DmvtPopup from "../../components/general/dmvtPopup";
 import DmkPopup from "../../components/general/dmkPopup";
-import { useNavigate } from "react-router";
-import Flatpickr from "react-flatpickr";
-import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import DmvtPopup from "../../components/general/dmvtPopup";
+import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
+import { Modal } from "../../components/ui/modal";
+import { Tabs } from "../../components/ui/tabs";
+import { useAccounts } from "../../hooks/useAccounts";
+import { useCustomers } from "../../hooks/useCustomer";
+import { useDmkho } from "../../hooks/useDmkho";
+import { useUpdatePhieuXuatKho } from "../../hooks/usephieuxuatkho";
 import { CalenderIcon } from "../../icons";
 import dmvtService from "../../services/dmvt";
-import { useDmkho } from "../../hooks/useDmkho";
 
 export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhieuXuatKho }) => {
   const navigate = useNavigate();
@@ -37,6 +37,8 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     mst: "",
     ma_nt: "VND",
     ty_gia: "1",
+    sua_tien: false,
+    px_gia_dd: false,
   });
 
   // State cho customer search
@@ -159,6 +161,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
   // Load data when selectedPhieuXuatKho changes
   useEffect(() => {
     if (selectedPhieuXuatKho && isOpenEdit) {
+      console.log(selectedPhieuXuatKho?.px_gia_dd, selectedPhieuXuatKho?.sua_tien);
       setFormData({
         so_ct: selectedPhieuXuatKho.so_ct || "",
         ong_ba: selectedPhieuXuatKho.ong_ba || "",
@@ -174,6 +177,8 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         mst: selectedPhieuXuatKho.mst || "",
         ma_nt: selectedPhieuXuatKho.ma_nt || "VND",
         ty_gia: selectedPhieuXuatKho.ty_gia || "1",
+        sua_tien: Boolean(selectedPhieuXuatKho?.sua_tien),
+        px_gia_dd: Boolean(selectedPhieuXuatKho?.px_gia_dd),
       });
 
       // Set search values for existing data
@@ -691,6 +696,11 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
             onChange={(e) => handleHangHoaChange(row.id, "tien", e.target.value)}
             placeholder="0"
             className="w-full text-right"
+            disabled={!formData.sua_tien}
+            style={{
+              backgroundColor: formData.sua_tien ? 'white' : '#f9fafb',
+              cursor: formData.sua_tien ? 'text' : 'not-allowed'
+            }}
           />
         );
       },
@@ -784,15 +794,18 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
       const newData = prev.map(item => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-
-          // Auto calculate tien when so_luong or gia changes
           if (field === "so_luong" || field === "gia") {
             const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
             const gia = parseFloat(field === "gia" ? value : item.gia) || 0;
+            if (!formData.sua_tien) {
+              updatedItem.tien = soLuong * gia;
+            }
+          }
+          if (field === "tien" && !formData.sua_tien) {
+            const soLuong = parseFloat(item.so_luong) || 0;
+            const gia = parseFloat(item.gia) || 0;
             updatedItem.tien = soLuong * gia;
           }
-
-          // Trigger popup vật tư khi nhập mã vật tư
           if (field === "ma_vt" && value && value.trim()) {
             setSearchStates(prev => ({
               ...prev,
@@ -800,8 +813,6 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
               maVtSearchRowId: id
             }));
           }
-
-          // Trigger popup kho khi nhập mã kho - THÊM MỚI
           if (field === "ma_kho_i" && value && value.trim()) {
             setSearchStates(prev => ({
               ...prev,
@@ -816,8 +827,8 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
       });
       return newData;
     });
+
     if (field === "tk_vt") {
-      // Tài khoản nợ → Popup 1
       setSearchStates(prev => ({
         ...prev,
         tkSearch: value,
@@ -826,7 +837,6 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         showAccountPopup: true
       }));
     } else if (field === "ma_nx_i") {
-      // Tài khoản có → Popup 2
       setSearchStates(prev => ({
         ...prev,
         tkSearch2: value,
@@ -835,7 +845,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         showAccountPopup2: true
       }));
     }
-  }, []);
+  }, [formData.sua_tien]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -853,6 +863,8 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
       mst: "",
       ma_nt: "VND",
       ty_gia: "1",
+      sua_tien: false,
+      px_gia_dd: false,
     });
     setHangHoaData(INITIAL_HANG_HOA_DATA);
     setSelectedAccount(null);
@@ -902,12 +914,14 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         ma_nt: formData.ma_nt?.trim() || "VND",
         ty_gia: Number(formData.ty_gia) || 1,
         loai_ct: formData.loai_ct?.trim() || "",
+        sua_tien: formData.sua_tien ? 1 : 0,
+        px_gia_dd: formData.px_gia_dd ? 1 : 0,
         // tong_tien: totals.totalTien || 0,
 
         // Updated to match backend structure
         hang_hoa_list: hangHoaData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
-          .map(({ ma_vt, ma_kho_i, so_luong, gia, tien, tk_vt, ma_nx_i,dien_giai }) => ({
+          .map(({ ma_vt, ma_kho_i, so_luong, gia, tien, tk_vt, ma_nx_i, dien_giai }) => ({
             ma_vt: ma_vt?.trim() || "",
             ma_kho_i: ma_kho_i?.trim() || "",
             so_luong: Number(so_luong) || 0,
@@ -1138,23 +1152,50 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
                 {
                   label: "Hàng hóa",
                   content: (
-                    <div className="" ref={hangHoaTableRef}>
-                      <TableBasic
-                        data={hangHoaDataWithTotal}
-                        columns={hangHoaColumns}
-                        onDeleteRow={deleteHangHoaRow}
-                        showAddButton={true}
-                        addButtonText="Thêm dòng"
-                        onAddRow={(e) => {
-                          if (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }
-                          addHangHoaRow(e);
-                        }}
-                        maxHeight="max-h-72"
-                        className="w-full"
-                      />
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 p-2 flex justify-end">
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.sua_tien}
+                              onChange={(e) => handleChange("sua_tien", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">Sửa trường tiền</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.px_gia_dd}
+                              onChange={(e) => handleChange("px_gia_dd", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">
+                              Xuất theo giá vốn đích danh cho VT giá TB
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="" ref={hangHoaTableRef}>
+                        <TableBasic
+                          data={hangHoaDataWithTotal}
+                          columns={hangHoaColumns}
+                          onDeleteRow={deleteHangHoaRow}
+                          showAddButton={true}
+                          addButtonText="Thêm dòng"
+                          onAddRow={(e) => {
+                            if (e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                            addHangHoaRow(e);
+                          }}
+                          maxHeight="max-h-72"
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                   ),
                 },

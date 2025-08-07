@@ -1,18 +1,18 @@
+import { Plus, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
-import Button from "../../../components/ui/button/Button";
 import { Modal } from "../../../components/ui/modal";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useUpdateDmvt } from "../../../hooks/useDmvt";
 import { useMaterialGroups } from "../../../hooks/useMaterialGroup";
 import SearchableSelect from "../account/SearchableSelect";
-import { Plus, X, Save } from "lucide-react";
 
 export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, selectedMaterial }) => {
     const [formData, setFormData] = useState({
         ten_vt: "",
         dvt: "",
+        gia_ton: 1,
         vt_ton_kho: "1",
         loai_vt: "21",
         tk_vt: "",
@@ -67,6 +67,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                 dvt: selectedMaterial.dvt || "",
                 vt_ton_kho: selectedMaterial.vt_ton_kho || "1",
                 loai_vt: selectedMaterial.loai_vt || "",
+                gia_ton: selectedMaterial.gia_ton || 1,
                 tk_vt: selectedMaterial.tk_vt || "",
                 sua_tk_vt: selectedMaterial.sua_tk_vt || "0",
                 tk_dt: selectedMaterial.tk_dt || "",
@@ -159,6 +160,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                 data: {
                     ...formData,
                     vt_ton_kho: formData.vt_ton_kho,
+                    gia_ton: formData.gia_ton,
                     loai_vt: formData.loai_vt,
                     sua_tk_vt: formData.sua_tk_vt,
                     sl_min: formData.sl_min,
@@ -179,6 +181,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             dvt: "",
             vt_ton_kho: "1",
             loai_vt: "21",
+            gia_ton: 1,
             tk_vt: "",
             sua_tk_vt: "0",
             tk_dt: "",
@@ -186,7 +189,7 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
             tk_ck: "",
             tk_gv: "",
             tk_km: "",
-            tk_spdd:"",
+            tk_spdd: "",
             tk_tl: "",
             nh_vt1: "",
             nh_vt2: "",
@@ -229,38 +232,6 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                 </div>
                 <form className="flex flex-col" onSubmit={handleSubmit}>
                     <div className="px-4 py-3 bg-blue-50">
-                        {/* Grid layout 2 cột cho toàn bộ form */}
-                        {/* <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[30%]">Mã vật tư</Label>
-                  <div className="w-[70%]">
-                    <Input
-                      type="text"
-                      value={formData.ma_vt}
-                      onChange={(e) => handleInputChange('ma_vt', e.target.value)}
-                      placeholder="VT003"
-                      className="h-8 text-sm w-full bg-white"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[30%]">Mã tra cứu</Label>
-                  <div className="w-[70%]">
-                    <Input
-                      type="text"
-                      value={formData.ma_tra_cuu}
-                      onChange={(e) => handleInputChange('ma_tra_cuu', e.target.value)}
-                      placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
-                    />
-                  </div>
-
-                </div>
-              </div>
-            </div> */}
 
                         <div className="gap-x-8 gap-y-2">
                             <div className="mb-2">
@@ -289,23 +260,6 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                             </div>
                         </div>
 
-
-                        {/* <div className="gap-x-8 gap-y-2">
-              <div className="mb-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[15%]">Tên 2</Label>
-                  <div className="w-[87.5%]">
-                    <Input
-                      type="text"
-                      value={formData.ten_vt2}
-                      onChange={(e) => handleInputChange('ten_vt2', e.target.value)}
-                      placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div> */}
                         <div className="space-y-2 mb-2"></div>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-2">
                             {/* Cột trái */}
@@ -342,21 +296,22 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
                                     </div>
                                 </div>
 
-                                {/* <div className="flex items-center gap-2">
-                  <Label className="text-xs basis-[30%]">Cách tính giá tồn kho</Label>
-                  <div className="flex items-center gap-2 basis-[70%]">
-                    <div className="basis-3/5">
-                      <Input
-                        type="text"
-                        value={formData.cach_tinh_gia}
-                        onChange={(e) => handleInputChange('cach_tinh_gia', e.target.value)}
-                        placeholder="1"
-                        className="h-8 text-sm w-full bg-white"
-                      />
-                    </div>
-                    <span className="text-xs text-gray-600 basis-2/5">Trung bình tháng</span>
-                  </div>
-                </div> */}
+                                <div className="flex items-center gap-2">
+                                    <Label className="text-xs basis-[30%]">Cách tính giá tồn kho</Label>
+                                    <div className="flex items-center gap-2 basis-[70%]">
+                                        <div className="basis-3/5">
+                                            <Input
+                                                type="number"
+                                                value={formData.gia_ton}
+                                                onChange={(e) => handleInputChange('gia_ton', e.target.value)}
+                                                placeholder="1"
+                                                className="h-8 text-sm w-full bg-white"
+                                                disabled
+                                            />
+                                        </div>
+                                        <span className="text-xs text-gray-600 basis-2/5">Trung bình tháng</span>
+                                    </div>
+                                </div>
 
                                 <div className="flex items-center gap-2">
                                     <Label className="text-xs w-[30%]">Loại vật tư</Label>

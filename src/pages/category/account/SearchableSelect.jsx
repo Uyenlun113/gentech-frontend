@@ -11,7 +11,7 @@ const SearchableSelect = ({
     onSearch,
     displayKey = "value",
     valueKey = "value",
-    className = "", // ✅ THÊM: className truyền từ bên ngoài
+    className = "",
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -119,11 +119,10 @@ const SearchableSelect = ({
                                     key={option[valueKey]}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                                        value === option[valueKey]
+                                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${value === option[valueKey]
                                             ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
                                             : 'text-gray-800 dark:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     {option[valueKey]} - {option[displayKey]}
                                 </button>
