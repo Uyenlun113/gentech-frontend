@@ -6,6 +6,7 @@ export default function LoadingModal({
     currentTask,
     isCompleted,
     hasError,
+    errorMessage,
     onClose,
     onRetry
 }) {
@@ -22,7 +23,9 @@ export default function LoadingModal({
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold text-gray-800">Tính giá trung bình tháng</h3>
-                            <p className="text-sm text-gray-600">Đang xử lý dữ liệu...</p>
+                            <p className="text-sm text-gray-600">
+                                {hasError ? 'Có lỗi xảy ra' : isCompleted ? 'Hoàn thành' : 'Đang xử lý dữ liệu...'}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -75,22 +78,38 @@ export default function LoadingModal({
                             <AlertCircle className="w-16 h-16 text-red-500 mx-auto" />
                             <div>
                                 <h4 className="text-lg font-semibold text-red-800 mb-2">Có lỗi xảy ra</h4>
-                                <p className="text-red-600">{currentTask}</p>
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <p className="text-red-700 text-sm whitespace-pre-wrap">
+                                        {errorMessage || currentTask || 'Không thể thực hiện tính giá. Vui lòng thử lại.'}
+                                    </p>
+                                </div>
                             </div>
                             <div className="flex gap-3 justify-center">
                                 <button
                                     onClick={onRetry}
-                                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                                 >
                                     Thử lại
                                 </button>
                                 <button
                                     onClick={onClose}
-                                    className="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400"
+                                    className="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400 transition-colors"
                                 >
                                     Đóng
                                 </button>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Close button for successful completion */}
+                    {isCompleted && !hasError && (
+                        <div className="text-center">
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Đóng
+                            </button>
                         </div>
                     )}
                 </div>

@@ -1,25 +1,25 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import { Plus, Save, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "react-datepicker/dist/react-datepicker.css";
+import Flatpickr from "react-flatpickr";
+import { useNavigate } from "react-router";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
-import { Modal } from "../../components/ui/modal";
-import "react-datepicker/dist/react-datepicker.css";
-import { useUpdateHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
-import { useCustomers } from "../../hooks/useCustomer";
-import { useAccounts } from "../../hooks/useAccounts";
-import { Plus, Trash2, X, Save, CalendarIcon } from "lucide-react";
-import { Tabs } from "../../components/ui/tabs";
-import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
 import CustomerSelectionPopup from "../../components/general/CustomerSelectionPopup";
-import { useNavigate } from "react-router";
-import Flatpickr from "react-flatpickr";
-import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import DmkPopup from "../../components/general/dmkPopup";
+import DmvtPopup from "../../components/general/dmvtPopup";
+import TableBasic from "../../components/tables/BasicTables/BasicTableOne";
+import { Modal } from "../../components/ui/modal";
+import { Tabs } from "../../components/ui/tabs";
+import { useAccounts } from "../../hooks/useAccounts";
+import { useCustomers } from "../../hooks/useCustomer";
+import { useDmkho } from "../../hooks/useDmkho";
+import { useDmvt } from "../../hooks/useDmvt";
+import { useUpdateHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
 import { CalenderIcon } from "../../icons";
 import accountDirectoryApi from "../../services/account-directory";
-import DmvtPopup from "../../components/general/dmvtPopup";
-import DmkPopup from "../../components/general/dmkPopup";
-import { useDmvt } from "../../hooks/useDmvt";
-import { useDmkho } from "../../hooks/useDmkho";
 
 export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoaDonXuatKho }) => {
   const navigate = useNavigate();
@@ -52,6 +52,9 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     t_tien: "",
     t_thue: "",
     t_tt: "",
+    sua_tien: false,
+    px_gia_dd: false,
+
   });
 
 
@@ -71,7 +74,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
 
   const { mutateAsync: updateHoaDonXuatKho, isPending } = useUpdateHoaDonXuatKho();
   const hachToanTableRef = useRef(null);
-  const hopDongThueTableRef = useRef(null); // Thêm ref cho bảng hợp đồng thuế
 
   const [searchStates, setSearchStates] = useState({
     tkSearch: "",
@@ -113,37 +115,12 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     },
   ];
 
-  // Thêm INITIAL_TAX_CONTRACT_DATA
-  const INITIAL_TAX_CONTRACT_DATA = [
-    {
-      id: 1,
-      so_ct0: "",
-      ma_ms: "",
-      kh_mau_hd: "",
-      so_seri0: "",
-      ngay_ct: "",
-      ma_kh: "",
-      ten_kh: "",
-      dia_chi: "",
-      ma_so_thue: "",
-      ten_vt: "",
-      t_tien: 0,
-      ma_thue: "",
-      thue_suat: 0,
-      t_tt: 0,
-      t_thue: 0,
-      tk_thue_no: "",
-      tk_du: ""
-    }
-  ];
-
   const FLATPICKR_OPTIONS = {
     dateFormat: "Y-m-d",
     locale: Vietnamese,
   };
 
   const [hachToanData, setHachToanData] = useState(INITIAL_ACCOUNTING_DATA);
-  const [hopDongThueData, setHopDongThueData] = useState(INITIAL_TAX_CONTRACT_DATA); // Thêm state cho hợp đồng thuế
 
   // Hook để lấy tên tài khoản cho từng dòng hạch toán
   const fetchAccountNames = useCallback(async (hachToanArray) => {
@@ -198,18 +175,8 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
         t_tien: selectedHoaDonXuatKho.t_tien || "",
         t_thue: selectedHoaDonXuatKho.t_thue || "",
         t_tt: selectedHoaDonXuatKho.t_tt || "",
-
-        // ma_thue: "",
-        // thue_suat: "",
-        // tk_no:"",
-        // tk_co:"",
-        // ten_vtthue:"",
-        // gc_thue:"",
-        // ht_tt:"",
-        // t_so_luong:"",
-        // t_tien:"",
-        // t_thue:"",
-        // t_tt:"",
+        sua_tien: Boolean(selectedHoaDonXuatKho.sua_tien),
+        px_gia_dd: Boolean(selectedHoaDonXuatKho.px_gia_dd),
       });
 
       // Set search values for existing data
@@ -238,34 +205,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       } else {
         setHachToanData(INITIAL_ACCOUNTING_DATA);
       }
-
-      // Load hopDongThue data - THÊM MỚI
-      if (selectedHoaDonXuatKho.hopDongThue && selectedHoaDonXuatKho.hopDongThue.length > 0) {
-        const hopDongThueDataFromServer = selectedHoaDonXuatKho.hopDongThue.map((item, index) => ({
-          id: index + 1,
-          so_ct0: item.so_ct0 || "",
-          ma_ms: item.ma_ms || "",
-          kh_mau_hd: item.kh_mau_hd || "",
-          so_seri0: item.so_seri0 || "",
-          ngay_ct: item.ngay_ct || "",
-          ma_kh: item.ma_kh.trim() || "",
-          ten_kh: item.ten_kh.trim() || "",
-          dia_chi: item.dia_chi || "",
-          ma_so_thue: item.ma_so_thue || "",
-          ten_vt: item.ten_vt || "",
-          t_tien: item.t_tien || 0,
-          ma_thue: item.ma_thue || "",
-          thue_suat: item.thue_suat || 0,
-          t_thue: item.t_thue || 0,
-          tk_thue_no: item.tk_thue_no || "",
-          tk_du: item.tk_du || "",
-          t_tt: item.t_tt || 0,
-        }));
-        setHopDongThueData(hopDongThueDataFromServer);
-      } else {
-        setHopDongThueData(INITIAL_TAX_CONTRACT_DATA);
-      }
-
       // Load account info for the main account if exists
       if (selectedHoaDonXuatKho.ma_nx && accountData.data) {
         const accountInfo = accountData.data.find(acc => acc.tk === selectedHoaDonXuatKho.ma_nx);
@@ -318,44 +257,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     return () => clearTimeout(delayDebounce);
   }, [maTaiKhoanSearch]);
 
-  // Thêm handleHopDongThueChange
-  const handleHopDongThueChange = useCallback((id, field, value) => {
-    setHopDongThueData(prev =>
-      prev.map(item => {
-        if (item.id !== id) return item;
-
-        const updatedItem = { ...item, [field]: value };
-
-        // Tự động tính tiền thuế nếu thay đổi "thue_suat" hoặc "t_tien"
-        const t_tien = parseFloat(field === "t_tien" ? value : item.t_tien) || 0;
-        const thue_suat = parseFloat(field === "thue_suat" ? value : item.thue_suat) || 0;
-
-        if (field === "t_tien" || field === "thue_suat") {
-          updatedItem.t_thue = (t_tien * thue_suat) / 100;
-        }
-
-        return updatedItem;
-      })
-    );
-    if (field === "ma_kh") {
-      setSearchStates(prev => ({
-        ...prev,
-        maKhSearch: value,
-        maKhSearchRowId: id,
-        searchContext: "hopDongThue"
-      }));
-    }
-
-    if (field === "tk_thue_no" || field === "tk_du") {
-      setSearchStates(prev => ({
-        ...prev,
-        tkSearch: value,
-        tkSearchRowId: id,
-        tkSearchField: field,
-        searchContext: "hopDongThue"
-      }));
-    }
-  }, []);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -454,16 +355,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
   const handleAccountSelect = useCallback((id, account) => {
     // Kiểm tra context để xác định cần cập nhật bảng nào
     if (searchStates.searchContext === "hopDongThue") {
-      // Xử lý cho bảng hợp đồng thuế
-      const fieldToUpdate = searchStates.tkSearchField || "tk_thue_no";
-      setHopDongThueData(prev =>
-        prev.map(item =>
-          item.id === id
-            ? { ...item, [fieldToUpdate]: account.tk.trim() }
-            : item
-        )
-      );
-    } else {
       // Xử lý cho bảng hạch toán (logic cũ)
       setHachToanData(prev =>
         prev.map(item =>
@@ -498,21 +389,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
           return item;
         })
       );
-    } else {
-      setHopDongThueData(prev => {
-        const newData = prev.map(item =>
-          item.id === id
-            ? {
-              ...item,
-              ma_kh: customer.ma_kh || "",
-              ten_kh: customer.ten_kh || "",
-              dia_chi: customer.dia_chi || "",
-              ma_so_thue: customer.ma_so_thue || ""
-            }
-            : item
-        );
-        return newData;
-      });
     }
 
     setSearchStates(prev => ({
@@ -543,12 +419,16 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
 
   // Calculate totals
   const totals = useMemo(() => {
-    const totalPsCo = hachToanData.reduce((sum, item) => {
+    const totalTien = hachToanData.reduce((sum, item) => {
       const value = parseFloat(item.tien) || 0;
       return sum + value;
     }, 0);
+    const totalSoLuong = hachToanData.reduce((sum, item) => {
+      const value = parseFloat(item.so_luong) || 0;
+      return sum + value;
+    }, 0);
 
-    return { totalPsCo };
+    return { totalTien, totalSoLuong };
   }, [hachToanData]);
 
   const { data: accountRawData = {} } = useAccounts(
@@ -582,42 +462,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     setTimeout(() => {
       if (hachToanTableRef.current) {
         const tableContainer = hachToanTableRef.current.querySelector('.overflow-x-auto');
-        if (tableContainer) {
-          tableContainer.scrollTop = tableContainer.scrollHeight;
-        }
-      }
-    }, 100);
-  }, []);
-
-  // Thêm addHopDongThueRow
-  const addHopDongThueRow = useCallback(() => {
-    setHopDongThueData(prev => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        so_ct0: "",
-        ma_ms: "",
-        kh_mau_hd: "",
-        so_seri0: "",
-        ngay_ct: "",
-        ma_kh: "",
-        ten_kh: "",
-        dia_chi: "",
-        ma_so_thue: "",
-        ten_vt: "",
-        t_tien: 0,
-        ma_thue: "",
-        thue_suat: 0,
-        t_thue: 0,
-        tk_thue_no: "",
-        tk_du: "",
-        t_tt: 0,
-      }
-    ]);
-
-    setTimeout(() => {
-      if (hopDongThueTableRef.current) {
-        const tableContainer = hopDongThueTableRef.current.querySelector('.overflow-x-auto');
         if (tableContainer) {
           tableContainer.scrollTop = tableContainer.scrollHeight;
         }
@@ -759,7 +603,7 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       ),
     },
     {
-      key: "gia",
+      key: "gia2",
       title: "Đơn giá",
       width: 120,
       render: (val, row) => {
@@ -779,11 +623,38 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       key: "tien",
       title: "Thành tiền",
       width: 120,
+      render: (val, row) => {
+        if (row.id === 'total') {
+          return (
+            <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
+              {totals.totalTien.toLocaleString('vi-VN')}
+            </div>
+          );
+        }
+        return (
+          <Input
+            type="number"
+            value={row.tien}
+            onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            disabled={!formData.sua_tien}
+            style={{
+              backgroundColor: formData.sua_tien ? 'white' : '#f9fafb',
+              cursor: formData.sua_tien ? 'text' : 'not-allowed'
+            }}
+          />
+        );
+      },
+    },
+    {
+      key: "gia",
+      title: "Giá vốn",
+      width: 120,
       render: (val, row) => (
         <Input
-          value={row.tien}
-          onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
-          placeholder="0"
+          value={row.gia}
+          onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
           className="w-full text-right"
           type="number"
         />
@@ -887,19 +758,38 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     setHachToanData(prev => prev.filter(item => item.id !== id));
   }, []);
 
-  // Thêm deleteHopDongThueRow
-  const deleteHopDongThueRow = useCallback((id) => {
-    setHopDongThueData(prev => prev.filter(item => item.id !== id));
-  }, []);
-
   const handleHachToanChange = useCallback((id, field, value) => {
     setHachToanData(prev => {
-      const newData = prev.map(item =>
-        item.id === id ? { ...item, [field]: value } : item
-      );
+      const newData = prev.map(item => {
+        if (item.id !== id) return item;
+
+        const updatedItem = { ...item, [field]: value };
+
+        if (field === "so_luong" || field === "gia2") {
+          const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
+          const gia = parseFloat(field === "gia2" ? value : item.gia2) || 0;
+
+          // Nếu không cho phép sửa trường tiền, tự động tính toán
+          if (!formData.sua_tien) {
+            updatedItem.tien = soLuong * gia;
+          }
+        }
+
+        // Nếu trường tiền được sửa trực tiếp và checkbox "sửa trường tiền" được bật
+        if (field === "tien" && !formData.sua_tien) {
+          // Không cho phép sửa, giữ nguyên giá trị tính toán
+          const soLuong = parseFloat(item.so_luong) || 0;
+          const gia = parseFloat(item.gia2) || 0;
+          updatedItem.tien = soLuong * gia;
+        }
+
+        return updatedItem;
+      });
+
       return newData;
     });
-    // Search logic
+
+    // Search logic for material code
     if (field === "ma_vt") {
       setMaVtSearch(value);
       setSearchStates(prev => ({
@@ -920,7 +810,17 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
         showDmkPopup: value.length > 0
       }));
     }
-  }, []);
+
+    // Search logic for account fields
+    if (["tk_dt", "tk_vt", "tk_gv"].includes(field)) {
+      setSearchStates(prev => ({
+        ...prev,
+        tkSearch: value,
+        tkSearchRowId: id,
+        tkSearchField: field
+      }));
+    }
+  }, [formData.sua_tien]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -937,9 +837,10 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       ma_so_thue: "",
       ma_nt: "VND",
       ty_gia: "1",
+      sua_tien: false,
+      px_gia_dd: false,
     });
     setHachToanData(INITIAL_ACCOUNTING_DATA);
-    setHopDongThueData(INITIAL_TAX_CONTRACT_DATA); // Reset hợp đồng thuế
     setSelectedAccount(null);
     setMaTaiKhoanSearch("");
     setMaKhSearch("");
@@ -964,7 +865,32 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     if (!validateForm()) return;
     try {
       const payload = {
-        // ...các trường chung...
+        ma_gd: formData.ma_gd?.trim() || "",
+        ma_kh: formData.ma_kh?.trim() || "",
+        dia_chi: formData.dia_chi?.trim() || "",
+        ma_so_thue: formData.ma_so_thue?.trim() || "",
+        ong_ba: formData.ong_ba?.trim() || "",
+        dien_giai: formData.dien_giai?.trim() || "",
+        ma_nx: formData.ma_nx?.trim() || "",
+        ma_bp: formData.ma_bp?.trim() || "",
+        ngay_ct: formData.ngay_ct,
+        ngay_lct: formData.ngay_lct,
+        ma_qs: formData.ma_qs?.trim() || "",
+        so_seri: formData.so_seri?.trim() || "",
+        so_ct: formData.so_ct?.trim() || "",
+        ma_nt: formData.ma_nt?.trim() || "VND",
+        ty_gia: Number(formData.ty_gia) || 1,
+        sl_in: Number(formData.sl_in) || 0,
+        ma_thue: formData.ma_thue?.trim() || "",
+        thue_suat: Number(formData.thue_suat) || 0,
+        tk_no: formData.tk_no?.trim() || "",
+        tk_co: formData.tk_co?.trim() || "",
+        ten_vtthue: formData.ten_vtthue?.trim() || "",
+        gc_thue: formData.gc_thue?.trim() || "",
+        ht_tt: formData.ht_tt?.trim() || "",
+        sua_tien: formData.sua_tien,
+        px_gia_dd: formData.px_gia_dd,
+
         hachToanList: hachToanData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
           .map(({ ma_vt, ma_kho_i, so_luong, gia2, tien2, gia, tien, tk_dt, tk_vt, tk_gv }) => ({
@@ -1268,30 +1194,55 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
             </div>
           </div>
 
-          {/* Accounting section */}
           <div className="flex justify-between shadow-lg border-0 px-6">
             <Tabs
               tabs={[
                 {
                   label: "Hạch toán",
                   content: (
-                    <div className="" ref={hachToanTableRef}>
-                      <TableBasic
-                        data={hachToanDataWithTotal}
-                        columns={hachToanColumns}
-                        onDeleteRow={deleteHachToanRow}
-                        showAddButton={true}
-                        addButtonText="Thêm dòng vật tư"
-                        onAddRow={(e) => {
-                          if (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }
-                          addHachToanRow(e);
-                        }}
-                        maxHeight="max-h-72"
-                        className="w-full"
-                      />
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 p-2 flex justify-end">
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.sua_tien}
+                              onChange={(e) => handleChange("sua_tien", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">Sửa trường tiền</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.px_gia_dd}
+                              onChange={(e) => handleChange("px_gia_dd", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">
+                              Xuất theo giá vốn đích danh cho VT giá TB
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="" ref={hachToanTableRef}>
+                        <TableBasic
+                          data={hachToanDataWithTotal}
+                          columns={hachToanColumns}
+                          onDeleteRow={deleteHachToanRow}
+                          showAddButton={true}
+                          addButtonText="Thêm dòng vật tư"
+                          onAddRow={(e) => {
+                            if (e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                            addHachToanRow(e);
+                          }}
+                          maxHeight="max-h-72"
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                   ),
                 },
@@ -1451,9 +1402,9 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
           </button>
           <button
             type="button"
-            disabled
+            onClick={handleSave}
             className="px-6 py-2.5 text-sm font-medium text-white 
-             bg-blue-400 opacity-50 cursor-not-allowed
+             bg-blue-600 
              border border-transparent rounded-lg
              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
              transition-colors flex items-center gap-2"

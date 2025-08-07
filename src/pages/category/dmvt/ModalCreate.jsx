@@ -1,15 +1,14 @@
 import { useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
-import Button from "../../../components/ui/button/Button";
 
 import { Modal } from "../../../components/ui/modal";
 
+import { Plus, Save, X } from "lucide-react";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCreateDmvt } from "../../../hooks/useDmvt";
 import { useMaterialGroups } from "../../../hooks/useMaterialGroup";
 import SearchableSelect from "../account/SearchableSelect";
-import { Plus, X, Save } from "lucide-react";
 
 export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCreate }) => {
   const [formData, setFormData] = useState({
@@ -18,7 +17,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     // ten_vt2: "",
     dvt: "",
     vt_ton_kho: "1",
-    // cach_tinh_gia: "1",
+    gia_ton: 1,
     loai_vt: "21",
     tk_vt: "",
     sua_tk_vt: "0",
@@ -135,7 +134,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         // ten_vt2: formData.ten_vt2,
         dvt: formData.dvt,
         vt_ton_kho: formData.vt_ton_kho,
-        // cach_tinh_gia: formData.cach_tinh_gia,
+        gia_ton: formData.gia_ton,
         loai_vt: formData.loai_vt,
         tk_vt: formData.tk_vt,
         sua_tk_vt: formData.sua_tk_vt,
@@ -165,7 +164,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         // ten_vt2: "",
         dvt: "",
         vt_ton_kho: "1",
-        // cach_tinh_gia: "1",
+        gia_ton: 1,
         loai_vt: "21",
         tk_vt: "",
         sua_tk_vt: "0",
@@ -212,7 +211,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
       // ten_vt2: "",
       dvt: "",
       vt_ton_kho: "1",
-      // cach_tinh_gia: "1",
+      gia_ton: 1,
       loai_vt: "21",
       tk_vt: "",
       sua_tk_vt: "0",
@@ -382,21 +381,22 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </div>
                 </div>
 
-                {/* <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Label className="text-xs basis-[30%]">Cách tính giá tồn kho</Label>
                   <div className="flex items-center gap-2 basis-[70%]">
                     <div className="basis-3/5">
                       <Input
-                        type="text"
-                        value={formData.cach_tinh_gia}
-                        onChange={(e) => handleInputChange('cach_tinh_gia', e.target.value)}
+                        type="number"
+                        value={formData.gia_ton}
+                        onChange={(e) => handleInputChange('gia_ton', e.target.value)}
                         placeholder="1"
                         className="h-8 text-sm w-full bg-white"
+                        disabled
                       />
                     </div>
                     <span className="text-xs text-gray-600 basis-2/5">Trung bình tháng</span>
                   </div>
-                </div> */}
+                </div>
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">Loại vật tư</Label>

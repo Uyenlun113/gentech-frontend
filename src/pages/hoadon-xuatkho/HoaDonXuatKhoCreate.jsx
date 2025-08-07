@@ -46,6 +46,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
     ten_vtthue: "",
     gc_thue: "",
     ht_tt: "",
+    sua_tien: false,
+    px_gia_dd: false,
   });
 
   // State cho customer search
@@ -522,15 +524,15 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       ),
     },
     {
-      key: "gia",
+      key: "gia2",
       title: "Đơn giá",
       width: 120,
       render: (val, row) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            value={row.gia}
-            onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
+            value={row.gia2}
+            onChange={(e) => handleHachToanChange(row.id, "gia2", e.target.value)}
             placeholder="0"
             className="w-full text-right"
             type="number"
@@ -542,12 +544,38 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       key: "tien",
       title: "Thành tiền",
       width: 120,
+      render: (val, row) => {
+        if (row.id === 'total') {
+          return (
+            <div className="text-right text-[16px] text-green-600 p-2 rounded px-7">
+              {totals.totalTien.toLocaleString('vi-VN')}
+            </div>
+          );
+        }
+        return (
+          <Input
+            type="number"
+            value={row.tien}
+            onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            disabled={!formData.sua_tien}
+            style={{
+              backgroundColor: formData.sua_tien ? 'white' : '#f9fafb',
+              cursor: formData.sua_tien ? 'text' : 'not-allowed'
+            }}
+          />
+        );
+      },
+    },
+    {
+      key: "gia",
+      title: "Giá vốn",
+      width: 120,
       render: (val, row) => (
         <Input
-          value={row.tien}
-          onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
-          // placeholder="0"
-          disabled
+          value={row.gia}
+          onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
           className="w-full text-right"
           type="number"
         />
@@ -643,10 +671,21 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
 
         const updatedItem = { ...item, [field]: value };
 
-        // Auto calculate tien when so_luong or gia changes
-        if (field === "so_luong" || field === "gia") {
+        if (field === "so_luong" || field === "gia2") {
           const soLuong = parseFloat(field === "so_luong" ? value : item.so_luong) || 0;
-          const gia = parseFloat(field === "gia" ? value : item.gia) || 0;
+          const gia = parseFloat(field === "gia2" ? value : item.gia2) || 0;
+
+          // Nếu không cho phép sửa trường tiền, tự động tính toán
+          if (!formData.sua_tien) {
+            updatedItem.tien = soLuong * gia;
+          }
+        }
+
+        // Nếu trường tiền được sửa trực tiếp và checkbox "sửa trường tiền" được bật
+        if (field === "tien" && !formData.sua_tien) {
+          // Không cho phép sửa, giữ nguyên giá trị tính toán
+          const soLuong = parseFloat(item.so_luong) || 0;
+          const gia = parseFloat(item.gia2) || 0;
           updatedItem.tien = soLuong * gia;
         }
 
@@ -687,7 +726,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         tkSearchField: field
       }));
     }
-  }, []);
+  }, [formData.sua_tien]);
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -714,6 +753,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       ten_vtthue: "",
       gc_thue: "",
       ht_tt: "",
+      sua_tien: false,
+      px_gia_dd: false,
     });
     setHachToanData(INITIAL_ACCOUNTING_DATA);
     setSelectedAccount(null);
@@ -771,6 +812,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         ten_vtthue: formData.ten_vtthue?.trim() || "",
         gc_thue: formData.gc_thue?.trim() || "",
         ht_tt: formData.ht_tt?.trim() || "",
+        sua_tien: formData.sua_tien,
+        px_gia_dd: formData.px_gia_dd,
 
         hachToanList: hachToanData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
@@ -1144,23 +1187,49 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                 {
                   label: "Hạch toán",
                   content: (
-                    <div className="" ref={hachToanTableRef}>
-                      <TableBasic
-                        data={hachToanDataWithTotal}
-                        columns={hachToanColumns}
-                        onDeleteRow={deleteHachToanRow}
-                        showAddButton={true}
-                        addButtonText="Thêm dòng vật tư"
-                        onAddRow={(e) => {
-                          if (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }
-                          addHachToanRow(e);
-                        }}
-                        maxHeight="max-h-72"
-                        className="w-full"
-                      />
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 p-2 flex justify-end">
+                        <div className="flex gap-4">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.sua_tien}
+                              onChange={(e) => handleChange("sua_tien", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">Sửa trường tiền</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.px_gia_dd}
+                              onChange={(e) => handleChange("px_gia_dd", e.target.checked)}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <Label className="text-sm font-medium text-gray-700">
+                              Xuất theo giá vốn đích danh cho VT giá TB
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="" ref={hachToanTableRef}>
+                        <TableBasic
+                          data={hachToanDataWithTotal}
+                          columns={hachToanColumns}
+                          onDeleteRow={deleteHachToanRow}
+                          showAddButton={true}
+                          addButtonText="Thêm dòng vật tư"
+                          onAddRow={(e) => {
+                            if (e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                            addHachToanRow(e);
+                          }}
+                          maxHeight="max-h-72"
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                   ),
                 },

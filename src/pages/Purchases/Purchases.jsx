@@ -2,6 +2,31 @@ import { Calculator, ChevronRight, FileText, FileType, Users } from 'lucide-reac
 import { useState } from 'react';
 import LoadingModal from '../../components/LoadingModal';
 import PricingModal from '../../components/PricingModal';
+import { usePostInGia } from '../../hooks/useInGia';
+
+// Get current date values
+const now = new Date();
+const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11, so add 1
+const currentYear = now.getFullYear();
+
+const initialPricingData = {
+  ky: currentMonth.toString(),       // Current month
+  nam: currentYear.toString(),       // Current year
+  ky2: '',
+  nam2: '',
+  maKho: '',
+  maVatTu: '',
+  maDuAn: '',
+  taiKhoanVatTu: '',
+  nhomVatTu1: '',
+  nhomVatTu2: '',
+  nhomVatTu3: '',
+  taoPxChenhLech: '0',
+  capNhatGiaTrungBinh: '1',
+  xuLyKhiHoachToan: '0',
+  ngayBatDau: '31-12-2020',
+  maDVCS: 'CTY'
+};
 
 export default function PurChases() {
   const [activeTab, setActiveTab] = useState('software');
@@ -10,24 +35,13 @@ export default function PurChases() {
   const [progress, setProgress] = useState(0);
   const [currentTask, setCurrentTask] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
-  const [hasError, setHasError] = useState(false)
-  const [pricingData, setPricingData] = useState({
-    ky: '',
-    nam: '',
-    maKho: '',
-    maVatTu: '',
-    maDuAn: '',
-    taiKhoanVatTu: '',
-    nhomVatTu1: '',
-    nhomVatTu2: '',
-    nhomVatTu3: '',
-    taoPxChenhLech: '0',
-    capNhatGiaTrungBinh: '1',
-    xuLyKhiHoachToan: '0',
-    ngayBatDau: '31-12-2020',
-    maDVCS: 'CTY'
-  });
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Initialize API mutation hook
+  const postInGiaMutation = usePostInGia();
+
+  const [pricingData, setPricingData] = useState(initialPricingData);
   const processingSteps = [
     { progress: 10, task: 'Đang khởi tạo quá trình tính giá...' },
     { progress: 20, task: 'Đang tính toán giá trung bình...' },
@@ -36,42 +50,125 @@ export default function PurChases() {
     { progress: 100, task: 'Hoàn tất!' }
   ];
 
-  const handlePricingSubmit = () => {
-    setShowPricingModal(false);
-    setShowLoadingModal(true);
-    setProgress(0);
-    setIsCompleted(false);
-    setHasError(false);
-    simulateProcessing();
+  const transformToApiPayload = (formData) => {
+    const period1 = parseInt(formData.ky);
+    const year1 = parseInt(formData.nam);
+    const period2 = parseInt(formData.ky2 || formData.ky);
+    const year2 = parseInt(formData.nam2 || formData.nam);
+    if (isNaN(period1) || period1 < 1 || period1 > 12) {
+      throw new Error('Kỳ phải là số từ 1 đến 12');
+    }
+    if (isNaN(year1) || year1 < 1900 || year1 > 2100) {
+      throw new Error('Năm phải là số từ 1900 đến 2100');
+    }
+    if (isNaN(period2) || period2 < 1 || period2 > 12) {
+      throw new Error('Kỳ 2 phải là số từ 1 đến 12');
+    }
+    if (isNaN(year2) || year2 < 1900 || year2 > 2100) {
+      throw new Error('Năm 2 phải là số từ 1900 đến 2100');
+    }
+
+    return {
+      Period1: period1,
+      Year1: year1,
+      Period2: period2,
+      Year2: year2,
+      Ma_kho: formData.maKho.trim() || undefined,
+      Ma_dvcs: formData.maDVCS || undefined,
+      Ma_vt: formData.maVatTu.trim() || undefined,
+      Ma_vv: formData.maDuAn.trim() || undefined,
+      OutMa_vts: undefined,
+      Tk_vt: formData.taiKhoanVatTu.trim() || undefined,
+      Nh_vt1: formData.nhomVatTu1.trim() || undefined,
+      Nh_vt2: formData.nhomVatTu2.trim() || undefined,
+      Nh_vt3: formData.nhomVatTu3.trim() || undefined,
+      Nh_sc: formData.xuLyKhiHoachToan || 0,
+      Dk_cl: formData.taoPxChenhLech || 0,
+      Tinh_giatb: formData.capNhatGiaTrungBinh || 1,
+    };
   };
 
-  const simulateProcessing = async () => {
-    for (let i = 0; i < processingSteps.length; i++) {
+  const simulateProgress = async () => {
+    for (let i = 0; i < processingSteps.length - 1; i++) {
       const step = processingSteps[i];
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       setProgress(step.progress);
       setCurrentTask(step.task);
     }
+  };
 
-    setIsCompleted(true);
-    setTimeout(() => {
-      setShowLoadingModal(false);
+  const handlePricingSubmit = async () => {
+    try {
+      if (!pricingData.ky || !pricingData.nam) {
+        throw new Error('Vui lòng nhập đầy đủ thông tin Kỳ và Năm');
+      }
+
+      const apiPayload = transformToApiPayload(pricingData);
+      setShowPricingModal(false);
+      setShowLoadingModal(true);
       setProgress(0);
       setIsCompleted(false);
-    }, 3000);
+      setHasError(false);
+      setErrorMessage('');
+      await simulateProgress();
+      await postInGiaMutation.mutateAsync(apiPayload);
+      setProgress(100);
+      setCurrentTask('Hoàn tất!');
+      setIsCompleted(true);
+      setTimeout(() => {
+        setShowLoadingModal(false);
+        resetModalState();
+        setPricingData(initialPricingData);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error:', error);
+      setProgress(100);
+      setTimeout(() => {
+        setHasError(true);
+        setIsCompleted(false);
+        let errorMsg = 'Có lỗi xảy ra khi tính giá';
+        if (error?.response?.data?.message) {
+          errorMsg = error.response.data.message;
+        } else if (error?.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+          errorMsg = error.response.data.errors.join(', ');
+        } else if (error?.message) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        }
+
+        setErrorMessage(errorMsg);
+        setCurrentTask(`Lỗi: ${errorMsg}`);
+      }, 800);
+    }
+  };
+
+  const resetModalState = () => {
+    setProgress(0);
+    setIsCompleted(false);
+    setHasError(false);
+    setErrorMessage('');
+    setCurrentTask('');
   };
 
   const handleCloseLoading = () => {
     setShowLoadingModal(false);
-    setProgress(0);
-    setIsCompleted(false);
-    setHasError(false);
+    resetModalState();
+    setPricingData(initialPricingData);
+  };
+
+  const handleCloseModal = () => {
+    setShowPricingModal(false);
+    resetModalState();
+    setPricingData(initialPricingData);
   };
 
   const handleRetry = () => {
     setHasError(false);
+    setErrorMessage('');
     setProgress(0);
-    simulateProcessing();
+    handlePricingSubmit();
   };
 
   const softwareMenuItems = [
@@ -232,7 +329,7 @@ export default function PurChases() {
       {/* Modals */}
       <PricingModal
         showModal={showPricingModal}
-        onClose={() => setShowPricingModal(false)}
+        onClose={handleCloseModal}
         onSubmit={handlePricingSubmit}
         pricingData={pricingData}
         onInputChange={handleInputChange}
@@ -244,6 +341,7 @@ export default function PurChases() {
         currentTask={currentTask}
         isCompleted={isCompleted}
         hasError={hasError}
+        errorMessage={errorMessage}
         onClose={handleCloseLoading}
         onRetry={handleRetry}
       />
