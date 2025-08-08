@@ -354,16 +354,15 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
   // Handle account selection for table - CẬP NHẬT để hỗ trợ cả hachToan và hopDongThue
   const handleAccountSelect = useCallback((id, account) => {
     // Kiểm tra context để xác định cần cập nhật bảng nào
-    if (searchStates.searchContext === "hopDongThue") {
-      // Xử lý cho bảng hạch toán (logic cũ)
-      setHachToanData(prev =>
-        prev.map(item =>
-          item.id === id
-            ? { ...item, tk_vt: account.tk.trim(), ten_tk: account.ten_tk }
-            : item
-        )
-      );
-    }
+    const fieldToUpdate = searchStates.tkSearchField || "tk_vt";
+
+    setHachToanData(prev =>
+      prev.map(item =>
+        item.id === id
+          ? { ...item, [fieldToUpdate]: account.tk.trim(), ten_tk: account.ten_tk }
+          : item
+      )
+    );
 
     // Reset search states
     setSearchStates(prev => ({
@@ -610,8 +609,8 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            value={row.gia}
-            onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
+            value={row.gia2}
+            onChange={(e) => handleHachToanChange(row.id, "gia2", e.target.value)}
             placeholder="0"
             className="w-full text-right"
             type="number"
