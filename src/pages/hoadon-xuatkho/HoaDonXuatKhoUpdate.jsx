@@ -19,7 +19,6 @@ import { useDmkho } from "../../hooks/useDmkho";
 import { useDmvt } from "../../hooks/useDmvt";
 import { useUpdateHoaDonXuatKho } from "../../hooks/usehoadonxuatkho";
 import { CalenderIcon } from "../../icons";
-import accountDirectoryApi from "../../services/account-directory";
 
 export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoaDonXuatKho }) => {
   const navigate = useNavigate();
@@ -44,19 +43,13 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     ma_thue: "",
     thue_suat: "",
     tk_no: "",
-    tk_co: "",
+    tk_thue_co: "",
     ten_vtthue: "",
     gc_thue: "",
     ht_tt: "",
-    t_so_luong: "",
-    t_tien: "",
-    t_thue: "",
-    t_tt: "",
     sua_tien: false,
     px_gia_dd: false,
-
   });
-
 
   // State cho customer search
   const [maKhSearch, setMaKhSearch] = useState("");
@@ -85,12 +78,10 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     showAccountPopup: false,
     showMainAccountPopup: false,
     showMainCustomerPopup: false,
-    showCustomerPopup: false, // Thêm cho customer popup trong bảng
-
+    showCustomerPopup: false,
     maKhoSearch: "",
     maKhoSearchRowId: null,
     showDmkPopup: false,
-
     maVtSearch: "",
     maVtSearchRowId: null,
     showDmvtPopup: false,
@@ -122,27 +113,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
 
   const [hachToanData, setHachToanData] = useState(INITIAL_ACCOUNTING_DATA);
 
-  // Hook để lấy tên tài khoản cho từng dòng hạch toán
-  const fetchAccountNames = useCallback(async (hachToanArray) => {
-    const promises = hachToanArray.map(async (item) => {
-      if (item.tk_vt && !item.ten_tk) {
-        try {
-          const accountData = await accountDirectoryApi.getAccount(item.tk_vt);
-          return {
-            ...item,
-            ten_tk: accountData?.ten_tk || ""
-          };
-        } catch (error) {
-          console.warn(`Cannot fetch account name for ${item.tk_vt}:`, error);
-          return item;
-        }
-      }
-      return item;
-    });
-
-    return Promise.all(promises);
-  }, []);
-
   // Load data when selectedHoaDonXuatKho changes
   useEffect(() => {
     if (selectedHoaDonXuatKho && isOpenEdit) {
@@ -167,14 +137,10 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
         ma_thue: selectedHoaDonXuatKho.ma_thue || "",
         thue_suat: selectedHoaDonXuatKho.thue_suat || "",
         tk_no: selectedHoaDonXuatKho.tk_no || "",
-        tk_co: selectedHoaDonXuatKho.tk_co || "",
+        tk_thue_co: selectedHoaDonXuatKho.tk_thue_co || "",
         ten_vtthue: selectedHoaDonXuatKho.ten_vtthue || "",
         gc_thue: selectedHoaDonXuatKho.gc_thue || "",
         ht_tt: selectedHoaDonXuatKho.ht_tt || "",
-        t_so_luong: selectedHoaDonXuatKho.t_so_luong || "",
-        t_tien: selectedHoaDonXuatKho.t_tien || "",
-        t_thue: selectedHoaDonXuatKho.t_thue || "",
-        t_tt: selectedHoaDonXuatKho.t_tt || "",
         sua_tien: Boolean(selectedHoaDonXuatKho.sua_tien),
         px_gia_dd: Boolean(selectedHoaDonXuatKho.px_gia_dd),
       });
@@ -215,7 +181,7 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     } else if (!isOpenEdit) {
       resetForm();
     }
-  }, [selectedHoaDonXuatKho, isOpenEdit, accountData.data, fetchAccountNames]);
+  }, [selectedHoaDonXuatKho, isOpenEdit, accountData.data]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -257,6 +223,45 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     return () => clearTimeout(delayDebounce);
   }, [maTaiKhoanSearch]);
 
+  // Debounce material search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (maVtSearch && maVtSearch.length > 0) {
+      } else {
+        setSearchStates(prev => ({ ...prev, showDmvtPopup: false }));
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [maVtSearch]);
+
+  // Debounce warehouse search
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (maKho && maKho.length > 0) {
+      } else {
+        setSearchStates(prev => ({ ...prev, showDmkPopup: false }));
+      }
+    }, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [maKho]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchStates.maVtSearch) {
+        setSearchStates(prev => ({ ...prev, showDmvtPopup: true }));
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchStates.maVtSearch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchStates.maKhoSearch) {
+        setSearchStates(prev => ({ ...prev, showDmkPopup: true }));
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [searchStates.maKhoSearch]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -304,7 +309,7 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     }
 
     const validAccountingRows = hachToanData.filter(row =>
-      row.tk_vt && (parseFloat(row.tien) > 0)
+      row.ma_vt && (parseFloat(row.so_luong) > 0)
     );
     if (validAccountingRows.length === 0) {
       console.error("Vui lòng nhập ít nhất một dòng hạch toán hợp lệ");
@@ -337,35 +342,32 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     }));
   };
 
-  // Handle account selection
+  // Handle account selection - FIXED
   const handleMainAccountSelect = (account) => {
     setFormData(prev => ({
       ...prev,
-      ma_nx: account.ma_nx.trim()
+      ma_nx: account.tk.trim() // Fixed: use account.tk instead of account.ma_nx
     }));
     setSelectedAccount(account);
-    setMaTaiKhoanSearch(account.ma_nx.trim());
+    setMaTaiKhoanSearch(account.tk.trim()); // Fixed: use account.tk
     setSearchStates(prev => ({
       ...prev,
       showMainAccountPopup: false
     }));
   };
 
-  // Handle account selection for table - CẬP NHẬT để hỗ trợ cả hachToan và hopDongThue
+  // Handle account selection for table
   const handleAccountSelect = useCallback((id, account) => {
-    // Kiểm tra context để xác định cần cập nhật bảng nào
-    if (searchStates.searchContext === "hopDongThue") {
-      // Xử lý cho bảng hạch toán (logic cũ)
-      setHachToanData(prev =>
-        prev.map(item =>
-          item.id === id
-            ? { ...item, tk_vt: account.tk.trim(), ten_tk: account.ten_tk }
-            : item
-        )
-      );
-    }
+    const fieldToUpdate = searchStates.tkSearchField || "tk_vt";
 
-    // Reset search states
+    setHachToanData(prev =>
+      prev.map(item =>
+        item.id === id
+          ? { ...item, [fieldToUpdate]: account.tk.trim(), ten_tk: account.ten_tk }
+          : item
+      )
+    );
+
     setSearchStates(prev => ({
       ...prev,
       showAccountPopup: false,
@@ -373,31 +375,7 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       tkSearchField: null,
       searchContext: null
     }));
-  }, [searchStates.searchContext, searchStates.tkSearchField]);
-
-  // Thêm handleCustomerSelect
-  const handleCustomerSelect = useCallback((id, customer) => {
-    if (searchStates.searchContext === "hachToan") {
-      setHachToanData(prev =>
-        prev.map((item, index) => {
-          if (item.id === id) {
-            return { ...item, ma_kh_i: customer.ma_kh.trim() || "", ten_kh: customer.ten_kh.trim() || "" };
-          }
-          if (id === 1 && index > 0) {
-            return { ...item, ma_kh_i: customer.ma_kh.trim() || "", ten_kh: customer.ten_kh.trim() || "" };
-          }
-          return item;
-        })
-      );
-    }
-
-    setSearchStates(prev => ({
-      ...prev,
-      showCustomerPopup: false,
-      maKhSearch: "",
-      searchContext: null
-    }));
-  }, [searchStates.searchContext]);
+  }, [searchStates.tkSearchField]);
 
   const handleFormChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -451,9 +429,18 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       const newRow = {
         id: newRowId,
         stt_rec: newRowId.toString(),
-        tk_vt: "",
+        ma_vt: "",
+        ten_vt: "",
+        dvt: "",
+        ma_kho_i: "",
+        so_luong: 0,
+        gia2: 0,
+        tien2: 0,
+        gia: 0,
         tien: 0,
-        dien_giaii: "",
+        tk_dt: "",
+        tk_vt: "",
+        tk_gv: "",
       };
 
       return [...prev, newRow];
@@ -610,8 +597,8 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            value={row.gia}
-            onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
+            value={row.gia2}
+            onChange={(e) => handleHachToanChange(row.id, "gia2", e.target.value)}
             placeholder="0"
             className="w-full text-right"
             type="number"
@@ -734,6 +721,7 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
       },
     },
   ];
+
   const handleWarehouseSelect = useCallback((id, warehouse) => {
     setHachToanData(prev =>
       prev.map(item =>
@@ -757,7 +745,6 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     }
     setHachToanData(prev => prev.filter(item => item.id !== id));
   }, []);
-
   const handleHachToanChange = useCallback((id, field, value) => {
     setHachToanData(prev => {
       const newData = prev.map(item => {
@@ -865,33 +852,34 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
     if (!validateForm()) return;
     try {
       const payload = {
-        ma_gd: formData.ma_gd?.trim() || "",
-        ma_kh: formData.ma_kh?.trim() || "",
-        dia_chi: formData.dia_chi?.trim() || "",
-        ma_so_thue: formData.ma_so_thue?.trim() || "",
-        ong_ba: formData.ong_ba?.trim() || "",
-        dien_giai: formData.dien_giai?.trim() || "",
-        ma_nx: formData.ma_nx?.trim() || "",
-        ma_bp: formData.ma_bp?.trim() || "",
-        ngay_ct: formData.ngay_ct,
-        ngay_lct: formData.ngay_lct,
-        ma_qs: formData.ma_qs?.trim() || "",
-        so_seri: formData.so_seri?.trim() || "",
-        so_ct: formData.so_ct?.trim() || "",
-        ma_nt: formData.ma_nt?.trim() || "VND",
-        ty_gia: Number(formData.ty_gia) || 1,
-        sl_in: Number(formData.sl_in) || 0,
-        ma_thue: formData.ma_thue?.trim() || "",
-        thue_suat: Number(formData.thue_suat) || 0,
-        tk_no: formData.tk_no?.trim() || "",
-        tk_co: formData.tk_co?.trim() || "",
-        ten_vtthue: formData.ten_vtthue?.trim() || "",
-        gc_thue: formData.gc_thue?.trim() || "",
-        ht_tt: formData.ht_tt?.trim() || "",
-        sua_tien: formData.sua_tien,
-        px_gia_dd: formData.px_gia_dd,
+        phieu: {
+          ma_gd: formData.ma_gd?.trim() || "",
+          ma_kh: formData.ma_kh?.trim() || "",
+          dia_chi: formData.dia_chi?.trim() || "",
+          ma_so_thue: formData.ma_so_thue?.trim() || "",
+          ong_ba: formData.ong_ba?.trim() || "",
+          dien_giai: formData.dien_giai?.trim() || "",
+          ma_nx: formData.ma_nx?.trim() || "",
+          ma_bp: formData.ma_bp?.trim() || "",
+          ngay_ct: formData.ngay_ct,
+          ngay_lct: formData.ngay_lct,
+          ma_qs: formData.ma_qs?.trim() || "",
+          so_seri: formData.so_seri?.trim() || "",
+          so_ct: formData.so_ct?.trim() || "",
+          ma_nt: formData.ma_nt?.trim() || "VND",
+          ty_gia: Number(formData.ty_gia) || 1,
+          sl_in: Number(formData.sl_in) || 0,
+          ma_thue: formData.ma_thue?.trim() || "",
+          thue_suat: Number(formData.thue_suat) || 0,
+          tk_thue_co: formData.tk_thue_co?.trim() || "",
+          ten_vtthue: formData.ten_vtthue?.trim() || "",
+          gc_thue: formData.gc_thue?.trim() || "",
+          ht_tt: formData.ht_tt?.trim() || "",
+          sua_tien: formData.sua_tien,
+          px_gia_dd: formData.px_gia_dd,
+        },
 
-        hachToanList: hachToanData
+        hangHoa: hachToanData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
           .map(({ ma_vt, ma_kho_i, so_luong, gia2, tien2, gia, tien, tk_dt, tk_vt, tk_gv }) => ({
             ma_vt: ma_vt?.trim() || "",
@@ -1292,16 +1280,9 @@ export const ModalEditHoaDonXuatKho = ({ isOpenEdit, closeModalEdit, selectedHoa
                     <Label className="text-xs col-span-4">TK thuế</Label>
                     <div className="col-span-4">
                       <Input
-                        value={formData.tk_no}
+                        value={formData.tk_thue_co}
                         className="h-6 text-sm bg-white"
                         onChange={e => handleChange("tk_no", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-span-4">
-                      <Input
-                        value={formData.tk_co}
-                        className="h-6 text-sm bg-white"
-                        onChange={e => handleChange("tk_co", e.target.value)}
                       />
                     </div>
                   </div>
