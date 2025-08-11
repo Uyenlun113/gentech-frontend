@@ -283,17 +283,14 @@ export default function PurChases() {
         ...formData,
       };
       console.log("requestData:", requestData);
-      let paramSearch = await getBCKhoMutation.mutateAsync(requestData);
-      // Gọi API lấy dữ liệu báo cáo (bạn cần thay khoService.getData bằng service thực tế)
-      // const khoData = await khoService.getData(paramSearch);
-      const khoData = []
+      const responseData = await getBCKhoMutation.mutateAsync(requestData);
       // Đóng modal
       setOpenModalId(null);
       setSelectedMenuItem(null);
       // Điều hướng sang trang TablePrintKho với dữ liệu
       navigate('/purchases/print-kho', {
         state: {
-          data: khoData,
+          data: responseData,
           filterData: requestData,
           reportName: selectedMenuItem?.label,
           reportType: selectedMenuItem?.id
@@ -438,6 +435,7 @@ export default function PurChases() {
             onSubmit={handleModalSubmit}
             isSubmitting={isSubmitting}
             configName={selectedMenuItem.id}
+            configTitle={selectedMenuItem.label}
           />
         )}
       </div>

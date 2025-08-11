@@ -31,6 +31,7 @@ export default function FilterModalKho({
   onSubmit,
   isSubmitting = false,
   configName,
+  configTitle,
   onSearch,
   title = "Bộ lọc dữ liệu"
 }) {

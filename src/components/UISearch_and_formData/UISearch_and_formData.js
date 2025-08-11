@@ -215,7 +215,7 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
@@ -567,7 +567,7 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         {
@@ -634,7 +634,7 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách hàng",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         {
@@ -706,11 +706,11 @@ export const FILTER_CONFIGS = {
     defaultFormData: {
       ma_vat_tu: "",
       ma_kho: "",
-      ngay_ct1: "2025-01-01", // Converted to YYYY-MM-DD for date input compatibility
-      ngay_ct2: "2025-08-31", // Converted to YYYY-MM-DD for date input compatibility
-      ngay_lap_the: "",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_lap_the: "28-08-2025",
       to_so: "",
-      ngay_mo_so: "2025-08-07", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_mo_so: "28-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_dvcs: "CTY", // Added based on image
       mau_vnd_ngoai_te: "VND"
     },
@@ -747,8 +747,8 @@ export const FILTER_CONFIGS = {
   tong_hop_nhap_xuat_ton: {
     title: 'Tổng hợp nhập xuất tồn',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       v_tu_theo_doi_ton_kho: "*", // Default based on image
@@ -813,8 +813,8 @@ export const FILTER_CONFIGS = {
   tong_hop_nhap_xuat_ton_quy_doi: {
     title: 'Tổng hợp nhập xuất tồn quy đổi',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       v_tu_theo_doi_ton_kho: "*", // Default based on image
@@ -879,8 +879,8 @@ export const FILTER_CONFIGS = {
   tong_hop_chi_tiet_vat_tu: {
     title: 'Tổng hợp chi tiết vật tư',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       ps_dieu_chuyen_kho: "Tính các ps điều chuyển",
@@ -934,7 +934,7 @@ export const FILTER_CONFIGS = {
   bao_cao_ton_kho: {
     title: 'Báo cáo tồn kho',
     defaultFormData: {
-      ngay_ct2: "2025-08-31", // Only "Đến ngày"
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       ma_dvcs: "CTY",

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useModal } from "../../hooks/useModal";
-import { columnsTableKho } from "../../components/UISearch_and_formData/tableKho";
+import { columnsTableKho } from "../../components/UISearch_and_formData/tableKho.jsx";
 
 export const useTablePrintKho = () => {
   const [selectedEditId, setSelectedEditId] = useState();

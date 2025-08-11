@@ -62,6 +62,7 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import TablePrintKho from "./pages/Purchases/TablePrintKho";
 
 
 export default function App() {
@@ -174,6 +175,8 @@ export default function App() {
               <Route path="/chung-tu/don-dat-hang-mua" element={<DonHangMuaList />} />
               <Route path="/chung-tu/hoa-don-mua-dv" element={<HoaDonMuaDVList />} />
               <Route path="/chung-tu/hoa-don-ban-hang" element={<HoaDonXuatKhoList />} />
+
+              <Route path="/purchases/print-kho" element={<TablePrintKho />} />
 
             </Route>
           </Route>
