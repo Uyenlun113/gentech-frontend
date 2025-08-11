@@ -1,8 +1,9 @@
-import { Calculator ,Building2, ChevronRight, Receipt, Wallet, FileText, FileType, Users } from 'lucide-react';
+import { Calculator, Building2, ChevronRight, Receipt, Wallet, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
 import LoadingModal from '../../components/LoadingModal';
 import PricingModal from '../../components/PricingModal';
 import { usePostInGia } from '../../hooks/useInGia';
+import usePostBCKho from "../../hooks/useBCKho";
 
 // Get current date values
 const now = new Date();
@@ -48,6 +49,7 @@ export default function PurChases() {
 
   // Initialize API mutation hook
   const postInGiaMutation = usePostInGia();
+  const getBCKhoMutation = usePostBCKho();
 
   const [pricingData, setPricingData] = useState(initialPricingData);
   const processingSteps = [
@@ -279,10 +281,9 @@ export default function PurChases() {
       // Chuẩn bị data để gọi API
       const requestData = {
         ...formData,
-        // reportType: selectedMenuItem?.id,
-        // reportName: selectedMenuItem?.label
       };
-      let paramSearch = new URLSearchParams(requestData).toString();
+      console.log("requestData:", requestData);
+      let paramSearch = await getBCKhoMutation.mutateAsync(requestData);
       // Gọi API lấy dữ liệu báo cáo (bạn cần thay khoService.getData bằng service thực tế)
       // const khoData = await khoService.getData(paramSearch);
       const khoData = []
