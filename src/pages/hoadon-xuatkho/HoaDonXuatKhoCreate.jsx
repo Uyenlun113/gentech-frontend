@@ -42,7 +42,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
     ma_thue: "",
     thue_suat: 0,
     tk_no: "",
-    tk_co: "",
+    tk_thue_co: "",
     ten_vtthue: "",
     gc_thue: "",
     ht_tt: "",
@@ -749,7 +749,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       ma_thue: "",
       thue_suat: 0,
       tk_no: "",
-      tk_co: "",
+      tk_thue_co: "",
       ten_vtthue: "",
       gc_thue: "",
       ht_tt: "",
@@ -789,33 +789,33 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
 
     try {
       const payload = {
-        ma_gd: formData.ma_gd?.trim() || "",
-        ma_kh: formData.ma_kh?.trim() || "",
-        dia_chi: formData.dia_chi?.trim() || "",
-        ma_so_thue: formData.ma_so_thue?.trim() || "",
-        ong_ba: formData.ong_ba?.trim() || "",
-        dien_giai: formData.dien_giai?.trim() || "",
-        ma_nx: formData.ma_nx?.trim() || "",
-        ma_bp: formData.ma_bp?.trim() || "",
-        ngay_ct: formData.ngay_ct,
-        ngay_lct: formData.ngay_lct,
-        ma_qs: formData.ma_qs?.trim() || "",
-        so_seri: formData.so_seri?.trim() || "",
-        so_ct: formData.so_ct?.trim() || "",
-        ma_nt: formData.ma_nt?.trim() || "VND",
-        ty_gia: Number(formData.ty_gia) || 1,
-        sl_in: Number(formData.sl_in) || 0,
-        ma_thue: formData.ma_thue?.trim() || "",
-        thue_suat: Number(formData.thue_suat) || 0,
-        tk_no: formData.tk_no?.trim() || "",
-        tk_co: formData.tk_co?.trim() || "",
-        ten_vtthue: formData.ten_vtthue?.trim() || "",
-        gc_thue: formData.gc_thue?.trim() || "",
-        ht_tt: formData.ht_tt?.trim() || "",
-        sua_tien: formData.sua_tien,
-        px_gia_dd: formData.px_gia_dd,
-
-        hachToanList: hachToanData
+        phieu: {
+          ma_gd: formData.ma_gd?.trim() || "",
+          ma_kh: formData.ma_kh?.trim() || "",
+          dia_chi: formData.dia_chi?.trim() || "",
+          ma_so_thue: formData.ma_so_thue?.trim() || "",
+          ong_ba: formData.ong_ba?.trim() || "",
+          dien_giai: formData.dien_giai?.trim() || "",
+          ma_nx: formData.ma_nx?.trim() || "",
+          ma_bp: formData.ma_bp?.trim() || "",
+          ngay_ct: formData.ngay_ct,
+          ngay_lct: formData.ngay_lct,
+          ma_qs: formData.ma_qs?.trim() || "",
+          so_seri: formData.so_seri?.trim() || "",
+          so_ct: formData.so_ct?.trim() || "",
+          ma_nt: formData.ma_nt?.trim() || "VND",
+          ty_gia: Number(formData.ty_gia) || 1,
+          sl_in: Number(formData.sl_in) || 0,
+          ma_thue: formData.ma_thue?.trim() || "",
+          thue_suat: Number(formData.thue_suat) || 0,
+          tk_thue_co: formData.tk_thue_co?.trim() || "",
+          ten_vtthue: formData.ten_vtthue?.trim() || "",
+          gc_thue: formData.gc_thue?.trim() || "",
+          ht_tt: formData.ht_tt?.trim() || "",
+          sua_tien: formData.sua_tien,
+          px_gia_dd: formData.px_gia_dd,
+        },
+        hangHoa: hachToanData
           .filter(row => row.ma_vt && parseFloat(row.so_luong) > 0)
           .map(({ ma_vt, ma_kho_i, so_luong, gia2, tien2, gia, tien, tk_dt, tk_vt, tk_gv }) => ({
             ma_vt: ma_vt?.trim() || "",
@@ -997,31 +997,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       </div>
                       <div className="col-span-3"></div>
                     </div>
-
-                    {/* Additional tax fields */}
-                    {/* <div className="grid items-center gap-2 grid-cols-12">
-                      <Label className="text-xs min-w-[110px] col-span-2">Mã thuế</Label>
-                      <div className="col-span-3">
-                        <Input value={formData.ma_thue} className="h-8 text-sm bg-white" onChange={e => handleChange("ma_thue", e.target.value)} />
-                      </div>
-                      <Label className="text-xs col-span-2 text-center">Thuế suất (%)</Label>
-                      <div className="col-span-3">
-                        <Input value={formData.thue_suat} className="h-8 text-sm bg-white" onChange={e => handleChange("thue_suat", e.target.value)} type="number" />
-                      </div>
-                      <div className="col-span-2"></div>
-                    </div>
-
-                    <div className="grid items-center gap-2 grid-cols-12">
-                      <Label className="text-xs min-w-[110px] col-span-2">TK nợ</Label>
-                      <div className="col-span-3">
-                        <Input value={formData.tk_no} className="h-8 text-sm bg-white" onChange={e => handleChange("tk_no", e.target.value)} />
-                      </div>
-                      <Label className="text-xs col-span-2 text-center">TK có</Label>
-                      <div className="col-span-3">
-                        <Input value={formData.tk_co} className="h-8 text-sm bg-white" onChange={e => handleChange("tk_co", e.target.value)} />
-                      </div>
-                      <div className="col-span-2"></div>
-                    </div> */}
                   </div>
                 </div>
               </div>
@@ -1138,42 +1113,6 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       </div>
                       <div className="col-span-1"></div>
                     </div>
-
-                    {/* <div className="grid grid-cols-12 items-center gap-2">
-                      <Label className="text-xs col-span-6 text-left">Tên VT thuế</Label>
-                      <div className="col-span-5">
-                        <Input
-                          value={formData.ten_vtthue}
-                          onChange={e => handleChange("ten_vtthue", e.target.value)}
-                          className="h-8 text-sm bg-white"
-                        />
-                      </div>
-                      <div className="col-span-1"></div>
-                    </div>
-
-                    <div className="grid grid-cols-12 items-center gap-2">
-                      <Label className="text-xs col-span-6 text-left">Ghi chú thuế</Label>
-                      <div className="col-span-5">
-                        <Input
-                          value={formData.gc_thue}
-                          onChange={e => handleChange("gc_thue", e.target.value)}
-                          className="h-8 text-sm bg-white"
-                        />
-                      </div>
-                      <div className="col-span-1"></div>
-                    </div>
-
-                    <div className="grid grid-cols-12 items-center gap-2">
-                      <Label className="text-xs col-span-6 text-left">Hình thức TT</Label>
-                      <div className="col-span-5">
-                        <Input
-                          value={formData.ht_tt}
-                          onChange={e => handleChange("ht_tt", e.target.value)}
-                          className="h-8 text-sm bg-white"
-                        />
-                      </div>
-                      <div className="col-span-1"></div>
-                    </div> */}
                   </div>
                 </div>
               </div>
@@ -1279,16 +1218,10 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">TK thuế</Label>
                     <div className="col-span-4">
                       <Input
-                        value={formData.tk_no}
+                        value={formData.tk_thue_co}
                         className="h-8 text-sm bg-white"
-                        onChange={e => handleChange("tk_no", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-span-4">
-                      <Input
-                        value={formData.tk_co}
-                        className="h-8 text-sm bg-white"
-                        onChange={e => handleChange("tk_co", e.target.value)}
+                        onChange={e => handleChange("tk_thue_co", e.target.value)}
+                        type="text"
                       />
                     </div>
                   </div>
