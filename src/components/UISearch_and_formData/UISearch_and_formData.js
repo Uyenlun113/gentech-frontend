@@ -14,7 +14,6 @@ export const FILTER_CONFIGS = {
       ma_khach: "",
       ma_vat_tu: "",
       loai_phieu_nhap: "Tất cả",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND",
       kieu_loc: "Tất cả các vật tư trọn"
     },
@@ -87,7 +86,6 @@ export const FILTER_CONFIGS = {
     title: 'Bảng kê phiếu nhập mặt hàng',
     defaultFormData: {
       ma_vat_tu: "",
-      con_hang: "",
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
       loai_phieu_nhap: "Tất cả",
@@ -95,15 +93,14 @@ export const FILTER_CONFIGS = {
       den_so: "",
       ma_kho: "",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text", placeholder: "Nhập mã vật tư..." },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư..." },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" }, {
           key: "loai_phieu_nhap", label: "Loại phiếu nhập", type: "select",
@@ -132,7 +129,7 @@ export const FILTER_CONFIGS = {
       { id: 'ma_du_an', name: 'Mã dự án', checked: true, operator: 'like' }
     ],
     submitFields: [
-      'ma_vat_tu', 'con_hang', 'ngay_ct1', 'ngay_ct2',
+      'ma_vat_tu', 'ngay_ct1', 'ngay_ct2',
       'loai_phieu_nhap', 'chung_tu_tu_so', 'den_so', 'ma_kho',
       'ma_dvcs', 'mau_vnd_ngoai_te',
       'ma_dang_nx', 'ma_khach', 'ma_du_an'
@@ -143,7 +140,6 @@ export const FILTER_CONFIGS = {
     title: 'Bảng kê phiếu nhập mặt hàng theo nhà cung cấp',
     defaultFormData: {
       ma_vat_tu: "",
-      con_hang: "",
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
       loai_phieu_nhap: "Tất cả",
@@ -151,7 +147,6 @@ export const FILTER_CONFIGS = {
       den_so: "",
       ma_kho: "",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -159,7 +154,7 @@ export const FILTER_CONFIGS = {
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
         {
-          key: "ma_vat_tu", label: "Mã vật tư", type: "text",
+          key: "ma_vat_tu", label: "Mã vật tư", type: "lookup",
           placeholder: "Mã vật tư; Tên vật tư; TK"
         },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
@@ -172,7 +167,7 @@ export const FILTER_CONFIGS = {
             { value: "Khác", label: "Khác" }
           ]
         },
-        { key: "ma_kho", label: "Mã kho", type: "text" }
+        { key: "ma_kho", label: "Mã kho", type: "lookup" }
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled" }
@@ -194,7 +189,7 @@ export const FILTER_CONFIGS = {
       { id: 'ma_du_an', name: 'Mã dự án', checked: true, operator: 'like' }
     ],
     submitFields: [
-      'ma_vat_tu', 'con_hang', 'ngay_ct1', 'ngay_ct2',
+      'ma_vat_tu', 'ngay_ct1', 'ngay_ct2',
       'loai_phieu_nhap', 'chung_tu_tu_so', 'den_so', 'ma_kho',
       'ma_dvcs', 'mau_vnd_ngoai_te',
       'ma_dang_nx', 'ma_khach', 'ma_kho_nhap', 'ma_kho_xuat', 'ma_du_an'
@@ -213,7 +208,6 @@ export const FILTER_CONFIGS = {
       ma_kho: "",
       loai_phieu_nhap: "Tất cả",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -221,14 +215,14 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
         {
           key: "loai_phieu_nhap",
           label: "Loại phiếu nhập",
@@ -283,7 +277,6 @@ export const FILTER_CONFIGS = {
       ma_kho: "",
       ps_dieu_chuyen: "Tính các ps điều chuyển",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -305,7 +298,7 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_kho",
           label: "Mã kho",
-          type: "text"
+          type: "lookup"
         },
         {
           key: "loai_phieu_nhap",
@@ -371,7 +364,6 @@ export const FILTER_CONFIGS = {
       ma_khach: "",
       ma_vat_tu: "",
       loai_phieu_nhap: "Tất cả",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND",
       kieu_loc: "Tất cả các vật tư trọn"
     },
@@ -444,7 +436,6 @@ export const FILTER_CONFIGS = {
     title: 'Bảng kê phiếu xuất mặt hàng',
     defaultFormData: {
       ma_vat_tu: "",
-      con_hang: "",
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
       loai_phieu_nhap: "Tất cả",
@@ -452,14 +443,13 @@ export const FILTER_CONFIGS = {
       den_so: "",
       ma_kho: "",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text", placeholder: "Nhập mã vật tư..." },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư..." },
         {
           key: "loai_phieu_nhap", label: "Loại phiếu nhập", type: "select",
           options: [
@@ -470,8 +460,8 @@ export const FILTER_CONFIGS = {
         },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" },
-        { key: "ma_kho_xuat", label: "Mã kho xuất", type: "text" },
-        { key: "ma_kho_nhap", label: "Mã kho nhập", type: "text" },
+        { key: "ma_kho_xuat", label: "Mã kho xuất", type: "lookup" },
+        { key: "ma_kho_nhap", label: "Mã kho nhập", type: "lookup" },
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled" },],
@@ -501,7 +491,6 @@ export const FILTER_CONFIGS = {
     title: 'Bảng kê phiếu xuất của một mặt hàng theo khách hàng',
     defaultFormData: {
       ma_vat_tu: "",
-      con_hang: "",
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
       loai_phieu_nhap: "Tất cả",
@@ -509,7 +498,6 @@ export const FILTER_CONFIGS = {
       den_so: "",
       ma_kho: "",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -517,10 +505,10 @@ export const FILTER_CONFIGS = {
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
         {
-          key: "ma_vat_tu", label: "Mã vật tư", type: "text",
+          key: "ma_vat_tu", label: "Mã vật tư", type: "lookup",
           placeholder: "Mã vật tư"
         },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" },
         {
@@ -570,7 +558,6 @@ export const FILTER_CONFIGS = {
       ma_kho: "",
       loai_phieu_nhap: "Tất cả",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -580,7 +567,7 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         {
@@ -595,7 +582,7 @@ export const FILTER_CONFIGS = {
         },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled" }
@@ -638,7 +625,6 @@ export const FILTER_CONFIGS = {
       ma_kho: "",
       ps_dieu_chuyen: "Tính các ps điều chuyển",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
@@ -648,19 +634,19 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách hàng",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         {
           key: "ma_vat_tu",
           label: "Mã vật tư",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã vật tư, Tên vật tư"
         },
         {
           key: "ma_kho",
           label: "Mã kho",
-          type: "text"
+          type: "lookup"
         },
         {
           key: "loai_phieu_nhap",
@@ -720,19 +706,18 @@ export const FILTER_CONFIGS = {
     defaultFormData: {
       ma_vat_tu: "",
       ma_kho: "",
-      ngay_ct1: "2025-01-01", // Converted to YYYY-MM-DD for date input compatibility
-      ngay_ct2: "2025-08-31", // Converted to YYYY-MM-DD for date input compatibility
-      ngay_lap_the: "",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_lap_the: "28-08-2025",
       to_so: "",
-      ngay_mo_so: "2025-08-07", // Converted to YYYY-MM-DD for date input compatibility
-      ma_dvcs: "CTY",
-      mau_bao_cao: "", // Added based on image
+      ngay_mo_so: "28-08-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ma_dvcs: "CTY", // Added based on image
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text", placeholder: "(Mã vật tư, Tên vật tư, TK)" },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "(Mã vật tư, Tên vật tư, TK)" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
         { key: "ngay_lap_the", label: "Ngày lập thẻ", type: "date" },
@@ -762,22 +747,21 @@ export const FILTER_CONFIGS = {
   tong_hop_nhap_xuat_ton: {
     title: 'Tổng hợp nhập xuất tồn',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       v_tu_theo_doi_ton_kho: "*", // Default based on image
       ps_dieu_chuyen_kho: "Tính các ps điều chuyển",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup" },
         {
           key: "v_tu_theo_doi_ton_kho",
           label: "V.tư t.dõi tồn kho",
@@ -829,22 +813,21 @@ export const FILTER_CONFIGS = {
   tong_hop_nhap_xuat_ton_quy_doi: {
     title: 'Tổng hợp nhập xuất tồn quy đổi',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       v_tu_theo_doi_ton_kho: "*", // Default based on image
       ps_dieu_chuyen_kho: "Tính các ps điều chuyển",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text" },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup" },
         {
           key: "v_tu_theo_doi_ton_kho",
           label: "V.tư t.dõi tồn kho",
@@ -896,21 +879,20 @@ export const FILTER_CONFIGS = {
   tong_hop_chi_tiet_vat_tu: {
     title: 'Tổng hợp chi tiết vật tư',
     defaultFormData: {
-      ngay_ct1: "2025-01-01",
-      ngay_ct2: "2025-08-31",
+      ngay_ct1: "01-01-2025", // Converted to YYYY-MM-DD for date input compatibility
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       ps_dieu_chuyen_kho: "Tính các ps điều chuyển",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text" }
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup" }
       ],
       rightBox1Keys: [
         {
@@ -952,18 +934,17 @@ export const FILTER_CONFIGS = {
   bao_cao_ton_kho: {
     title: 'Báo cáo tồn kho',
     defaultFormData: {
-      ngay_ct2: "2025-08-31", // Only "Đến ngày"
+      ngay_ct2: "31-08-2025", // Converted to YYYY-MM-DD for date input compatibility
       ma_kho: "",
       ma_vat_tu: "",
       ma_dvcs: "CTY",
-      mau_bao_cao: "",
       mau_vnd_ngoai_te: "VND"
     },
     searchFields: {
       mainFieldKeys: [
         { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "ma_kho", label: "Mã kho", type: "text" },
-        { key: "ma_vat_tu", label: "Mã vật tư", type: "text" }
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
+        { key: "ma_vat_tu", label: "Mã vật tư", type: "lookup" }
       ],
       rightBox1Keys: [
         // "Ps điều chuyển kho" is missing from this form
@@ -1016,8 +997,17 @@ export const validateSubmitData = (configKey, data) => {
   });
 
   // Validate required fields
-  config.searchFields.forEach(field => {
-    if (field.required && (!submitData[field.key] || submitData[field.key].toString().trim() === '')) {
+  const allFields = [
+    ...(config.searchFields.mainFieldKeys || []),
+    ...(config.searchFields.rightBox1Keys || []),
+    ...(config.searchFields.rightBox2Keys || [])
+  ];
+
+  allFields.forEach(field => {
+    if (
+      field.required &&
+      (!submitData[field.key] || submitData[field.key].toString().trim() === "")
+    ) {
       errors.push(`${field.label} là bắt buộc`);
     }
   });

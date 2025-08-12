@@ -10,6 +10,7 @@ import PrintWrapper from "../../components/PrintWrapper";
 import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
 import { useTablePrintKho } from "./useTablePrintKho";
+import { getColumnsForReport } from "../../components/UISearch_and_formData/tableKho.jsx";
 
 export default function TablePrintKho() {
     const location = useLocation();
@@ -23,6 +24,7 @@ export default function TablePrintKho() {
     const [reportName, setReportName] = useState('Danh sách kho');
     const [reportType, setReportType] = useState('kho');
     const [totals, setTotals] = useState({});
+    const [columns, setColumns] = useState(columnsTable);
 
     // Hàm in sử dụng react-to-print
     const handlePrint = useReactToPrint({
@@ -67,8 +69,13 @@ export default function TablePrintKho() {
                 reportName: name,
                 reportType: type,
             } = location.state;
-            const rawData = wrappedData?.data || [];
-            const totalsData = wrappedData?.totals?.[0] || {};
+            // Linh hoạt nhận nhiều dạng response
+            const rawData = Array.isArray(wrappedData)
+                ? wrappedData
+                : (wrappedData?.data || wrappedData?.rows || []);
+            const totalsData = Array.isArray(wrappedData?.totals)
+                ? (wrappedData.totals[0] || {})
+                : (wrappedData?.summary || {});
 
             if (Array.isArray(rawData)) {
                 const mappedData = rawData.map((item, index) => ({
@@ -82,9 +89,12 @@ export default function TablePrintKho() {
 
                 setDataTable(mappedData);
                 setFilterInfo(filterData);
+                const nextReportType = type || "kho";
                 setReportName(name || "Danh sách kho");
-                setReportType(type || "kho");
+                setReportType(nextReportType);
                 setTotals(totalsData);
+                const nextColumns = getColumnsForReport(nextReportType, mappedData);
+                setColumns(nextColumns && nextColumns.length > 0 ? nextColumns : columnsTable);
             } else {
                 setDataTable([]);
             }
@@ -156,7 +166,7 @@ export default function TablePrintKho() {
                         {dataTable.length > 0 ? (
                             <ShowMoreTables
                                 dataTable={dataTable}
-                                columnsTable={columnsTable}
+                                columnsTable={columns}
                                 loading={loading}
                             />
                         ) : (
