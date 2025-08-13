@@ -6,7 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import PrintWrapper from "../../components/PrintWrapper";
+import PrintWrapperKho from "../../components/PrintWrapperKho.jsx";
 import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
 import { useTablePrintKho } from "./useTablePrintKho";
@@ -23,11 +23,46 @@ export default function TablePrintKho() {
     const [filterInfo, setFilterInfo] = useState(null);
     const [reportName, setReportName] = useState('Danh sách kho');
     const [reportType, setReportType] = useState('kho');
-    const [totals, setTotals] = useState({});
+    const [totals, setTotals] = useState([]);
     const [columns, setColumns] = useState(columnsTable);
 
     // Hàm in sử dụng react-to-print
+
+
     const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: reportName,
+        pageStyle: `
+            @page {
+                size: A4 portrait;
+                margin: 0.5in;
+            }
+            @media print {
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .no-print {
+                    display: none !important;
+                }
+                .print-content {
+                    display: block !important;
+                }
+            }
+            @media screen {
+                .print-content {
+                    display: none !important;
+                }
+            }
+        `,
+        onBeforeGetContent: () => {
+            return Promise.resolve();
+        },
+        onAfterPrint: () => {
+        }
+    });
+
+    const handlePrint2 = useReactToPrint({
         contentRef: printRef,
         documentTitle: reportName,
         pageStyle: `
@@ -57,7 +92,6 @@ export default function TablePrintKho() {
             return Promise.resolve();
         },
         onAfterPrint: () => {
-            console.log('Print completed for report type:', reportType);
         }
     });
 
@@ -74,8 +108,8 @@ export default function TablePrintKho() {
                 ? wrappedData
                 : (wrappedData?.data || wrappedData?.rows || []);
             const totalsData = Array.isArray(wrappedData?.totals)
-                ? (wrappedData.totals[0] || {})
-                : (wrappedData?.summary || {});
+                ? (wrappedData.totals || [])
+                : [];
 
             if (Array.isArray(rawData)) {
                 const mappedData = rawData.map((item, index) => ({
@@ -116,6 +150,26 @@ export default function TablePrintKho() {
         navigate(-1);
     };
 
+    const reportOrientation = [
+        'bang_ke_phieu_nhap_mat_hang',
+        // bang_ke_phieu_nhap_mat_hang_ncc: "portrait",
+        // bang_ke_phieu_nhap_ncc_mat_hang: "portrait",
+        // tong_hop_hang_nhap_kho: "portrait",
+
+        // // Report Out
+        // bang_ke_phieu_xuat: "portrait",
+        // bang_ke_phieu_xuat_mat_hang: "portrait",
+        // bang_ke_phieu_xuat_mat_hang_khach_hang: "portrait",
+        // bang_ke_phieu_xuat_khach_hang_mat_hang: "portrait",
+        // tong_hop_hang_xuat_kho: "portrait",
+
+        // // Report Exist
+        // the_kho_chi_tiet_vat_tu: "portrait",
+        // tong_hop_nhap_xuat_ton: "portrait",
+        // tong_hop_nhap_xuat_ton_quy_doi: "portrait",
+        // tong_hop_chi_tiet_vat_tu: "portrait",
+        // bao_cao_ton_kho: "portrait"
+    ];
     return (
         <>
             <div className="px-4">
@@ -152,13 +206,18 @@ export default function TablePrintKho() {
                                             alert('Không có dữ liệu để in!');
                                             return;
                                         }
-                                        handlePrint();
+                                        // const reportOrientation = ['bang_ke_phieu_nhap_mat_hang'];
+                                        if (reportOrientation.includes(reportType)) {
+                                            handlePrint2();
+                                        } else {
+                                            handlePrint();
+                                        }
                                     }}
                                     size="sm"
                                     variant="secondary"
                                     startIcon={<PrinterIcon className="size-4" />}
                                 >
-                                    In danh sách kho
+                                    In danh sách {reportName}
                                 </Button>
                             </div>
                         </div>
@@ -190,7 +249,7 @@ export default function TablePrintKho() {
                 </div >
             </div >
 
-            <PrintWrapper
+            <PrintWrapperKho
                 ref={printRef}
                 reportType={reportType}
                 dataTable={dataTable}

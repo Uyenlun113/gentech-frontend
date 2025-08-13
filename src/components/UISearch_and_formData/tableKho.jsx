@@ -143,9 +143,10 @@ export const preferredColumnsByReport = {
     { key: 'ma_kh', title: 'Mã khách', width: 100 },
     { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
     { key: 'dien_giai', title: 'Diễn giải', width: 220 },
-    { key: 'tong_tien', title: 'Tổng tiền', width: 120, render: (val) => val ? val.toLocaleString('vi-VN') : '-' },
+    { key: 't_tien', title: 'Tổng tiền', width: 120, render: (val) => val ? val.toLocaleString('vi-VN') : '-' },
     { key: 'ma_ct', title: 'Mã c.t', width: 80 }, // Cột này bạn ghi 2 lần trong ảnh? Nếu trùng có thể bỏ
   ],
+
   bang_ke_phieu_nhap_mat_hang: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
     { key: 'ma_ct', title: 'Mã c.t', width: 80 },
@@ -154,13 +155,202 @@ export const preferredColumnsByReport = {
     { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
     { key: 'dien_giai', title: 'Diễn giải', width: 220 },
     { key: 'so_luong', title: 'Số lượng', width: 100 },
-    { key: 'don_gia', title: 'Đơn giá', width: 120 },
-    { key: 'thanh_tien', title: 'Thành tiền', width: 120 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
     { key: 'ma_kho', title: 'Mã kho', width: 100 },
     { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
     { key: 'ma_nx', title: 'Mã nx', width: 100 },
-    { key: 'ten_nhap_xuat', title: 'Tên nhập xuất', width: 180 },
-    { key: 'ma_cti', title: 'Mã c.ti', width: 100 },
+    { key: 'ten_nx', title: 'Tên nhập xuất', width: 180 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 },
+  ],
+
+  bang_ke_phieu_nhap_mat_hang_ncc: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'ma_kho', title: 'Mã kho', width: 100 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+
+  bang_ke_phieu_nhap_ncc_mat_hang: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'ma_kho', title: 'Mã kho', width: 100 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+  tong_hop_hang_nhap_kho: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 100 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 180 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 }
+  ],
+
+  // Từ reportOutMenuItems
+  bang_ke_phieu_xuat: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'ma_kh', title: 'Mã khách', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 't_tien', title: 'Tổng tiền', width: 120 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+  bang_ke_phieu_xuat_mat_hang: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'ma_kh', title: 'Mã khách', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'ma_kho', title: 'Mã kho', width: 100 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'ten_nx', title: 'Tên nhập xuất', width: 180 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+
+  bang_ke_phieu_xuat_mat_hang_khach_hang: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'ma_kho', title: 'Mã kho', width: 100 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+
+  bang_ke_phieu_xuat_khach_hang_mat_hang: [ 
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.t', width: 80 },
+    { key: 'so_ct', title: 'Số c.từ', width: 120 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'ma_kho', title: 'Mã kho', width: 100 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 100 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+
+  tong_hop_hang_xuat_kho: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 120 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 220 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'so_luong', title: 'Số lượng', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'tien', title: 'Thành tiền', width: 120 },
+    { key: 'nh_vt1', title: 'Nhóm vật tư 1', width: 150 },
+    { key: 'nh_vt2', title: 'Nhóm vật tư 2', width: 150 },
+    { key: 'nh_vt3', title: 'Nhóm vật tư 3', width: 150 }
+  ],
+
+  // Từ reportExistMenuItems
+  the_kho_chi_tiet_vat_tu: [
+    { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
+    { key: 'ngay_lct', title: 'Ngày lập c.từ', width: 120 },
+    { key: 'ma_ct0', title: 'Mã c.từ in', width: 100 },
+    { key: 'so_ct', title: 'Số c.từ', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 200 },
+    { key: 'dien_giai', title: 'Diễn giải', width: 220 },
+    { key: 'ma_nx', title: 'Mã nx', width: 100 },
+    { key: 'gia', title: 'Đơn giá', width: 120 },
+    { key: 'sl_nhap', title: 'SL nhập', width: 100 },
+    { key: 'tien_nhap', title: 'Thành tiền nhập', width: 150 },
+    { key: 'sl_xuat', title: 'SL xuất', width: 100 },
+    { key: 'tien_xuat', title: 'Thành tiền xuất', width: 150 },
+    { key: 'sl_ton', title: 'SL tồn', width: 100 },
+    { key: 'ton', title: 'Thành tiền tồn', width: 150 },
+    { key: 'ma_du_an', title: 'Mã dự án', width: 120 },
+    { key: 'ten_nx', title: 'Tên nx', width: 150 },
+    { key: 'ma_kh', title: 'Mã khách', width: 120 },
+    { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
+  ],
+
+  tong_hop_nhap_xuat_ton: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 120 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 220 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'ton_dau', title: 'SL tồn đầu', width: 120 },
+    { key: 'du_dau', title: 'Dư đầu', width: 120 },
+    { key: 'sl_nhap', title: 'SL nhập', width: 120 },
+    { key: 'tien_nhap', title: 'Tiền nhập', width: 150 },
+    { key: 'sl_xuat', title: 'SL xuất', width: 120 },
+    { key: 'tien_xuat', title: 'Tiền xuất', width: 150 },
+    { key: 'ton_cuoi', title: 'SL tồn cuối', width: 120 },
+    { key: 'du_cuoi', title: 'Dư cuối', width: 120 },
+    { key: 'nh_vt1', title: 'Nhóm v.tư 1', width: 150 },
+    { key: 'nh_vt2', title: 'Nhóm v.tư 2', width: 150 },
+    { key: 'nh_vt3', title: 'Nhóm v.tư 3', width: 150 }
+  ],
+
+  tong_hop_nhap_xuat_ton_quy_doi: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 120 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 220 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'ton_dau', title: 'SL tồn đầu', width: 120 },
+    { key: 'du_dau', title: 'Dư đầu', width: 120 },
+    { key: 'sl_nhap', title: 'SL nhập', width: 120 },
+    { key: 'tien_nhap', title: 'Tiền nhập', width: 150 },
+    { key: 'sl_xuat', title: 'SL xuất', width: 120 },
+    { key: 'tien_xuat', title: 'Tiền xuất', width: 150 },
+    { key: 'ton_cuoi', title: 'SL tồn cuối', width: 120 },
+    { key: 'du_cuoi', title: 'Dư cuối', width: 120 },
+    { key: 'nh_vt1', title: 'Nhóm v.tư 1', width: 150 },
+    { key: 'nh_vt2', title: 'Nhóm v.tư 2', width: 150 },
+    { key: 'nh_vt3', title: 'Nhóm v.tư 3', width: 150 }
+  ],
+  tong_hop_chi_tiet_vat_tu: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 120 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 220 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'ton_dau', title: 'SL tồn đầu', width: 120 },
+    { key: 'du_dau', title: 'Dư đầu', width: 120 },
+    { key: 'sl_nhap', title: 'SL nhập', width: 120 },
+    { key: 'tien_nhap', title: 'Tiền nhập', width: 150 },
+    { key: 'sl_xuat', title: 'SL xuất', width: 120 },
+    { key: 'tien_xuat', title: 'Tiền xuất', width: 150 },
+    { key: 'ton_cuoi', title: 'SL tồn cuối', width: 120 },
+    { key: 'du_cuoi', title: 'Dư cuối', width: 120 }
+  ],
+  bao_cao_ton_kho: [
+    { key: 'stt', title: 'Stt', width: 60 },
+    { key: 'ma_vt', title: 'Mã vật tư', width: 120 },
+    { key: 'ten_vt', title: 'Tên vật tư', width: 220 },
+    { key: 'dvt', title: 'Đvt', width: 80 },
+    { key: 'ton00', title: 'SL tồn cuối', width: 120 },
+    { key: 'du00', title: 'Tiền', width: 120 },
+    { key: 'nh_vt1', title: 'Nhóm vật tư 1', width: 150 },
+    { key: 'nh_vt2', title: 'Nhóm vật tư 2', width: 150 },
+    { key: 'nh_vt3', title: 'Nhóm vật tư 3', width: 150 }
   ]
 };
 
