@@ -1,9 +1,11 @@
-import { Calculator, Building2, ChevronRight, Receipt, Wallet, FileText, FileType, Users } from 'lucide-react';
+import { Calculator, ChevronRight, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import FilterModalKho from '../../components/FilterModalKho';
 import LoadingModal from '../../components/LoadingModal';
 import PricingModal from '../../components/PricingModal';
-import { usePostInGia } from '../../hooks/useInGia';
 import usePostBCKho from "../../hooks/useBCKho";
+import { usePostInGia } from '../../hooks/useInGia';
 
 // Get current date values
 const now = new Date();
@@ -28,9 +30,7 @@ const initialPricingData = {
   ngayBatDau: '31-12-2020',
   maDVCS: 'CTY'
 };
-import { useNavigate } from 'react-router-dom';
-import FilterModalKho from '../../components/FilterModalKho';
-// import khoService from "../../services/khoService"; // Giả lập, bạn cần tạo file này hoặc thay bằng service thực tế
+
 
 export default function PurChases() {
   const [activeTab, setActiveTab] = useState('software');

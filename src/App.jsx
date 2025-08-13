@@ -33,6 +33,7 @@ import SalesPage from "./pages/Sales/Sales";
 import TableVonBangTien from "./pages/BC-von-bang-tien/TableVonBangTien";
 import CashCapitalPage from "./pages/Cash Capital/CashCapitalPage";
 import Ct46ListPage from "./pages/Cash Capital/PaymentVoucher/Ct46ListPage";
+import BaoCaoDonBanHang from "./pages/Cash/bcDonBanHang";
 import ListAccountPage from "./pages/category/account/ListAccount";
 import ListWarehousePage from "./pages/category/dmkho/ListWarehousePage";
 import PhieuPhieuChiPhiMuaHangPage from "./pages/chi-phi-mua-hang/PhieuMuaChiPhiPage";
@@ -48,6 +49,7 @@ import PhieuMuaListPage from "./pages/phieu-mua/PhieuMuaListPage";
 import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
 import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
+import TablePrintKho from "./pages/Purchases/TablePrintKho";
 import QuickReport from "./pages/Quick Report/QuickReport";
 import SoDuDauKyTable from "./pages/Sddk/SoDuDauKyTable";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
@@ -62,7 +64,6 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
-import TablePrintKho from "./pages/Purchases/TablePrintKho";
 
 
 export default function App() {
@@ -177,6 +178,8 @@ export default function App() {
               <Route path="/chung-tu/hoa-don-ban-hang" element={<HoaDonXuatKhoList />} />
 
               <Route path="/purchases/print-kho" element={<TablePrintKho />} />
+              <Route path="/bao-cao-ban-hang" element={<BaoCaoDonBanHang />} />
+
 
             </Route>
           </Route>
