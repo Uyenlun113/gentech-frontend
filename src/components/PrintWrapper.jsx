@@ -8,11 +8,7 @@ const PrintWrapper = forwardRef(({
     filterInfo,
     totals
 }, ref) => {
-    // Chọn template dựa trên reportType
     const getTemplate = (type) => {
-        console.log('Report Type:', type);
-        console.log('Totals received:', totals);
-
         switch (type?.toLowerCase()) {
             case 'so-quy':
                 return printTemplates.cashBook;

@@ -60,8 +60,6 @@ export default function TableVonBangTien() {
     });
 
     useEffect(() => {
-        console.log("DATA:", location.state);
-
         if (location.state) {
             const {
                 data: wrappedData,
@@ -98,8 +96,6 @@ export default function TableVonBangTien() {
                 setFilterInfo(filterData);
                 setReportName(name || "Danh sách báo cáo");
                 setReportType(type || "default");
-
-                // Lưu totals từ API
                 setTotals(totalsData);
             } else {
                 setDataTable([]);
@@ -122,12 +118,11 @@ export default function TableVonBangTien() {
         navigate(-1);
     };
 
-    // Lấy trực tiếp các giá trị từ totals API (đã được tính sẵn)
     const {
-        no_dk = 0,      // Số dư đầu kỳ bên Nợ
-        co_dk = 0,      // Số dư đầu kỳ bên Có
-        ps_no = 0,      // Phát sinh bên Nợ
-        ps_co = 0,      // Phát sinh bên Có
+        no_dk = 0,
+        co_dk = 0,
+        ps_no = 0,
+        ps_co = 0,
         no_ck = 0,      // Số dư cuối kỳ bên Nợ
         co_ck = 0       // Số dư cuối kỳ bên Có
     } = totals;
