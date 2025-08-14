@@ -451,13 +451,11 @@ export default function FilterModalKho({
       if (!validation.isValid) {
         // Hiển thị lỗi validation
         setValidationErrors(validation.errors || {});
-        console.log("Validation errors:", validation.errors);
         return;
       }
 
       // Clear validation errors và submit
       setValidationErrors({});
-      // console.log("Filter data:", submitData);
       onSubmit(submitData);
 
     } catch (error) {

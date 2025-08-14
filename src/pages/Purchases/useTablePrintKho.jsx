@@ -56,7 +56,6 @@ export const useTablePrintKho = () => {
   const handleDeleteClick = (record, e) => {
     e.stopPropagation();
     if (window.confirm(`Bạn có chắc chắn muốn xóa bản ghi kho "${record.ma_kho || record.stt_rec}"?`)) {
-      console.log("Deleting record:", record);
     }
   };
 
@@ -67,7 +66,6 @@ export const useTablePrintKho = () => {
   };
 
   const handleChangePage = (page) => {
-    console.log("Page changed to:", page);
   };
 
   return {
