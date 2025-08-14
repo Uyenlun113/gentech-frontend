@@ -17,7 +17,6 @@ export default function BaoCaoDonBanHang() {
 
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [filterInfo, setFilterInfo] = useState(null);
     const [reportName, setReportName] = useState('Danh sách báo cáo');
     const [reportType, setReportType] = useState('default');
     const [totals, setTotals] = useState({});
@@ -33,6 +32,8 @@ export default function BaoCaoDonBanHang() {
         const value = Array.isArray(amount) ? amount[0] : amount;
         return new Intl.NumberFormat("vi-VN").format(value);
     };
+    const filterInfo = location.state?.filterData || {};
+    console.log(filterInfo);
 
     const typeConfig = {
         inventory: { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
@@ -376,7 +377,6 @@ export default function BaoCaoDonBanHang() {
         if (location.state) {
             const {
                 data: wrappedData,
-                filterData,
                 reportName: name,
                 reportType: type,
             } = location.state;
@@ -406,7 +406,6 @@ export default function BaoCaoDonBanHang() {
                 }));
 
                 setDataTable(mappedData);
-                setFilterInfo(filterData);
                 setReportName(name || "Danh sách báo cáo");
                 setReportType(type || "default");
                 setTotals(totalsData);
@@ -527,6 +526,8 @@ export default function BaoCaoDonBanHang() {
                                 <Button
                                     onClick={() => {
                                         let hasData = false;
+
+                                        // Kiểm tra dựa vào reportType
                                         if (reportType === 'import-plan') {
                                             hasData = (data1 && data1.length > 0) || (data2 && data2.length > 0);
                                         } else {
