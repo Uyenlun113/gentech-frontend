@@ -253,8 +253,9 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
     }, [isOpen, isSubmitting, onClose]);
 
     if (!isOpen) return null;
-    const allowedIds = ["import-plan", "hehe", "haha", "hoho"];
-    const allowedIds2 = ["import-plan", "import-export-plan", "haha", "hoho"];
+    const allowedIds = ["import-plan", "inventory", "inventory-detail", "import-export-summary", "import-export-detail"];//vật tư
+    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail", "import-export-summary", "import-export-detail"];//kho
+    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];//khách hàng
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -382,29 +383,34 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                 </div>
                             </div>
                             {/* Row 1: Khách hàng và Kho */}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Khách hàng */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center text-sm font-semibold text-gray-700">
-                                        <Users className="w-4 h-4 mr-2 text-blue-600" />
-                                        Mã khách hàng
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={filterData.ma_kh || searchStates.ma_khach}
-                                            onChange={(e) => handlePopupSearch('ma_khach', e.target.value)}
-                                            onFocus={() => handleInputFocus('ma_khach')}
-                                            onBlur={() => handleInputBlur('ma_khach')}
-                                            placeholder="Nhập mã khách hàng..."
-                                            className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-                                            disabled={isSubmitting}
-                                        />
-                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                            <User className="w-4 h-4 text-gray-400" />
+                                {allowedIds3.includes(selectedItem.id) && (
+                                    <div className="space-y-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-700">
+                                            <Users className="w-4 h-4 mr-2 text-blue-600" />
+                                            Mã khách hàng
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={filterData.ma_kh || searchStates.ma_khach}
+                                                onChange={(e) => handlePopupSearch('ma_khach', e.target.value)}
+                                                onFocus={() => handleInputFocus('ma_khach')}
+                                                onBlur={() => handleInputBlur('ma_khach')}
+                                                placeholder="Nhập mã khách hàng..."
+                                                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                                disabled={isSubmitting}
+                                            />
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <User className="w-4 h-4 text-gray-400" />
+                                            </div>
                                         </div>
+
                                     </div>
-                                </div>
+                                )}
+
 
                                 {/* Kho */}  {allowedIds2.includes(selectedItem.id) && (
                                     <div className="space-y-2">

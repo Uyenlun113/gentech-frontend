@@ -1,10 +1,13 @@
 import { forwardRef } from 'react';
+import { printBcDonBanHang } from '../services/printBcDonBanHang';
 import { printTemplates } from '../services/printTemplates';
 
 
 const PrintWrapper = forwardRef(({
     reportType,
     dataTable,
+    data1,
+    data2,
     filterInfo,
     totals
 }, ref) => {
@@ -18,6 +21,8 @@ const PrintWrapper = forwardRef(({
                 return printTemplates.soTienGui;
             case 'import-export-summary':
                 return printTemplates.soChiTiet;
+            case 'import-plan':
+                return printBcDonBanHang.invoiceSummary;
             default:
                 return printTemplates.default;
         }
@@ -25,7 +30,13 @@ const PrintWrapper = forwardRef(({
 
     const selectedTemplate = getTemplate(reportType);
 
-    const htmlContent = selectedTemplate(dataTable, filterInfo, totals);
+    let htmlContent;
+    if (reportType?.toLowerCase() === 'import-plan') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo, totals);
+    } else {
+        htmlContent = selectedTemplate(dataTable, filterInfo, totals);
+    }
+
 
     return (
         <div
