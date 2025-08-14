@@ -157,6 +157,7 @@ export const FILTER_CONFIGS = {
           key: "ma_vat_tu", label: "Mã vật tư", type: "lookup",
           placeholder: "Mã vật tư; Tên vật tư; TK"
         },
+        { key: "ma_kho", label: "Mã kho", type: "lookup" },
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
         { key: "den_so", label: "Đến số", type: "text" },
         {
@@ -167,7 +168,6 @@ export const FILTER_CONFIGS = {
             { value: "Khác", label: "Khác" }
           ]
         },
-        { key: "ma_kho", label: "Mã kho", type: "lookup" }
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled" }
@@ -212,16 +212,16 @@ export const FILTER_CONFIGS = {
     },
     searchFields: {
       mainFieldKeys: [
+        { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
+        { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
+        { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
+        { key: "den_so", label: "Đến số", type: "text" },
         {
           key: "ma_khach",
           label: "Mã khách",
           type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
-        { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
-        { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
-        { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text" },
-        { key: "den_so", label: "Đến số", type: "text" },
         { key: "ma_kho", label: "Mã kho", type: "lookup" },
         {
           key: "loai_phieu_nhap",
@@ -286,13 +286,13 @@ export const FILTER_CONFIGS = {
         {
           key: "ma_khach",
           label: "Mã khách hàng",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã khách, Tên khách hàng"
         },
         {
           key: "ma_vat_tu",
           label: "Mã vật tư",
-          type: "text",
+          type: "lookup",
           placeholder: "Mã vật tư, Tên vật tư"
         },
         {

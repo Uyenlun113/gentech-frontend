@@ -282,7 +282,6 @@ export default function PurChases() {
       const requestData = {
         ...formData,
       };
-      console.log("requestData:", requestData);
       const responseData = await getBCKhoMutation.mutateAsync(requestData);
       // Đóng modal
       setOpenModalId(null);
