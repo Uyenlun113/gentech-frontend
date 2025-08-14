@@ -151,7 +151,10 @@ export default function TablePrintKho() {
     };
 
     const reportOrientation = [
-        'bang_ke_phieu_nhap_mat_hang',
+        'bang_ke_phieu_nhap_mat_hang', 
+        'bang_ke_phieu_xuat_mat_hang',
+        'the_kho_chi_tiet_vat_tu',
+        'tong_hop_nhap_xuat_ton',
         // bang_ke_phieu_nhap_mat_hang_ncc: "portrait",
         // bang_ke_phieu_nhap_ncc_mat_hang: "portrait",
         // tong_hop_hang_nhap_kho: "portrait",
