@@ -42,23 +42,18 @@ const PrintWrapper = forwardRef(({
 
     let htmlContent;
     if (reportType?.toLowerCase() === 'import-plan') {
-        htmlContent = selectedTemplate(data1, data2, filterInfo, totals);
-    } if (reportType?.toLowerCase() === 'export-plan') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'export-plan') {
         htmlContent = selectedTemplate(data1, filterInfo, totals);
-    }
-    if (reportType?.toLowerCase() === 'inventory2') {
+    } else if (reportType?.toLowerCase() === 'inventory2') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
-    }
-    if (reportType?.toLowerCase() === 'inventory-detail2') {
+    } else if (reportType?.toLowerCase() === 'inventory-detail2') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
-    }
-    if (reportType?.toLowerCase() === 'import-export-summary2') {
+    } else if (reportType?.toLowerCase() === 'import-export-summary2') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
-    }
-    if (reportType?.toLowerCase() === 'import-export-detail') {
+    } else if (reportType?.toLowerCase() === 'import-export-detail') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
-    }
-    else {
+    } else {
         htmlContent = selectedTemplate(data1, filterInfo, totals);
     }
 

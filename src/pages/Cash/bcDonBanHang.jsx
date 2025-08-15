@@ -431,7 +431,6 @@ export default function BaoCaoDonBanHang() {
     const data1 = location.state?.data?.data1 || [];
     const data2 = location.state?.data?.data2 || [];
     const data = data1.length > 0 ? data1 : data2;
-    console.log(data1);
     const allowedIds = ["export-plan", "inventory2"];
     const tinhTong = (data) => {
         return data?.reduce(

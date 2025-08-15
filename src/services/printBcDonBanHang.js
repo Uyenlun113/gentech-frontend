@@ -18,7 +18,12 @@ const formatCurrency = (amount) => {
 };
 
 const renderInvoiceTableGrouped = (data1, data2) => {
-    // Nhóm data1 theo stt_rec
+    if (!Array.isArray(data1)) {
+        data1 = [];
+    }
+    if (!Array.isArray(data2)) {
+        data2 = [];
+    }
     const grouped = data1.reduce((acc, item) => {
         if (!acc[item.stt_rec]) acc[item.stt_rec] = [];
         acc[item.stt_rec].push(item);
@@ -26,7 +31,7 @@ const renderInvoiceTableGrouped = (data1, data2) => {
     }, {});
 
     // Nhóm data2 theo stt_rec
-    const detailsBySttRec = data2.reduce((acc, detail) => {
+    const detailsBySttRec = data2?.reduce((acc, detail) => {
         if (!acc[detail.stt_rec]) acc[detail.stt_rec] = [];
         acc[detail.stt_rec].push(detail);
         return acc;
@@ -143,6 +148,7 @@ const renderInvoiceTableGrouped = (data1, data2) => {
 
 export const printBcDonBanHang = {
     invoiceSummary: (data1, data2, filterInfo) => {
+        console.log(data1, data2, filterInfo);
         const { rows, grandTong } = renderInvoiceTableGrouped(data1, data2);
         return `
             <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
