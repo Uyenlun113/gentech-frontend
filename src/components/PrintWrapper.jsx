@@ -5,7 +5,6 @@ import { printTemplates } from '../services/printTemplates';
 
 const PrintWrapper = forwardRef(({
     reportType,
-    dataTable,
     data1,
     data2,
     filterInfo,
@@ -23,6 +22,17 @@ const PrintWrapper = forwardRef(({
                 return printTemplates.soChiTiet;
             case 'import-plan':
                 return printBcDonBanHang.invoiceSummary;
+            case 'export-plan':
+                return printBcDonBanHang.salesAndServiceInvoice;
+            case 'inventory2':
+                return printBcDonBanHang.invoiceOfAnItem;
+            case 'inventory-detail2':
+                return printBcDonBanHang.invoiceByCustomerGroup;
+            case 'import-export-summary2':
+                return printBcDonBanHang.invoiceBySales;
+            case 'import-export-detail':
+                return printBcDonBanHang.invoiceByCustomerProductGroup;
+
             default:
                 return printTemplates.default;
         }
@@ -33,8 +43,23 @@ const PrintWrapper = forwardRef(({
     let htmlContent;
     if (reportType?.toLowerCase() === 'import-plan') {
         htmlContent = selectedTemplate(data1, data2, filterInfo, totals);
-    } else {
-        htmlContent = selectedTemplate(dataTable, filterInfo, totals);
+    } if (reportType?.toLowerCase() === 'export-plan') {
+        htmlContent = selectedTemplate(data1, filterInfo, totals);
+    }
+    if (reportType?.toLowerCase() === 'inventory2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    }
+    if (reportType?.toLowerCase() === 'inventory-detail2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    }
+    if (reportType?.toLowerCase() === 'import-export-summary2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    }
+    if (reportType?.toLowerCase() === 'import-export-detail') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    }
+    else {
+        htmlContent = selectedTemplate(data1, filterInfo, totals);
     }
 
 

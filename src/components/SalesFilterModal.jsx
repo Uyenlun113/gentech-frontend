@@ -253,8 +253,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
     }, [isOpen, isSubmitting, onClose]);
 
     if (!isOpen) return null;
-    const allowedIds = ["import-plan", "inventory", "inventory-detail", "import-export-summary", "import-export-detail"];//vật tư
-    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail", "import-export-summary", "import-export-detail"];//kho
+    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail"];//vật tư
+    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail"];//kho
     const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];//khách hàng
 
     return (

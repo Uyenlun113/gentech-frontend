@@ -33,12 +33,11 @@ export default function BaoCaoDonBanHang() {
         return new Intl.NumberFormat("vi-VN").format(value);
     };
     const filterInfo = location.state?.filterData || {};
-    console.log(filterInfo);
 
     const typeConfig = {
-        inventory: { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
-        "inventory-detail": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
-        "import-export-summary": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        inventory2: { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        "inventory-detail2": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        "import-export-summary2": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
         supplier: { maKey: "ma_ncc", maTitle: "Mã NCC", tenKey: "ten_ncc", tenTitle: "Tên NCC" },
     };
 
@@ -429,19 +428,11 @@ export default function BaoCaoDonBanHang() {
     const handleGoBack = () => {
         navigate(-1);
     };
-
-    const {
-        no_dk = 0,
-        co_dk = 0,
-        ps_no = 0,
-        ps_co = 0,
-        no_ck = 0,
-        co_ck = 0
-    } = totals;
     const data1 = location.state?.data?.data1 || [];
     const data2 = location.state?.data?.data2 || [];
     const data = data1.length > 0 ? data1 : data2;
-    const allowedIds = ["export-plan", "inventory"];
+    console.log(data1);
+    const allowedIds = ["export-plan", "inventory2"];
     const tinhTong = (data) => {
         return data?.reduce(
             (acc, item) => {
@@ -455,7 +446,8 @@ export default function BaoCaoDonBanHang() {
         );
     };
     const { tienHang, tienCK, tienThue, tongThanhToan } = tinhTong(data);
-    const allowedIds2 = ["inventory-detail", "import-export-detail"];
+
+    const allowedIds2 = ["inventory-detail2", "import-export-detail"];
     const tinhTongTruObj1 = (data) => {
         if (!data || data.length < 2) return { tienHang: 0, tienCK: 0, tienThue: 0, tongThanhToan: 0 };
 
@@ -476,7 +468,7 @@ export default function BaoCaoDonBanHang() {
         );
     };
     const { tienHang2, tienCK2, tienThue2, tongThanhToan2 } = tinhTongTruObj1(data);
-    const allowedIds3 = ["import-export-summary"];
+    const allowedIds3 = ["import-export-summary2"];
     const tinhTong3 = (data) => {
         return data?.reduce(
             (acc, item) => {
@@ -526,14 +518,14 @@ export default function BaoCaoDonBanHang() {
                                 <Button
                                     onClick={() => {
                                         let hasData = false;
-
-                                        // Kiểm tra dựa vào reportType
-                                        if (reportType === 'import-plan') {
-                                            hasData = (data1 && data1.length > 0) || (data2 && data2.length > 0);
+                                        const typeCheckData12 = ['import-plan', 'export-plan', 'inventory2', 'inventory-detail2', 'import-export-summary2', 'import-export-detail'];
+                                        if (typeCheckData12.includes(reportType)) {
+                                            hasData =
+                                                (data1 && data1.length > 0) ||
+                                                (data2 && data2.length > 0);
                                         } else {
                                             hasData = dataTable && dataTable.length > 0;
                                         }
-
                                         if (!hasData) {
                                             alert('Không có dữ liệu để in!');
                                             return;
@@ -728,7 +720,7 @@ export default function BaoCaoDonBanHang() {
                 filterInfo={filterInfo}
                 data1={data1}
                 data2={data2}
-                totals={{ ps_no, ps_co, no_dk, co_dk, no_ck, co_ck }}
+                totals={{ tienHang, tienCK, tienThue, tongThanhToan }}
             />
         </>
     );
