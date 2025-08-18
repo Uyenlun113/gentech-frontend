@@ -91,7 +91,11 @@ export default function CashPage() {
         ma_vt: '',
         so_ct_from: '',
         so_ct_to: '',
-        ma_dvcs: 'CTY'
+        ma_dvcs: 'CTY',
+        tk_doanh_thu: [],
+        tk_giam_tru: [],
+        quyen_so: "",
+        ngay_mo_so: "2025-08-01",
       },
       'cost-analysis': {
         StartDate: '2025-08-01',

@@ -1,9 +1,11 @@
+
 import "flatpickr/dist/flatpickr.min.css";
 import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
-import { Building2, Calendar, CreditCard, Filter, Loader, Package, Search, Truck, User, Users, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Building2, Calendar, ChevronDown, CreditCard, Filter, Loader, Package, Search, Truck, Users, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Flatpickr from "react-flatpickr";
 
+import { useAccounts } from "../hooks/useAccounts";
 import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
 import { useDmvt } from "../hooks/useDmvt";
@@ -11,7 +13,6 @@ import { CalenderIcon } from "../icons";
 import CustomerSelectionPopup from "./general/CustomerSelectionPopup";
 import WarehouseSelectionPopup from "./general/dmkPopup";
 import MaterialSelectionPopup from "./general/dmvtPopup";
-
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -29,6 +30,227 @@ const useDebounce = (value, delay) => {
     return debouncedValue;
 };
 
+const MultiAccountSelect = ({
+    value = [],
+    onChange,
+    placeholder = "Chọn tài khoản",
+    searchPlaceholder = "Tìm kiếm tài khoản...",
+    label = "Tài khoản",
+    disabled = false,
+    showNameInTags = true
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const dropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
+
+    // Lấy danh sách tài khoản
+    const { data: accountsData, isLoading } = useAccounts({ search: searchTerm });
+    const accounts = accountsData?.data || [];
+
+
+    const selectedAccounts = accounts.filter(account =>
+        value.includes(account.tk)
+    );
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setSearchTerm('');
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    const handleToggle = () => {
+        if (!disabled) {
+            setIsOpen(!isOpen);
+            if (!isOpen) {
+                setSearchTerm('');
+            }
+        }
+    };
+
+    const handleSelect = (account) => {
+        const accountCode = account.tk;
+        const newValue = value.includes(accountCode)
+            ? value.filter(code => code !== accountCode)
+            : [...value, accountCode];
+        onChange(newValue);
+    };
+
+    const handleRemove = (accountCode, e) => {
+        e.stopPropagation();
+        const newValue = value.filter(code => code !== accountCode);
+        onChange(newValue);
+    };
+
+    const handleClear = (e) => {
+        e.stopPropagation();
+        onChange([]);
+    };
+    const getDisplayText = (account) => {
+        if (showNameInTags && account.ten_tk) {
+            return `${account.tk}`;
+        }
+        return account.tk;
+    };
+
+    return (
+        <div className="space-y-2">
+            <label className="flex items-center text-sm font-semibold text-gray-700">
+                <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+                {label}
+            </label>
+            <div className="relative" ref={dropdownRef}>
+                {/* Select Button */}
+                <button
+                    type="button"
+                    onClick={handleToggle}
+                    disabled={disabled}
+                    className={`min-h-[44px] w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10 flex items-center justify-between transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-300'
+                        }`}
+                >
+                    <div className="flex-1 text-left">
+                        {selectedAccounts.length === 0 ? (
+                            <span className="text-gray-500">{placeholder}</span>
+                        ) : selectedAccounts.length === 1 ? (
+                            <div className="flex flex-wrap gap-1">
+                                <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md max-w-full">
+                                    <span className="truncate">{getDisplayText(selectedAccounts[0])}</span>
+                                    {!disabled && (
+                                        <button
+                                            onClick={(e) => handleRemove(selectedAccounts[0].tk, e)}
+                                            className="ml-1 hover:text-blue-600 flex-shrink-0"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    )}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-1">
+                                {selectedAccounts.slice(0, 3).map((account) => (
+                                    <span
+                                        key={account.tk}
+                                        className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md"
+                                    >
+                                        <span className="truncate max-w-[120px]">
+                                            {getDisplayText(account)}
+                                        </span>
+                                        {!disabled && (
+                                            <button
+                                                onClick={(e) => handleRemove(account.tk, e)}
+                                                className="ml-1 hover:text-blue-600 flex-shrink-0"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        )}
+                                    </span>
+                                ))}
+                                {selectedAccounts.length > 3 && (
+                                    <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                                        +{selectedAccounts.length - 3} khác
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-2">
+                        {selectedAccounts.length > 0 && !disabled && (
+                            <button
+                                onClick={handleClear}
+                                className="text-gray-400 hover:text-gray-600"
+                                title="Xóa tất cả"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                        <ChevronDown
+                            size={16}
+                            className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                        />
+                    </div>
+                </button>
+
+                {/* Dropdown */}
+                {isOpen && !disabled && (
+                    <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-lg">
+                        {/* Search Input */}
+                        <div className="p-2 border-b border-gray-200">
+                            <div className="relative">
+                                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder={searchPlaceholder}
+                                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Options List */}
+                        <div className="max-h-60 overflow-y-auto">
+                            {isLoading ? (
+                                <div className="p-4 text-center text-gray-500">
+                                    <div className="inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                                    <span className="ml-2">Đang tải...</span>
+                                </div>
+                            ) : accounts.length === 0 ? (
+                                <div className="p-4 text-center text-gray-500">
+                                    {searchTerm ? 'Không tìm thấy kết quả' : 'Không có dữ liệu'}
+                                </div>
+                            ) : (
+                                accounts.map((account) => {
+                                    const accountCode = account.tk;
+                                    const isSelected = value.includes(accountCode);
+                                    return (
+                                        <button
+                                            key={accountCode}
+                                            type="button"
+                                            onClick={() => handleSelect(account)}
+                                            className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 transition-colors flex items-center justify-between ${isSelected
+                                                ? 'bg-blue-50 text-blue-600'
+                                                : 'text-gray-800'
+                                                }`}
+                                        >
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium truncate">{account.tk}</div>
+                                                {account.ten_tk && (
+                                                    <div className="text-xs text-gray-500 truncate mt-1">
+                                                        {account.ten_tk}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {isSelected && (
+                                                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+
+// Main SalesFilterModal Component
 export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaultValues, onSubmit, isSubmitting = false }) {
     const [filterData, setFilterData] = useState({
         StartDate: "",
@@ -39,6 +261,10 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         so_ct_from: "",
         so_ct_to: "",
         ma_dvcs: "",
+        tk_doanh_thu: [],
+        tk_giam_tru: [],
+        quyen_so: "",
+        ngay_mo_so: "",
     });
 
     // States cho search và popup
@@ -81,11 +307,19 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         { enabled: !!debouncedKhoXuatSearch && debouncedKhoXuatSearch.length > 0 }
     );
 
+    // Check if current item is "Sổ chi tiết bán hàng"
+    const isDetailedSalesReport = selectedItem?.id === 'inventory-report';
+
     // Reset form khi modal đóng/mở
     useEffect(() => {
         if (isOpen) {
             if (defaultValues) {
-                setFilterData((prev) => ({ ...prev, ...defaultValues }));
+                setFilterData((prev) => ({
+                    ...prev,
+                    ...defaultValues,
+                    tk_doanh_thu: defaultValues.tk_doanh_thu || [],
+                    tk_giam_tru: defaultValues.tk_giam_tru || []
+                }));
             }
         } else {
             // Reset khi đóng modal
@@ -230,6 +464,9 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
             ma_kh: filterData.ma_kh || searchStates.ma_khach.trim(),
             ma_kho: filterData.ma_kho || searchStates.ma_kho.trim(),
             ma_vt: filterData.ma_vt || searchStates.ma_vat_tu.trim(),
+            // Format account arrays as comma-separated strings
+            tk_doanh_thu: Array.isArray(filterData.tk_doanh_thu) ? filterData.tk_doanh_thu.join(',') : filterData.tk_doanh_thu,
+            tk_giam_tru: Array.isArray(filterData.tk_giam_tru) ? filterData.tk_giam_tru.join(',') : filterData.tk_giam_tru,
         };
         onSubmit(submitData);
     }, [filterData, searchStates, onSubmit]);
@@ -239,6 +476,7 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
             onClose();
         }
     }, [isSubmitting, onClose]);
+
     useEffect(() => {
         const handleEsc = (event) => {
             if (event.keyCode === 27 && !isSubmitting) {
@@ -253,13 +491,14 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
     }, [isOpen, isSubmitting, onClose]);
 
     if (!isOpen) return null;
-    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail"];//vật tư
-    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail"];//kho
-    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];//khách hàng
+
+    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail"];
+    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail"];
+    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-auto transform transition-all">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl mx-auto transform transition-all max-h-[90vh] overflow-y-auto">
                 {/* Header với gradient */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-blue-500 rounded-t-xl">
                     <div className="flex items-center space-x-3">
@@ -346,8 +585,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
+
                             {/* Row 3: Số chứng từ và Loại voucher */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Số CT từ */}
@@ -382,86 +621,145 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                     />
                                 </div>
                             </div>
-                            {/* Row 1: Khách hàng và Kho */}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Khách hàng */}
-                                {allowedIds3.includes(selectedItem.id) && (
-                                    <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700">
-                                            <Users className="w-4 h-4 mr-2 text-blue-600" />
-                                            Mã khách hàng
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={filterData.ma_kh || searchStates.ma_khach}
-                                                onChange={(e) => handlePopupSearch('ma_khach', e.target.value)}
-                                                onFocus={() => handleInputFocus('ma_khach')}
-                                                onBlur={() => handleInputBlur('ma_khach')}
-                                                placeholder="Nhập mã khách hàng..."
-                                                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-                                                disabled={isSubmitting}
-                                            />
-                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <User className="w-4 h-4 text-gray-400" />
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                )}
-
-
-                                {/* Kho */}  {allowedIds2.includes(selectedItem.id) && (
-                                    <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700">
-                                            <Truck className="w-4 h-4 mr-2 text-blue-600" />
-                                            Mã kho
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={filterData.ma_kho || searchStates.ma_kho}
-                                                onChange={(e) => handlePopupSearch('ma_kho', e.target.value)}
-                                                onFocus={() => handleInputFocus('ma_kho')}
-                                                onBlur={() => handleInputBlur('ma_kho')}
-                                                placeholder="Nhập mã kho..."
-                                                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-                                                disabled={isSubmitting}
-                                            />
-                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <Package className="w-4 h-4 text-gray-400" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            {/* Row 2: Vật tư và Đơn vị */}
-                            {allowedIds.includes(selectedItem.id) && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Vật tư */}
-                                    <div className="space-y-2">
-                                        <label className="flex items-center text-sm font-semibold text-gray-700">
-                                            <Package className="w-4 h-4 mr-2 text-blue-600" />
-                                            Mã vật tư
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={filterData.ma_vt || searchStates.ma_vat_tu}
-                                                onChange={(e) => handlePopupSearch('ma_vat_tu', e.target.value)}
-                                                onFocus={() => handleInputFocus('ma_vat_tu')}
-                                                onBlur={() => handleInputBlur('ma_vat_tu')}
-                                                placeholder="Nhập mã vật tư..."
-                                                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
-                                                disabled={isSubmitting}
-                                            />
-                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <CreditCard className="w-4 h-4 text-gray-400" />
-                                            </div>
+                            {/* Khách hàng */}
+                            {allowedIds3.includes(selectedItem.id) && (
+                                <div className="space-y-2">
+                                    <label className="flex items-center text-sm font-semibold text-gray-700">
+                                        <Users className="w-4 h-4 mr-2 text-blue-600" />
+                                        Mã khách hàng
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={filterData.ma_kh || searchStates.ma_khach}
+                                            onChange={(e) => handlePopupSearch('ma_khach', e.target.value)}
+                                            onFocus={() => handleInputFocus('ma_khach')}
+                                            onBlur={() => handleInputBlur('ma_khach')}
+                                            placeholder="Nhập mã khách hàng..."
+                                            className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                            disabled={isSubmitting}
+                                        />
+                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                            <Package className="w-4 h-4 text-gray-400" />
                                         </div>
                                     </div>
                                 </div>
+                            )}
+                            {/* Row 2: Vật tư */}
+                            {allowedIds.includes(selectedItem.id) && (
+                                <div className="space-y-2">
+                                    <label className="flex items-center text-sm font-semibold text-gray-700">
+                                        <Package className="w-4 h-4 mr-2 text-blue-600" />
+                                        Mã vật tư
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={filterData.ma_vt || searchStates.ma_vat_tu}
+                                            onChange={(e) => handlePopupSearch('ma_vat_tu', e.target.value)}
+                                            onFocus={() => handleInputFocus('ma_vat_tu')}
+                                            onBlur={() => handleInputBlur('ma_vat_tu')}
+                                            placeholder="Nhập mã vật tư..."
+                                            className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                            disabled={isSubmitting}
+                                        />
+                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                            <CreditCard className="w-4 h-4 text-gray-400" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {allowedIds2.includes(selectedItem.id) && (
+                                <div className="space-y-2">
+                                    <label className="flex items-center text-sm font-semibold text-gray-700">
+                                        <Truck className="w-4 h-4 mr-2 text-blue-600" />
+                                        Mã kho
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={filterData.ma_kho || searchStates.ma_kho}
+                                            onChange={(e) => handlePopupSearch('ma_kho', e.target.value)}
+                                            onFocus={() => handleInputFocus('ma_kho')}
+                                            onBlur={() => handleInputBlur('ma_kho')}
+                                            placeholder="Nhập mã kho..."
+                                            className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                            disabled={isSubmitting}
+                                        />
+                                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                            <Truck className="w-4 h-4 text-gray-400" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Additional fields for "Sổ chi tiết bán hàng" */}
+                            {isDetailedSalesReport && (
+                                <>
+                                    {/* Account selection fields */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <MultiAccountSelect
+                                            value={filterData.tk_doanh_thu}
+                                            onChange={(value) => handleInputChange("tk_doanh_thu", value)}
+                                            label="TK doanh thu"
+                                            placeholder="Chọn tài khoản doanh thu"
+                                            disabled={isSubmitting}
+                                        />
+
+                                        <MultiAccountSelect
+                                            value={filterData.tk_giam_tru}
+                                            onChange={(value) => handleInputChange("tk_giam_tru", value)}
+                                            label="TK giảm trừ"
+                                            placeholder="Chọn tài khoản giảm trừ"
+                                            disabled={isSubmitting}
+                                        />
+                                    </div>
+
+                                    {/* Quyển số và Ngày mở sổ */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="flex items-center text-sm font-semibold text-gray-700">
+                                                <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+                                                Quyển số
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={filterData.quyen_so}
+                                                onChange={(e) => handleInputChange("quyen_so", e.target.value)}
+                                                placeholder="Nhập quyển số..."
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+                                                Ngày mở sổ
+                                            </label>
+                                            <div className="relative">
+                                                <Flatpickr
+                                                    value={filterData.ngay_mo_so}
+                                                    onChange={(date) => {
+                                                        const isoDate = date[0]?.toISOString().split("T")[0];
+                                                        handleInputChange("ngay_mo_so", isoDate);
+                                                    }}
+                                                    options={{
+                                                        dateFormat: "Y-m-d",
+                                                        locale: Vietnamese,
+                                                        allowInput: true,
+                                                    }}
+                                                    placeholder="Chọn ngày mở sổ"
+                                                    className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                                    disabled={isSubmitting}
+                                                />
+                                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                                    <CalenderIcon className="w-5 h-5 text-gray-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
                             )}
                         </div>
 
@@ -484,6 +782,7 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                     </select>
                                 </div>
                             </div>
+
                             <div className="space-y-2">
                                 <label className="flex items-center text-sm font-semibold text-gray-700">
                                     <Building2 className="w-4 h-4 mr-2 text-blue-600" />
@@ -498,6 +797,26 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                     disabled={isSubmitting}
                                 />
                             </div>
+
+                            {/* Màu báo cáo chỉ hiện khi là "Sổ chi tiết bán hàng" */}
+                            {isDetailedSalesReport && (
+                                <div className="space-y-2">
+                                    <label className="flex items-center text-sm font-semibold text-gray-700">
+                                        <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+                                        Màu VND/ngoại tệ
+                                    </label>
+                                    <select
+                                        value={filterData.mau_bao_cao || 'VND'}
+                                        onChange={(e) => handleInputChange("mau_bao_cao", e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                        disabled={isSubmitting}
+                                    >
+                                        <option value="VND">VND</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -534,40 +853,46 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
             </div>
 
             {/* Popup cho khách hàng */}
-            {popupStates.showCustomerPopup && (
-                <CustomerSelectionPopup
-                    isOpen={true}
-                    onClose={() => handleClosePopup('showCustomerPopup')}
-                    onSelect={handleCustomerSelect}
-                    customers={customerData.data || []}
-                    searchValue={searchStates.ma_khach || ""}
-                    onSearch={(value) => handlePopupSearch('ma_khach', value)}
-                />
-            )}
+            {
+                popupStates.showCustomerPopup && (
+                    <CustomerSelectionPopup
+                        isOpen={true}
+                        onClose={() => handleClosePopup('showCustomerPopup')}
+                        onSelect={handleCustomerSelect}
+                        customers={customerData.data || []}
+                        searchValue={searchStates.ma_khach || ""}
+                        onSearch={(value) => handlePopupSearch('ma_khach', value)}
+                    />
+                )
+            }
 
             {/* Popup cho kho */}
-            {popupStates.showKhoPopup && (
-                <WarehouseSelectionPopup
-                    isOpen={true}
-                    onClose={() => handleClosePopup('showKhoPopup')}
-                    onSelect={handleKhoSelect}
-                    warehouses={Array.isArray(khoXuatData?.data) ? khoXuatData.data : []}
-                    searchValue={searchStates.ma_kho || ""}
-                    onSearch={(value) => handlePopupSearch('ma_kho', value)}
-                />
-            )}
+            {
+                popupStates.showKhoPopup && (
+                    <WarehouseSelectionPopup
+                        isOpen={true}
+                        onClose={() => handleClosePopup('showKhoPopup')}
+                        onSelect={handleKhoSelect}
+                        warehouses={Array.isArray(khoXuatData?.data) ? khoXuatData.data : []}
+                        searchValue={searchStates.ma_kho || ""}
+                        onSearch={(value) => handlePopupSearch('ma_kho', value)}
+                    />
+                )
+            }
 
             {/* Popup cho vật tư */}
-            {popupStates.showVatTuPopup && (
-                <MaterialSelectionPopup
-                    isOpen={true}
-                    onClose={() => handleClosePopup('showVatTuPopup')}
-                    onSelect={handleVatTuSelect}
-                    materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
-                    searchValue={searchStates.ma_vat_tu || ""}
-                    onSearch={(value) => handlePopupSearch('ma_vat_tu', value)}
-                />
-            )}
-        </div>
+            {
+                popupStates.showVatTuPopup && (
+                    <MaterialSelectionPopup
+                        isOpen={true}
+                        onClose={() => handleClosePopup('showVatTuPopup')}
+                        onSelect={handleVatTuSelect}
+                        materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
+                        searchValue={searchStates.ma_vat_tu || ""}
+                        onSearch={(value) => handlePopupSearch('ma_vat_tu', value)}
+                    />
+                )
+            }
+        </div >
     );
 }
