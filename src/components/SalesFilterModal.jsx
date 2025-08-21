@@ -492,9 +492,9 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
 
     if (!isOpen) return null;
 
-    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail"];
-    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail"];
-    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];
+    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
+    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
+    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail" ];
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
