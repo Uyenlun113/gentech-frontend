@@ -1,26 +1,26 @@
 // Helper functions
 const formatDate = (dateString) => {
-  if (!dateString) return "";
+    if (!dateString) return "";
 
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
 
-  return `${day}/${month}/${year}`;
+    return `${day}/${month}/${year}`;
 };
 
 const formatCurrency = (amount) => {
-  if (!amount && amount !== 0) return "0";
-  const value = Array.isArray(amount) ? amount[0] : amount;
-  return new Intl.NumberFormat("vi-VN").format(value);
+    if (!amount && amount !== 0) return "0";
+    const value = Array.isArray(amount) ? amount[0] : amount;
+    return new Intl.NumberFormat("vi-VN").format(value);
 };
 
 export const printTemplates = {
-  // Template cho Sổ quỹ tiền mặt
-  cashBook: (data, filterInfo, totals) => `
+    // Template cho Sổ quỹ tiền mặt
+    cashBook: (data, filterInfo, totals) => `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 20px;">
@@ -42,9 +42,8 @@ export const printTemplates = {
                 </h2>
                 <div style="font-size: 12px; margin-bottom: 10px;">
                     TÀI KHOẢN: ${filterInfo?.tk || "1111"} - TIỀN MẶT VND<br/>
-                    TỪ NGÀY: ${formatDate(filterInfo?.ngay_ct1) || ""} ĐẾN NGÀY: ${
-    formatDate(filterInfo?.ngay_ct2) || ""
-  }
+                    TỪ NGÀY: ${formatDate(filterInfo?.ngay_ct1) || ""} ĐẾN NGÀY: ${formatDate(filterInfo?.ngay_ct2) || ""
+        }
                 </div>
             </div>
             <div style="text-align: right; font-weight: bold; margin: 4px 0 4px auto; width: 200px; margin-right: 95px;">
@@ -96,9 +95,8 @@ export const printTemplates = {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (record) => `
+                    ${data?.map(
+            (record) => `
                         <tr>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">
                                 ${formatDate(record.ngay_ct)}
@@ -127,8 +125,8 @@ export const printTemplates = {
                             <td style="border: 1px solid #000; padding: 4px;"></td>
                         </tr>
                     `
-                      )
-                      .join("")}
+        )
+            .join("")}
                 </tbody>
             </table>
 
@@ -188,8 +186,8 @@ export const printTemplates = {
             </div>
         </div>
     `,
-  // Template cho Bảng cân đối kế toán
-  detailedCashLedger: (data, filterInfo, totals) => `
+    // Template cho Bảng cân đối kế toán
+    detailedCashLedger: (data, filterInfo, totals) => `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
             <!-- Header -->
             <div style="text-align: center; margin-bottom: 20px;">
@@ -271,9 +269,8 @@ export const printTemplates = {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (record) => `
+                    ${data?.map(
+        (record) => `
                         <tr>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">
                                 ${formatDate(record.ngay_ct)}
@@ -305,8 +302,8 @@ export const printTemplates = {
                             <td style="border: 1px solid #000; padding: 4px;"></td>
                         </tr>
                     `
-                      )
-                      .join("")}
+    )
+            .join("")}
                 </tbody>
             </table>
 
@@ -363,8 +360,8 @@ export const printTemplates = {
             </div>
         </div>
     `,
-  // Template cho Sổ chi tiết của một tài khoản
-  soChiTiet: (data, filterInfo, totals) => `
+    // Template cho Sổ chi tiết của một tài khoản
+    soChiTiet: (data, filterInfo, totals) => `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
             <!-- Header -->
             <div style="font-size: 10px; text-align: left;">
@@ -429,9 +426,8 @@ export const printTemplates = {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (record) => `
+                    ${data?.map(
+        (record) => `
                         <tr>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">
                                 ${formatDate(record.ngay_ct)}
@@ -456,15 +452,15 @@ export const printTemplates = {
                             </td>
                         </tr>
                     `
-                      )
-                      .join("")}
+    )
+            .join("")}
                 </tbody>
             </table>
 
             <!-- Summary -->
             <div style="margin-top: 20px;">
                 <div style="text-align: left; margin-bottom: 10px; font-size: 11px;">
-                    Số dây có: ${data.length} dòng, đánh số từ trang 01 đến trang 01<br/>
+                    Số dây có: ${data?.length} dòng, đánh số từ trang 01 đến trang 01<br/>
                     Ngày mở sổ: ${filterInfo?.ngay_ct1 || "01-08-2025"}
                 </div>
 
@@ -515,8 +511,8 @@ export const printTemplates = {
         </div>
     `,
 
-  // Template cho Sổ tiền gửi ngân hàng
-  soTienGui: (data, filterInfo, totals) => `
+    // Template cho Sổ tiền gửi ngân hàng
+    soTienGui: (data, filterInfo, totals) => `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
             <!-- Header -->
             <div style="font-size: 10px; text-align: left;">
@@ -589,9 +585,8 @@ export const printTemplates = {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (record) => `
+                    ${data?.map(
+        (record) => `
                         <tr>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">
                                 ${formatDate(record.ngay_ct)}
@@ -620,8 +615,8 @@ export const printTemplates = {
                             <td style="border: 1px solid #000; padding: 4px;">${record.ghi_chu || ""}</td>
                         </tr>
                     `
-                      )
-                      .join("")}
+    )
+            .join("")}
                     
                     <!-- Summary row in table -->
                     <!-- <tr>
@@ -644,9 +639,8 @@ export const printTemplates = {
             <!-- Footer with summary information -->
             <div style="margin-top: 20px;">
                 <div style="text-align: left; margin-bottom: 10px; font-size: 11px;">
-                    Số nay có ${Math.ceil(data.length / 25) || 1} trang, đánh số từ trang 01 đến trang ${
-    Math.ceil(data.length / 25) || 1
-  }<br/>
+                    Số nay có ${Math.ceil(data?.length / 25) || 1} trang, đánh số từ trang 01 đến trang ${Math.ceil(data?.length / 25) || 1
+        }<br/>
                     Ngày mở sổ: ${filterInfo?.ngay_ct1 || "01-07-2025"}
                 </div>
                 
@@ -696,8 +690,8 @@ export const printTemplates = {
         </div>
     `,
 
-  // Template mặc định
-  default: (data, filterInfo, totals) => `
+    // Template mặc định
+    default: (data, filterInfo, totals) => `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
             <div style="text-align: center; margin-bottom: 20px;">
                 <h2 style="font-size: 16px; font-weight: bold;">BÁO CÁO CHI TIẾT</h2>
@@ -718,28 +712,24 @@ export const printTemplates = {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data
-                      .map(
-                        (record, index) => `
+                    ${data?.map(
+        (record, index) => `
                         <tr>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">${index + 1}</td>
                             <td style="border: 1px solid #000; padding: 4px; text-align: center;">${formatDate(
-                              record.ngay_ct
-                            )}</td>
-                            <td style="border: 1px solid #000; padding: 4px; text-align: center;">${
-                              record.so_ct_trim || record.so_ct || "-"
-                            }</td>
+            record.ngay_ct
+        )}</td>
+                            <td style="border: 1px solid #000; padding: 4px; text-align: center;">${record.so_ct_trim || record.so_ct || "-"
+            }</td>
                             <td style="border: 1px solid #000; padding: 4px;">${record.dien_giai || "-"}</td>
-                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${
-                              record.ps_no ? formatCurrency(record.ps_no) : "-"
-                            }</td>
-                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${
-                              record.ps_co ? formatCurrency(record.ps_co) : "-"
-                            }</td>
+                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${record.ps_no ? formatCurrency(record.ps_no) : "-"
+            }</td>
+                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${record.ps_co ? formatCurrency(record.ps_co) : "-"
+            }</td>
                         </tr>
                     `
-                      )
-                      .join("")}
+    )
+            .join("")}
                 </tbody>
                 <tfoot>
                     <tr>
@@ -756,7 +746,7 @@ export const printTemplates = {
 
             <!-- Summary Info -->
             <div style="margin-top: 20px; font-size: 11px;">
-                <div>Tổng số bản ghi: ${data.length}</div>
+                <div>Tổng số bản ghi: ${data?.length}</div>
                 <div>Ngày in: ${new Date().toLocaleDateString("vi-VN")}</div>
             </div>
         </div>

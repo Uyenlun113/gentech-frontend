@@ -1232,7 +1232,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "gia",
             title: "Đơn giá",
-            width: 120,
+            width: 180,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -1249,7 +1249,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "tien_nt",
             title: "Tiền hàng",
-            width: 120,
+            width: 180,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -1382,7 +1382,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "tien_hang",
             title: "Tiền hàng",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"
@@ -1397,7 +1397,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "cp_nt",
             title: "Tiền chi phí",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"
@@ -1599,7 +1599,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "gia",
             title: "Giá",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"
@@ -1614,7 +1614,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "t_tien",
             title: "Tiền hàng",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"
@@ -1643,7 +1643,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         {
             key: "t_thue",
             title: "Tiền thuế",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"
