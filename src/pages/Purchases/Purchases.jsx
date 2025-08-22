@@ -33,7 +33,7 @@ const initialPricingData = {
 
 
 export default function PurChases() {
-  const [activeTab, setActiveTab] = useState('software');
+  const [activeTab, setActiveTab] = useState('reportIn');
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -268,7 +268,7 @@ export default function PurChases() {
     management: managementMenuItems,
   };
 
-  const currentMenuItems = menuMap[activeTab] || [];
+  const currentMenuItems = menuMap[activeTab] || reportInMenuItems;
 
   const handleMenuItemClick = (item) => {
     setSelectedMenuItem(item);
