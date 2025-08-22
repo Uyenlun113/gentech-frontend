@@ -43,7 +43,7 @@ export default function CashPage() {
         so_ct_to: '',
         ma_dvcs: 'CTY'
       },
-      'inventory': {
+      'inventory2': {
         StartDate: '2025-08-01',
         EndDate: '2025-08-31',
         ma_kh: '',
@@ -53,7 +53,7 @@ export default function CashPage() {
         so_ct_to: '',
         ma_dvcs: 'CTY'
       },
-      'inventory-detail': {
+      'inventory-detail2': {
         StartDate: '2025-08-01',
         EndDate: '2025-08-31',
         ma_kh: '',
@@ -63,7 +63,7 @@ export default function CashPage() {
         so_ct_to: '',
         ma_dvcs: 'CTY'
       },
-      'import-export-summary': {
+      'import-export-summary2': {
         StartDate: '2025-08-01',
         EndDate: '2025-08-31',
         ma_kh: '',
@@ -91,7 +91,11 @@ export default function CashPage() {
         ma_vt: '',
         so_ct_from: '',
         so_ct_to: '',
-        ma_dvcs: 'CTY'
+        ma_dvcs: 'CTY',
+        tk_doanh_thu: [],
+        tk_giam_tru: [],
+        quyen_so: "",
+        ngay_mo_so: "2025-08-01",
       },
       'cost-analysis': {
         StartDate: '2025-08-01',
@@ -193,9 +197,9 @@ export default function CashPage() {
     { id: 'import-plan', label: 'Bảng kê hóa đơn bán hàng', isCanUse: true },
     { id: 'export-plan', label: 'Bảng kê hóa đơn bán hàng và dịch vụ', isCanUse: true },
     { id: 'import-export-plan', label: 'Bảng kê phiếu nhập bàng bán bị trả lại', isCanUse: true },
-    { id: 'inventory', label: 'Bảng kê hóa đơn của một mặt hàng', isCanUse: true },
-    { id: 'inventory-detail', label: 'Bảng kê hóa đơn của một mặt hàng nhóm theo khách hàng', isCanUse: true },
-    { id: 'import-export-summary', label: 'Bảng kê hóa đơn của một mặt hàng nhóm theo dạng xuất bán', isCanUse: true },
+    { id: 'inventory2', label: 'Bảng kê hóa đơn của một mặt hàng', isCanUse: true },
+    { id: 'inventory-detail2', label: 'Bảng kê hóa đơn của một mặt hàng nhóm theo khách hàng', isCanUse: true },
+    { id: 'import-export-summary2', label: 'Bảng kê hóa đơn của một mặt hàng nhóm theo dạng xuất bán', isCanUse: true },
     { id: 'import-export-detail', label: 'Bảng kê hóa đơn của một mặt hàng nhóm theo mặt hàng', isCanUse: true },
     { id: 'inventory-report', label: 'Sổ chi tiết bán hàng', isCanUse: true },
   ];

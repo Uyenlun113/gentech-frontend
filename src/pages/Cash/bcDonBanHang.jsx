@@ -17,7 +17,6 @@ export default function BaoCaoDonBanHang() {
 
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [filterInfo, setFilterInfo] = useState(null);
     const [reportName, setReportName] = useState('Danh sách báo cáo');
     const [reportType, setReportType] = useState('default');
     const [totals, setTotals] = useState({});
@@ -33,6 +32,17 @@ export default function BaoCaoDonBanHang() {
         const value = Array.isArray(amount) ? amount[0] : amount;
         return new Intl.NumberFormat("vi-VN").format(value);
     };
+    const filterInfo = location.state?.filterData || {};
+
+    const typeConfig = {
+        inventory2: { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        "inventory-detail2": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        "import-export-summary2": { maKey: "ma_kh", maTitle: "Mã KH", tenKey: "ten_kh", tenTitle: "Tên KH" },
+        supplier: { maKey: "ma_ncc", maTitle: "Mã NCC", tenKey: "ten_ncc", tenTitle: "Tên NCC" },
+    };
+
+    const currentType = location.state?.reportType;
+    const { maKey, maTitle, tenKey, tenTitle } = typeConfig[currentType] || { maKey: "ma_vt", maTitle: "Mã VT", tenKey: "ten_vt", tenTitle: "Tên VT" };
     const columnsTable = [
         {
             key: "stt",
@@ -56,8 +66,13 @@ export default function BaoCaoDonBanHang() {
             key: "ma_ct0",
             title: "Mã CT in",
             width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
+            render: (_, record) => {
+                const val = record.ma_ct0 ?? record.ma_ct_in;
+                return val ? (
+                    <div className="text-center text-black-600">{val}</div>
+                ) : (
+                    <div className="text-center">0</div>
+                );
             },
         },
         {
@@ -127,7 +142,7 @@ export default function BaoCaoDonBanHang() {
             title: "Tổng tiền tt",
             width: 150,
             render: (_, record) => {
-                const val = record.t_pt ?? record.t_tt ?? record.tien;
+                const val = record.t_pt ?? record.t_tt ?? record.pt;
                 return val ? (
                     <div className="text-center text-green-600">{formatCurrency(val)}</div>
                 ) : (
@@ -139,9 +154,10 @@ export default function BaoCaoDonBanHang() {
             key: "t_tien",
             title: "Tiền vốn",
             width: 150,
-            render: (val) => {
+            render: (_, record) => {
+                const val = record.t_tien ?? record.tien;
                 return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
+                    <div className="text-center text-blue-600">{formatCurrency(val)}</div>
                 ) : (
                     <div className="text-center">0</div>
                 );
@@ -179,26 +195,24 @@ export default function BaoCaoDonBanHang() {
             },
         },
         {
-            key: "ma_vt",
-            title: "Mã VT",
+            key: maKey,
+            title: maTitle,
             fixed: "left",
             width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
+            dataIndex: maKey,
+            render: (val) => <div className="font-medium text-center">{val}</div>,
         },
         {
-            key: "ten_vt",
-            title: "Tên VT",
-            width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
+            key: tenKey,
+            title: tenTitle,
+            width: 150,
+            dataIndex: tenKey,
+            render: (val) => <div className="font-medium text-center">{val}</div>,
         },
         {
-            key: "dvt",
-            title: "ĐVT",
-            width: 80,
+            key: "dien_giai",
+            title: "Diễn giải",
+            width: 140,
             render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
         },
         {
@@ -313,6 +327,16 @@ export default function BaoCaoDonBanHang() {
                 </div>
             ),
         },
+        {
+            key: "ma_ct",
+            title: "Mã CT",
+            width: 180,
+            render: (val) => (
+                <div className="max-w-xs truncate text-center" title={val}>
+                    {val || "-"}
+                </div>
+            ),
+        },
     ];
     const handlePrint = useReactToPrint({
         contentRef: printRef,
@@ -352,7 +376,6 @@ export default function BaoCaoDonBanHang() {
         if (location.state) {
             const {
                 data: wrappedData,
-                filterData,
                 reportName: name,
                 reportType: type,
             } = location.state;
@@ -382,7 +405,6 @@ export default function BaoCaoDonBanHang() {
                 }));
 
                 setDataTable(mappedData);
-                setFilterInfo(filterData);
                 setReportName(name || "Danh sách báo cáo");
                 setReportType(type || "default");
                 setTotals(totalsData);
@@ -406,30 +428,61 @@ export default function BaoCaoDonBanHang() {
     const handleGoBack = () => {
         navigate(-1);
     };
-
-    const {
-        no_dk = 0,
-        co_dk = 0,
-        ps_no = 0,
-        ps_co = 0,
-        no_ck = 0,
-        co_ck = 0
-    } = totals;
-    const data = location.state?.data?.data1 || [];
-    const allowedIds = ["export-plan", "hehe", "haha", "hoho"];
+    const data1 = location.state?.data?.data1 || [];
+    const data2 = location.state?.data?.data2 || [];
+    const data = data1.length > 0 ? data1 : data2;
+    const allowedIds = ["export-plan", "inventory2"];
     const tinhTong = (data) => {
         return data?.reduce(
             (acc, item) => {
                 acc.tienHang += item.t_tien2 ?? item.t_tien_2 ?? item.tien ?? 0;
                 acc.tienCK += item.t_ck ?? 0;
                 acc.tienThue += item.thue ?? item.t_thue ?? 0;
-                acc.tongThanhToan += item.t_tt ?? 0;
+                acc.tongThanhToan += item.t_tt ?? item.tt ?? item.pt ?? 0;
                 return acc;
             },
             { tienHang: 0, tienCK: 0, tienThue: 0, tongThanhToan: 0 }
         );
     };
     const { tienHang, tienCK, tienThue, tongThanhToan } = tinhTong(data);
+
+    const allowedIds2 = ["inventory-detail2", "import-export-detail"];
+    const tinhTongTruObj1 = (data) => {
+        if (!data || data.length < 2) return { tienHang: 0, tienCK: 0, tienThue: 0, tongThanhToan: 0 };
+
+        return data.slice(1).reduce(
+            (acc, item) => {
+                acc.tienHang += (item.t_tien2 ?? item.t_tien_2 ?? item.tien ?? 0);
+                acc.tienCK += (item.t_ck ?? 0);
+                acc.tienThue += (item.thue ?? item.t_thue ?? 0);
+                acc.tongThanhToan += (item.t_tt ?? item.tt ?? item.pt ?? 0);
+                return acc;
+            },
+            {
+                tienHang2: (data[0].t_tien2 ?? data[0].t_tien_2 ?? data[0].tien ?? 0),
+                tienCK2: (data[0].t_ck ?? 0),
+                tienThue2: (data[0].thue ?? data[0].t_thue ?? 0),
+                tongThanhToan2: (data[0].t_tt ?? data[0].tt ?? data[0].pt ?? 0)
+            }
+        );
+    };
+    const { tienHang2, tienCK2, tienThue2, tongThanhToan2 } = tinhTongTruObj1(data);
+    const allowedIds3 = ["import-export-summary2"];
+    const tinhTong3 = (data) => {
+        return data?.reduce(
+            (acc, item) => {
+                if (item.ma_kh) {
+                    acc.tienHang3 += item.t_tien2 ?? item.t_tien_2 ?? item.tien ?? 0;
+                    acc.tienCK3 += item.t_ck ?? 0;
+                    acc.tienThue3 += item.thue ?? item.t_thue ?? 0;
+                    acc.tongThanhToan3 += item.t_tt ?? item.tt ?? item.pt ?? 0;
+                }
+                return acc;
+            },
+            { tienHang3: 0, tienCK3: 0, tienThue3: 0, tongThanhToan3: 0 }
+        );
+    };
+    const { tienHang3, tienCK3, tienThue3, tongThanhToan3 } = tinhTong3(data);
 
     return (
         <>
@@ -463,7 +516,16 @@ export default function BaoCaoDonBanHang() {
                             <div className="flex items-center gap-2">
                                 <Button
                                     onClick={() => {
-                                        if (dataTable.length === 0) {
+                                        let hasData = false;
+                                        const typeCheckData12 = ['import-plan', 'export-plan', 'inventory2', 'inventory-detail2', 'import-export-summary2', 'import-export-detail'];
+                                        if (typeCheckData12.includes(reportType)) {
+                                            hasData =
+                                                (data1 && data1.length > 0) ||
+                                                (data2 && data2.length > 0);
+                                        } else {
+                                            hasData = dataTable && dataTable.length > 0;
+                                        }
+                                        if (!hasData) {
                                             alert('Không có dữ liệu để in!');
                                             return;
                                         }
@@ -565,6 +627,86 @@ export default function BaoCaoDonBanHang() {
                                 </div>
                             </div>
                         )}
+                        {allowedIds2.includes(location.state?.reportType) && (
+                            <div className="flex justify-center">
+                                <div className="mt-4 w-[500px]">
+                                    <div className="p-4 rounded-lg">
+                                        <div className="space-y-2">
+                                            <div>Tổng cộng :</div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền hàng :</div>
+                                                <div className="px-4 py-2 text-right">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienHang2)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền ck :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienCK2)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền thuế :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienThue2)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tổng tiền tt :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tongThanhToan2)}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {allowedIds3.includes(location.state?.reportType) && (
+                            <div className="flex justify-center">
+                                <div className="mt-4 w-[500px]">
+                                    <div className="p-4 rounded-lg">
+                                        <div className="space-y-2">
+                                            <div>Tổng cộng :</div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền hàng :</div>
+                                                <div className="px-4 py-2 text-right">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienHang3)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền ck :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienCK3)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tiền thuế :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tienThue3)}
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 text-sm">
+                                                <div className="px-4 py-2 text-left">Tổng tiền tt :</div>
+                                                <div className="px-4 py-2 text-right text-blue-600">
+                                                    {new Intl.NumberFormat('vi-VN').format(tongThanhToan3)}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                     </ComponentCard>
                 </div >
@@ -575,7 +717,9 @@ export default function BaoCaoDonBanHang() {
                 reportType={reportType}
                 dataTable={dataTable}
                 filterInfo={filterInfo}
-                totals={{ ps_no, ps_co, no_dk, co_dk, no_ck, co_ck }}
+                data1={data1}
+                data2={data2}
+                totals={{ tienHang, tienCK, tienThue, tongThanhToan }}
             />
         </>
     );

@@ -1,10 +1,12 @@
 import { forwardRef } from 'react';
+import { printBcDonBanHang } from '../services/printBcDonBanHang';
 import { printTemplates } from '../services/printTemplates';
 
 
 const PrintWrapper = forwardRef(({
     reportType,
-    dataTable,
+    data1,
+    data2,
     filterInfo,
     totals
 }, ref) => {
@@ -18,6 +20,19 @@ const PrintWrapper = forwardRef(({
                 return printTemplates.soTienGui;
             case 'import-export-summary':
                 return printTemplates.soChiTiet;
+            case 'import-plan':
+                return printBcDonBanHang.invoiceSummary;
+            case 'export-plan':
+                return printBcDonBanHang.salesAndServiceInvoice;
+            case 'inventory2':
+                return printBcDonBanHang.invoiceOfAnItem;
+            case 'inventory-detail2':
+                return printBcDonBanHang.invoiceByCustomerGroup;
+            case 'import-export-summary2':
+                return printBcDonBanHang.invoiceBySales;
+            case 'import-export-detail':
+                return printBcDonBanHang.invoiceByCustomerProductGroup;
+
             default:
                 return printTemplates.default;
         }
@@ -25,7 +40,23 @@ const PrintWrapper = forwardRef(({
 
     const selectedTemplate = getTemplate(reportType);
 
-    const htmlContent = selectedTemplate(dataTable, filterInfo, totals);
+    let htmlContent;
+    if (reportType?.toLowerCase() === 'import-plan') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'export-plan') {
+        htmlContent = selectedTemplate(data1, filterInfo, totals);
+    } else if (reportType?.toLowerCase() === 'inventory2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    } else if (reportType?.toLowerCase() === 'inventory-detail2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    } else if (reportType?.toLowerCase() === 'import-export-summary2') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    } else if (reportType?.toLowerCase() === 'import-export-detail') {
+        htmlContent = selectedTemplate(data2, filterInfo, totals);
+    } else {
+        htmlContent = selectedTemplate(data1, filterInfo, totals);
+    }
+
 
     return (
         <div
