@@ -389,46 +389,50 @@ export default function PhieuNhapKhoList() {
     const columnsTable = [
         {
             key: "ngay_ct",
-            title: "Ngày chứng từ",
+            title: "Ngày CT",
             fixed: "left",
             width: 150,
         },
         {
             key: "so_ct",
-            title: "Số chứng từ",
+            title: "Số CT",
             fixed: "left",
             width: 100,
         },
         {
             key: "ma_gd",
-            title: "Mã giao dịch",
-            width: 100,
+            title: "Mã GD",
+            width: 50,
         },
         {
             key: "ma_kh",
-            title: "Mã khách hàng",
-            width: 150,
+            title: "Mã KH",
+            width: 100,
         },
         {
             key: "ong_ba",
             title: "Tên khách hàng",
             fixed: "left",
-            width: 150,
+            width: 200,
         },
+        // {
+        //     key: "ma_kh",
+        //     title: "Tổng tiền ngoại tệ",
+        //     width: 150,
+        // },
         {
-            key: "ma_kh",
-            title: "Tổng tiền ngoại tệ",
-            width: 150,
-        },
-        {
-            key: "ma_kh",
+            key: "tong_tien",
             title: "Tổng tiền VNĐ",
             width: 150,
+            render: (value) => {
+                if (typeof value !== "number") return value;
+                return value.toLocaleString("vi-VN");
+            },
         },
         {
             key: "dien_giai",
             title: "Lý do nộp",
-            width: 200,
+            width: 250,
         },
         {
             key: "ma_nt",
@@ -443,12 +447,20 @@ export default function PhieuNhapKhoList() {
         {
             key: "date",
             title: "Ngày cập nhật",
-            width: 150,
+            width: 120,
+            render: (value) => {
+                if (!value) return "";
+                const date = new Date(value);
+                const dd = String(date.getDate()).padStart(2, "0");
+                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                const yyyy = date.getFullYear();
+                return `${yyyy}-${mm}-${dd}`;
+            },
         },
         {
             key: "time",
             title: "Giờ cập nhật",
-            width: 150,
+            width: 100,
         },
         {
             key: "ma_dvcs",
@@ -579,22 +591,24 @@ export default function PhieuNhapKhoList() {
                                 {/* Danh sách hàng hóa */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <div className="flex flex-col items-start border-gray-200 dark:border-gray-700 pb-4 space-y-1">
-                                            <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                                Hàng hóa
-                                                {isLoadingMaterialNames && (
-                                                    <span className="ml-2 inline-flex items-center">
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                                                        <span className="ml-1 text-sm text-blue-500">Đang tải tên vật tư...</span>
-                                                    </span>
-                                                )}
-                                            </h4>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                                                {selectedRowForDetail.hang_hoa_list?.length || 0} mục
-                                            </span>
+                                        <div className="flex flex-col border-gray-200 dark:border-gray-700 space-y-1">
+                                            <div className="flex items-center justify-between w-full">
+                                                <h4 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                                                    Hàng hóa
+                                                    {isLoadingMaterialNames && (
+                                                        <span className="ml-2 inline-flex items-center">
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                                                            <span className="ml-1 text-sm text-blue-500">Đang tải tên vật tư...</span>
+                                                        </span>
+                                                    )}
+                                                </h4>
+                                                <span className="ml-4 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+                                                    {selectedRowForDetail.hang_hoa_list?.length || 0} mục
+                                                </span>
+                                            </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
+                                        <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 gap-x-4">
                                             <Button
                                                 size="sm"
                                                 variant="outline"

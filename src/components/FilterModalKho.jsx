@@ -7,6 +7,7 @@ import MaterialSelectionPopup from "../components/general/dmvtPopup";
 import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
 import { useDmvt } from "../hooks/useDmvt";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -138,6 +139,7 @@ export default function FilterModalKho({
         (debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch).length > 0
     }
   );
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Load filter configuration khi component mount hoặc configName thay đổi
   useEffect(() => {
@@ -524,29 +526,6 @@ export default function FilterModalKho({
       [popupType]: false
     }));
   }, []);
-  useEffect(() => {
-    console.log('PopupSearchStates changed:', popupSearchStates);
-  }, [popupSearchStates]);
-
-  useEffect(() => {
-    console.log('Customer data changed:', customerData);
-  }, [customerData]);
-
-  useEffect(() => {
-    console.log('Kho data changed:', khoData);
-  }, [khoData]);
-
-  useEffect(() => {
-    console.log('KhoXuat data changed:', khoXuatData);
-  }, [khoXuatData]);
-
-  useEffect(() => {
-    console.log('KhoNhap data changed:', khoNhapData);
-  }, [khoNhapData]);
-
-  useEffect(() => {
-    console.log('VatTu data changed:', vatTuData);
-  }, [vatTuData]);
 
   const handleSubmit = useCallback(() => {
     if (!filterConfig) {
@@ -909,10 +888,25 @@ export default function FilterModalKho({
             })()}
 
             {/* Advanced filters section */}
-            {advancedFields.length > 0 && (
-              <div className="bg-orange-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-orange-900 mb-4">Điều kiện lọc nâng cao</h4>
-                <div className="overflow-x-auto">
+            <div className="bg-orange-50 rounded-lg p-4">
+              {/* Header có nút toggle */}
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <h4 className="text-sm font-medium text-orange-900">
+                  Điều kiện lọc nâng cao
+                </h4>
+                {showAdvanced ? (
+                  <ChevronDown className="w-4 h-4 text-orange-700" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-orange-700" />
+                )}
+              </div>
+
+              {/* Nội dung bảng */}
+              {showAdvanced && advancedFields.length > 0 && (
+                <div className="overflow-x-auto mt-4">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
@@ -929,17 +923,18 @@ export default function FilterModalKho({
                           </td>
                           <td className="p-2">
                             <span className="text-blue-600 cursor-pointer hover:underline">
-                              {item.operator || 'like'}
+                              {item.operator || "like"}
                             </span>
                           </td>
                           <td className="p-2">
                             <input
                               type="text"
                               className="border px-2 py-0.5 text-sm rounded w-full"
-                              value={item.value1 || ''}
+                              value={item.value1 || ""}
                               onChange={(e) => {
                                 const updated = [...advancedFields];
                                 updated[index].value1 = e.target.value;
+                                // TODO: nhớ gọi setAdvancedFields(updated) nếu advancedFields là state
                               }}
                             />
                           </td>
@@ -948,8 +943,8 @@ export default function FilterModalKho({
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Empty state */}
             {allFields.length === 0 && advancedFields.length === 0 && (
