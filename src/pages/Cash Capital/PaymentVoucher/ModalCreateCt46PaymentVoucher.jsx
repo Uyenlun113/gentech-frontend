@@ -511,7 +511,10 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
 
         return true;
     }, [formData, ct46Data, validateLoaiPhieuChi]);
-
+    const formatMoney = (val) => {
+        if (!val) return "";
+        return Number(val.replace(/\D/g, ""))?.toLocaleString("vi-VN");
+    };
     const handleSave = useCallback(async () => {
         if (!validateForm()) {
             return;
@@ -644,7 +647,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "tien",
             title: "PS nợ",
-            width: 100,
+            width: 150,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -655,10 +658,13 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 }
                 return (
                     <Input
-                        value={row.tien}
-                        onChange={(e) => handleCt46Change(row.id, "tien", e.target.value)}
+                        value={formatMoney(row.tien)}
+                        onChange={(e) => {
+                            const raw = e.target.value.replace(/\D/g, "");
+                            handleCt46Change(row.id, "tien", raw);
+                        }}
                         placeholder="Ps nợ"
-                        className="w-full"
+                        className="w-full text-right"
                     />
                 );
             },
@@ -666,7 +672,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "dien_giaii",
             title: "Diễn giải",
-            width: 150,
+            width: 200,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -787,7 +793,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "ma_kh_t",
             title: "Mã khách hàng",
-            width: 150,
+            width: 120,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -868,7 +874,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "thue_suat",
             title: "Thuế suất %",
-            width: 80,
+            width: 120,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -885,7 +891,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "thue",
             title: "Tiền thuế",
-            width: 100,
+            width: 150,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -897,7 +903,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                 return (
                     <Input
                         type="number"
-                        value={row.thue}
+                        value={formatMoney(row.thue)}
                         onChange={(e) => handleCt46Change(row.id, "thue", e.target.value)}
                         placeholder="0"
                         className="w-full text-right"
@@ -909,7 +915,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "tt",
             title: "Thành tiền",
-            width: 100,
+            width: 150,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -1000,7 +1006,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "ma_ms",
             title: "Số hóa đơn",
-            width: 150,
+            width: 100,
             fixed: "left",
             render: (val, row) => (
                 <Input
@@ -1014,7 +1020,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "kh_mau_hd",
             title: "Mẫu hóa đơn",
-            width: 150,
+            width: 100,
             render: (val, row) => (
                 <Input
                     value={row.kh_mau_hd}
@@ -1061,7 +1067,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "ma_kh",
             title: "Mã khách hàng",
-            width: 150,
+            width: 120,
             render: (val, row) => (
                 <Input
                     value={row.ma_kh}
@@ -1127,11 +1133,11 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "t_tien",
             title: "Tiền hàng",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="text"
-                    value={row.t_tien}
+                    value={formatMoney(row.t_tien)}
                     onChange={(e) => handleCt46gtChange(row.id, "t_tien", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
@@ -1154,7 +1160,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "thue_suat",
             title: "%",
-            width: 80,
+            width: 150,
             render: (val, row) => (
                 <Input
                     type="text"
@@ -1168,11 +1174,11 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "t_thue",
             title: "Tiền thuế",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="text"
-                    value={row.t_thue}
+                    value={formatMoney(row.t_thue)}
                     onChange={(e) => handleCt46gtChange(row.id, "t_thue", e.target.value)}
                     placeholder="0"
                     className="w-full text-right"
@@ -1182,7 +1188,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         {
             key: "t_tt",
             title: "TT",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="number"

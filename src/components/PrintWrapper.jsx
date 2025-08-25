@@ -5,6 +5,7 @@ import { printTemplates } from '../services/printTemplates';
 
 const PrintWrapper = forwardRef(({
     reportType,
+    dataTable,
     data1,
     data2,
     filterInfo,
@@ -54,10 +55,8 @@ const PrintWrapper = forwardRef(({
     } else if (reportType?.toLowerCase() === 'import-export-detail') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
     } else {
-        htmlContent = selectedTemplate(data1, filterInfo, totals);
+        htmlContent = selectedTemplate(dataTable, filterInfo, totals);
     }
-
-
     return (
         <div
             ref={ref}

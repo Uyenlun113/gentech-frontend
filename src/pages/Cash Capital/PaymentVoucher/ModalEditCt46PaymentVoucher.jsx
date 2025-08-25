@@ -774,7 +774,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "tien",
             title: "PS nợ",
-            width: 100,
+            width: 180,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -796,7 +796,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "dien_giaii",
             title: "Diễn giải",
-            width: 150,
+            width: 250,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -966,7 +966,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "mst_t",
             title: "Mã số thuế",
-            width: 150,
+            width: 120,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -998,7 +998,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "thue_suat",
             title: "Thuế suất %",
-            width: 80,
+            width: 100,
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
@@ -1015,7 +1015,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "thue",
             title: "Tiền thuế",
-            width: 100,
+            width: 180,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -1039,7 +1039,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "tt",
             title: "Thành tiền",
-            width: 100,
+            width: 180,
             render: (val, row) => {
                 if (row.id === 'total') {
                     return (
@@ -1130,7 +1130,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "ma_ms",
             title: "Số hóa đơn",
-            width: 150,
+            width: 120,
             fixed: "left",
             render: (val, row) => (
                 <Input
@@ -1144,7 +1144,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "kh_mau_hd",
             title: "Mẫu hóa đơn",
-            width: 150,
+            width: 120,
             render: (val, row) => (
                 <Input
                     value={row.kh_mau_hd}
@@ -1157,7 +1157,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "so_seri0",
             title: "Số seri",
-            width: 150,
+            width: 120,
             render: (val, row) => (
                 <Input
                     value={row.so_seri0}
@@ -1257,7 +1257,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "t_tien",
             title: "Tiền hàng",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="text"
@@ -1284,7 +1284,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "thue_suat",
             title: "%",
-            width: 80,
+            width: 100,
             render: (val, row) => (
                 <Input
                     type="text"
@@ -1298,7 +1298,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "t_thue",
             title: "Tiền thuế",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="text"
@@ -1312,7 +1312,7 @@ export const ModalEditCt46PaymentVoucher = ({ isOpenEdit, closeModalEdit, editin
         {
             key: "t_tt",
             title: "TT",
-            width: 120,
+            width: 180,
             render: (val, row) => (
                 <Input
                     type="text"
