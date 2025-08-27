@@ -205,10 +205,10 @@ export default function CashPage() {
   ];
 
   const managementMenuItems = [
-    { id: 'cost-analysis', label: 'Phân tích chi phí vật tư', isCanUse: false },
-    { id: 'performance-report', label: 'Báo cáo hiệu suất quản trị', isCanUse: false },
-    { id: 'turnover-analysis', label: 'Phân tích vòng quay hàng tồn', isCanUse: false },
-    { id: 'abc-analysis', label: 'Phân tích ABC vật tư', isCanUse: false },
+    { id: 'cost-analysis', label: 'Bảng kê chứng từ', isCanUse: true },
+    { id: 'performance-report', label: 'Bảng kê chứng từ theo khách hàng', isCanUse: true },
+    { id: 'turnover-analysis', label: 'Tổng hợp số phát sinh theo khách hàng', isCanUse: true },
+    { id: 'abc-analysis', label: 'Tra số dư công nợ của một khách hàng', isCanUse: false },
     { id: 'inventory-valuation', label: 'Định giá tồn kho', isCanUse: false },
     { id: 'budget-control', label: 'Kiểm soát ngân sách', isCanUse: false },
     { id: 'variance-analysis', label: 'Phân tích chênh lệch', isCanUse: false },
