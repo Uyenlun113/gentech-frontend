@@ -10,6 +10,7 @@ import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
 import { useDmvt } from "../hooks/useDmvt";
 import { CalenderIcon } from "../icons";
+import AccountSelectionPopup from "./general/AccountSelectionPopup";
 import CustomerSelectionPopup from "./general/CustomerSelectionPopup";
 import WarehouseSelectionPopup from "./general/dmkPopup";
 import MaterialSelectionPopup from "./general/dmvtPopup";
@@ -249,8 +250,6 @@ const MultiAccountSelect = ({
     );
 };
 
-
-// Main SalesFilterModal Component
 export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaultValues, onSubmit, isSubmitting = false }) {
     const [filterData, setFilterData] = useState({
         StartDate: "",
@@ -258,6 +257,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         ma_kh: "",
         ma_kho: "",
         ma_vt: "",
+        ma_tk: "", // Thêm trường mã tài khoản
+        ghi_no_co: 3, // Thêm trường ghi nợ/có, mặc định là "Nợ"
         so_ct_from: "",
         so_ct_to: "",
         ma_dvcs: "",
@@ -272,24 +273,28 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         ma_khach: "",
         ma_kho: "",
         ma_vat_tu: "",
+        ma_tai_khoan: "", // Thêm state search cho tài khoản
     });
 
     const [popupStates, setPopupStates] = useState({
         showCustomerPopup: false,
         showKhoPopup: false,
         showVatTuPopup: false,
+        showAccountPopup: false, // Thêm state popup cho tài khoản
     });
 
     const [focusStates, setFocusStates] = useState({
         customerFocused: false,
         khoFocused: false,
         vatTuFocused: false,
+        accountFocused: false, // Thêm state focus cho tài khoản
     });
 
     // Debounce search queries
     const debouncedMaKhSearch = useDebounce(searchStates.ma_khach, 300);
     const debouncedKhoXuatSearch = useDebounce(searchStates.ma_kho, 300);
     const debouncedVatTuSearch = useDebounce(searchStates.ma_vat_tu, 300);
+    const debouncedAccountSearch = useDebounce(searchStates.ma_tai_khoan, 300); // Thêm debounce cho tài khoản
 
     // API Hooks
     const { data: customerData = [] } = useCustomers(
@@ -305,6 +310,12 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
     const { data: khoXuatData = [] } = useDmkho(
         { search: debouncedKhoXuatSearch || "" },
         { enabled: !!debouncedKhoXuatSearch && debouncedKhoXuatSearch.length > 0 }
+    );
+
+    // Thêm hook cho tài khoản
+    const { data: accountData = [] } = useAccounts(
+        { search: debouncedAccountSearch || "" },
+        { enabled: !!debouncedAccountSearch && debouncedAccountSearch.length > 0 }
     );
 
     // Check if current item is "Sổ chi tiết bán hàng"
@@ -327,16 +338,19 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                 ma_khach: "",
                 ma_kho: "",
                 ma_vat_tu: "",
+                ma_tai_khoan: "", // Reset search tài khoản
             });
             setPopupStates({
                 showCustomerPopup: false,
                 showKhoPopup: false,
                 showVatTuPopup: false,
+                showAccountPopup: false, // Reset popup tài khoản
             });
             setFocusStates({
                 customerFocused: false,
                 khoFocused: false,
                 vatTuFocused: false,
+                accountFocused: false, // Reset focus tài khoản
             });
         }
     }, [isOpen, defaultValues]);
@@ -366,6 +380,15 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         }
     }, [debouncedVatTuSearch, focusStates.vatTuFocused, searchStates.ma_vat_tu]);
 
+    // Thêm useEffect cho tài khoản
+    useEffect(() => {
+        if (debouncedAccountSearch && focusStates.accountFocused) {
+            setPopupStates(prev => ({ ...prev, showAccountPopup: true }));
+        } else if (!searchStates.ma_tai_khoan) {
+            setPopupStates(prev => ({ ...prev, showAccountPopup: false }));
+        }
+    }, [debouncedAccountSearch, focusStates.accountFocused, searchStates.ma_tai_khoan]);
+
     const handleInputChange = useCallback((field, value) => {
         setFilterData((prev) => ({
             ...prev,
@@ -380,7 +403,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         const fieldMap = {
             ma_khach: 'ma_kh',
             ma_kho: 'ma_kho',
-            ma_vat_tu: 'ma_vt'
+            ma_vat_tu: 'ma_vt',
+            ma_tai_khoan: 'ma_tk' // Thêm mapping cho tài khoản
         };
 
         if (value !== filterData[fieldMap[field]]) {
@@ -392,7 +416,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         const focusMap = {
             ma_khach: 'customerFocused',
             ma_kho: 'khoFocused',
-            ma_vat_tu: 'vatTuFocused'
+            ma_vat_tu: 'vatTuFocused',
+            ma_tai_khoan: 'accountFocused' // Thêm mapping focus cho tài khoản
         };
 
         setFocusStates(prev => ({ ...prev, [focusMap[field]]: true }));
@@ -402,7 +427,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
             const popupMap = {
                 ma_khach: 'showCustomerPopup',
                 ma_kho: 'showKhoPopup',
-                ma_vat_tu: 'showVatTuPopup'
+                ma_vat_tu: 'showVatTuPopup',
+                ma_tai_khoan: 'showAccountPopup' // Thêm mapping popup cho tài khoản
             };
             setPopupStates(prev => ({ ...prev, [popupMap[field]]: true }));
         }
@@ -412,7 +438,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         const focusMap = {
             ma_khach: 'customerFocused',
             ma_kho: 'khoFocused',
-            ma_vat_tu: 'vatTuFocused'
+            ma_vat_tu: 'vatTuFocused',
+            ma_tai_khoan: 'accountFocused' // Thêm mapping blur cho tài khoản
         };
 
         setTimeout(() => {
@@ -458,12 +485,25 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         setFocusStates(prev => ({ ...prev, vatTuFocused: false }));
     }, []);
 
+    // Thêm handler cho tài khoản
+    const handleAccountSelect = useCallback((account) => {
+        const accountCode = account.tk?.trim() || ""; // Sửa từ ma_tk thành tk
+        setFilterData((prev) => ({
+            ...prev,
+            ma_tk: accountCode,
+        }));
+        setSearchStates(prev => ({ ...prev, ma_tai_khoan: accountCode }));
+        setPopupStates(prev => ({ ...prev, showAccountPopup: false }));
+        setFocusStates(prev => ({ ...prev, accountFocused: false }));
+    }, []);
+
     const handleSubmit = useCallback(() => {
         const submitData = {
             ...filterData,
             ma_kh: filterData.ma_kh || searchStates.ma_khach.trim(),
             ma_kho: filterData.ma_kho || searchStates.ma_kho.trim(),
             ma_vt: filterData.ma_vt || searchStates.ma_vat_tu.trim(),
+            ma_tk: filterData.ma_tk || searchStates.ma_tai_khoan.trim(), // Thêm mã tài khoản vào submit data
             // Format account arrays as comma-separated strings
             tk_doanh_thu: Array.isArray(filterData.tk_doanh_thu) ? filterData.tk_doanh_thu.join(',') : filterData.tk_doanh_thu,
             tk_giam_tru: Array.isArray(filterData.tk_giam_tru) ? filterData.tk_giam_tru.join(',') : filterData.tk_giam_tru,
@@ -494,7 +534,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
 
     const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
     const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
-    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail" ];
+    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];
+    const allowedIds4 = ["cost-analysis", "performance-report", "turnover-analysis"];
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -689,6 +730,51 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                                             <Truck className="w-4 h-4 text-gray-400" />
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Thêm trường Mã tài khoản */}
+                            {allowedIds4.includes(selectedItem.id) && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-700">
+                                            <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+                                            Mã tài khoản
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={filterData.ma_tk || searchStates.ma_tai_khoan}
+                                                onChange={(e) => handlePopupSearch('ma_tai_khoan', e.target.value)}
+                                                onFocus={() => handleInputFocus('ma_tai_khoan')}
+                                                onBlur={() => handleInputBlur('ma_tai_khoan')}
+                                                placeholder="Nhập mã tài khoản..."
+                                                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                                disabled={isSubmitting}
+                                            />
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <CreditCard className="w-4 h-4 text-gray-400" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Thêm trường Ghi nợ/có */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center text-sm font-semibold text-gray-700">
+                                            <Filter className="w-4 h-4 mr-2 text-blue-600" />
+                                            Ghi nợ/có
+                                        </label>
+                                        <select
+                                            value={filterData.ghi_no_co}
+                                            onChange={(e) => handleInputChange("ghi_no_co", parseInt(e.target.value))}
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value={1}>1 - Nợ</option>
+                                            <option value={2}>2 - Có</option>
+                                            <option value={3}>3 - Cả hai</option>
+                                        </select>
                                     </div>
                                 </div>
                             )}
@@ -890,6 +976,20 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                         materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
                         searchValue={searchStates.ma_vat_tu || ""}
                         onSearch={(value) => handlePopupSearch('ma_vat_tu', value)}
+                    />
+                )
+            }
+
+            {/* Popup cho tài khoản */}
+            {
+                popupStates.showAccountPopup && (
+                    <AccountSelectionPopup
+                        isOpen={true}
+                        onClose={() => handleClosePopup('showAccountPopup')}
+                        onSelect={handleAccountSelect}
+                        accounts={Array.isArray(accountData?.data) ? accountData.data : []}
+                        searchValue={searchStates.ma_tai_khoan || ""}
+                        onSearch={(value) => handlePopupSearch('ma_tai_khoan', value)}
                     />
                 )
             }

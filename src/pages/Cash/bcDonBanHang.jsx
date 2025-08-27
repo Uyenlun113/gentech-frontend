@@ -1,6 +1,6 @@
 import "flatpickr/dist/flatpickr.min.css";
 import { ArrowLeft, PrinterIcon, RefreshCw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -20,6 +20,7 @@ export default function BaoCaoDonBanHang() {
     const [reportName, setReportName] = useState('Danh sách báo cáo');
     const [reportType, setReportType] = useState('default');
     const [totals, setTotals] = useState({});
+
     const formatDate = (dateString) => {
         if (!dateString) return "";
         const date = new Date(dateString);
@@ -32,6 +33,7 @@ export default function BaoCaoDonBanHang() {
         const value = Array.isArray(amount) ? amount[0] : amount;
         return new Intl.NumberFormat("vi-VN").format(value);
     };
+
     const filterInfo = location.state?.filterData || {};
 
     const typeConfig = {
@@ -43,6 +45,7 @@ export default function BaoCaoDonBanHang() {
 
     const currentType = location.state?.reportType;
     const { maKey, maTitle, tenKey, tenTitle } = typeConfig[currentType] || { maKey: "ma_vt", maTitle: "Mã VT", tenKey: "ten_vt", tenTitle: "Tên VT" };
+
     const columnsTable = [
         {
             key: "stt",
@@ -184,6 +187,7 @@ export default function BaoCaoDonBanHang() {
             ),
         },
     ];
+
     const columnsTable2 = [
         {
             key: "stt",
@@ -338,6 +342,111 @@ export default function BaoCaoDonBanHang() {
             ),
         },
     ];
+
+    const columnsTable3 = [
+        {
+            key: "stt",
+            title: "STT",
+            fixed: "left",
+            width: 60,
+            render: (val) => {
+                return <div className="font-medium text-center">{val}</div>;
+            },
+        },
+        {
+            key: "ngay_ct",
+            title: "Ngày CT",
+            width: 100,
+            render: (val) => {
+                return <div className="font-medium text-center">{formatDate(val)}</div>;
+            },
+        },
+        {
+            key: "ma_ct0",
+            title: "Mã CT in",
+            width: 80,
+            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
+        },
+        {
+            key: "so_ct",
+            title: "Số CT",
+            width: 80,
+            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
+        },
+        {
+            key: "dien_giai",
+            title: "Diễn giải",
+            width: 200,
+            render: (val) => (
+                <div className="max-w-xs truncate text-left" title={val}>
+                    {val || ""}
+                </div>
+            ),
+        },
+        {
+            key: "tk",
+            title: "Tài khoản",
+            width: 100,
+            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
+        },
+        {
+            key: "tk_du",
+            title: "TK đ.ứng",
+            width: 100,
+            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
+        },
+        {
+            key: "ps_no",
+            title: "Phát sinh nợ",
+            width: 120,
+            render: (val) => {
+                return val ? (
+                    <div className="text-right text-red-600 pr-2">{formatCurrency(val)}</div>
+                ) : (
+                    <div className="text-center"></div>
+                );
+            },
+        },
+        {
+            key: "ps_co",
+            title: "Phát sinh có",
+            width: 120,
+            render: (val) => {
+                return val ? (
+                    <div className="text-right text-blue-600 pr-2">{formatCurrency(val)}</div>
+                ) : (
+                    <div className="text-center"></div>
+                );
+            },
+        },
+        {
+            key: "ten_tk",
+            title: "Tên tài khoản",
+            width: 180,
+            render: (val) => (
+                <div className="max-w-xs truncate text-center" title={val}>
+                    {val || ""}
+                </div>
+            ),
+        },
+        {
+            key: "ten_tk_du",
+            title: "Tên tài khoản đối ứng",
+            width: 200,
+            render: (val) => (
+                <div className="max-w-xs truncate text-left" title={val}>
+                    {val || ""}
+                </div>
+            ),
+        },
+        {
+            key: "ma_ct",
+            title: "Mã CT",
+            width: 100,
+            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
+        },
+    ];
+
     const handlePrint = useReactToPrint({
         contentRef: printRef,
         documentTitle: reportName,
@@ -428,10 +537,12 @@ export default function BaoCaoDonBanHang() {
     const handleGoBack = () => {
         navigate(-1);
     };
+
     const data1 = location.state?.data?.data1 || [];
     const data2 = location.state?.data?.data2 || [];
     const data = data1.length > 0 ? data1 : data2;
     const allowedIds = ["export-plan", "inventory2"];
+
     const tinhTong = (data) => {
         return data?.reduce(
             (acc, item) => {
@@ -467,6 +578,7 @@ export default function BaoCaoDonBanHang() {
         );
     };
     const { tienHang2, tienCK2, tienThue2, tongThanhToan2 } = tinhTongTruObj1(data);
+
     const allowedIds3 = ["import-export-summary2"];
     const tinhTong3 = (data) => {
         return data?.reduce(
@@ -484,6 +596,20 @@ export default function BaoCaoDonBanHang() {
     };
     const { tienHang3, tienCK3, tienThue3, tongThanhToan3 } = tinhTong3(data);
 
+    const specialTypes = ["cost-analysis", "performance-report", "turnover-analysis"];
+    const { psNo, psCo } = useMemo(() => {
+        let tongNo = 0;
+        let tongCo = 0;
+
+        [...data1, ...data2].forEach(item => {
+            if (item.stt_rec != null) {
+                tongNo += parseFloat(item.ps_no) || 0;
+                tongCo += parseFloat(item.ps_co) || 0;
+            }
+        });
+
+        return { psNo: tongNo, psCo: tongCo };
+    }, [data1, data2]);
     return (
         <>
             <div className="px-4">
@@ -540,7 +666,47 @@ export default function BaoCaoDonBanHang() {
                             </div>
                         </div>
 
-                        {(location.state?.data?.data1?.length > 0 || location.state?.data?.data2?.length > 0) ? (
+                        {specialTypes.includes(reportType) && (location.state?.data?.data1?.length > 0 || location.state?.data?.data2?.length > 0) ? (
+                            <div className="space-y-9">
+                                {/* Table 1 - data1 */}
+                                {location.state?.data?.data2?.length > 0 && (
+                                    <div className="mb-8">
+                                        <ShowMoreTables
+                                            dataTable={location.state.data.data2.map((item, index) => ({
+                                                ...item,
+                                                stt: index + 1,
+                                            }))}
+                                            columnsTable={columnsTable3}
+                                            loading={loading}
+                                        />
+                                    </div>
+                                )}
+                                <div className="flex justify-center">
+                                    <div className="mt-4 w-[500px]">
+                                        <div className="p-4 rounded-lg">
+                                            <div className="space-y-2">
+                                                <div>Tổng cộng :</div>
+
+                                                <div className="grid grid-cols-3 text-sm">
+                                                    <div className="px-4 py-2 text-left">Phát sinh nợ</div>
+                                                    <div className="px-4 py-2 text-right">
+                                                        {new Intl.NumberFormat('vi-VN').format(psNo)}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 text-sm">
+                                                    <div className="px-4 py-2 text-left">Phát sinh có :</div>
+                                                    <div className="px-4 py-2 text-right text-blue-600">
+                                                        {new Intl.NumberFormat('vi-VN').format(psCo)}
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (location.state?.data?.data1?.length > 0 || location.state?.data?.data2?.length > 0) ? (
                             <div className="space-y-9">
                                 {/* Table 1 - data1 */}
                                 {location.state?.data?.data1?.length > 0 && (
@@ -587,6 +753,7 @@ export default function BaoCaoDonBanHang() {
                                 </Button>
                             </div>
                         )}
+
                         {allowedIds.includes(location.state?.reportType) && (
                             <div className="flex justify-center">
                                 <div className="mt-4 w-[500px]">
@@ -627,6 +794,7 @@ export default function BaoCaoDonBanHang() {
                                 </div>
                             </div>
                         )}
+
                         {allowedIds2.includes(location.state?.reportType) && (
                             <div className="flex justify-center">
                                 <div className="mt-4 w-[500px]">
@@ -667,6 +835,7 @@ export default function BaoCaoDonBanHang() {
                                 </div>
                             </div>
                         )}
+
                         {allowedIds3.includes(location.state?.reportType) && (
                             <div className="flex justify-center">
                                 <div className="mt-4 w-[500px]">
@@ -709,8 +878,8 @@ export default function BaoCaoDonBanHang() {
                         )}
 
                     </ComponentCard>
-                </div >
-            </div >
+                </div>
+            </div>
 
             <PrintWrapper
                 ref={printRef}
