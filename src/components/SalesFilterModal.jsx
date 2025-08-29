@@ -257,8 +257,8 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         ma_kh: "",
         ma_kho: "",
         ma_vt: "",
-        ma_tk: "", // Thêm trường mã tài khoản
-        ghi_no_co: 3, // Thêm trường ghi nợ/có, mặc định là "Nợ"
+        ma_tk: "",
+        ghi_no_co: 3,
         so_ct_from: "",
         so_ct_to: "",
         ma_dvcs: "",
@@ -266,6 +266,7 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
         tk_giam_tru: [],
         quyen_so: "",
         ngay_mo_so: "",
+        chi_tiet: 0,
     });
 
     // States cho search và popup
@@ -532,10 +533,11 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
 
     if (!isOpen) return null;
 
-    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
-    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report"];
-    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail"];
-    const allowedIds4 = ["cost-analysis", "performance-report", "turnover-analysis"];
+    const allowedIds = ["import-plan", "inventory2", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report",];//vật tư
+    const allowedIds2 = ["import-plan", "import-export-plan", "inventory-detail2", "import-export-summary2", "import-export-detail", "inventory-report",];//kho
+    const allowedIds3 = ["import-plan", "import-export-plan", "export-plan", "import-export-detail", "import-export-detail", "inventory-valuation"];//khách hàng
+    const allowedIds4 = ["cost-analysis", "performance-report", "turnover-analysis", "inventory-valuation"];
+    const allowedIds5 = ["cost-analysis", "performance-report", "turnover-analysis"];
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -736,7 +738,7 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
 
                             {/* Thêm trường Mã tài khoản */}
                             {allowedIds4.includes(selectedItem.id) && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <label className="flex items-center text-sm font-semibold text-gray-700">
                                             <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
@@ -758,8 +760,10 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Thêm trường Ghi nợ/có */}
+                                </div>
+                            )}
+                            {allowedIds5.includes(selectedItem.id) && (
+                                <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <label className="flex items-center text-sm font-semibold text-gray-700">
                                             <Filter className="w-4 h-4 mr-2 text-blue-600" />
@@ -884,6 +888,22 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                 />
                             </div>
 
+                            <div className="space-y-2">
+                                <label className="flex items-center text-sm font-semibold text-gray-700">
+                                    <CreditCard className="w-4 h-4 mr-2 text-blue-600" />
+                                    Chi tiết theo H.hóa
+                                </label>
+                                <select
+                                    value={filterData.chi_tiet || 0}
+                                    onChange={(e) => handleInputChange("chi_tiet", e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value={0}>Không</option>
+                                    <option value={1}>Có</option>
+                                </select>
+                            </div>
+
                             {/* Màu báo cáo chỉ hiện khi là "Sổ chi tiết bán hàng" */}
                             {isDetailedSalesReport && (
                                 <div className="space-y-2">
@@ -899,7 +919,6 @@ export default function SalesFilterModal({ isOpen, onClose, selectedItem, defaul
                                     >
                                         <option value="VND">VND</option>
                                         <option value="USD">USD</option>
-                                        <option value="EUR">EUR</option>
                                     </select>
                                 </div>
                             )}

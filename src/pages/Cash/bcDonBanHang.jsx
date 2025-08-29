@@ -9,6 +9,7 @@ import PageMeta from "../../components/common/PageMeta";
 import PrintWrapper from "../../components/PrintWrapper";
 import { ShowMoreTables } from "../../components/tables/ShowMoreTables";
 import Button from "../../components/ui/button/Button";
+import { createColumnsTable1, createColumnsTable2, createColumnsTable3, createColumnsTable4, createColumnsTable5 } from "./tableColumns";
 
 export default function BaoCaoDonBanHang() {
     const location = useLocation();
@@ -20,19 +21,6 @@ export default function BaoCaoDonBanHang() {
     const [reportName, setReportName] = useState('Danh sách báo cáo');
     const [reportType, setReportType] = useState('default');
     const [totals, setTotals] = useState({});
-
-    const formatDate = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("vi-VN");
-    };
-
-    const formatCurrency = (amount) => {
-        if (!amount && amount !== 0) return "0";
-        // Handle array values (take first element if array)
-        const value = Array.isArray(amount) ? amount[0] : amount;
-        return new Intl.NumberFormat("vi-VN").format(value);
-    };
 
     const filterInfo = location.state?.filterData || {};
 
@@ -46,406 +34,11 @@ export default function BaoCaoDonBanHang() {
     const currentType = location.state?.reportType;
     const { maKey, maTitle, tenKey, tenTitle } = typeConfig[currentType] || { maKey: "ma_vt", maTitle: "Mã VT", tenKey: "ten_vt", tenTitle: "Tên VT" };
 
-    const columnsTable = [
-        {
-            key: "stt",
-            title: "Số TT",
-            fixed: "left",
-            width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
-        },
-        {
-            key: "ngay_ct",
-            title: "Ngày chứng từ",
-            fixed: "left",
-            width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{formatDate(val)}</div>;
-            },
-        },
-        {
-            key: "ma_ct0",
-            title: "Mã CT in",
-            width: 110,
-            render: (_, record) => {
-                const val = record.ma_ct0 ?? record.ma_ct_in;
-                return val ? (
-                    <div className="text-center text-black-600">{val}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "so_ct",
-            title: "Số CT",
-            width: 80,
-            render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
-        },
-        {
-            key: "ma_kh",
-            title: "Mã Khách",
-            width: 100,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
-        },
-        {
-            key: "ten_kh",
-            title: "Tên khách hàng",
-            width: 150,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "t_tien2",
-            title: "Tiền hàng",
-            width: 150,
-            render: (_, record) => {
-                const val = record.t_tien2 ?? record.t_tien_2 ?? record.tien;
-                return val ? (
-                    <div className="text-center text-red-600">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "t_ck",
-            title: "Tiền ck",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "t_thue",
-            title: "Tiền thuế",
-            width: 150,
-            render: (_, record) => {
-                const val = record.t_thue ?? record.thue ?? record.tien;
-                return val ? (
-                    <div className="text-center text-blue-600">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "t_pt",
-            title: "Tổng tiền tt",
-            width: 150,
-            render: (_, record) => {
-                const val = record.t_pt ?? record.t_tt ?? record.pt;
-                return val ? (
-                    <div className="text-center text-green-600">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "t_tien",
-            title: "Tiền vốn",
-            width: 150,
-            render: (_, record) => {
-                const val = record.t_tien ?? record.tien;
-                return val ? (
-                    <div className="text-center text-blue-600">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "dien_giai",
-            title: "Diễn giải",
-            width: 120,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "ma_ct",
-            title: "Mã CT",
-            width: 180,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-    ];
-
-    const columnsTable2 = [
-        {
-            key: "stt",
-            title: "Số TT",
-            fixed: "left",
-            width: 110,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
-        },
-        {
-            key: maKey,
-            title: maTitle,
-            fixed: "left",
-            width: 110,
-            dataIndex: maKey,
-            render: (val) => <div className="font-medium text-center">{val}</div>,
-        },
-        {
-            key: tenKey,
-            title: tenTitle,
-            width: 150,
-            dataIndex: tenKey,
-            render: (val) => <div className="font-medium text-center">{val}</div>,
-        },
-        {
-            key: "dien_giai",
-            title: "Diễn giải",
-            width: 140,
-            render: (val) => <div className="font-medium text-center">{val || "-"}</div>,
-        },
-        {
-            key: "so_luong",
-            title: "Số lượng",
-            width: 100,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
-        },
-        {
-            key: "gia2",
-            title: "Giá bán",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "tien2",
-            title: "Tiền hàng",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-red-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "ck",
-            title: "Tiền ck",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "thue",
-            title: "Tiền thuế",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-blue-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "pt",
-            title: "Tổng tiền tt",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-green-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "gia",
-            title: "Giá vốn",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "tien",
-            title: "Tiền vốn",
-            width: 150,
-            render: (val) => {
-                return val ? (
-                    <div className="text-center text-black-600 ">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center">0</div>
-                );
-            },
-        },
-        {
-            key: "ma_nx",
-            title: "Mã NX",
-            width: 120,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "ma_kho",
-            title: "Mã kho",
-            width: 180,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-        {
-            key: "ma_ct",
-            title: "Mã CT",
-            width: 180,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || "-"}
-                </div>
-            ),
-        },
-    ];
-
-    const columnsTable3 = [
-        {
-            key: "stt",
-            title: "STT",
-            fixed: "left",
-            width: 60,
-            render: (val) => {
-                return <div className="font-medium text-center">{val}</div>;
-            },
-        },
-        {
-            key: "ngay_ct",
-            title: "Ngày CT",
-            width: 100,
-            render: (val) => {
-                return <div className="font-medium text-center">{formatDate(val)}</div>;
-            },
-        },
-        {
-            key: "ma_ct0",
-            title: "Mã CT in",
-            width: 80,
-            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
-        },
-        {
-            key: "so_ct",
-            title: "Số CT",
-            width: 80,
-            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
-        },
-        {
-            key: "dien_giai",
-            title: "Diễn giải",
-            width: 200,
-            render: (val) => (
-                <div className="max-w-xs truncate text-left" title={val}>
-                    {val || ""}
-                </div>
-            ),
-        },
-        {
-            key: "tk",
-            title: "Tài khoản",
-            width: 100,
-            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
-        },
-        {
-            key: "tk_du",
-            title: "TK đ.ứng",
-            width: 100,
-            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
-        },
-        {
-            key: "ps_no",
-            title: "Phát sinh nợ",
-            width: 120,
-            render: (val) => {
-                return val ? (
-                    <div className="text-right text-red-600 pr-2">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center"></div>
-                );
-            },
-        },
-        {
-            key: "ps_co",
-            title: "Phát sinh có",
-            width: 120,
-            render: (val) => {
-                return val ? (
-                    <div className="text-right text-blue-600 pr-2">{formatCurrency(val)}</div>
-                ) : (
-                    <div className="text-center"></div>
-                );
-            },
-        },
-        {
-            key: "ten_tk",
-            title: "Tên tài khoản",
-            width: 180,
-            render: (val) => (
-                <div className="max-w-xs truncate text-center" title={val}>
-                    {val || ""}
-                </div>
-            ),
-        },
-        {
-            key: "ten_tk_du",
-            title: "Tên tài khoản đối ứng",
-            width: 200,
-            render: (val) => (
-                <div className="max-w-xs truncate text-left" title={val}>
-                    {val || ""}
-                </div>
-            ),
-        },
-        {
-            key: "ma_ct",
-            title: "Mã CT",
-            width: 100,
-            render: (val) => <div className="font-medium text-center">{val || ""}</div>,
-        },
-    ];
+    const columnsTable = createColumnsTable1();
+    const columnsTable2 = createColumnsTable2(maKey, maTitle, tenKey, tenTitle);
+    const columnsTable3 = createColumnsTable3();
+    const columnsTable4 = createColumnsTable4();
+    const columnsTable5 = createColumnsTable5();
 
     const handlePrint = useReactToPrint({
         contentRef: printRef,
@@ -595,8 +188,11 @@ export default function BaoCaoDonBanHang() {
         );
     };
     const { tienHang3, tienCK3, tienThue3, tongThanhToan3 } = tinhTong3(data);
+    const hasData =
+        location.state?.data?.data1?.length > 0 ||
+        location.state?.data?.data2?.length > 0;
 
-    const specialTypes = ["cost-analysis", "performance-report", "turnover-analysis"];
+    const specialTypes = ["cost-analysis", "performance-report"];
     const { psNo, psCo } = useMemo(() => {
         let tongNo = 0;
         let tongCo = 0;
@@ -609,6 +205,19 @@ export default function BaoCaoDonBanHang() {
         });
 
         return { psNo: tongNo, psCo: tongCo };
+    }, [data1, data2]);
+    const { psNo2, psCo2 } = useMemo(() => {
+        let tongNo = 0;
+        let tongCo = 0;
+
+        [...data1, ...data2].forEach(item => {
+
+            tongNo += parseFloat(item.ps_no) || 0;
+            tongCo += parseFloat(item.ps_co) || 0;
+
+        });
+
+        return { psNo2: tongNo, psCo2: tongCo };
     }, [data1, data2]);
     return (
         <>
@@ -666,21 +275,24 @@ export default function BaoCaoDonBanHang() {
                             </div>
                         </div>
 
-                        {specialTypes.includes(reportType) && (location.state?.data?.data1?.length > 0 || location.state?.data?.data2?.length > 0) ? (
+                        {specialTypes.includes(reportType) && hasData ? (
                             <div className="space-y-9">
-                                {/* Table 1 - data1 */}
                                 {location.state?.data?.data2?.length > 0 && (
                                     <div className="mb-8">
                                         <ShowMoreTables
-                                            dataTable={location.state.data.data2.map((item, index) => ({
-                                                ...item,
-                                                stt: index + 1,
-                                            }))}
+                                            dataTable={location.state.data.data2.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
                                             columnsTable={columnsTable3}
                                             loading={loading}
                                         />
                                     </div>
                                 )}
+
+                                {/* Tổng cộng */}
                                 <div className="flex justify-center">
                                     <div className="mt-4 w-[500px]">
                                         <div className="p-4 rounded-lg">
@@ -688,34 +300,176 @@ export default function BaoCaoDonBanHang() {
                                                 <div>Tổng cộng :</div>
 
                                                 <div className="grid grid-cols-3 text-sm">
-                                                    <div className="px-4 py-2 text-left">Phát sinh nợ</div>
+                                                    <div className="px-4 py-2 text-left">
+                                                        Phát sinh nợ
+                                                    </div>
                                                     <div className="px-4 py-2 text-right">
-                                                        {new Intl.NumberFormat('vi-VN').format(psNo)}
+                                                        {new Intl.NumberFormat("vi-VN").format(
+                                                            psNo
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-3 text-sm">
-                                                    <div className="px-4 py-2 text-left">Phát sinh có :</div>
+                                                    <div className="px-4 py-2 text-left">
+                                                        Phát sinh có :
+                                                    </div>
                                                     <div className="px-4 py-2 text-right text-blue-600">
-                                                        {new Intl.NumberFormat('vi-VN').format(psCo)}
+                                                        {new Intl.NumberFormat("vi-VN").format(
+                                                            psCo
+                                                        )}
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ) : (location.state?.data?.data1?.length > 0 || location.state?.data?.data2?.length > 0) ? (
+                        ) : reportType === "turnover-analysis" && hasData ? (
+                            <div className="space-y-9">
+                                {/* Table chỉ hiện data2 */}
+                                {location.state?.data?.data2?.length > 0 && (
+                                    <div className="mb-8">
+                                        <ShowMoreTables
+                                            dataTable={location.state.data.data2.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
+                                            columnsTable={columnsTable4}
+                                            loading={loading}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Tổng cộng */}
+                                <div className="flex justify-center">
+                                    <div className="mt-4 w-[500px]">
+                                        <div className="p-4 rounded-lg">
+                                            <div className="space-y-2">
+                                                <div>Tổng cộng :</div>
+
+                                                <div className="grid grid-cols-3 text-sm">
+                                                    <div className="px-4 py-2 text-left">
+                                                        Phát sinh nợ
+                                                    </div>
+                                                    <div className="px-4 py-2 text-right">
+                                                        {new Intl.NumberFormat("vi-VN").format(
+                                                            psNo2
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 text-sm">
+                                                    <div className="px-4 py-2 text-left">
+                                                        Phát sinh có :
+                                                    </div>
+                                                    <div className="px-4 py-2 text-right text-blue-600">
+                                                        {new Intl.NumberFormat("vi-VN").format(
+                                                            psCo2
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : reportType === "abc-analysis" && hasData ? (
+                            <div className="space-y-9">
+                                {/* Table 1 - data1 */}
+                                {location.state?.data?.data2?.length > 0 && (
+                                    <div className="mb-8">
+                                        <ShowMoreTables
+                                            dataTable={location.state.data.data2.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
+                                            columnsTable={columnsTable5}
+                                            loading={loading}
+                                        />
+                                    </div>
+                                )}
+                                {location.state?.data?.data1?.length > 0 && (
+                                    location.state.data.data1.map((item, index) => (
+                                        <div key={index} className="flex justify-center">
+                                            <div className="mt-4 w-[500px]">
+                                                <div className="p-4 rounded-lg">
+                                                    <div className="space-y-2">
+                                                        <div>Tổng cộng :</div>
+
+                                                        <div className="grid grid-cols-3 text-sm">
+                                                            <div className="px-4 py-2 text-left">Nợ cuối kì</div>
+                                                            <div className="px-4 py-2 text-right">
+                                                                {new Intl.NumberFormat("vi-VN").format(item.no_ck)}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-3 text-sm">
+                                                            <div className="px-4 py-2 text-left">Có cuối kì :</div>
+                                                            <div className="px-4 py-2 text-right text-blue-600">
+                                                                {new Intl.NumberFormat("vi-VN").format(item.co_ck)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        ) : reportType === "inventory-valuation" && hasData ? (
                             <div className="space-y-9">
                                 {/* Table 1 - data1 */}
                                 {location.state?.data?.data1?.length > 0 && (
                                     <div className="mb-8">
                                         <ShowMoreTables
-                                            dataTable={location.state.data.data1.map((item, index) => ({
-                                                ...item,
-                                                stt: index + 1,
-                                            }))}
+                                            dataTable={location.state.data.data1.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
+                                            columnsTable={columnsTable3}
+                                            loading={loading}
+                                        />
+                                    </div>
+                                )}
+                                {location.state?.data?.data2?.length > 0 && (
+                                    <div className="flex flex-col items-center space-y-2">
+                                        {location.state?.data?.data2?.map((item, index) => (
+                                            <div key={index} className="w-[600px]">
+                                                <div className="p-2 rounded-lg">
+                                                    <div className="grid grid-cols-[2fr_1fr_1fr] text-sm py-1 gap-x-2">
+                                                        <div className="px-4 text-left">{item.dien_giai}</div>
+                                                        <div className="px-4 text-right">
+                                                            {new Intl.NumberFormat("vi-VN").format(item.ps_no)}
+                                                        </div>
+                                                        <div className="px-4 text-right">
+                                                            {new Intl.NumberFormat("vi-VN").format(item.ps_co)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : hasData ? (
+                            <div className="space-y-9">
+                                {/* Table 1 - data1 */}
+                                {location.state?.data?.data1?.length > 0 && (
+                                    <div className="mb-8">
+                                        <ShowMoreTables
+                                            dataTable={location.state.data.data1.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
                                             columnsTable={columnsTable}
                                             loading={loading}
                                         />
@@ -726,10 +480,12 @@ export default function BaoCaoDonBanHang() {
                                 {location.state?.data?.data2?.length > 0 && (
                                     <div className="mb-8">
                                         <ShowMoreTables
-                                            dataTable={location.state.data.data2.map((item, index) => ({
-                                                ...item,
-                                                stt: index + 1,
-                                            }))}
+                                            dataTable={location.state.data.data2.map(
+                                                (item, index) => ({
+                                                    ...item,
+                                                    stt: index + 1,
+                                                })
+                                            )}
                                             columnsTable={columnsTable2}
                                             loading={loading}
                                         />
@@ -878,8 +634,8 @@ export default function BaoCaoDonBanHang() {
                         )}
 
                     </ComponentCard>
-                </div>
-            </div>
+                </div >
+            </div >
 
             <PrintWrapper
                 ref={printRef}

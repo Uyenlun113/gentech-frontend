@@ -1,6 +1,7 @@
 import { CarFront, ChevronRight, FileType, Laptop, Pocket } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AbcAnalysisFilterModal from '../../components/AbcAnalysisFilterModal';
 import SalesFilterModal from '../../components/SalesFilterModal';
 import bcBanHangPhaiThuService from '../../services/bc-ban-hang';
 
@@ -128,23 +129,18 @@ export default function CashPage() {
         ma_dvcs: 'CTY'
       },
       'abc-analysis': {
-        StartDate: '2025-08-01',
-        EndDate: '2025-08-31',
-        ma_kh: '',
-        ma_kho: '',
-        ma_vt: '',
-        so_ct_from: '',
-        so_ct_to: '',
-        ma_dvcs: 'CTY'
+        ma_khach: '',
+        tai_khoan: '',
+        ngay: '2025-08-27',
+        ma_dvcs: 'CTY',
+        tien_mat_vnd: 'VND',
       },
       'inventory-valuation': {
         StartDate: '2025-08-01',
         EndDate: '2025-08-31',
         ma_kh: '',
-        ma_kho: '',
-        ma_vt: '',
-        so_ct_from: '',
-        so_ct_to: '',
+        tai_khoan: '',
+        chi_tiet: 0,
         ma_dvcs: 'CTY'
       },
       'budget-control': {
@@ -208,22 +204,25 @@ export default function CashPage() {
     { id: 'cost-analysis', label: 'Bảng kê chứng từ', isCanUse: true },
     { id: 'performance-report', label: 'Bảng kê chứng từ theo khách hàng', isCanUse: true },
     { id: 'turnover-analysis', label: 'Tổng hợp số phát sinh theo khách hàng', isCanUse: true },
-    { id: 'abc-analysis', label: 'Tra số dư công nợ của một khách hàng', isCanUse: false },
-    { id: 'inventory-valuation', label: 'Định giá tồn kho', isCanUse: false },
-    { id: 'budget-control', label: 'Kiểm soát ngân sách', isCanUse: false },
+    { id: 'abc-analysis', label: 'Tra số dư công nợ của một khách hàng', isCanUse: true },
+    { id: 'inventory-valuation', label: 'Sổ chi tiết công nợ của một khách hàng', isCanUse: true },
+    { id: 'budget-control', label: 'Sổ đối chiếu công nợ ', isCanUse: false },
     { id: 'variance-analysis', label: 'Phân tích chênh lệch', isCanUse: false },
     { id: 'profitability-report', label: 'Báo cáo lợi nhuận', isCanUse: false }
   ];
 
   const productMenuItems = [
-    { id: 'cost-analysis', label: 'Phân tích chi phí vật tư', isCanUse: false },
-    { id: 'performance-report', label: 'Báo cáo hiệu suất quản trị', isCanUse: false },
-    { id: 'turnover-analysis', label: 'Phân tích vòng quay hàng tồn', isCanUse: false },
-    { id: 'abc-analysis', label: 'Phân tích ABC vật tư', isCanUse: false },
-    { id: 'inventory-valuation', label: 'Định giá tồn kho', isCanUse: false },
-    { id: 'budget-control', label: 'Kiểm soát ngân sách', isCanUse: false },
-    { id: 'variance-analysis', label: 'Phân tích chênh lệch', isCanUse: false },
-    { id: 'profitability-report', label: 'Báo cáo lợi nhuận', isCanUse: false }
+    { id: 'order-list', label: 'Bảng kê đơn hàng', isCanUse: false },
+    { id: 'order-performance-report', label: 'Báo cáo thực hiện đơn hàng', isCanUse: false },
+    { id: 'order-plan-status-report', label: 'Báo cáo tình hình thực hiện kế hoạch đơn hàng', isCanUse: false },
+    { id: 'order-detail', label: 'Sổ chi tiết đơn hàng', isCanUse: false },
+    { id: 'order-voucher-list', label: 'Bảng kê chứng từ phát sinh theo đơn hàng', isCanUse: false },
+    { id: 'order-transaction-summary', label: 'Tổng hợp số phát sinh theo đơn hàng', isCanUse: false },
+    { id: 'order-balance', label: 'Bảng cân đối phát sinh của các đơn hàng', isCanUse: false },
+    { id: 'order-cost-summary', label: 'Tổng hợp chi phí theo đơn hàng', isCanUse: false },
+    { id: 'order-profit-loss-report', label: 'Báo cáo lỗ lãi của các đơn hàng', isCanUse: false },
+    { id: 'order-opening-balance', label: 'Số dư đầu kỳ của các đơn hàng', isCanUse: false },
+    { id: 'order-closing-balance', label: 'Số dư cuối kỳ của các đơn hàng', isCanUse: false }
   ];
 
   const handleIconClick = (type) => {
@@ -404,17 +403,33 @@ export default function CashPage() {
         </div>
 
         {openModalId && selectedMenuItem && (
-          <SalesFilterModal
-            isOpen={true}
-            onClose={() => {
-              setOpenModalId(null);
-              setSelectedMenuItem(null);
-            }}
-            selectedItem={selectedMenuItem}
-            defaultValues={getDefaultValues(selectedMenuItem.id)}
-            onSubmit={handleModalSubmit}
-            isSubmitting={isSubmitting}
-          />
+          <>
+            {selectedMenuItem.id === 'abc-analysis' ? (
+              <AbcAnalysisFilterModal
+                isOpen={true}
+                onClose={() => {
+                  setOpenModalId(null);
+                  setSelectedMenuItem(null);
+                }}
+                selectedItem={selectedMenuItem}
+                defaultValues={getDefaultValues(selectedMenuItem.id)}
+                onSubmit={handleModalSubmit}
+                isSubmitting={isSubmitting}
+              />
+            ) : (
+              <SalesFilterModal
+                isOpen={true}
+                onClose={() => {
+                  setOpenModalId(null);
+                  setSelectedMenuItem(null);
+                }}
+                selectedItem={selectedMenuItem}
+                defaultValues={getDefaultValues(selectedMenuItem.id)}
+                onSubmit={handleModalSubmit}
+                isSubmitting={isSubmitting}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
