@@ -14,6 +14,7 @@ import { ModalCreateHoaDonXuatKho } from "./HoaDonXuatKhoCreate";
 import { ModalEditHoaDonXuatKho } from "./HoaDonXuatKhoUpdate";
 import { useListHoaDonXuatKho } from "./useListHoaDonXuatKho";
 import HoaDonXuatKhoPrintTemplate from "./HoaDonXuatKhoPrintTemplate";
+import { Link } from "react-router";
 
 export default function HoaDonXuatKhoList() {
     const {
@@ -78,7 +79,13 @@ export default function HoaDonXuatKhoList() {
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         {/* Left: Button */}
-                        <div>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                to="/purchases"
+                                className="flex items-center border border-gray-300 px-2 py-1.5 text-gray-600 hover:bg-gray-50 rounded-lg"
+                            >
+                                Quay lại
+                            </Link>
                             <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
                                 Thêm mới
                             </Button>
@@ -150,138 +157,106 @@ export default function HoaDonXuatKhoList() {
                             />
                         </div>
                     )}
+                    {selectedRowForDetail && (
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+
+                                {selectedRowForDetail.hachToanList && selectedRowForDetail.hachToanList.length > 0 ? (
+                                    <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                        <table className="w-full border-collapse">
+                                            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                                                <tr>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã vật tư</th>
+                                                    {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th> */}
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên vật tư</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Đvt</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã kho</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Số lượng</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk d.thu</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk kho</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk giá vốn</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá bán</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền hàng</th>
+                                                    {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th> */}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                                {selectedRowForDetail.hachToanList.map((item, index) => (
+                                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                                            {index + 1}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                            {item.tk_vt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.ten_vt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.dvt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.ma_kho_i || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.so_luong || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.tk_dt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.tk_vt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {item.tk_gv || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
+                                                            {item.gia || '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
+                                                            {item.tien || '0'}
+                                                        </td>
+                                                        {/* <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                                    {item.dien_giaii || 'N/A'}
+                                                </td> */}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                                <tr>
+                                                    <td colSpan="10" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        Tổng tiền:
+                                                    </td>
+                                                    <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        {selectedRowForDetail.hachToanList
+                                                            .reduce((total, item) => total + (item.tien || 0), 0)
+                                                            .toLocaleString()
+                                                        } VNĐ
+                                                    </td>
+                                                    <td className="border-t border-gray-200 dark:border-gray-600"></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                        <div className="text-gray-400 dark:text-gray-500 mb-2">
+                                            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">Không có dữ liệu tài khoản</p>
+                                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Danh sách tài khoản trống</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </ComponentCard>
 
                 {/* Detail Panel với spacing đẹp hơn và cách đáy xa hơn */}
-                {selectedRowForDetail && (
-                    <div className="mt-8 mb-20 pb-8">
-                        <ComponentCard>
-                            <div className="space-y-6">
-                                {/* Header */}
 
-
-                                {/* Danh sách tài khoản */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col items-start border-gray-200 dark:border-gray-700 pb-4 space-y-1">
-                                            <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                                Hạch toán
-                                            </h4>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                                                {selectedRowForDetail.hachToanList?.length || 0} mục
-                                            </span>
-                                        </div>
-
-
-                                        <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
-
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                    setSelectedRowForDetail(null);
-                                                    setShowDetailPanel(false);
-                                                }}
-                                            >
-                                                Đóng
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    {selectedRowForDetail.hachToanList && selectedRowForDetail.hachToanList.length > 0 ? (
-                                        <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                                            <table className="w-full border-collapse">
-                                                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
-                                                    <tr>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã vật tư</th>
-                                                        {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK mẹ</th> */}
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên vật tư</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Đvt</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã kho</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Số lượng</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk d.thu</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk kho</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tk giá vốn</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá bán</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền hàng</th>
-                                                        {/* <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Diễn giải</th> */}
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                                    {selectedRowForDetail.hachToanList.map((item, index) => (
-                                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                                                {index + 1}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.tk_vt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.ten_vt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.dvt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.ma_kho_i || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.so_luong || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.tk_dt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.tk_vt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {item.tk_gv || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
-                                                                {item.gia || '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
-                                                                {item.tien || '0'}
-                                                            </td>
-                                                            {/* <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                                                                {item.dien_giaii || 'N/A'}
-                                                            </td> */}
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                                <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                                                    <tr>
-                                                        <td colSpan="10" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            Tổng tiền:
-                                                        </td>
-                                                        <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            {selectedRowForDetail.hachToanList
-                                                                .reduce((total, item) => total + (item.tien || 0), 0)
-                                                                .toLocaleString()
-                                                            } VNĐ
-                                                        </td>
-                                                        <td className="border-t border-gray-200 dark:border-gray-600"></td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                                            <div className="text-gray-400 dark:text-gray-500 mb-2">
-                                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-gray-500 dark:text-gray-400 font-medium">Không có dữ liệu tài khoản</p>
-                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Danh sách tài khoản trống</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </ComponentCard>
-                    </div>
-                )}
 
                 {/* Modals */}
                 <ModalCreateHoaDonXuatKho

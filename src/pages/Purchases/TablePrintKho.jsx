@@ -155,23 +155,6 @@ export default function TablePrintKho() {
         'bang_ke_phieu_xuat_mat_hang',
         'the_kho_chi_tiet_vat_tu',
         'tong_hop_nhap_xuat_ton',
-        // bang_ke_phieu_nhap_mat_hang_ncc: "portrait",
-        // bang_ke_phieu_nhap_ncc_mat_hang: "portrait",
-        // tong_hop_hang_nhap_kho: "portrait",
-
-        // // Report Out
-        // bang_ke_phieu_xuat: "portrait",
-        // bang_ke_phieu_xuat_mat_hang: "portrait",
-        // bang_ke_phieu_xuat_mat_hang_khach_hang: "portrait",
-        // bang_ke_phieu_xuat_khach_hang_mat_hang: "portrait",
-        // tong_hop_hang_xuat_kho: "portrait",
-
-        // // Report Exist
-        // the_kho_chi_tiet_vat_tu: "portrait",
-        // tong_hop_nhap_xuat_ton: "portrait",
-        // tong_hop_nhap_xuat_ton_quy_doi: "portrait",
-        // tong_hop_chi_tiet_vat_tu: "portrait",
-        // bao_cao_ton_kho: "portrait"
     ];
     return (
         <>

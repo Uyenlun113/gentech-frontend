@@ -17,6 +17,7 @@ import toWords from 'vn-num2words';
 import { FilePlus, Search, Pencil, Trash, Printer } from "lucide-react";
 import { useRef, forwardRef } from "react";
 import { useReactToPrint } from "react-to-print";
+import { Link } from "react-router";
 
 // Component nội dung in được tách riêng - Format nửa tờ A4
 const PrintContent = forwardRef(({ data }, ref) => {
@@ -513,7 +514,13 @@ export default function DonHangMuaList() {
                 <ComponentCard>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         {/* Left: Button */}
-                        <div>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                to="/sales"
+                                className="flex items-center border border-gray-300 px-2 py-1.5 text-gray-600 hover:bg-gray-50 rounded-lg"
+                            >
+                                Quay lại
+                            </Link>
                             <Button onClick={openModalCreate} size="sm" variant="primary" startIcon={<FilePlus className="size-5" />}>
                                 Thêm mới
                             </Button>
@@ -585,165 +592,130 @@ export default function DonHangMuaList() {
                             />
                         </div>
                     )}
-                </ComponentCard>
+                    {selectedRowForDetail && (
+                        <div className="space-y-6">
+                            {/* Danh sách hàng hóa */}
+                            <div className="space-y-4">
 
-                {/* Detail Panel với spacing đẹp hơn và cách đáy xa hơn */}
-                {selectedRowForDetail && (
-                    <div className="mt-8 mb-20 pb-8">
-                        <ComponentCard>
-                            <div className="space-y-6">
-                                {/* Danh sách hàng hóa */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col items-start border-gray-200 dark:border-gray-700 pb-4 space-y-1">
-                                            <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                                                Hàng hóa
-                                                {isLoadingMaterialNames && (
-                                                    <span className="ml-2 inline-flex items-center">
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                                                        <span className="ml-1 text-sm text-blue-500">Đang tải tên vật tư...</span>
-                                                    </span>
-                                                )}
-                                            </h4>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                                                {selectedRowForDetail.hang_hoa_list?.length || 0} mục
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center justify-between border-gray-200 dark:border-gray-700 pb-4 gap-x-4">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                    setSelectedRowForDetail(null);
-                                                    setShowDetailPanel(false);
-                                                }}
-                                            >
-                                                Đóng
-                                            </Button>
-                                        </div>
+                                {selectedRowForDetail.hang_hoa_list && selectedRowForDetail.hang_hoa_list.length > 0 ? (
+                                    <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                        <table className="w-full border-collapse">
+                                            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                                                <tr>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã vật tư</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên vật tư</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">ĐVT</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã kho</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Số lượng</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá gốc n.tệ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền cp n.tệ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá n.tệ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền n.tệ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK vật tư</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá gốc VNĐ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền cp VNĐ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá VNĐ</th>
+                                                    <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền VNĐ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                                {selectedRowForDetail.hang_hoa_list.map((item, index) => (
+                                                    <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                                            {index + 1}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                            {item.ma_vt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                                            {isLoadingMaterialNames && !item.ten_vt ? (
+                                                                <div className="flex items-center">
+                                                                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-24 rounded"></div>
+                                                                    <span className="ml-2 text-xs text-gray-400">Đang tải...</span>
+                                                                </div>
+                                                            ) : (
+                                                                item.ten_vt || item.ten_tai_khoan || 'N/A'
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-center">
+                                                            {item.dvt || item.don_vi_tinh || 'cái'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                            {item.ma_kho_i || item.ma_kho || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                            {item.so_luong ? parseFloat(item.so_luong).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
+                                                            {item.gia_nt0 ? parseFloat(item.gia_nt0).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
+                                                            {item.cp_nt ? parseFloat(item.cp_nt).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                            {item.gia_nt ? parseFloat(item.gia_nt).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                            {item.tien_nt ? parseFloat(item.tien_nt).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                                            {item.tk_vt || 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
+                                                            {item.gia0 ? parseFloat(item.gia0).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
+                                                            {item.cp ? parseFloat(item.cp).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                            {item.gia ? parseFloat(item.gia0).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
+                                                            {item.tien_nt ? parseFloat(item.tien0).toLocaleString('vi-VN') : '0'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                                <tr>
+                                                    <td colSpan="9" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        Tổng tiền n.tệ:
+                                                    </td>
+                                                    <td className="px-4 py-4 text-lg font-bold text-blue-600 dark:text-blue-400 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        {selectedRowForDetail.hang_hoa_list
+                                                            .reduce((total, item) => total + (parseFloat(item.tien_nt || item.tien) || 0), 0)
+                                                            .toLocaleString('vi-VN')
+                                                        }
+                                                    </td>
+                                                    <td colSpan="4" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        Tổng tiền VNĐ:
+                                                    </td>
+                                                    <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
+                                                        {selectedRowForDetail.hang_hoa_list
+                                                            .reduce((total, item) => total + (parseFloat(item.tien0) || 0), 0)
+                                                            .toLocaleString('vi-VN')
+                                                        } VNĐ
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
-
-                                    {selectedRowForDetail.hang_hoa_list && selectedRowForDetail.hang_hoa_list.length > 0 ? (
-                                        <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                                            <table className="w-full border-collapse">
-                                                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
-                                                    <tr>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">STT</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã vật tư</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tên vật tư</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">ĐVT</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Mã kho</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Số lượng</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá gốc n.tệ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền cp n.tệ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá n.tệ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền n.tệ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">TK vật tư</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá gốc VNĐ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền cp VNĐ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Giá VNĐ</th>
-                                                        <th className="border-b border-gray-200 dark:border-gray-600 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Tiền VNĐ</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                                    {selectedRowForDetail.hang_hoa_list.map((item, index) => (
-                                                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                                                {index + 1}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.ma_vt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                                                {isLoadingMaterialNames && !item.ten_vt ? (
-                                                                    <div className="flex items-center">
-                                                                        <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-24 rounded"></div>
-                                                                        <span className="ml-2 text-xs text-gray-400">Đang tải...</span>
-                                                                    </div>
-                                                                ) : (
-                                                                    item.ten_vt || item.ten_tai_khoan || 'N/A'
-                                                                )}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-center">
-                                                                {item.dvt || item.don_vi_tinh || 'cái'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.ma_kho_i || item.ma_kho || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
-                                                                {item.so_luong ? parseFloat(item.so_luong).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
-                                                                {item.gia_nt0 ? parseFloat(item.gia_nt0).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
-                                                                {item.cp_nt ? parseFloat(item.cp_nt).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
-                                                                {item.gia_nt ? parseFloat(item.gia_nt).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
-                                                                {item.tien_nt ? parseFloat(item.tien_nt).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                                                                {item.tk_vt || 'N/A'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
-                                                                {item.gia0 ? parseFloat(item.gia0).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-medium">
-                                                                {item.cp ? parseFloat(item.cp).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
-                                                                {item.gia ? parseFloat(item.gia0).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                            <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 text-right">
-                                                                {item.tien_nt ? parseFloat(item.tien0).toLocaleString('vi-VN') : '0'}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                                <tfoot className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                                                    <tr>
-                                                        <td colSpan="9" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            Tổng tiền n.tệ:
-                                                        </td>
-                                                        <td className="px-4 py-4 text-lg font-bold text-blue-600 dark:text-blue-400 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            {selectedRowForDetail.hang_hoa_list
-                                                                .reduce((total, item) => total + (parseFloat(item.tien_nt || item.tien) || 0), 0)
-                                                                .toLocaleString('vi-VN')
-                                                            }
-                                                        </td>
-                                                        <td colSpan="4" className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            Tổng tiền VNĐ:
-                                                        </td>
-                                                        <td className="px-4 py-4 text-lg font-bold text-green-600 dark:text-green-400 text-right border-t border-gray-200 dark:border-gray-600">
-                                                            {selectedRowForDetail.hang_hoa_list
-                                                                .reduce((total, item) => total + (parseFloat(item.tien0) || 0), 0)
-                                                                .toLocaleString('vi-VN')
-                                                            } VNĐ
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                        <div className="text-gray-400 dark:text-gray-500 mb-2">
+                                            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 21V9l3-1 3 1v12" />
+                                            </svg>
                                         </div>
-                                    ) : (
-                                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                                            <div className="text-gray-400 dark:text-gray-500 mb-2">
-                                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 21V9l3-1 3 1v12" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-gray-500 dark:text-gray-400 font-medium">Không có dữ liệu hàng hóa</p>
-                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Danh sách hàng hóa trống</p>
-                                        </div>
-                                    )}
-                                </div>
+                                        <p className="text-gray-500 dark:text-gray-400 font-medium">Không có dữ liệu hàng hóa</p>
+                                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Danh sách hàng hóa trống</p>
+                                    </div>
+                                )}
                             </div>
-                        </ComponentCard>
-                    </div>
-                )}
+                        </div>
+                    )}
+                </ComponentCard>
 
                 {/* Modals */}
                 <ModalCreateDonHangMua

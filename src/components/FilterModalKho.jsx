@@ -7,6 +7,7 @@ import MaterialSelectionPopup from "../components/general/dmvtPopup";
 import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
 import { useDmvt } from "../hooks/useDmvt";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -48,6 +49,15 @@ export default function FilterModalKho({
     ma_vat_tu: "",
   });
 
+  // ✅ THÊM: State riêng cho popup search values
+  const [popupSearchStates, setPopupSearchStates] = useState({
+    ma_khach: "",
+    ma_kho: "",
+    ma_kho_xuat: "",
+    ma_kho_nhap: "",
+    ma_vat_tu: "",
+  });
+
   // ✅ THÊM: State riêng cho popup states - thêm popup cho kho xuất và kho nhập
   const [popupStates, setPopupStates] = useState({
     showCustomerPopup: false,
@@ -77,38 +87,60 @@ export default function FilterModalKho({
     ];
   }
 
-  // Tạo debounced values cho từng field riêng biệt - THÊM kho xuất và kho nhập
   const debouncedMaKhSearch = useDebounce(searchStates.ma_khach || "", 300);
   const debouncedKhoSearch = useDebounce(searchStates.ma_kho || "", 300);
   const debouncedKhoXuatSearch = useDebounce(searchStates.ma_kho_xuat || "", 300);
   const debouncedKhoNhapSearch = useDebounce(searchStates.ma_kho_nhap || "", 300);
   const debouncedVatTuSearch = useDebounce(searchStates.ma_vat_tu || "", 300);
 
-  const { data: customerData = [] } = useCustomers(
-    { search: debouncedMaKhSearch || "" },
-    { enabled: !!debouncedMaKhSearch && debouncedMaKhSearch.length > 0 }
+  const debouncedPopupMaKhSearch = useDebounce(popupSearchStates.ma_khach || "", 300);
+  const debouncedPopupKhoSearch = useDebounce(popupSearchStates.ma_kho || "", 300);
+  const debouncedPopupKhoXuatSearch = useDebounce(popupSearchStates.ma_kho_xuat || "", 300);
+  const debouncedPopupKhoNhapSearch = useDebounce(popupSearchStates.ma_kho_nhap || "", 300);
+  const debouncedPopupVatTuSearch = useDebounce(popupSearchStates.ma_vat_tu || "", 300);
+
+  const { data: customerData = [], isLoading: isLoadingCustomers } = useCustomers(
+    { search: debouncedMaKhSearch || debouncedPopupMaKhSearch || "" },
+    {
+      enabled: !!(debouncedMaKhSearch || debouncedPopupMaKhSearch) &&
+        (debouncedMaKhSearch || debouncedPopupMaKhSearch).length > 0
+    }
   );
 
-  const { data: vatTuData = [] } = useDmvt(
-    { search: debouncedVatTuSearch || "" },
-    { enabled: !!debouncedVatTuSearch && debouncedVatTuSearch.length > 0 }
+  const { data: vatTuData = [], isLoading: isLoadingVatTu } = useDmvt(
+    { search: debouncedVatTuSearch || debouncedPopupVatTuSearch || "" },
+    {
+      enabled: !!(debouncedVatTuSearch || debouncedPopupVatTuSearch) &&
+        (debouncedVatTuSearch || debouncedPopupVatTuSearch).length > 0
+    }
   );
 
-  // ✅ THÊM: Hook cho kho xuất và kho nhập (sử dụng cùng hook useDmkho)
-  const { data: khoXuatData = [] } = useDmkho(
-    { search: debouncedKhoXuatSearch || "" },
-    { enabled: !!debouncedKhoXuatSearch && debouncedKhoXuatSearch.length > 0 }
+  // ✅ SỬA LẠI: Hook cho kho - sử dụng search value hợp nhất
+  const { data: khoData = [], isLoading: isLoadingKho } = useDmkho(
+    { search: debouncedKhoSearch || debouncedPopupKhoSearch || "" },
+    {
+      enabled: !!(debouncedKhoSearch || debouncedPopupKhoSearch) &&
+        (debouncedKhoSearch || debouncedPopupKhoSearch).length > 0
+    }
   );
 
-  const { data: khoNhapData = [] } = useDmkho(
-    { search: debouncedKhoNhapSearch || "" },
-    { enabled: !!debouncedKhoNhapSearch && debouncedKhoNhapSearch.length > 0 }
+  const { data: khoXuatData = [], isLoading: isLoadingKhoXuat } = useDmkho(
+    { search: debouncedKhoXuatSearch || debouncedPopupKhoXuatSearch || "" },
+    {
+      enabled: !!(debouncedKhoXuatSearch || debouncedPopupKhoXuatSearch) &&
+        (debouncedKhoXuatSearch || debouncedPopupKhoXuatSearch).length > 0
+    }
   );
 
-  const { data: khoData = [] } = useDmkho(
-    { search: debouncedKhoSearch || "" },
-    { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
+  const { data: khoNhapData = [], isLoading: isLoadingKhoNhap } = useDmkho(
+    { search: debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch || "" },
+    {
+      enabled: !!(debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch) &&
+        (debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch).length > 0
+    }
   );
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   // Load filter configuration khi component mount hoặc configName thay đổi
   useEffect(() => {
     if (configName) {
@@ -124,31 +156,74 @@ export default function FilterModalKho({
 
   // Handle search API calls - THÊM xử lý cho kho xuất và kho nhập
   useEffect(() => {
+    // API call cho khách hàng
     if (debouncedMaKhSearch && debouncedMaKhSearch.length > 0) {
       setLoadingStates(prev => ({ ...prev, ma_khach: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_khach: customerData.data || []
+      }));
       setLoadingStates(prev => ({ ...prev, ma_khach: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_khach: [] }));
     }
+  }, [debouncedMaKhSearch, customerData]);
 
+  useEffect(() => {
+    // API call cho kho
     if (debouncedKhoSearch && debouncedKhoSearch.length > 0) {
       setLoadingStates(prev => ({ ...prev, ma_kho: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_kho: Array.isArray(khoData?.data) ? khoData.data : []
+      }));
       setLoadingStates(prev => ({ ...prev, ma_kho: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_kho: [] }));
     }
+  }, [debouncedKhoSearch, khoData]);
 
+  useEffect(() => {
+    // API call cho kho xuất
     if (debouncedKhoXuatSearch && debouncedKhoXuatSearch.length > 0) {
       setLoadingStates(prev => ({ ...prev, ma_kho_xuat: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_kho_xuat: Array.isArray(khoXuatData?.data) ? khoXuatData.data : []
+      }));
       setLoadingStates(prev => ({ ...prev, ma_kho_xuat: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_kho_xuat: [] }));
     }
+  }, [debouncedKhoXuatSearch, khoXuatData]);
 
+  useEffect(() => {
+    // API call cho kho nhập
     if (debouncedKhoNhapSearch && debouncedKhoNhapSearch.length > 0) {
       setLoadingStates(prev => ({ ...prev, ma_kho_nhap: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_kho_nhap: Array.isArray(khoNhapData?.data) ? khoNhapData.data : []
+      }));
       setLoadingStates(prev => ({ ...prev, ma_kho_nhap: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_kho_nhap: [] }));
     }
+  }, [debouncedKhoNhapSearch, khoNhapData]);
 
+  useEffect(() => {
+    // API call cho vật tư
     if (debouncedVatTuSearch && debouncedVatTuSearch.length > 0) {
       setLoadingStates(prev => ({ ...prev, ma_vat_tu: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_vat_tu: Array.isArray(vatTuData?.data) ? vatTuData.data : []
+      }));
       setLoadingStates(prev => ({ ...prev, ma_vat_tu: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_vat_tu: [] }));
     }
-  }, [debouncedMaKhSearch, debouncedKhoSearch, debouncedKhoXuatSearch, debouncedKhoNhapSearch, debouncedVatTuSearch]);
+  }, [debouncedVatTuSearch, vatTuData]);
 
   // Reset form khi modal đóng/mở
   useEffect(() => {
@@ -161,6 +236,14 @@ export default function FilterModalKho({
     } else if (!isOpen) {
       // Reset states khi đóng modal - THÊM kho xuất và kho nhập
       setSearchStates({
+        ma_khach: "",
+        ma_kho: "",
+        ma_kho_xuat: "",
+        ma_kho_nhap: "",
+        ma_vat_tu: "",
+      });
+      // ✅ THÊM: Reset popup search states
+      setPopupSearchStates({
         ma_khach: "",
         ma_kho: "",
         ma_kho_xuat: "",
@@ -245,6 +328,9 @@ export default function FilterModalKho({
   const handleSearchInputChange = useCallback((fieldKey, value) => {
     setSearchStates(prev => ({ ...prev, [fieldKey]: value }));
 
+    // ✅ THÊM: Đồng bộ với popup search states
+    setPopupSearchStates(prev => ({ ...prev, [fieldKey]: value }));
+
     // Clear the actual field value if search value changes
     if (value !== filterData[fieldKey]) {
       setFilterData(prev => ({ ...prev, [fieldKey]: "" }));
@@ -271,6 +357,18 @@ export default function FilterModalKho({
     setSearchStates(prev => ({
       ...prev,
       [fieldKey]: value,
+    }));
+
+    // ✅ THÊM: Đồng bộ với popup search states
+    setPopupSearchStates(prev => ({
+      ...prev,
+      [fieldKey]: value,
+    }));
+
+    // ✅ THÊM: Clear popup search state
+    setPopupSearchStates(prev => ({
+      ...prev,
+      [fieldKey]: "",
     }));
 
     // ✅ SỬA LẠI: Đóng tất cả popup sau khi chọn - THÊM popup kho xuất và kho nhập
@@ -382,9 +480,10 @@ export default function FilterModalKho({
     }
   }, [handleLookupInputFocus, filterData]);
 
-  // ✅ SỬA LẠI: Xử lý tìm kiếm từ popup - cập nhật search states
+  // ✅ SỬA LẠI: Xử lý tìm kiếm từ popup - cập nhật popup search states
   const handlePopupSearch = useCallback((fieldKey, value) => {
-    setSearchStates(prev => ({ ...prev, [fieldKey]: value }));
+    // ✅ THAY ĐỔI: Update cả popup search states và main search states để đồng bộ
+    setPopupSearchStates(prev => ({ ...prev, [fieldKey]: value }));
 
     // Clear giá trị đã chọn nếu search value thay đổi
     if (value !== filterData[fieldKey]) {
@@ -558,6 +657,10 @@ export default function FilterModalKho({
 
         case 'lookup':
           const searchValue = searchStates[field.key] || "";
+          const results = searchResults[field.key] || [];
+          const isLoading = loadingStates[field.key] || false;
+          const showResults = focusStates[field.key] && searchValue.length > 0 && results.length > 0;
+
           return (
             <div className="relative">
               <input
@@ -572,6 +675,54 @@ export default function FilterModalKho({
                 placeholder={field.placeholder}
               />
               <Search className="absolute right-3 top-2.5 w-4 h-4 text-gray-400" />
+              {isLoading && (
+                <Loader className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-blue-500" />
+              )}
+
+              {/* Dropdown results */}
+              {showResults && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {results.map((item, index) => {
+                    // Xác định các key để hiển thị dựa vào field type
+                    const getDisplayKey = () => {
+                      if (field.key === 'ma_khach') return 'ten_kh';
+                      if (field.key.includes('kho')) return 'ten_kho';
+                      if (field.key === 'ma_vat_tu') return 'ten_vt';
+                      return 'name';
+                    };
+
+                    const getValueKey = () => {
+                      if (field.key === 'ma_khach') return 'ma_kh';
+                      if (field.key.includes('kho')) return 'ma_kho';
+                      if (field.key === 'ma_vat_tu') return 'ma_vt';
+                      return 'id';
+                    };
+
+                    return (
+                      <div
+                        key={`${getValueKey()}-${index}`}
+                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // Ngăn blur event
+                          const mockField = { valueKey: getValueKey() };
+                          handleLookupSelect(field.key, item, mockField);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-sm text-gray-900">
+                              {item[getValueKey()]}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {item[getDisplayKey()]}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
 
@@ -737,10 +888,25 @@ export default function FilterModalKho({
             })()}
 
             {/* Advanced filters section */}
-            {advancedFields.length > 0 && (
-              <div className="bg-orange-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-orange-900 mb-4">Điều kiện lọc nâng cao</h4>
-                <div className="overflow-x-auto">
+            <div className="bg-orange-50 rounded-lg p-4">
+              {/* Header có nút toggle */}
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <h4 className="text-sm font-medium text-orange-900">
+                  Điều kiện lọc nâng cao
+                </h4>
+                {showAdvanced ? (
+                  <ChevronDown className="w-4 h-4 text-orange-700" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-orange-700" />
+                )}
+              </div>
+
+              {/* Nội dung bảng */}
+              {showAdvanced && advancedFields.length > 0 && (
+                <div className="overflow-x-auto mt-4">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
@@ -757,17 +923,18 @@ export default function FilterModalKho({
                           </td>
                           <td className="p-2">
                             <span className="text-blue-600 cursor-pointer hover:underline">
-                              {item.operator || 'like'}
+                              {item.operator || "like"}
                             </span>
                           </td>
                           <td className="p-2">
                             <input
                               type="text"
                               className="border px-2 py-0.5 text-sm rounded w-full"
-                              value={item.value1 || ''}
+                              value={item.value1 || ""}
                               onChange={(e) => {
                                 const updated = [...advancedFields];
                                 updated[index].value1 = e.target.value;
+                                // TODO: nhớ gọi setAdvancedFields(updated) nếu advancedFields là state
                               }}
                             />
                           </td>
@@ -776,8 +943,8 @@ export default function FilterModalKho({
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Empty state */}
             {allFields.length === 0 && advancedFields.length === 0 && (
@@ -802,7 +969,7 @@ export default function FilterModalKho({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end items-center p-4 border-full border-gray-300 bg-gray-50 rounded-b-xl">
+        <div className="flex justify-end items-center p-4 border-t border-gray-300 bg-gray-50 rounded-b-xl">
           <div className="flex space-x-3">
             <button
               onClick={handleClose}
@@ -831,7 +998,6 @@ export default function FilterModalKho({
           </div>
         </div>
 
-        {/* ✅ THÊM: Popup Components - thêm popup cho kho xuất và kho nhập */}
 
         {/* Popup cho khách hàng */}
         {popupStates.showCustomerPopup && (
@@ -840,7 +1006,7 @@ export default function FilterModalKho({
             onClose={() => handleClosePopup('showCustomerPopup')}
             onSelect={handleCustomerSelect}
             customers={customerData.data || []}
-            searchValue={searchStates.ma_khach || ""}
+            searchValue={popupSearchStates.ma_khach || ""}
             onSearch={(value) => handlePopupSearch('ma_khach', value)}
           />
         )}
@@ -852,7 +1018,7 @@ export default function FilterModalKho({
             onClose={() => handleClosePopup('showKhoPopup')}
             onSelect={handleKhoSelect}
             warehouses={Array.isArray(khoData?.data) ? khoData.data : []}
-            searchValue={searchStates.ma_kho || ""}
+            searchValue={popupSearchStates.ma_kho || ""}
             onSearch={(value) => handlePopupSearch('ma_kho', value)}
           />
         )}
@@ -864,7 +1030,7 @@ export default function FilterModalKho({
             onClose={() => handleClosePopup('showKhoXuatPopup')}
             onSelect={handleKhoXuatSelect}
             warehouses={Array.isArray(khoXuatData?.data) ? khoXuatData.data : []}
-            searchValue={searchStates.ma_kho_xuat || ""}
+            searchValue={popupSearchStates.ma_kho_xuat || ""}
             onSearch={(value) => handlePopupSearch('ma_kho_xuat', value)}
           />
         )}
@@ -876,7 +1042,7 @@ export default function FilterModalKho({
             onClose={() => handleClosePopup('showKhoNhapPopup')}
             onSelect={handleKhoNhapSelect}
             warehouses={Array.isArray(khoNhapData?.data) ? khoNhapData.data : []}
-            searchValue={searchStates.ma_kho_nhap || ""}
+            searchValue={popupSearchStates.ma_kho_nhap || ""}
             onSearch={(value) => handlePopupSearch('ma_kho_nhap', value)}
           />
         )}
@@ -888,7 +1054,7 @@ export default function FilterModalKho({
             onClose={() => handleClosePopup('showVatTuPopup')}
             onSelect={handleVatTuSelect}
             materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
-            searchValue={searchStates.ma_vat_tu || ""}
+            searchValue={popupSearchStates.ma_vat_tu || ""}
             onSearch={(value) => handlePopupSearch('ma_vat_tu', value)}
           />
         )}

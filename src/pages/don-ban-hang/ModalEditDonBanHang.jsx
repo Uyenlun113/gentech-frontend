@@ -781,6 +781,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             fixed: "left",
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={11}
                     type="text"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "ma_kho_i", e.target.value)}
@@ -806,6 +808,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 120,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={12}
                     type="text"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "ma_vt", e.target.value)}
@@ -842,6 +846,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 100,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={13}
                     type="number"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "so_luong", e.target.value)}
@@ -856,6 +862,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 120,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={14}
                     type="number"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "gia_nt", e.target.value)}
@@ -881,6 +889,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 100,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={15}
                     type="number"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "tl_ck", e.target.value)}
@@ -930,6 +940,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 120,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={16}
                     type="number"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "thue_suat", e.target.value)}
@@ -957,6 +969,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 120,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={17}
                     type="text"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "tk_vt", e.target.value)}
@@ -971,6 +985,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 140,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={18}
                     type="date"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "han_gh_i", e.target.value)}
@@ -1007,7 +1023,20 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             </Modal>
         );
     }
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
 
+            // Lấy tabIndex từ element hiện tại thay vì biến tabIndex không tồn tại
+            const currentTabIndex = parseInt(e.target.tabIndex) || 0;
+            const nextInput = document.querySelector(`input[tabindex="${currentTabIndex + 1}"]`);
+
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            }
+        }
+    };
     return (
         <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
@@ -1047,6 +1076,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={1}
                                             type="text"
                                             value={formData.ma_kh}
                                             onChange={(e) => {
@@ -1062,6 +1093,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Địa chỉ
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={2}
                                             type="text"
                                             value={formData.dia_chi}
                                             onChange={(e) => handleFormChange("dia_chi", e.target.value)}
@@ -1071,6 +1104,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             MST
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={3}
                                             type="text"
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
@@ -1083,6 +1118,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Người nhận hàng
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={4}
                                             type="text"
                                             value={formData.ong_ba}
                                             onChange={(e) => handleFormChange("ong_ba", e.target.value)}
@@ -1095,6 +1132,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Diễn giải
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={5}
                                             type="text"
                                             value={formData.dien_giai}
                                             onChange={(e) => handleFormChange("dien_giai", e.target.value)}
@@ -1106,6 +1145,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Số đơn hàng mẹ
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={6}
                                             type="text"
                                             value={formData.ma_hd_me}
                                             onChange={(e) => handleFormChange("ma_hd_me", e.target.value)}
@@ -1117,6 +1158,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Mã NX
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={7}
                                             type="text"
                                             value={formData.ma_nx}
                                             onChange={(e) => {
@@ -1167,6 +1210,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Quyển sổ
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={8}
                                             type="text"
                                             value={formData.ma_qs}
                                             onChange={(e) => handleFormChange("ma_qs", e.target.value)}
@@ -1179,6 +1224,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             Số phiếu <span className="text-red-500">*</span>
                                         </Label>
                                         <input
+                                            onKeyDown={handleKeyDown}
+                                            tabIndex={9}
                                             type="text"
                                             value={formData.so_ct}
                                             onChange={(e) => handleFormChange("so_ct", e.target.value)}
@@ -1195,6 +1242,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                                 VND
                                             </span>
                                             <input
+                                                onKeyDown={handleKeyDown}
+                                                tabIndex={10}
                                                 type="text"
                                                 value={formData.ty_gia}
                                                 onChange={(e) => handleFormChange("ty_gia", e.target.value)}
