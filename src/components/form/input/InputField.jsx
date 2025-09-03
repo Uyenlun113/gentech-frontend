@@ -17,7 +17,6 @@ const Input = ({
   hint,
   onClick,
   onKeyDown,
-  // Props mới cho navigation
   tabIndex,
   autoFocus = false,
   onEnterPress,
@@ -32,18 +31,18 @@ const Input = ({
     if (autoFocus && ref.current) {
       ref.current.focus();
     }
-  }, [autoFocus]);
+  }, [autoFocus, ref]);
 
-  let inputClasses = ` h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring  dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${className}`;
+  let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-white ${className}`;
 
   if (disabled) {
-    inputClasses += ` text-gray-500 border-gray-300 opacity-40 bg-gray-100 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 opacity-40`;
+    inputClasses += ` text-gray-500 border-gray-300 opacity-40 bg-gray-100 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700`;
   } else if (error) {
-    inputClasses += `  border-error-500 focus:border-error-300 focus:ring-error-500/20 dark:text-error-400 dark:border-error-500 dark:focus:border-error-800`;
+    inputClasses += ` border-error-500 focus:border-error-300 focus:ring-error-500/20 dark:text-error-400 dark:border-error-500 dark:focus:border-error-800`;
   } else if (success) {
-    inputClasses += `  border-success-500 focus:border-success-300 focus:ring-success-500/20 dark:text-success-400 dark:border-success-500 dark:focus:border-success-800`;
+    inputClasses += ` border-success-500 focus:border-success-300 focus:ring-success-500/20 dark:text-success-400 dark:border-success-500 dark:focus:border-success-800`;
   } else {
-    inputClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90  dark:focus:border-brand-800`;
+    inputClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800`;
   }
 
   const handleKeyDown = (e) => {
@@ -63,15 +62,19 @@ const Input = ({
 
       // Tự động chuyển sang input tiếp theo
       if (nextInputRef && nextInputRef.current) {
-        nextInputRef.current.focus();
-        nextInputRef.current.select(); // Select all text để dễ nhập mới
-      } else {
+        setTimeout(() => {
+          nextInputRef.current.focus();
+          nextInputRef.current.select(); // Select all text để dễ nhập mới
+        }, 10);
+      } else if (tabIndex) {
         // Nếu không có nextInputRef, tìm input tiếp theo theo tabIndex
         const currentTabIndex = parseInt(tabIndex) || 0;
         const nextInput = document.querySelector(`input[tabindex="${currentTabIndex + 1}"]`);
         if (nextInput) {
-          nextInput.focus();
-          nextInput.select();
+          setTimeout(() => {
+            nextInput.focus();
+            nextInput.select();
+          }, 10);
         }
       }
     }

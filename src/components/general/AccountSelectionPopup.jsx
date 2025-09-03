@@ -1,10 +1,19 @@
 import { Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searchValue = "" }) => {
+const AccountSelectionPopup = ({
+  isOpen,
+  onClose,
+  onSelect,
+  accounts = [],
+  searchValue = "",
+  onSearchChange
+}) => {
   const [searchTerm, setSearchTerm] = useState(searchValue);
-  const [selectedAccountId, setSelectedAccountId] = useState(null);
+  const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
   const popupRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const listRef = useRef(null);
 
   const filteredAccounts = useMemo(() => {
     if (!Array.isArray(accounts)) return [];
@@ -16,12 +25,32 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
     );
   }, [accounts, searchTerm]);
 
+  // Reset selected index when filtered accounts change
+  useEffect(() => {
+    setSelectedAccountIndex(0);
+  }, [filteredAccounts.length]);
+
   useEffect(() => {
     if (isOpen) {
       setSearchTerm(searchValue);
-      setSelectedAccountId(null);
+      setSelectedAccountIndex(0);
+      // Focus search input when popup opens
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+        }
+      }, 100);
     }
   }, [isOpen, searchValue]);
+
+  // Handle search change
+  const handleSearchChange = useCallback((value) => {
+    setSearchTerm(value);
+    if (onSearchChange) {
+      onSearchChange(value);
+    }
+  }, [onSearchChange]);
 
   // Handle click outside to close popup
   useEffect(() => {
@@ -37,36 +66,58 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
     }
   }, [isOpen, onClose]);
 
+  // Scroll to selected item
+  const scrollToSelected = useCallback(() => {
+    if (listRef.current && selectedAccountIndex >= 0) {
+      const selectedElement = listRef.current.querySelector(`tr:nth-child(${selectedAccountIndex + 1})`);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedAccountIndex]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!isOpen) return;
+      if (!isOpen || filteredAccounts.length === 0) return;
 
       switch (event.key) {
         case "Escape":
+          event.preventDefault();
           onClose();
           break;
         case "ArrowDown":
           event.preventDefault();
-          setSelectedAccountId((prev) => {
-            const currentIndex = filteredAccounts.findIndex((acc) => acc.id === prev);
-            const nextIndex = currentIndex < filteredAccounts.length - 1 ? currentIndex + 1 : 0;
-            return filteredAccounts[nextIndex]?.id || null;
+          setSelectedAccountIndex((prev) => {
+            const next = prev < filteredAccounts.length - 1 ? prev + 1 : 0;
+            return next;
           });
           break;
         case "ArrowUp":
           event.preventDefault();
-          setSelectedAccountId((prev) => {
-            const currentIndex = filteredAccounts.findIndex((acc) => acc.id === prev);
-            const prevIndex = currentIndex > 0 ? currentIndex - 1 : filteredAccounts.length - 1;
-            return filteredAccounts[prevIndex]?.id || null;
+          setSelectedAccountIndex((prev) => {
+            const next = prev > 0 ? prev - 1 : filteredAccounts.length - 1;
+            return next;
           });
           break;
         case "Enter":
           event.preventDefault();
-          const selectedAccount = filteredAccounts.find((acc) => acc.id === selectedAccountId);
-          if (selectedAccount) {
-            handleSelectAccount(selectedAccount);
+          if (selectedAccountIndex >= 0 && filteredAccounts[selectedAccountIndex]) {
+            handleSelectAccount(filteredAccounts[selectedAccountIndex]);
+          }
+          break;
+        case "Tab":
+          // Allow tab to work normally for accessibility
+          break;
+        default:
+          // Focus search input for typing
+          if (event.target !== searchInputRef.current && !event.ctrlKey && !event.altKey) {
+            if (searchInputRef.current) {
+              searchInputRef.current.focus();
+            }
           }
           break;
       }
@@ -76,16 +127,28 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isOpen, filteredAccounts, selectedAccountId, onClose]);
+  }, [isOpen, filteredAccounts, selectedAccountIndex, onClose]);
 
-  const handleSelectAccount = (account) => {
+  // Scroll to selected item when selection changes
+  useEffect(() => {
+    if (isOpen) {
+      scrollToSelected();
+    }
+  }, [selectedAccountIndex, isOpen, scrollToSelected]);
+
+  const handleSelectAccount = useCallback((account) => {
     onSelect(account);
     onClose();
-  };
+  }, [onSelect, onClose]);
 
-  const handleDoubleClick = (account) => {
+  const handleRowClick = useCallback((account, index) => {
+    setSelectedAccountIndex(index);
     handleSelectAccount(account);
-  };
+  }, [handleSelectAccount]);
+
+  const handleDoubleClick = useCallback((account) => {
+    handleSelectAccount(account);
+  }, [handleSelectAccount]);
 
   if (!isOpen) return null;
 
@@ -95,7 +158,11 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Chọn tài khoản</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            tabIndex={-1}
+          >
             <X size={24} />
           </button>
         </div>
@@ -105,18 +172,21 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Tìm kiếm theo mã tài khoản hoặc tên..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              autoFocus
             />
+          </div>
+          <div className="mt-2 text-sm text-gray-500">
+            Sử dụng ↑↓ để di chuyển, Enter để chọn, Esc để đóng
           </div>
         </div>
 
         {/* Account List */}
-        <div className="overflow-y-auto max-h-96">
+        <div className="overflow-y-auto max-h-96" ref={listRef}>
           {filteredAccounts.length > 0 ? (
             <table className="w-full">
               <thead className="bg-gray-50 sticky top-0">
@@ -130,17 +200,22 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAccounts.map((account) => (
+                {filteredAccounts.map((account, index) => (
                   <tr
                     key={account.id || account.tk}
-                    onClick={() => handleSelectAccount(account)}
+                    onClick={() => handleRowClick(account, index)}
                     onDoubleClick={() => handleDoubleClick(account)}
-                    className={`cursor-pointer transition-colors ${
-                      selectedAccountId === account.id ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
-                    }`}
+                    className={`cursor-pointer transition-colors ${selectedAccountIndex === index
+                      ? "bg-blue-100 border-blue-300 ring-2 ring-blue-200"
+                      : "hover:bg-gray-50"
+                      }`}
                   >
-                    <td className="px-8 py-3 text-sm font-medium text-gray-900">{account.tk}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700 text-center">{account.ten_tk}</td>
+                    <td className="px-8 py-3 text-sm font-medium text-gray-900">
+                      {account.tk}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700 text-center">
+                      {account.ten_tk}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -158,22 +233,30 @@ const AccountSelectionPopup = ({ isOpen, onClose, onSelect, accounts = [], searc
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              {filteredAccounts.length > 0 && <>Tìm thấy {filteredAccounts.length} tài khoản</>}
+              {filteredAccounts.length > 0 && (
+                <>
+                  Tìm thấy {filteredAccounts.length} tài khoản
+                  {selectedAccountIndex >= 0 && (
+                    <span className="ml-2 text-blue-600">
+                      (Đã chọn: {selectedAccountIndex + 1}/{filteredAccounts.length})
+                    </span>
+                  )}
+                </>
+              )}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={onClose}
                 className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                tabIndex={-1}
               >
                 Hủy
               </button>
-              {selectedAccountId && (
+              {selectedAccountIndex >= 0 && filteredAccounts[selectedAccountIndex] && (
                 <button
-                  onClick={() => {
-                    const account = filteredAccounts.find((acc) => acc.id === selectedAccountId);
-                    if (account) handleSelectAccount(account);
-                  }}
+                  onClick={() => handleSelectAccount(filteredAccounts[selectedAccountIndex])}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  tabIndex={-1}
                 >
                   Chọn
                 </button>

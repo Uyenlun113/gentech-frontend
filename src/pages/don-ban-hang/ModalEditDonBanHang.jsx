@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Flatpickr from "react-flatpickr";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
 import AccountSelectionPopup from "../../components/general/AccountSelectionPopup";
@@ -100,6 +101,24 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
     });
 
     const hangHoaTableRef = useRef(null);
+    
+    // Refs cho các tab
+    const [activeTab, setActiveTab] = useState(0);
+    
+    // Refs cho các input fields theo thứ tự tab
+    const inputRefs = useRef({
+        // Tab thông tin cơ bản
+        maKhRef: useRef(null),
+        diaChiRef: useRef(null),
+        maSoThueRef: useRef(null),
+        nguoiNhanHangRef: useRef(null),
+        dienGiaiRef: useRef(null),
+        soDonHangMeRef: useRef(null),
+        maNxRef: useRef(null),
+        tyGiaRef: useRef(null),
+        quySoRef: useRef(null),
+        soPhieuRef: useRef(null),
+    });
 
     // Debounced search values
     const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
@@ -371,6 +390,97 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
         }));
     }, [debouncedMaNxSearch]);
 
+    // Navigation handlers
+    const switchToHangHoaTab = useCallback(() => {
+        setActiveTab(0); // Tab hàng hóa là tab đầu tiên
+        // Focus vào input đầu tiên của bảng hàng hóa
+        setTimeout(() => {
+            const firstInput = document.querySelector('[data-table-input="ma_kho_i_1"] input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }, 100);
+    }, []);
+
+    const handleLastInputEnter = useCallback(() => {
+        // Chuyển sang tab hàng hóa khi ấn Enter ở input cuối cùng
+        switchToHangHoaTab();
+    }, [switchToHangHoaTab]);
+
+    const addHangHoaRow = useCallback(() => {
+        setHangHoaData(prev => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                ma_kho_i: "",
+                ma_vt: "",
+                ten_vt: "",
+                so_luong: "",
+                gia_nt: "",
+                gia_nt2: "",
+                tien_nt: "",
+                tien_nt2: "",
+                tk_vt: "",
+                thue_nt: "",
+                tl_ck: "",
+                ck_nt: "",
+                thue_suat: "",
+                ma_thue: "",
+                dvt: "",
+                ten_kho: "",
+                han_gh_i: "",
+            }
+        ]);
+
+        setTimeout(() => {
+            if (hangHoaTableRef.current) {
+                const tableContainer = hangHoaTableRef.current.querySelector('.overflow-x-auto');
+                if (tableContainer) {
+                    tableContainer.scrollTop = tableContainer.scrollHeight;
+                }
+            }
+        }, 100);
+    }, []);
+
+    const handleTableInputEnter = useCallback((rowId, field) => {
+        // Tìm input tiếp theo trong bảng
+        const currentRowIndex = hangHoaData.findIndex(row => row.id === rowId);
+        
+        // Danh sách các field theo thứ tự (chỉ các field có thể nhập)
+        const fieldOrder = ["ma_kho_i", "ma_vt", "so_luong", "gia_nt", "tl_ck", "thue_suat", "tk_vt"];
+        const currentFieldIndex = fieldOrder.indexOf(field);
+        
+        if (currentFieldIndex < fieldOrder.length - 1) {
+            // Chuyển sang field tiếp theo trong cùng dòng
+            const nextField = fieldOrder[currentFieldIndex + 1];
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 50);
+        } else if (currentRowIndex < hangHoaData.length - 1) {
+            // Chuyển sang dòng tiếp theo, field đầu tiên
+            const nextRowId = hangHoaData[currentRowIndex + 1].id;
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="ma_kho_i_${nextRowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 50);
+        } else {
+            // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+            addHangHoaRow();
+            setTimeout(() => {
+                const newRowId = hangHoaData.length + 1;
+                const firstInputNewRow = document.querySelector(`[data-table-input="ma_kho_i_${newRowId}"] input`);
+                if (firstInputNewRow) {
+                    firstInputNewRow.focus();
+                }
+            }, 150);
+        }
+    }, [hangHoaData, addHangHoaRow]);
+
     // Handlers
     const handleFormChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -505,8 +615,25 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                         : item
                 )
             );
+            
+            // Restore focus to the table input after popup closes
+            setTimeout(() => {
+                const currentInput = document.querySelector(`[data-table-input="${searchStates.tkSearchField}_${id}"] input`);
+                if (currentInput) {
+                    currentInput.focus();
+                    currentInput.select();
+                }
+            }, 150);
         } else if (searchStates.searchContext === "maNx") {
             handleFormChange("ma_nx", account.tk.trim());
+            
+            // Restore focus to Mã NX input
+            setTimeout(() => {
+                if (inputRefs.current.maNxRef.current) {
+                    inputRefs.current.maNxRef.current.focus();
+                    inputRefs.current.maNxRef.current.select();
+                }
+            }, 150);
         }
 
         // Clear search state
@@ -524,6 +651,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             handleFormChange("ma_kh", customer.ma_kh.trim() || "");
             handleFormChange("dia_chi", customer.dia_chi || "");
             handleFormChange("ma_so_thue", customer.ma_so_thue || "");
+            
+            // Restore focus to the input after popup closes
+            setTimeout(() => {
+                if (inputRefs.current.maKhRef.current) {
+                    inputRefs.current.maKhRef.current.focus();
+                    inputRefs.current.maKhRef.current.select();
+                }
+            }, 150);
         }
 
         // Clear search state
@@ -549,6 +684,15 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                         : item
                 )
             );
+            
+            // Restore focus to the table input after popup closes
+            setTimeout(() => {
+                const currentInput = document.querySelector(`[data-table-input="ma_vt_${id}"] input`);
+                if (currentInput) {
+                    currentInput.focus();
+                    currentInput.select();
+                }
+            }, 150);
         }
 
         // Clear search state
@@ -574,6 +718,15 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                         : item
                 )
             );
+            
+            // Restore focus to the table input after popup closes
+            setTimeout(() => {
+                const currentInput = document.querySelector(`[data-table-input="ma_kho_i_${id}"] input`);
+                if (currentInput) {
+                    currentInput.focus();
+                    currentInput.select();
+                }
+            }, 150);
         }
 
         // Clear search state
@@ -588,6 +741,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
     const handleMaNxAccountSelect = useCallback((account) => {
         handleFormChange("ma_nx", account.tk.trim());
 
+        // Restore focus to Mã NX input
+        setTimeout(() => {
+            if (inputRefs.current.maNxRef.current) {
+                inputRefs.current.maNxRef.current.focus();
+                inputRefs.current.maNxRef.current.select();
+            }
+        }, 150);
+
         // Clear search state
         setSearchStates(prev => ({
             ...prev,
@@ -596,41 +757,6 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             searchContext: null
         }));
     }, [handleFormChange]);
-
-    const addHangHoaRow = useCallback(() => {
-        setHangHoaData(prev => [
-            ...prev,
-            {
-                id: prev.length + 1,
-                ma_kho_i: "",
-                ma_vt: "",
-                ten_vt: "",
-                so_luong: "",
-                gia_nt: "",
-                gia_nt2: "",
-                tien_nt: "",
-                tien_nt2: "",
-                tk_vt: "",
-                thue_nt: "",
-                tl_ck: "",
-                ck_nt: "",
-                thue_suat: "",
-                ma_thue: "",
-                dvt: "",
-                ten_kho: "",
-                han_gh_i: "",
-            }
-        ]);
-
-        setTimeout(() => {
-            if (hangHoaTableRef.current) {
-                const tableContainer = hangHoaTableRef.current.querySelector('.overflow-x-auto');
-                if (tableContainer) {
-                    tableContainer.scrollTop = tableContainer.scrollHeight;
-                }
-            }
-        }, 100);
-    }, []);
 
     const deleteHangHoaRow = useCallback((id) => {
         setHangHoaData(prev => prev.filter(item => item.id !== id));
@@ -780,12 +906,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 120,
             fixed: "left",
             render: (text, record) => (
-                <input
-                    type="text"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "ma_kho_i", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                />
+                <div data-table-input={`ma_kho_i_${record.id}`}>
+                    <Input
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "ma_kho_i", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "ma_kho_i")}
+                        className="w-full text-xs h-9"
+                    />
+                </div>
             ),
         },
         {
@@ -805,12 +933,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "ma_vt",
             width: 120,
             render: (text, record) => (
-                <input
-                    type="text"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "ma_vt", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                />
+                <div data-table-input={`ma_vt_${record.id}`}>
+                    <Input
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "ma_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "ma_vt")}
+                        className="w-full text-xs h-9"
+                    />
+                </div>
             ),
         },
         {
@@ -841,12 +971,15 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "so_luong",
             width: 100,
             render: (text, record) => (
-                <input
-                    type="number"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "so_luong", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
-                />
+                <div data-table-input={`so_luong_${record.id}`}>
+                    <Input
+                        type="number"
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "so_luong", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "so_luong")}
+                        className="w-full text-xs text-right h-9"
+                    />
+                </div>
             ),
         },
         {
@@ -855,12 +988,15 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "gia_nt",
             width: 120,
             render: (text, record) => (
-                <input
-                    type="number"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "gia_nt", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
-                />
+                <div data-table-input={`gia_nt_${record.id}`}>
+                    <Input
+                        type="number"
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "gia_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "gia_nt")}
+                        className="w-full text-xs text-right h-9"
+                    />
+                </div>
             ),
         },
         {
@@ -880,14 +1016,17 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "tl_ck",
             width: 100,
             render: (text, record) => (
-                <input
-                    type="number"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "tl_ck", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
-                    min="0"
-                    max="100"
-                />
+                <div data-table-input={`tl_ck_${record.id}`}>
+                    <Input
+                        type="number"
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "tl_ck", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "tl_ck")}
+                        className="w-full text-xs text-right h-9"
+                        min="0"
+                        max="100"
+                    />
+                </div>
             ),
         },
         {
@@ -929,14 +1068,17 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "thue_suat",
             width: 120,
             render: (text, record) => (
-                <input
-                    type="number"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "thue_suat", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
-                    min="0"
-                    max="100"
-                />
+                <div data-table-input={`thue_suat_${record.id}`}>
+                    <Input
+                        type="number"
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "thue_suat", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "thue_suat")}
+                        className="w-full text-xs text-right h-9"
+                        min="0"
+                        max="100"
+                    />
+                </div>
             ),
         },
         {
@@ -956,12 +1098,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             dataIndex: "tk_vt",
             width: 120,
             render: (text, record) => (
-                <input
-                    type="text"
-                    value={text || ""}
-                    onChange={(e) => handleHangHoaChange(record.id, "tk_vt", e.target.value)}
-                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                />
+                <div data-table-input={`tk_vt_${record.id}`}>
+                    <Input
+                        value={text || ""}
+                        onChange={(e) => handleHangHoaChange(record.id, "tk_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(record.id, "tk_vt")}
+                        className="w-full text-xs h-9"
+                    />
+                </div>
             ),
         },
         {
@@ -1046,14 +1190,16 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maKhRef}
                                             value={formData.ma_kh}
                                             onChange={(e) => {
                                                 handleFormChange("ma_kh", e.target.value);
                                                 handleMainFormCustomerSearch(e.target.value);
                                             }}
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.diaChiRef}
+                                            className="w-32 text-sm h-9"
+                                            tabIndex={1}
                                         />
                                     </div>
 
@@ -1061,20 +1207,24 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.diaChiRef}
                                             value={formData.dia_chi}
                                             onChange={(e) => handleFormChange("dia_chi", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.maSoThueRef}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={2}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[40px] ml-4">
                                             MST
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maSoThueRef}
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            nextInputRef={inputRefs.current.nguoiNhanHangRef}
+                                            className="w-32 text-sm h-9"
+                                            tabIndex={3}
                                         />
                                     </div>
 
@@ -1082,11 +1232,13 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận hàng
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.nguoiNhanHangRef}
                                             value={formData.ong_ba}
                                             onChange={(e) => handleFormChange("ong_ba", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.dienGiaiRef}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={4}
                                         />
                                     </div>
 
@@ -1094,36 +1246,42 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.dienGiaiRef}
                                             value={formData.dien_giai}
                                             onChange={(e) => handleFormChange("dien_giai", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.soDonHangMeRef}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={5}
                                         />
                                     </div>
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số đơn hàng mẹ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soDonHangMeRef}
                                             value={formData.ma_hd_me}
                                             onChange={(e) => handleFormChange("ma_hd_me", e.target.value)}
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.maNxRef}
+                                            className="w-32 text-sm h-9"
+                                            tabIndex={6}
                                         />
                                     </div>
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px] ">
                                             Mã NX
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maNxRef}
                                             value={formData.ma_nx}
                                             onChange={(e) => {
                                                 handleFormChange("ma_nx", e.target.value);
                                                 handleMaNxAccountSearch(e.target.value);
                                             }}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.quySoRef}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={7}
                                         />
                                     </div>
                                 </div>
@@ -1166,11 +1324,13 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Quyển sổ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.quySoRef}
                                             value={formData.ma_qs}
                                             onChange={(e) => handleFormChange("ma_qs", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            nextInputRef={inputRefs.current.soPhieuRef}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={10}
                                         />
                                     </div>
 
@@ -1178,11 +1338,13 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soPhieuRef}
                                             value={formData.so_ct}
                                             onChange={(e) => handleFormChange("so_ct", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            onEnterPress={handleLastInputEnter}
+                                            className="flex-1 text-sm h-9"
+                                            tabIndex={11}
                                         />
                                     </div>
 
@@ -1194,11 +1356,14 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                             <span className="px-3 py-2 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                                                 VND
                                             </span>
-                                            <input
-                                                type="text"
+                                            <Input
+                                                type="number"
+                                                inputRef={inputRefs.current.tyGiaRef}
                                                 value={formData.ty_gia}
                                                 onChange={(e) => handleFormChange("ty_gia", e.target.value)}
-                                                className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
+                                                nextInputRef={inputRefs.current.quySoRef}
+                                                className="flex-1 text-sm border-none h-9"
+                                                tabIndex={8}
                                             />
                                         </div>
                                     </div>
@@ -1224,11 +1389,13 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                     {/* Bảng hàng hóa với Tabs */}
                     <div className="px-6">
                         <Tabs
+                            activeTab={activeTab}
                             tabs={[
                                 {
                                     label: "1. Hàng hóa",
                                     content: (
                                         <TableBasic
+                                            ref={hangHoaTableRef}
                                             data={hangHoaData}
                                             columns={hangHoaColumns}
                                             onDeleteRow={deleteHangHoaRow}
@@ -1244,6 +1411,7 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                                 addHangHoaRow();
                             }}
                             onChangeTab={(tabIndex) => {
+                                setActiveTab(tabIndex);
                             }}
                         />
                     </div>
