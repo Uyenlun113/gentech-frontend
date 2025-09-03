@@ -445,6 +445,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         }
         return (
           <Input
+            tabIndex={14}
             value={row.ma_vt}
             onChange={(e) => handleHachToanChange(row.id, "ma_vt", e.target.value)}
             placeholder="Mã VT..."
@@ -492,6 +493,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={15}
             value={row.ma_kho_i}
             onChange={(e) => handleHachToanChange(row.id, "ma_kho_i", e.target.value)}
             placeholder="Mã kho..."
@@ -515,6 +517,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       width: 100,
       render: (val, row) => (
         <Input
+          tabIndex={16}
           value={row.so_luong}
           onChange={(e) => handleHachToanChange(row.id, "so_luong", e.target.value)}
           placeholder="0"
@@ -531,6 +534,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={17}
             value={row.gia2}
             onChange={(e) => handleHachToanChange(row.id, "gia2", e.target.value)}
             placeholder="0"
@@ -554,6 +558,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         }
         return (
           <Input
+            tabIndex={18}
             type="number"
             value={row.tien}
             onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
@@ -574,6 +579,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
       width: 120,
       render: (val, row) => (
         <Input
+          tabIndex={19}
           value={row.gia}
           onChange={(e) => handleHachToanChange(row.id, "gia", e.target.value)}
           className="w-full text-right"
@@ -589,6 +595,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={20}
             value={row.tk_dt}
             onChange={(e) => handleHachToanChange(row.id, "tk_dt", e.target.value)}
             placeholder="TK DT..."
@@ -605,6 +612,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={21}
             value={row.tk_vt}
             onChange={(e) => handleHachToanChange(row.id, "tk_vt", e.target.value)}
             placeholder="TK VT..."
@@ -621,6 +629,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={22}
             value={row.tk_gv}
             onChange={(e) => handleHachToanChange(row.id, "tk_gv", e.target.value)}
             placeholder="TK GV..."
@@ -893,7 +902,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs min-w-[110px] col-span-2">Loại giao dịch</Label>
                       <div className="col-span-6">
                         <div className="relative flex-1">
-                          <Input value={formData.ma_gd} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ma_gd", e.target.value)} />
+                          <Input
+                            tabIndex={1} value={formData.ma_gd} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ma_gd", e.target.value)} />
                         </div>
                       </div>
                       <div className="col-span-3"></div>
@@ -904,6 +914,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <div className="col-span-6">
                         <div className="relative flex-1">
                           <Input
+                            tabIndex={2}
                             value={maKhSearch}
                             onChange={e => {
                               const value = e.target.value;
@@ -931,18 +942,21 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <div className="grid grid-cols-12 gap-2 items-center">
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
-                        <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
+                        <Input
+                          tabIndex={3} value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
-                        <Input value={formData.ma_so_thue} className="h-8 text-sm bg-white" onChange={e => handleChange("ma_so_thue", e.target.value)} />
+                        <Input
+                          tabIndex={4} value={formData.ma_so_thue} className="h-8 text-sm bg-white" onChange={e => handleChange("ma_so_thue", e.target.value)} />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người nhận</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
+                        <Input
+                          tabIndex={5} value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
@@ -951,6 +965,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs min-w-[110px] col-span-2">Diễn giải</Label>
                       <div className="col-span-10">
                         <Input
+                          tabIndex={6}  
                           value={formData.dien_giai}
                           onChange={e => handleChange("dien_giai", e.target.value)}
                           className="h-8 text-sm flex-1 bg-white"
@@ -962,6 +977,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs col-span-2">Mã NX</Label>
                       <div className="relative col-span-6">
                         <Input
+                          tabIndex={7}
                           value={maTaiKhoanSearch}
                           onChange={e => {
                             const value = e.target.value;
@@ -993,7 +1009,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Mã bộ phận</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ma_bp} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ma_bp", e.target.value)} />
+                        <Input
+                          tabIndex={8} value={formData.ma_bp} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ma_bp", e.target.value)} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
@@ -1046,6 +1063,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs col-span-6 text-left">Quyển số</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={9}
                           value={formData.ma_qs}
                           onChange={e => handleChange("ma_qs", e.target.value)}
                           className="h-8 text-sm bg-white"
@@ -1058,6 +1076,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs col-span-6 text-left">Số seri</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={10}
                           value={formData.so_seri}
                           onChange={e => handleChange("so_seri", e.target.value)}
                           className="h-8 text-sm bg-white"
@@ -1070,6 +1089,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs col-span-6 text-left">Số chứng từ</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={11}
                           value={formData.so_ct}
                           onChange={e => handleChange("so_ct", e.target.value)}
                           className="h-8 text-sm bg-white"
@@ -1092,6 +1112,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       </div>
                       <div className="col-span-5">
                         <Input
+                          // tabIndex={13}
                           value={formData.ty_gia}
                           onChange={e => handleChange("ty_gia", e.target.value)}
                           disabled
@@ -1105,6 +1126,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                       <Label className="text-xs col-span-6 text-left">Số lần in</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={13}
                           value={formData.sl_in}
                           onChange={e => handleChange("sl_in", e.target.value)}
                           type="number"
@@ -1122,15 +1144,17 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
           {/* Accounting section */}
           <div className="flex justify-between shadow-lg border-0 px-6">
             <Tabs
+              height="h-[400px]"
               tabs={[
                 {
                   label: "Hạch toán",
                   content: (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 p-2 flex justify-end">
+                    <div className="">
+                      <div className="bg-blue-50 flex justify-end">
                         <div className="flex gap-4">
                           <div className="flex items-center gap-2">
-                            <input
+                            <Input
+                              // tabIndex={14}
                               type="checkbox"
                               checked={formData.sua_tien}
                               onChange={(e) => handleChange("sua_tien", e.target.checked)}
@@ -1139,7 +1163,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                             <Label className="text-sm font-medium text-gray-700">Sửa trường tiền</Label>
                           </div>
                           <div className="flex items-center gap-2">
-                            <input
+                            <Input
+                              // tabIndex={1}
                               type="checkbox"
                               checked={formData.px_gia_dd}
                               onChange={(e) => handleChange("px_gia_dd", e.target.checked)}
@@ -1184,17 +1209,16 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
 
         {/* Footer buttons */}
         <div className="flex items-center gap-4 px-6 py-4 border-t border-gray-200 dark:border-gray-700 justify-end bg-gray-50 dark:bg-gray-800 flex-shrink-0 rounded-b-3xl">
-          <div className="flex-1 min-h-0 flex flex-col bg-blue-50">
-            {/* Form fields section */}
+          {/* <div className="flex-1 min-h-0 flex flex-col bg-blue-50">
             <div className="h-[45%] px-6 py-4 flex-shrink-0">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
 
-                {/* Cột 1 */}
                 <div className="dark:border-gray-600 rounded-lg flex flex-col">
                   <div className="grid items-center gap-2 grid-cols-12">
                     <Label className="text-xs min-w-[110px] col-span-4">Mã thuế</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={formData.ma_thue}
                         className="h-8 text-sm bg-white"
                         onChange={e => handleChange("ma_thue", e.target.value)}
@@ -1206,6 +1230,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Thuế suất (%)</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={formData.thue_suat}
                         className="h-8 text-sm bg-white"
                         onChange={e => handleChange("thue_suat", e.target.value)}
@@ -1218,6 +1243,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">TK thuế</Label>
                     <div className="col-span-4">
                       <Input
+            tabIndex={1}
                         value={formData.tk_thue_co}
                         className="h-8 text-sm bg-white"
                         onChange={e => handleChange("tk_thue_co", e.target.value)}
@@ -1230,6 +1256,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Nhóm hàng</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={formData.ten_vtthue}
                         onChange={e => handleChange("ten_vtthue", e.target.value)}
                         className="h-8 text-sm bg-white"
@@ -1238,12 +1265,12 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                   </div>
                 </div>
 
-                {/* Cột 2 */}
                 <div className="dark:border-gray-600 rounded-lg flex flex-col">
                   <div className="grid items-center gap-2 grid-cols-12">
                     <Label className="text-xs col-span-4">Ghi chú thuế</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={formData.gc_thue}
                         onChange={e => handleChange("gc_thue", e.target.value)}
                         className="h-8 text-sm bg-white"
@@ -1255,6 +1282,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Hình thức TT</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={formData.ht_tt}
                         onChange={e => handleChange("ht_tt", e.target.value)}
                         className="h-8 text-sm bg-white"
@@ -1263,12 +1291,12 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                   </div>
                 </div>
 
-                {/* Cột 3: để trống cho các field khác sau này */}
                 <div className="dark:border-gray-600 rounded-lg flex flex-col">
                   <div className="grid items-center gap-2 grid-cols-12">
                     <Label className="text-xs col-span-4">Số lượng</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={totals.totalSoLuong}
                         disabled
                         className="h-8 text-sm bg-gray-100 text-right"
@@ -1279,6 +1307,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Cộng tiền hàng</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={totals.totalTien}
                         disabled
                         className="h-8 text-sm bg-gray-100 text-right"
@@ -1289,6 +1318,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Tiền thuế GTGT</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={
                           totals.totalTien && formData.thue_suat
                             ? ((totals.totalTien * Number(formData.thue_suat)) / 100).toFixed(2)
@@ -1303,6 +1333,7 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
                     <Label className="text-xs col-span-4">Tổng tiền tt</Label>
                     <div className="col-span-8">
                       <Input
+            tabIndex={1}
                         value={
                           totals.totalTien && formData.thue_suat
                             ? (
@@ -1321,7 +1352,8 @@ export const ModalCreateHoaDonXuatKho = ({ isOpenCreate, closeModalCreate }) => 
               </div>
             </div>
 
-          </div>
+          </div> */}
+
           <button
             type="button"
             onClick={handleClose}

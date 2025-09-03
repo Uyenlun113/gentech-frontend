@@ -858,15 +858,13 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             width: 120,
             fixed: "left",
             render: (text, record) => (
-                <div data-table-input={`ma_kho_i_${record.id}`}>
-                    <Input
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "ma_kho_i", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "ma_kho_i")}
-                        className="w-full text-xs h-9"
-                        placeholder="Mã kho"
-                    />
-                </div>
+                <input
+                    type="text"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "ma_kho_i", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    placeholder="Mã kho"
+                />
             ),
         },
         {
@@ -886,15 +884,13 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "ma_vt",
             width: 120,
             render: (text, record) => (
-                <div data-table-input={`ma_vt_${record.id}`}>
-                    <Input
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "ma_vt", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "ma_vt")}
-                        className="w-full text-xs h-9"
-                        placeholder="Mã VT"
-                    />
-                </div>
+                <input
+                    type="text"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "ma_vt", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    placeholder="Mã VT"
+                />
             ),
         },
         {
@@ -925,16 +921,13 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "so_luong",
             width: 100,
             render: (text, record) => (
-                <div data-table-input={`so_luong_${record.id}`}>
-                    <Input
-                        type="number"
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "so_luong", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "so_luong")}
-                        className="w-full text-xs text-right h-9"
-                        placeholder="0"
-                    />
-                </div>
+                <input
+                    type="number"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "so_luong", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                    placeholder="0"
+                />
             ),
         },
         {
@@ -943,16 +936,13 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "gia_nt",
             width: 120,
             render: (text, record) => (
-                <div data-table-input={`gia_nt_${record.id}`}>
-                    <Input
-                        type="number"
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "gia_nt", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "gia_nt")}
-                        className="w-full text-xs text-right h-9"
-                        placeholder="0"
-                    />
-                </div>
+                <input
+                    type="number"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "gia_nt", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                    placeholder="0"
+                />
             ),
         },
         {
@@ -972,18 +962,15 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "tl_ck",
             width: 100,
             render: (text, record) => (
-                <div data-table-input={`tl_ck_${record.id}`}>
-                    <Input
-                        type="number"
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "tl_ck", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "tl_ck")}
-                        className="w-full text-xs text-right h-9"
-                        placeholder="0"
-                        min="0"
-                        max="100"
-                    />
-                </div>
+                <input
+                    type="number"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "tl_ck", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                />
             ),
         },
         {
@@ -1014,18 +1001,15 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "thue_suat",
             width: 120,
             render: (text, record) => (
-                <div data-table-input={`thue_suat_${record.id}`}>
-                    <Input
-                        type="number"
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "thue_suat", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "thue_suat")}
-                        className="w-full text-xs text-right h-9"
-                        placeholder="0"
-                        min="0"
-                        max="100"
-                    />
-                </div>
+                <input
+                    type="number"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "thue_suat", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                />
             ),
         },
         {
@@ -1045,15 +1029,13 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
             dataIndex: "tk_vt",
             width: 120,
             render: (text, record) => (
-                <div data-table-input={`tk_vt_${record.id}`}>
-                    <Input
-                        value={text || ""}
-                        onChange={(e) => handleHangHoaChange(record.id, "tk_vt", e.target.value)}
-                        onEnterPress={() => handleTableInputEnter(record.id, "tk_vt")}
-                        className="w-full text-xs h-9"
-                        placeholder="TK"
-                    />
-                </div>
+                <input
+                    type="text"
+                    value={text || ""}
+                    onChange={(e) => handleHangHoaChange(record.id, "tk_vt", e.target.value)}
+                    className="w-full h-8 px-2 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    placeholder="TK"
+                />
             ),
         },
         {
@@ -1095,6 +1077,21 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
         },
     ];
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+
+            // Lấy tabIndex từ element hiện tại thay vì biến tabIndex không tồn tại
+            const currentTabIndex = parseInt(e.target.tabIndex) || 0;
+            const nextInput = document.querySelector(`input[tabindex="${currentTabIndex + 1}"]`);
+
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            }
+        }
+    };
+
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-[1400px] m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
@@ -1133,8 +1130,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.maKhRef}
+                                        <input
+                                            type="text"
                                             value={formData.ma_kh}
                                             onChange={(e) => {
                                                 handleFormChange("ma_kh", e.target.value);
@@ -1151,8 +1148,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.diaChiRef}
+                                        <input
+                                            type="text"
                                             value={formData.dia_chi}
                                             onChange={(e) => handleFormChange("dia_chi", e.target.value)}
                                             nextInputRef={inputRefs.current.maSoThueRef}
@@ -1163,8 +1160,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[40px] ml-4">
                                             MST
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.maSoThueRef}
+                                        <input
+                                            type="text"
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
                                             nextInputRef={inputRefs.current.nguoiNhanHangRef}
@@ -1178,8 +1175,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận hàng
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.nguoiNhanHangRef}
+                                        <input
+                                            type="text"
                                             value={formData.ong_ba}
                                             onChange={(e) => handleFormChange("ong_ba", e.target.value)}
                                             nextInputRef={inputRefs.current.dienGiaiRef}
@@ -1193,8 +1190,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.dienGiaiRef}
+                                        <input
+                                            type="text"
                                             value={formData.dien_giai}
                                             onChange={(e) => handleFormChange("dien_giai", e.target.value)}
                                             nextInputRef={inputRefs.current.soDonHangMeRef}
@@ -1208,8 +1205,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số đơn hàng mẹ
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.soDonHangMeRef}
+                                        <input
+                                            type="text"
                                             value={formData.ma_hd_me}
                                             onChange={(e) => handleFormChange("ma_hd_me", e.target.value)}
                                             nextInputRef={inputRefs.current.maNxRef}
@@ -1223,8 +1220,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px] ">
                                             Mã NX
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.maNxRef}
+                                        <input
+                                            type="text"
                                             value={formData.ma_nx}
                                             onChange={(e) => {
                                                 handleFormChange("ma_nx", e.target.value);
@@ -1276,8 +1273,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Quyển sổ
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.quySoRef}
+                                        <input
+                                            type="text"
                                             value={formData.ma_qs}
                                             onChange={(e) => handleFormChange("ma_qs", e.target.value)}
                                             nextInputRef={inputRefs.current.soPhieuRef}
@@ -1291,8 +1288,8 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu <span className="text-red-500">*</span>
                                         </Label>
-                                        <Input
-                                            inputRef={inputRefs.current.soPhieuRef}
+                                        <input
+                                            type="text"
                                             value={formData.so_ct}
                                             onChange={(e) => handleFormChange("so_ct", e.target.value)}
                                             onEnterPress={handleLastInputEnter}
@@ -1310,7 +1307,7 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
                                             <span className="px-3 py-2 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                                                 VND
                                             </span>
-                                            <Input
+                                            <input
                                                 type="number"
                                                 inputRef={inputRefs.current.tyGiaRef}
                                                 value={formData.ty_gia}

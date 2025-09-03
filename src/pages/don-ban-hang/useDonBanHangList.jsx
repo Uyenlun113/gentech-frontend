@@ -346,7 +346,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "ngay_lct",
-            title: "Ngày lập phiếu",
+            title: "Ngày LP",
             dataIndex: "ngay_lct",
             fixed: "left",
             width: 140,
@@ -356,7 +356,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "so_ct",
-            title: "Số đơn bán hàng",
+            title: "Số ĐBH",
             dataIndex: "so_ct",
             fixed: "left",
             width: 140,
@@ -371,7 +371,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "ngay_ct",
-            title: "Ngày hạch toán",
+            title: "Ngày HT",
             dataIndex: "ngay_ct",
             width: 140,
             render: (val) => {
@@ -402,7 +402,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "t_tt_nt",
-            title: "Tổng tiền thanh toán",
+            title: "Tổng tiền TT",
             dataIndex: "t_tt_nt",
             width: 160,
             render: (val) => (
@@ -413,7 +413,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "ma_kh",
-            title: "Mã khách hàng",
+            title: "Mã KH",
             dataIndex: "ma_kh",
             width: 140,
             render: (val) => (
@@ -435,7 +435,7 @@ export const useDonBanHangList = () => {
         },
         {
             key: "tk_thue_no",
-            title: "Tài khoản có",
+            title: "TK có",
             dataIndex: "tk_thue_no",
             width: 120,
             render: (val) => (

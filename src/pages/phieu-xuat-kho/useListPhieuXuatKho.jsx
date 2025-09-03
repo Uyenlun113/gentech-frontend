@@ -130,41 +130,45 @@ export const useListPhieuXuatKho = () => {
     const columnsTable = [
         {
             key: "ngay_ct",
-            title: "Ngày chứng từ",
+            title: "Ngày CT",
             fixed: "left",
             width: 150,
         },
         {
             key: "so_ct",
-            title: "Số chứng từ",
+            title: "Số CT",
             fixed: "left",
             width: 100,
         },
         {
             key: "ma_gd",
-            title: "Mã giao dịch",
-            width: 100,
+            title: "Mã GD",
+            width: 50,
         },
         {
             key: "ma_kh",
-            title: "Mã khách hàng",
+            title: "Mã KH",
             width: 150,
         },
         {
             key: "ong_ba",
-            title: "Tên khách hàng",
+            title: "Tên KH",
             fixed: "left",
             width: 150,
         },
+        // {
+        //     key: "ma_kh",
+        //     title: "Tổng tiền ngoại tệ",
+        //     width: 150,
+        // },
         {
-            key: "ma_kh",
-            title: "Tổng tiền ngoại tệ",
-            width: 150,
-        },
-        {
-            key: "ma_kh",
+            key: "tong_tien",
             title: "Tổng tiền VNĐ",
             width: 150,
+            render: (value) => {
+                if (typeof value !== "number") return value;
+                return value.toLocaleString("vi-VN");
+            },
         },
         {
             key: "dien_giai",
@@ -184,7 +188,15 @@ export const useListPhieuXuatKho = () => {
         {
             key: "date",
             title: "Ngày cập nhật",
-            width: 150,
+            width: 120,
+            render: (value) => {
+                if (!value) return "";
+                const date = new Date(value);
+                const dd = String(date.getDate()).padStart(2, "0");
+                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                const yyyy = date.getFullYear();
+                return `${yyyy}-${mm}-${dd}`;
+            },
         },
         {
             key: "time",
@@ -194,7 +206,7 @@ export const useListPhieuXuatKho = () => {
         {
             key: "ma_dvcs",
             title: "Mã DVCS",
-            width: 150,
+            width: 100,
         },
         {
             key: "action",
