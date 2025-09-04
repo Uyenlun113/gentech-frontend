@@ -5,7 +5,7 @@ export const Modal = ({
   onClose,
   children,
   className,
-  showCloseButton = true, 
+  showCloseButton = true,
   isFullscreen = false,
 }) => {
   const modalRef = useRef(null);
@@ -45,11 +45,11 @@ export const Modal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 modal z-99">
       {!isFullscreen && (
-        <div className="fixed inset-0 h-full w-full bg-gray-200/50 backdrop-blur-[2px]" onClick={onClose}></div>
+        <div className="fixed inset-0 h-full w-full bg-gray-200/80 backdrop-blur-[2px]" onClick={onClose}></div>
       )}
-      <div 
-        ref={modalRef} 
-        className={`${contentClasses} max-h-[98vh] overflow-hidden ${className}`} 
+      <div
+        ref={modalRef}
+        className={`${contentClasses} max-h-[98vh] overflow-hidden ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {showCloseButton && (

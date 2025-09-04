@@ -156,6 +156,28 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
     const chiPhiTableRef = useRef(null);
     const hdThueTableRef = useRef(null);
 
+    // Refs cho các tab
+    const [activeTab, setActiveTab] = useState(0);
+
+    // Refs cho các input chính
+    const inputRefs = useRef({
+        maKhRef: null,
+        tenKhRef: null,
+        diaChiRef: null,
+        maSoThueRef: null,
+        ongBaRef: null,
+        dienGiaiRef: null,
+        tkThueNoRef: null,
+        soPnRef: null,
+        ngayPnRef: null,
+        maQsRef: null,
+        soCtRef: null,
+        tongChiPhiRef: null,
+        // Refs cho input đầu tiên của mỗi tab
+        firstChiPhiInputRef: null,
+        firstHdThueInputRef: null,
+    });
+
     // Debounced search values
     const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
     const debouncedMaKhSearch = useDebounce(searchStates.maKhSearch, 600);
@@ -435,6 +457,13 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
         }
 
         setShowPhieuNhapPopup(false);
+
+        // Focus vào input tiếp theo sau khi chọn PN
+        setTimeout(() => {
+            if (inputRefs.current.maQsRef) {
+                inputRefs.current.maQsRef.focus();
+            }
+        }, 100);
     }, []);
 
     const handleChiPhiChange = useCallback((id, field, value) => {
@@ -614,6 +643,27 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             tkSearchField: null,
             searchContext: null
         }));
+
+        // Sau khi chọn TK, tự động focus sang trường tiếp theo để không bị mất Enter
+        setTimeout(() => {
+            if (searchStates.searchContext === "mainForm") {
+                // Focus về Số phiếu để tiếp tục luồng nhập
+                inputRefs.current?.soCtRef?.current?.focus?.();
+            } else if (searchStates.searchContext === "chiPhi" && searchStates.tkSearchField === "tk_vt" && typeof id === "number") {
+                const nextInput = document.querySelector(`[data-table-input="thue_nt_${id}"] input`);
+                if (nextInput) nextInput.focus();
+            } else if (searchStates.searchContext === "hdThue" && searchStates.tkSearchField === "tk_thue_no" && typeof id === "number") {
+                // Trường cuối dòng: nếu đã có dòng tiếp theo thì focus vào đầu dòng tiếp theo,
+                // nếu chưa có thì giữ focus tại trường hiện tại để người dùng Enter sẽ thêm dòng theo logic sẵn có
+                const nextRowInput = document.querySelector(`[data-table-input="so_ct0_${id + 1}"] input`);
+                if (nextRowInput) {
+                    nextRowInput.focus();
+                } else {
+                    const stayInput = document.querySelector(`[data-table-input="tk_thue_no_${id}"] input`);
+                    if (stayInput) stayInput.focus();
+                }
+            }
+        }, 80);
     }, [searchStates.tkSearchField, searchStates.searchContext, handleFormChange]);
 
     const handleCustomerSelect = useCallback((id, customer) => {
@@ -645,6 +695,14 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             maKhSearch: "",
             searchContext: null
         }));
+
+        // Focus sang field tiếp theo sau khi chọn khách hàng
+        if (searchStates.searchContext === "hdThue" && typeof id === "number") {
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="dia_chi_${id}"] input`);
+                if (nextInput) nextInput.focus();
+            }, 100);
+        }
     }, [searchStates.searchContext, handleFormChange]);
 
     const handleVatTuSelect = useCallback((id, vatTu) => {
@@ -670,6 +728,14 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             vtSearch: "",
             searchContext: null
         }));
+
+        // Focus sang field tiếp theo sau khi chọn vật tư
+        if (searchStates.searchContext === "chiPhi" && typeof id === "number") {
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="so_luong_${id}"] input`);
+                if (nextInput) nextInput.focus();
+            }, 100);
+        }
     }, [searchStates.searchContext]);
 
     const handleKhoSelect = useCallback((id, kho) => {
@@ -707,6 +773,19 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             khoSearch: "",
             searchContext: null
         }));
+
+        // Focus sang field tiếp theo sau khi chọn kho
+        if (typeof id === "number") {
+            setTimeout(() => {
+                if (searchStates.searchContext === "chiPhi") {
+                    const nextInput = document.querySelector(`[data-table-input=\"ma_vt_${id}\"] input`);
+                    if (nextInput) nextInput.focus();
+                } else if (searchStates.searchContext === "hdThue") {
+                    const nextInput = document.querySelector(`[data-table-input=\"ten_vt_${id}\"] input`);
+                    if (nextInput) nextInput.focus();
+                }
+            }, 100);
+        }
     }, [searchStates.searchContext]);
 
     const addChiPhiRow = useCallback(() => {
@@ -780,6 +859,173 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             }
         }, 100);
     }, [formData]);
+
+    // Navigation handlers
+    const switchToChiPhiTab = useCallback(() => {
+        setActiveTab(0); // Tab chi phí là tab đầu tiên
+        // Focus vào input đầu tiên của bảng chi phí
+        setTimeout(() => {
+            const firstInput = document.querySelector('[data-table-input="ma_kho_i_1"] input');
+            if (firstInput) {
+                firstInput.focus();
+            } else {
+                // Fallback: tìm input đầu tiên trong bảng
+                const tableInputs = document.querySelectorAll('[data-table-input] input');
+                if (tableInputs.length > 0) {
+                    tableInputs[0].focus();
+                }
+            }
+        }, 200);
+    }, []);
+
+    const handleLastInputEnter = useCallback(() => {
+        // Chuyển sang tab chi phí khi ấn Enter ở input cuối cùng
+        switchToChiPhiTab();
+    }, [switchToChiPhiTab]);
+
+    const handleTableInputEnter = useCallback((rowId, field, tableType) => {
+        if (tableType === "chiPhi") {
+            // Tìm input tiếp theo trong bảng chi phí
+            const currentRowIndex = chiPhiData.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cho bảng chi phí
+            const fieldOrder = ["ma_kho_i", "ma_vt", "so_luong", "gia", "tien_nt", "tk_vt", "thue_nt", "cp_nt"];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input tiếp theo theo thứ tự
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < chiPhiData.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = chiPhiData[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="ma_kho_i_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input đầu tiên của dòng tiếp theo
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addChiPhiRow();
+                setTimeout(() => {
+                    const newRowId = chiPhiData.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="ma_kho_i_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 200);
+            }
+        } else if (tableType === "hdThue") {
+            // Tìm input tiếp theo trong bảng hóa đơn thuế
+            const currentRowIndex = hdThueData.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cột hiện có trong bảng hóa đơn thuế
+            const fieldOrder = [
+                "so_ct0",
+                "so_seri0",
+                "ma_gd",
+                "ma_kh",
+                "dia_chi",
+                "ma_so_thue",
+                "ma_kho",
+                "ten_vt",
+                "so_luong",
+                "gia",
+                "t_tien",
+                "thue_suat",
+                "tk_thue_no",
+            ];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: đi theo thứ tự DOM nếu không tìm thấy theo field
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < hdThueData.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = hdThueData[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="so_ct0_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: đi theo thứ tự DOM
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addHdThueRow();
+                setTimeout(() => {
+                    const newRowId = hdThueData.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="so_ct0_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng hiện có
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 150);
+            }
+        }
+    }, [chiPhiData, hdThueData, addChiPhiRow, addHdThueRow]);
 
     const deleteHdThueRow = useCallback((id) => {
         setHdThueData(prev => prev.filter(item => item.id !== id));
@@ -1027,13 +1273,17 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mã kho",
             fixed: "left",
             width: 120,
-            render: (val, row) => (
-                <Input
-                    value={row.ma_kho_i}
-                    onChange={(e) => handleChiPhiChange(row.id, "ma_kho_i", e.target.value)}
-                    placeholder="Nhập mã kho..."
-                    className="w-full"
-                />
+            render: (val, row, index) => (
+                <div data-table-input={`ma_kho_i_${row.id}`}>
+                    <Input
+                        inputRef={index === 0 ? inputRefs.current.firstChiPhiInputRef : null}
+                        value={row.ma_kho_i}
+                        onChange={(e) => handleChiPhiChange(row.id, "ma_kho_i", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kho_i", "chiPhi")}
+                        placeholder="Nhập mã kho..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1051,12 +1301,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mã vật tư",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_vt}
-                    onChange={(e) => handleChiPhiChange(row.id, "ma_vt", e.target.value)}
-                    placeholder="Nhập mã VT..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_vt_${row.id}`}>
+                    <Input
+                        value={row.ma_vt}
+                        onChange={(e) => handleChiPhiChange(row.id, "ma_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_vt", "chiPhi")}
+                        placeholder="Nhập mã VT..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1084,13 +1337,33 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Số lượng",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.so_luong}
-                    onChange={(e) => handleChiPhiChange(row.id, "so_luong", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`so_luong_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.so_luong}
+                        onChange={(e) => handleChiPhiChange(row.id, "so_luong", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_luong", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
+            ),
+        },
+        {
+            key: "gia",
+            title: "Đơn giá",
+            width: 120,
+            render: (val, row) => (
+                <div data-table-input={`gia_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.gia}
+                        onChange={(e) => handleChiPhiChange(row.id, "gia", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "gia", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1098,15 +1371,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Tiền hàng",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.tien_nt}
-                    onChange={(e) => handleChiPhiChange(row.id, "tien_nt", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                    readOnly
-                    disabled
-                />
+                <div data-table-input={`tien_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.tien_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "tien_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tien_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1114,13 +1388,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.cp_nt}
-                    onChange={(e) => handleChiPhiChange(row.id, "cp_nt", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`cp_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.cp_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "cp_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "cp_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1128,12 +1405,32 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "TK vật tư",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.tk_vt}
-                    onChange={(e) => handleChiPhiChange(row.id, "tk_vt", e.target.value)}
-                    placeholder="Nhập TK..."
-                    className="w-full"
-                />
+                <div data-table-input={`tk_vt_${row.id}`}>
+                    <Input
+                        value={row.tk_vt}
+                        onChange={(e) => handleChiPhiChange(row.id, "tk_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tk_vt", "chiPhi")}
+                        placeholder="Nhập TK..."
+                        className="w-full"
+                    />
+                </div>
+            ),
+        },
+        {
+            key: "thue_nt",
+            title: "Thuế NT",
+            width: 120,
+            render: (val, row) => (
+                <div data-table-input={`thue_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.thue_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "thue_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "thue_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1173,13 +1470,17 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Nhóm",
             fixed: "left",
             width: 100,
-            render: (val, row) => (
-                <Input
-                    value={row.so_ct0}
-                    onChange={(e) => handleHdThueChange(row.id, "so_ct0", e.target.value)}
-                    placeholder="Nhóm..."
-                    className="w-full"
-                />
+            render: (val, row, index) => (
+                <div data-table-input={`so_ct0_${row.id}`}>
+                    <Input
+                        inputRef={index === 0 ? inputRefs.current.firstHdThueInputRef : null}
+                        value={row.so_ct0}
+                        onChange={(e) => handleHdThueChange(row.id, "so_ct0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_ct0", "hdThue")}
+                        placeholder="Nhóm..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1187,12 +1488,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Số seri",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.so_seri0}
-                    onChange={(e) => handleHdThueChange(row.id, "so_seri0", e.target.value)}
-                    placeholder="Số seri..."
-                    className="w-full"
-                />
+                <div data-table-input={`so_seri0_${row.id}`}>
+                    <Input
+                        value={row.so_seri0}
+                        onChange={(e) => handleHdThueChange(row.id, "so_seri0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_seri0", "hdThue")}
+                        placeholder="Số seri..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1200,12 +1504,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mẫu hóa đơn",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_gd}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_gd", e.target.value)}
-                    placeholder="Mẫu HĐ..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_gd_${row.id}`}>
+                    <Input
+                        value={row.ma_gd}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_gd", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_gd", "hdThue")}
+                        placeholder="Mẫu HĐ..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1234,12 +1541,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mã khách",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_kh}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_kh", e.target.value)}
-                    placeholder="Mã khách..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_kh_${row.id}`}>
+                    <Input
+                        value={row.ma_kh}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_kh", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kh", "hdThue")}
+                        placeholder="Mã khách..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1261,12 +1571,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Địa chỉ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.dia_chi}
-                    onChange={(e) => handleHdThueChange(row.id, "dia_chi", e.target.value)}
-                    placeholder="Địa chỉ..."
-                    className="w-full"
-                />
+                <div data-table-input={`dia_chi_${row.id}`}>
+                    <Input
+                        value={row.dia_chi}
+                        onChange={(e) => handleHdThueChange(row.id, "dia_chi", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "dia_chi", "hdThue")}
+                        placeholder="Địa chỉ..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1274,12 +1587,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mã số thuế",
             width: 150,
             render: (val, row) => (
-                <Input
-                    value={row.ma_so_thue}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_so_thue", e.target.value)}
-                    placeholder="MST..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_so_thue_${row.id}`}>
+                    <Input
+                        value={row.ma_so_thue}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_so_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_so_thue", "hdThue")}
+                        placeholder="MST..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1287,12 +1603,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Mã kho",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_kho}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
-                    placeholder="Mã kho..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_kho_${row.id}`}>
+                    <Input
+                        value={row.ma_kho}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kho", "hdThue")}
+                        placeholder="Mã kho..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1310,12 +1629,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Hàng hóa, dịch vụ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.ten_vt}
-                    onChange={(e) => handleHdThueChange(row.id, "ten_vt", e.target.value)}
-                    placeholder="Hàng hóa, DV..."
-                    className="w-full"
-                />
+                <div data-table-input={`ten_vt_${row.id}`}>
+                    <Input
+                        value={row.ten_vt}
+                        onChange={(e) => handleHdThueChange(row.id, "ten_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ten_vt", "hdThue")}
+                        placeholder="Hàng hóa, DV..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1323,13 +1645,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Số lượng",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.so_luong}
-                    onChange={(e) => handleHdThueChange(row.id, "so_luong", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`so_luong_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.so_luong}
+                        onChange={(e) => handleHdThueChange(row.id, "so_luong", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_luong", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1337,13 +1662,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Giá",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.gia}
-                    onChange={(e) => handleHdThueChange(row.id, "gia", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`gia_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.gia}
+                        onChange={(e) => handleHdThueChange(row.id, "gia", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "gia", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1351,13 +1679,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Tiền hàng",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.t_tien}
-                    onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`t_tien_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.t_tien}
+                        onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_tien", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1365,13 +1696,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "Thuế suất (%)",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.thue_suat}
-                    onChange={(e) => handleHdThueChange(row.id, "thue_suat", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`thue_suat_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.thue_suat}
+                        onChange={(e) => handleHdThueChange(row.id, "thue_suat", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "thue_suat", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1394,12 +1728,15 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
             title: "TK thuế",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.tk_thue_no}
-                    onChange={(e) => handleHdThueChange(row.id, "tk_thue_no", e.target.value)}
-                    placeholder="TK thuế..."
-                    className="w-full"
-                />
+                <div data-table-input={`tk_thue_no_${row.id}`}>
+                    <Input
+                        value={row.tk_thue_no}
+                        onChange={(e) => handleHdThueChange(row.id, "tk_thue_no", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tk_thue_no", "hdThue")}
+                        placeholder="TK thuế..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1458,22 +1795,26 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maKhRef}
                                             value={formData.ma_kh}
                                             onChange={(e) => {
                                                 handleFormChange("ma_kh", e.target.value);
                                                 handleMainFormCustomerSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.tenKhRef}
                                             placeholder="KH005"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={1}
                                         />
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.tenKhRef}
                                             value={formData.ten_kh}
                                             onChange={(e) => handleFormChange("ten_kh", e.target.value)}
+                                            nextInputRef={inputRefs.current.diaChiRef}
                                             readOnly
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600 ml-4"
+                                            className="flex-1 h-9 text-sm ml-4 bg-gray-50"
+                                            tabIndex={2}
                                         />
                                     </div>
 
@@ -1481,22 +1822,26 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.diaChiRef}
                                             value={formData.dia_chi}
                                             onChange={(e) => handleFormChange("dia_chi", e.target.value)}
+                                            nextInputRef={inputRefs.current.maSoThueRef}
                                             placeholder="Nhập địa chỉ khách hàng"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={3}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[40px] ml-4">
                                             MST
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maSoThueRef}
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
+                                            nextInputRef={inputRefs.current.ongBaRef}
                                             placeholder="Mã số thuế"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            className="w-32 h-9 text-sm bg-gray-50"
+                                            tabIndex={4}
                                         />
                                     </div>
 
@@ -1504,12 +1849,14 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người giao hàng
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.ongBaRef}
                                             value={formData.ong_ba}
                                             onChange={(e) => handleFormChange("ong_ba", e.target.value)}
+                                            nextInputRef={inputRefs.current.dienGiaiRef}
                                             placeholder="Tên người giao hàng"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={5}
                                         />
                                     </div>
 
@@ -1517,12 +1864,14 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.dienGiaiRef}
                                             value={formData.dien_giai}
                                             onChange={(e) => handleFormChange("dien_giai", e.target.value)}
+                                            nextInputRef={inputRefs.current.tkThueNoRef}
                                             placeholder="Nhập diễn giải"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={6}
                                         />
                                     </div>
 
@@ -1530,15 +1879,17 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             TK có
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.tkThueNoRef}
                                             value={formData.tk_thue_no}
                                             onChange={(e) => {
                                                 handleFormChange("tk_thue_no", e.target.value);
                                                 handleMainFormAccountSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.soPnRef}
                                             placeholder="1111"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={7}
                                         />
                                     </div>
 
@@ -1546,24 +1897,29 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu nhập
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soPnRef}
                                             value={formData.so_pn}
                                             onChange={(e) => handleFormChange("so_pn", e.target.value)}
+                                            nextInputRef={inputRefs.current.ngayPnRef}
                                             placeholder="PN001"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            className="w-32 h-9 text-sm bg-gray-50"
                                             readOnly
+                                            tabIndex={8}
                                         />
 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] ml-4">
                                             Ngày phiếu nhập
                                         </Label>
-                                        <input
+                                        <Input
+                                            inputRef={inputRefs.current.ngayPnRef}
                                             type="date"
                                             value={formData.ngay_pn}
                                             onChange={(e) => handleFormChange("ngay_pn", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            nextInputRef={inputRefs.current.maQsRef}
+                                            className="flex-1 h-9 text-sm bg-gray-50"
                                             readOnly
+                                            tabIndex={9}
                                         />
                                         <button
                                             type="button"
@@ -1614,26 +1970,34 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Quyển sổ
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.ma_qs}
-                                            onChange={(e) => handleFormChange("ma_qs", e.target.value)}
-                                            placeholder="PN001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
+                                                                                 <Input
+                                             inputRef={inputRefs.current.maQsRef}
+                                             value={formData.ma_qs}
+                                             onChange={(e) => handleFormChange("ma_qs", e.target.value)}
+                                             onEnterPress={() => {
+                                                 if (inputRefs.current.soCtRef) {
+                                                     inputRefs.current.soCtRef.focus();
+                                                 }
+                                             }}
+                                             placeholder="PN001"
+                                             className="flex-1 h-9 text-sm"
+                                             tabIndex={10}
+                                         />
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.so_ct}
-                                            onChange={(e) => handleFormChange("so_ct", e.target.value)}
-                                            placeholder="PN00010"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
+                                                                                 <Input
+                                             inputRef={inputRefs.current.soCtRef}
+                                             value={formData.so_ct}
+                                             onChange={(e) => handleFormChange("so_ct", e.target.value)}
+                                             onEnterPress={handleLastInputEnter}
+                                             placeholder="PN00010"
+                                             className="flex-1 h-9 text-sm"
+                                             tabIndex={11}
+                                         />
                                     </div>
 
                                     <div className="flex gap-3 items-center">
@@ -1644,12 +2008,20 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                             <span className="px-3 py-2 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                                                 VND
                                             </span>
-                                            <input
-                                                type="number"
-                                                value={formData.ty_gia}
-                                                onChange={(e) => handleFormChange("ty_gia", e.target.value)}
-                                                className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
-                                            />
+                                                                                         <input
+                                                 type="number"
+                                                 value={formData.ty_gia}
+                                                 onChange={(e) => handleFormChange("ty_gia", e.target.value)}
+                                                 onKeyDown={(e) => {
+                                                     if (e.key === 'Enter') {
+                                                         e.preventDefault();
+                                                         if (inputRefs.current.soCtRef) {
+                                                             inputRefs.current.soCtRef.focus();
+                                                         }
+                                                     }
+                                                 }}
+                                                 className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
+                                             />
                                         </div>
                                     </div>
 
@@ -1657,14 +2029,22 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Trạng thái
                                         </Label>
-                                        <div className="flex-1">
-                                            <Select
-                                                defaultValue={formData.status}
-                                                options={STATUS_OPTIONS}
-                                                onChange={(value) => handleFormChange("status", value)}
-                                                className="w-full h-9 text-sm bg-white"
-                                            />
-                                        </div>
+                                                                                 <div className="flex-1">
+                                             <Select
+                                                 defaultValue={formData.status}
+                                                 options={STATUS_OPTIONS}
+                                                 onChange={(value) => handleFormChange("status", value)}
+                                                 onKeyDown={(e) => {
+                                                     if (e.key === 'Enter') {
+                                                         e.preventDefault();
+                                                         if (inputRefs.current.soCtRef) {
+                                                             inputRefs.current.soCtRef.focus();
+                                                         }
+                                                     }
+                                                 }}
+                                                 className="w-full h-9 text-sm bg-white"
+                                             />
+                                         </div>
                                     </div>
                                 </div>
                             </div>
@@ -1674,6 +2054,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                     {/* Tabs */}
                     <div className="px-6">
                         <Tabs
+                            activeTab={activeTab}
                             tabs={[
                                 {
                                     label: "1. Chi phí",
@@ -1685,14 +2066,16 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                                     {/* Tổng chi phí */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
-                                                        <input
+                                                        <Input
+                                                            inputRef={inputRefs.current.tongChiPhiRef}
                                                             type="number"
                                                             value={chiPhiFormData.t_cp_nt}
                                                             onChange={(e) =>
                                                                 setChiPhiFormData((prev) => ({ ...prev, t_cp_nt: e.target.value }))
                                                             }
+                                                            onEnterPress={handleLastInputEnter}
                                                             placeholder="0"
-                                                            className="h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right"
+                                                            className="h-9 text-sm text-right"
                                                         />
                                                     </div>
 
@@ -1764,6 +2147,7 @@ export const ModalCreateChiPhiMuaHang = ({ isOpenCreate, closeModalCreate }) => 
                                 }
                             }}
                             onChangeTab={(tabIndex) => {
+                                setActiveTab(tabIndex);
                             }}
                         />
                     </div>
