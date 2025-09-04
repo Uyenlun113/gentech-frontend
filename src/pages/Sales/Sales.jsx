@@ -1,6 +1,6 @@
 import { CarFront, ChevronRight, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
-import FilterModalKho from '../../components/FilterModalKho';
+import FilterModalMuaHang from '../../components/FilterModalMuaHang';
 export default function Sales() {
   const [activeTab, setActiveTab] = useState('reportIn');
   const [openModalId, setOpenModalId] = useState(null);
@@ -246,7 +246,7 @@ export default function Sales() {
           ))}
         </div>
         {openModalId && selectedMenuItem && (
-          <FilterModalKho
+          <FilterModalMuaHang
             isOpen={true}
             onClose={() => {
               setOpenModalId(null);
