@@ -2313,8 +2313,7 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                                             value={formData.ten_kh}
                                             onChange={(e) => handleFormChange("ten_kh", e.target.value)}
                                             nextInputRef={inputRefs.current.diaChiRef}
-                                            disabled={true}
-                                            className="flex-1 text-sm h-9 ml-4"
+                                            className="text-sm h-9 "
                                             tabIndex={2}
                                         />
                                     </div>

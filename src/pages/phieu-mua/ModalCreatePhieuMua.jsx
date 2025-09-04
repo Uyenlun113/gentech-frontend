@@ -1955,7 +1955,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                                 {/* Cột trái - 70% (7 cột) */}
                                 <div className="lg:col-span-7 space-y-2">
-                                    <div className="flex gap-3 items-center w-full">
+                                    <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
@@ -1968,19 +1968,17 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                                             }}
                                             nextInputRef={inputRefs.current.diaChiRef}
                                             placeholder="KH005"
-                                            className="w-32 text-sm h-9"
+                                            className="text-sm h-9"
                                             tabIndex={1}
                                         />
-                                        <div className="w-[500px]">
-                                            <Input
-                                                inputRef={inputRefs.current.tenKhRef}
-                                                value={formData.ten_kh}
-                                                onChange={(e) => handleFormChange("ten_kh", e.target.value)}
-                                                nextInputRef={inputRefs.current.diaChiRef}
-                                                className="w-full text-sm h-9 ml-4"
-                                                tabIndex={2}
-                                            />
-                                        </div>
+                                        <Input
+                                            inputRef={inputRefs.current.tenKhRef}
+                                            value={formData.ten_kh}
+                                            onChange={(e) => handleFormChange("ten_kh", e.target.value)}
+                                            nextInputRef={inputRefs.current.diaChiRef}
+                                            className="text-sm h-9 "
+                                            tabIndex={2}
+                                        />
                                     </div>
 
 
