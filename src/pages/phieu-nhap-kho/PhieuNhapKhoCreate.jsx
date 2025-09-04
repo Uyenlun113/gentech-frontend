@@ -530,6 +530,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         }
         return (
           <Input
+            tabIndex={9}
             value={row.ma_vt}
             onChange={(e) => handleHangHoaChange(row.id, "ma_vt", e.target.value)}
             placeholder="Nhập mã vt..."
@@ -556,6 +557,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={10}
             value={row.ma_kho_i}
             onChange={(e) => handleHangHoaChange(row.id, "ma_kho_i", e.target.value)}
             placeholder="Mã kho"
@@ -578,6 +580,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         }
         return (
           <Input
+            tabIndex={11}
             type="number"
             value={row.so_luong}
             onChange={(e) => handleHangHoaChange(row.id, "so_luong", e.target.value)}
@@ -595,6 +598,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={12}
             type="number"
             value={row.gia}
             onChange={(e) => handleHangHoaChange(row.id, "gia", e.target.value)}
@@ -618,6 +622,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         }
         return (
           <Input
+            tabIndex={13}
             type="number"
             value={row.tien}
             onChange={(e) => handleHangHoaChange(row.id, "tien", e.target.value)}
@@ -635,6 +640,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={14}
             value={row.tk_vt}
             onChange={(e) => handleHangHoaChange(row.id, "tk_vt", e.target.value)}
             placeholder="TK"
@@ -652,6 +658,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={15}
             value={row.ma_nx_i}
             onChange={(e) => handleHangHoaChange(row.id, "ma_nx_i", e.target.value)}
             placeholder="TK"
@@ -668,6 +675,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
         if (row.id === 'total') return <div></div>;
         return (
           <Input
+            tabIndex={16}
             value={row.dien_giai}
             onChange={(e) => handleHangHoaChange(row.id, "dien_giai", e.target.value)}
             placeholder="Nhập diễn giải..."
@@ -891,6 +899,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                     <div className="flex items-center gap-2">
                       <Label className="text-xs min-w-[110px]">Loại phiếu nhập</Label>
                       <Input
+                        tabIndex={1}
                         value={formData.ma_gd}
                         onChange={e => handleChange("ma_gd", e.target.value)}
                         placeholder="2"
@@ -903,6 +912,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                       <div className="col-span-6">
                         <div className="relative flex-1">
                           <Input
+                            tabIndex={2}
                             value={maKhSearch}
                             onChange={e => {
                               const value = e.target.value;
@@ -931,18 +941,21 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                     <div className="grid grid-cols-12 gap-2 items-center">
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
-                        <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
+                        <Input
+                          tabIndex={3} value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
-                        <Input value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} />
+                        <Input
+                          tabIndex={4} value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người giao hàng</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
+                        <Input
+                          tabIndex={5} value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
@@ -951,6 +964,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                       <Label className="text-xs min-w-[110px] col-span-2">Lý do nhập</Label>
                       <div className="col-span-10">
                         <Input
+                          tabIndex={6}
                           value={formData.dien_giai}
                           onChange={e => handleChange("dien_giai", e.target.value)}
                           className="h-8 text-sm flex-1 bg-white"
@@ -1006,6 +1020,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                       <Label className="text-xs col-span-6 text-left">Quyển số</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={7}
                           value={formData.ma_qs}
                           onChange={e => handleChange("ma_qs", e.target.value)}
                           className="h-8 text-sm bg-white"
@@ -1018,6 +1033,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                       <Label className="text-xs col-span-6 text-left">Số phiếu nhập</Label>
                       <div className="col-span-5">
                         <Input
+                          tabIndex={8}
                           value={formData.so_ct}
                           onChange={e => handleChange("so_ct", e.target.value)}
                           className="h-8 text-sm bg-white"
@@ -1040,6 +1056,7 @@ export const ModalCreatePhieuNhapKho = ({ isOpenCreate, closeModalCreate }) => {
                       </div>
                       <div className="col-span-5">
                         <Input
+                          // tabIndex={1}
                           value={formData.ty_gia}
                           onChange={e => handleChange("ty_gia", e.target.value)}
                           disabled

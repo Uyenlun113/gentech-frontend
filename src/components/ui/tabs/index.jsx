@@ -9,6 +9,7 @@ export const Tabs = ({
   tabClassName = "",
   contentClassName = "",
   onChangeTab,
+  height = "h-[380px]",
 }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
@@ -24,7 +25,7 @@ export const Tabs = ({
   };
 
   return (
-    <div className={`w-full ${className} h-[380px] mt-1`}>
+    <div className={`w-full ${className} ${height} mt-1`}>
       {/* Tab Headers */}
       <div className="flex border-b border-gray-200 dark:border-gray-700 justify-between items-center">
         <div>
