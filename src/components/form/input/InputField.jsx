@@ -81,7 +81,7 @@ const Input = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex-1">
       <input
         ref={ref}
         type={type}

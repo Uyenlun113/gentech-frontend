@@ -923,8 +923,8 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
     ];
 
     return (
-        <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-[1400px] m-4">
-            <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
+        <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-[1400px] mx-4">
+            <div className="relative w-full h-[950px] rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl max-h-[98vh]">
                 {/* Header */}
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
@@ -943,10 +943,10 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto bg-blue-50">
+                <div className="flex-1 overflow-hidden bg-blue-50 min-h-0 flex flex-col">
                     {/* Form thông tin cơ bản */}
-                    <div className="border-b border-gray-100">
-                        <div className="dark:bg-gray-800 rounded-xl py-2 px-4">
+                    <div className="flex-shrink-0 border-b border-gray-100">
+                        <div className="dark:bg-gray-800 rounded-xl py-2 px-4 max-h-[40vh] overflow-y-auto">
                             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                                 {/* Cột trái - 70% (7 cột) */}
                                 <div className="lg:col-span-7 space-y-2">
@@ -1157,7 +1157,8 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
                         </div>
                     </div>
 
-                    <div className="px-6">
+                    {/* Tab section - chiếm phần còn lại của content */}
+                    <div className="flex-1 min-h-0 px-6">
                         <Tabs
                             activeTab={activeTab}
                             tabs={[
@@ -1171,8 +1172,8 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
                                             onDeleteRow={deleteHangHoaRow}
                                             showAddButton={true}
                                             addButtonText="Thêm dòng hàng hóa"
-                                            maxHeight="max-h-80"
-                                            className="w-full"
+                                            maxHeight="max-h-full"
+                                            className="w-full h-full flex-1"
                                         />
                                     ),
                                 },
@@ -1183,13 +1184,14 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
                             onChangeTab={(tabIndex) => {
                                 setActiveTab(tabIndex);
                             }}
+                            flexLayout={true}
                         />
                     </div>
                 </div>
 
                 {/* Footer - Tổng cộng */}
-                <div className="flex-shrink-0 px-6 py-1 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                <div className="flex-shrink-0 px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs mb-4">
                         {/* Cột 1 */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
@@ -1275,7 +1277,7 @@ export const ModalCreateHdBanDv = ({ isOpenCreate, closeModalCreate }) => {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex justify-end gap-3 mt-4 pt-4">
+                    <div className="flex justify-end gap-3 pt-2 border-t border-gray-200">
                         <button
                             onClick={handleClose}
                             className="px-6 py-2.5 text-sm font-medium text-white hover:text-gray-700 bg-red-600 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors flex items-center gap-2"

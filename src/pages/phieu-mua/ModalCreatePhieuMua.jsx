@@ -1923,7 +1923,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
 
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-7xl m-4">
-            <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
+            <div className="relative w-full h-[950px] rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">
                 {/* Header */}
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">

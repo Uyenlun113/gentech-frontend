@@ -43,11 +43,15 @@ export const Modal = ({
   const contentClasses = isFullscreen ? "w-full h-full" : "relative rounded-3xl bg-white dark:bg-gray-900";
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99">
+    <div className="fixed inset-0 flex items-center justify-center p-4 modal z-99">
       {!isFullscreen && (
         <div className="fixed inset-0 h-full w-full bg-gray-200/50 backdrop-blur-[2px]" onClick={onClose}></div>
       )}
-      <div ref={modalRef} className={`${contentClasses}  ${className}`} onClick={(e) => e.stopPropagation()}>
+      <div 
+        ref={modalRef} 
+        className={`${contentClasses} max-h-[98vh] overflow-hidden ${className}`} 
+        onClick={(e) => e.stopPropagation()}
+      >
         {showCloseButton && (
           <button
             onClick={onClose}
@@ -63,7 +67,7 @@ export const Modal = ({
             </svg>
           </button>
         )}
-        <div>{children}</div>
+        <div className="h-full flex flex-col">{children}</div>
       </div>
     </div>
   );
