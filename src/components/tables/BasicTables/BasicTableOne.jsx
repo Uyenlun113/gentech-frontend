@@ -9,6 +9,7 @@ const TableBasic = ({
   onRowClick,
   maxHeight = "max-h-[500px]",
   scrollThreshold = 4,
+  className = "",
 }) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -156,13 +157,13 @@ const TableBasic = ({
   };
 
   return (
-    <div className="space-y-3"> {/* Giảm space từ space-y-4 xuống space-y-3 */}
+    <div className={`space-y-3 ${className}`}> {/* Giảm space từ space-y-4 xuống space-y-3 */}
 
       {/* Table */}
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]"> {/* Giảm rounded từ rounded-xl xuống rounded-lg */}
         <div
           ref={scrollContainerRef}
-          className={`w-full overflow-x-auto ${shouldEnableScroll ? 'overflow-y-auto' : 'overflow-y-hidden'} ${shouldEnableScroll ? maxHeight : ''} relative`}
+          className={`w-full overflow-x-auto ${shouldEnableScroll ? 'overflow-y-auto' : 'overflow-y-hidden'} ${shouldEnableScroll ? maxHeight : ''} relative h-full`}
           style={{ scrollBehavior: "smooth" }}
         >
           <Table>

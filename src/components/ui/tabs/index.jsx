@@ -9,7 +9,8 @@ export const Tabs = ({
   tabClassName = "",
   contentClassName = "",
   onChangeTab,
-  height = "h-[380px]",
+  height = "h-[400px]",
+  flexLayout = false,
 }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
@@ -25,9 +26,9 @@ export const Tabs = ({
   };
 
   return (
-    <div className={`w-full ${className} ${height} mt-1`}>
+    <div className={`w-full ${className} ${flexLayout ? 'flex flex-col flex-1 min-h-0' : height} ${flexLayout ? '' : 'mt-1'}`}>
       {/* Tab Headers */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700 justify-between items-center">
+      <div className="flex-shrink-0 flex border-b border-gray-200 dark:border-gray-700 justify-between items-center">
         <div>
           {tabs.map((tab, index) => {
             const isActive = activeTab === index;
@@ -82,7 +83,7 @@ export const Tabs = ({
 
       {/* Tab Content */}
       <div
-        className={`mt-4 ${contentClassName}`}
+        className={`${flexLayout ? 'flex-1 min-h-0 overflow-hidden' : 'mt-4'} ${contentClassName}`}
         role="tabpanel"
         aria-labelledby={`tab-${activeTab}`}
         id={`tabpanel-${activeTab}`}
