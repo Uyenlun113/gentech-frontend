@@ -445,11 +445,9 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
     const handleTableInputEnter = useCallback((rowId, field) => {
         // Tìm input tiếp theo trong bảng
         const currentRowIndex = hangHoaData.findIndex(row => row.id === rowId);
-
         // Danh sách các field theo thứ tự (chỉ các field có thể nhập)
         const fieldOrder = ["ma_kho_i", "ma_vt", "so_luong", "gia_nt", "tl_ck", "thue_suat", "tk_vt"];
         const currentFieldIndex = fieldOrder.indexOf(field);
-
         if (currentFieldIndex < fieldOrder.length - 1) {
             // Chuyển sang field tiếp theo trong cùng dòng
             const nextField = fieldOrder[currentFieldIndex + 1];
@@ -615,7 +613,6 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                         : item
                 )
             );
-
             // Restore focus to the table input after popup closes
             setTimeout(() => {
                 const currentInput = document.querySelector(`[data-table-input="${searchStates.tkSearchField}_${id}"] input`);
@@ -626,7 +623,6 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             }, 150);
         } else if (searchStates.searchContext === "maNx") {
             handleFormChange("ma_nx", account.tk.trim());
-
             // Restore focus to Mã NX input
             setTimeout(() => {
                 if (inputRefs.current.maNxRef.current) {
@@ -684,7 +680,6 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
                         : item
                 )
             );
-
             // Restore focus to the table input after popup closes
             setTimeout(() => {
                 const currentInput = document.querySelector(`[data-table-input="ma_vt_${id}"] input`);
@@ -1115,6 +1110,8 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             width: 140,
             render: (text, record) => (
                 <input
+                    onKeyDown={handleKeyDown}
+                    tabIndex={18}
                     type="date"
                     value={text || ""}
                     onChange={(e) => handleHangHoaChange(record.id, "han_gh_i", e.target.value)}
@@ -1151,7 +1148,20 @@ export const ModalEditDonBanHang = ({ isOpenEdit, closeModalEdit, editingId }) =
             </Modal>
         );
     }
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
 
+            // Lấy tabIndex từ element hiện tại thay vì biến tabIndex không tồn tại
+            const currentTabIndex = parseInt(e.target.tabIndex) || 0;
+            const nextInput = document.querySelector(`input[tabindex="${currentTabIndex + 1}"]`);
+
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            }
+        }
+    };
     return (
         <Modal isOpen={isOpenEdit} onClose={closeModalEdit} className="w-full max-w-7xl m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">

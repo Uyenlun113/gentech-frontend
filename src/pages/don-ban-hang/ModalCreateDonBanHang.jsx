@@ -1095,6 +1095,7 @@ export const ModalCreateDonBanHang = ({ isOpenCreate, closeModalCreate }) => {
         },
     ];
 
+
     return (
         <Modal isOpen={isOpenCreate} onClose={closeModalCreate} className="w-full max-w-[1400px] m-4">
             <div className="relative w-full h-full rounded-3xl bg-white dark:bg-gray-900 flex flex-col overflow-hidden shadow-2xl">

@@ -165,7 +165,6 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
     const hangHoaTableRef = useRef(null);
     const chiPhiTableRef = useRef(null);
     const hdThueTableRef = useRef(null);
-
     // Refs cho các tab
     const [activeTab, setActiveTab] = useState(0);
 
@@ -1157,7 +1156,9 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 const selector = `[data-table-input="${field}_${rowId}"] input`;
                 const el = document.querySelector(selector);
                 if (el) {
-                    try { el.focus(); el.select?.(); } catch { }
+                    try { el.focus(); el.select?.(); } catch (error) {
+                        console.error("Error focusing input:", error);
+                    }
                 }
             }, 150);
         }
@@ -1200,7 +1201,9 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
             setTimeout(() => {
                 const next = inputRefs.current?.diaChiRef?.current;
                 if (next) {
-                    try { next.focus(); next.select?.(); } catch { }
+                    try { next.focus(); next.select?.(); } catch (error) {
+                        console.error("Error focusing input:", error);
+                    }
                 }
             }, 150);
         }
@@ -1251,7 +1254,9 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 const selector = `[data-table-input="ma_vt_${rowId}"] input`;
                 const el = document.querySelector(selector);
                 if (el) {
-                    try { el.focus(); el.select?.(); } catch { }
+                    try { el.focus(); el.select?.(); } catch (error) {
+                        console.error("Error focusing input:", error);
+                     }
                 }
             }, 150);
         }
@@ -1301,7 +1306,9 @@ export const ModalEditPhieuMua = ({ isOpenEdit, closeModalEdit, editingId }) => 
                 const selector = `[data-table-input="${field}_${rowId}"] input`;
                 const el = document.querySelector(selector);
                 if (el) {
-                    try { el.focus(); el.select?.(); } catch { }
+                    try { el.focus(); el.select?.(); } catch (error) {
+                        console.error("Error focusing input:", error);
+                     }
                 }
             }, 150);
         }
