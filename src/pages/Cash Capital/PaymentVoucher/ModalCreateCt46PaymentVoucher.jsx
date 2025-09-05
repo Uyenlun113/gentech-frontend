@@ -116,6 +116,22 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
     const ct46TableRef = useRef(null);
     const ct46gtTableRef = useRef(null);
 
+    // Refs cho các input trong form chính
+    const inputRefs = useRef({
+        loaiPhieuChiRef: null,
+        maKhachHangRef: null,
+        diaChiKhachHangRef: null,
+        ongBaRef: null,
+        liDoChiRef: null,
+        taiKhoanCoRef: null,
+        quyenSoRef: null,
+        soPhieuChiRef: null,
+        // Refs cho input đầu tiên của mỗi tab
+        firstCt46InputRef: null,
+        firstCt46gtInputRef: null,
+    });
+
+    const [activeTab, setActiveTab] = useState(0);
     const [searchParams, setSearchParams] = useState({});
 
     useEffect(() => {
@@ -286,83 +302,6 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         }));
     }, []);
 
-    const handleAccountSelect = useCallback((id, account) => {
-        if (searchStates.searchContext === "mainForm") {
-            // Update main form account field
-            handleFormChange("taiKhoanCo", account.tk.trim());
-            handleFormChange("tenTaiKhoanCo", account.ten_tk);
-        } else if (searchStates.searchContext === "ct46") {
-            setCt46Data(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? { ...item, [searchStates.tkSearchField]: account.tk.trim(), ten_tk: account.ten_tk }
-                        : item
-                )
-            );
-        } else {
-            const fieldToUpdate = searchStates.tkSearchField || "tk_thue_no";
-            setCt46gtData(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? { ...item, [fieldToUpdate]: account.tk.trim() }
-                        : item
-                )
-            );
-        }
-
-        setSearchStates(prev => ({
-            ...prev,
-            showAccountPopup: false,
-            tkSearch: "",
-            tkSearchField: null,
-            searchContext: null
-        }));
-    }, [searchStates.tkSearchField, searchStates.searchContext, handleFormChange]);
-
-    const handleCustomerSelect = useCallback((id, customer) => {
-        if (searchStates.searchContext === "mainForm") {
-            handleFormChange("maKhachHang", customer.ma_kh.trim() || "");
-            handleFormChange("diaChiKhachHang", customer.dia_chi || "");
-            handleFormChange("maSoThue", customer.ma_so_thue || "");
-            handleFormChange("tenKhachHang", customer.ten_kh || "");
-        } else if (searchStates.searchContext === "ct46") {
-            setCt46Data(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? {
-                            ...item,
-                            ma_kh_t: customer.ma_kh || "",
-                            ten_kh_t: customer.ten_kh || "",
-                            dia_chi_t: customer.dia_chi || "",
-                            mst_t: customer.ma_so_thue || ""
-                        }
-                        : item
-                )
-            );
-        } else {
-            setCt46gtData(prev =>
-                prev.map(item =>
-                    item.id === id
-                        ? {
-                            ...item,
-                            ma_kh: customer.ma_kh || "",
-                            ten_kh: customer.ten_kh || "",
-                            dia_chi: customer.dia_chi || "",
-                            ma_so_thue: customer.ma_so_thue || ""
-                        }
-                        : item
-                )
-            );
-        }
-
-        setSearchStates(prev => ({
-            ...prev,
-            showCustomerPopup: false,
-            maKhSearch: "",
-            searchContext: null
-        }));
-    }, [searchStates.searchContext, handleFormChange]);
-
     const addCt46Row = useCallback(() => {
         setCt46Data(prev => [
             ...prev,
@@ -445,6 +384,275 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
         setCt46gtData(prev => prev.filter(item => item.id !== id));
     }, []);
 
+    const handleAccountSelect = useCallback((id, account) => {
+        if (searchStates.searchContext === "mainForm") {
+            // Update main form account field
+            handleFormChange("taiKhoanCo", account.tk.trim());
+            handleFormChange("tenTaiKhoanCo", account.ten_tk);
+        } else if (searchStates.searchContext === "ct46") {
+            setCt46Data(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? { ...item, [searchStates.tkSearchField]: account.tk.trim(), ten_tk: account.ten_tk }
+                        : item
+                )
+            );
+        } else {
+            const fieldToUpdate = searchStates.tkSearchField || "tk_thue_no";
+            setCt46gtData(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? { ...item, [fieldToUpdate]: account.tk.trim() }
+                        : item
+                )
+            );
+        }
+
+        setSearchStates(prev => ({
+            ...prev,
+            showAccountPopup: false,
+            tkSearch: "",
+            tkSearchField: null,
+            searchContext: null
+        }));
+
+        // Sau khi chọn TK, tự động focus sang trường tiếp theo để không bị mất Enter
+        setTimeout(() => {
+            if (searchStates.searchContext === "mainForm") {
+                // Focus về Số phiếu chi để tiếp tục luồng nhập
+                inputRefs.current?.soPhieuChiRef?.current?.focus?.();
+            } else if (searchStates.searchContext === "ct46" && searchStates.tkSearchField === "tk_i" && typeof id === "number") {
+                const nextInput = document.querySelector(`[data-table-input="tien_${id}"] input`);
+                if (nextInput) nextInput.focus();
+            } else if (searchStates.searchContext === "ct46gt" && searchStates.tkSearchField === "tk_thue_no" && typeof id === "number") {
+                // Trường cuối dòng: nếu đã có dòng tiếp theo thì focus vào đầu dòng tiếp theo,
+                // nếu không thì thêm dòng mới
+                const currentRowIndex = ct46gtData.findIndex(row => row.id === id);
+                if (currentRowIndex < ct46gtData.length - 1) {
+                    const nextRowId = ct46gtData[currentRowIndex + 1].id;
+                    const nextInput = document.querySelector(`[data-table-input="so_ct0_${nextRowId}"] input`);
+                    if (nextInput) nextInput.focus();
+                } else {
+                    addCt46gtRow();
+                    setTimeout(() => {
+                        const newRowId = ct46gtData.length + 1;
+                        const firstInputNewRow = document.querySelector(`[data-table-input="so_ct0_${newRowId}"] input`);
+                        if (firstInputNewRow) firstInputNewRow.focus();
+                    }, 200);
+                }
+            }
+        }, 100);
+    }, [searchStates.tkSearchField, searchStates.searchContext, handleFormChange, addCt46gtRow, ct46gtData]);
+
+    const handleCustomerSelect = useCallback((id, customer) => {
+        if (searchStates.searchContext === "mainForm") {
+            handleFormChange("maKhachHang", customer.ma_kh.trim() || "");
+            handleFormChange("diaChiKhachHang", customer.dia_chi || "");
+            handleFormChange("maSoThue", customer.ma_so_thue || "");
+            handleFormChange("tenKhachHang", customer.ten_kh || "");
+        } else if (searchStates.searchContext === "ct46") {
+            setCt46Data(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            ma_kh_t: customer.ma_kh || "",
+                            ten_kh_t: customer.ten_kh || "",
+                            dia_chi_t: customer.dia_chi || "",
+                            mst_t: customer.ma_so_thue || ""
+                        }
+                        : item
+                )
+            );
+        } else {
+            setCt46gtData(prev =>
+                prev.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            ma_kh: customer.ma_kh || "",
+                            ten_kh: customer.ten_kh || "",
+                            dia_chi: customer.dia_chi || "",
+                            ma_so_thue: customer.ma_so_thue || ""
+                        }
+                        : item
+                )
+            );
+        }
+
+        setSearchStates(prev => ({
+            ...prev,
+            showCustomerPopup: false,
+            maKhSearch: "",
+            searchContext: null
+        }));
+    }, [searchStates.searchContext, handleFormChange]);
+
+    // Handler chuyển sang tab hạch toán
+    const switchToCt46Tab = useCallback(() => {
+        // Chuyển sang tab hạch toán (tab index 0)
+        setActiveTab(0);
+        // Và focus vào input đầu tiên của bảng hạch toán
+        setTimeout(() => {
+            if (inputRefs.current.firstCt46InputRef) {
+                inputRefs.current.firstCt46InputRef.focus();
+            }
+        }, 100);
+    }, []);
+
+    // Handler xử lý Enter cho form chính
+    const handleLastInputEnter = useCallback(() => {
+        // Chuyển sang tab hạch toán khi ấn Enter ở input cuối cùng
+        switchToCt46Tab();
+    }, [switchToCt46Tab]);
+
+    // Handler xử lý Enter cho bảng
+    const handleTableInputEnter = useCallback((rowId, field, tableType) => {
+        if (tableType === "ct46") {
+            // Tìm input tiếp theo trong bảng hạch toán
+            const currentRowIndex = ct46Data.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cho bảng hạch toán
+            const fieldOrder = ["tk_i", "tien", "dien_giaii", "loai_hd", "so_ct0", "ngay_ct", "so_seri0", "ma_ms", "kh_mau_hd", "ma_kh_t", "dia_chi_t", "mst_t", "ten_vt_t", "thue_suat"];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input tiếp theo theo thứ tự
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < ct46Data.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = ct46Data[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="tk_i_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input đầu tiên của dòng tiếp theo
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addCt46Row();
+                setTimeout(() => {
+                    const newRowId = ct46Data.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="tk_i_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 200);
+            }
+        } else if (tableType === "ct46gt") {
+            // Tìm input tiếp theo trong bảng hợp đồng thuế
+            const currentRowIndex = ct46gtData.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cột hiện có trong bảng hợp đồng thuế
+            const fieldOrder = [
+                "so_ct0",
+                "ma_ms",
+                "kh_mau_hd",
+                "so_seri0",
+                "ngay_ct",
+                "ma_kh",
+                "dia_chi",
+                "ma_so_thue",
+                "ten_vt",
+                "t_tien",
+                "ma_thue",
+                "thue_suat",
+                "t_thue",
+                "t_tt",
+                "tk_thue_no",
+            ];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: đi theo thứ tự DOM nếu không tìm thấy theo field
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < ct46gtData.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = ct46gtData[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="so_ct0_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: đi theo thứ tự DOM
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addCt46gtRow();
+                setTimeout(() => {
+                    const newRowId = ct46gtData.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="so_ct0_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 200);
+            }
+        }
+    }, [ct46Data, ct46gtData, addCt46Row, addCt46gtRow]);
+
     const resetForm = useCallback(() => {
         setFormData({
             loaiPhieuChi: "",
@@ -476,6 +684,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             showAccountPopup: false,
             showCustomerPopup: false,
         });
+        setActiveTab(0);
     }, []);
 
     const validateForm = useCallback(() => {
@@ -624,12 +833,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     return <div className="font-bold text-gray-900"></div>;
                 }
                 return (
-                    <Input
-                        value={row.tk_i}
-                        onChange={(e) => handleCt46Change(row.id, "tk_i", e.target.value)}
-                        placeholder="Nhập mã TK..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`tk_i_${row.id}`}>
+                        <Input
+                            inputRef={row.id === 1 ? inputRefs.current.firstCt46InputRef : null}
+                            value={row.tk_i}
+                            onChange={(e) => handleCt46Change(row.id, "tk_i", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "tk_i", "ct46")}
+                            placeholder="Nhập mã TK..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -657,15 +870,18 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     );
                 }
                 return (
-                    <Input
-                        value={formatMoney(row.tien)}
-                        onChange={(e) => {
-                            const raw = e.target.value.replace(/\D/g, "");
-                            handleCt46Change(row.id, "tien", raw);
-                        }}
-                        placeholder="Ps nợ"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`tien_${row.id}`}>
+                        <Input
+                            value={formatMoney(row.tien)}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/\D/g, "");
+                                handleCt46Change(row.id, "tien", raw);
+                            }}
+                            onEnterPress={() => handleTableInputEnter(row.id, "tien", "ct46")}
+                            placeholder="Ps nợ"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -676,12 +892,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.dien_giaii}
-                        onChange={(e) => handleCt46Change(row.id, "dien_giaii", e.target.value)}
-                        placeholder="Diễn giải..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`dien_giaii_${row.id}`}>
+                        <Input
+                            value={row.dien_giaii}
+                            onChange={(e) => handleCt46Change(row.id, "dien_giaii", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "dien_giaii", "ct46")}
+                            placeholder="Diễn giải..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -692,13 +911,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        type="number"
-                        value={row.loai_hd}
-                        onChange={(e) => handleCt46Change(row.id, "loai_hd", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`loai_hd_${row.id}`}>
+                        <Input
+                            type="number"
+                            value={row.loai_hd}
+                            onChange={(e) => handleCt46Change(row.id, "loai_hd", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "loai_hd", "ct46")}
+                            placeholder="0"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -709,12 +931,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.so_ct0}
-                        onChange={(e) => handleCt46Change(row.id, "so_ct0", e.target.value)}
-                        placeholder="Nhóm"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`so_ct0_${row.id}`}>
+                        <Input
+                            value={row.so_ct0}
+                            onChange={(e) => handleCt46Change(row.id, "so_ct0", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "so_ct0", "ct46")}
+                            placeholder="Nhóm"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -749,12 +974,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.so_seri0}
-                        onChange={(e) => handleCt46Change(row.id, "so_seri0", e.target.value)}
-                        placeholder="Số seri"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`so_seri0_${row.id}`}>
+                        <Input
+                            value={row.so_seri0}
+                            onChange={(e) => handleCt46Change(row.id, "so_seri0", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "so_seri0", "ct46")}
+                            placeholder="Số seri"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -765,12 +993,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_ms}
-                        onChange={(e) => handleCt46Change(row.id, "ma_ms", e.target.value)}
-                        placeholder="Số HĐ"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`ma_ms_${row.id}`}>
+                        <Input
+                            value={row.ma_ms}
+                            onChange={(e) => handleCt46Change(row.id, "ma_ms", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "ma_ms", "ct46")}
+                            placeholder="Số HĐ"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -781,12 +1012,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.kh_mau_hd}
-                        onChange={(e) => handleCt46Change(row.id, "kh_mau_hd", e.target.value)}
-                        placeholder="Mẫu HĐ"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`kh_mau_hd_${row.id}`}>
+                        <Input
+                            value={row.kh_mau_hd}
+                            onChange={(e) => handleCt46Change(row.id, "kh_mau_hd", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "kh_mau_hd", "ct46")}
+                            placeholder="Mẫu HĐ"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -797,12 +1031,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_kh_t}
-                        onChange={(e) => handleCt46Change(row.id, "ma_kh_t", e.target.value)}
-                        placeholder="Nhập mã KH..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_kh_t_${row.id}`}>
+                        <Input
+                            value={row.ma_kh_t}
+                            onChange={(e) => handleCt46Change(row.id, "ma_kh_t", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "ma_kh_t", "ct46")}
+                            placeholder="Nhập mã KH..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -830,12 +1067,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.dia_chi_t}
-                        onChange={(e) => handleCt46Change(row.id, "dia_chi_t", e.target.value)}
-                        placeholder="Nhập địa chỉ..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`dia_chi_t_${row.id}`}>
+                        <Input
+                            value={row.dia_chi_t}
+                            onChange={(e) => handleCt46Change(row.id, "dia_chi_t", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "dia_chi_t", "ct46")}
+                            placeholder="Nhập địa chỉ..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             }
         },
@@ -846,12 +1086,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.mst_t}
-                        onChange={(e) => handleCt46Change(row.id, "mst_t", e.target.value)}
-                        placeholder="Nhập mã số thuế..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`mst_t_${row.id}`}>
+                        <Input
+                            value={row.mst_t}
+                            onChange={(e) => handleCt46Change(row.id, "mst_t", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "mst_t", "ct46")}
+                            placeholder="Nhập mã số thuế..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             }
         },
@@ -862,12 +1105,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ten_vt_t}
-                        onChange={(e) => handleCt46Change(row.id, "ten_vt_t", e.target.value)}
-                        placeholder="Nhập hàng hóa, dịch vụ..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`ten_vt_t_${row.id}`}>
+                        <Input
+                            value={row.ten_vt_t}
+                            onChange={(e) => handleCt46Change(row.id, "ten_vt_t", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "ten_vt_t", "ct46")}
+                            placeholder="Nhập hàng hóa, dịch vụ..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -878,13 +1124,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        type="number"
-                        value={row.thue_suat}
-                        onChange={(e) => handleCt46Change(row.id, "thue_suat", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`thue_suat_${row.id}`}>
+                        <Input
+                            type="number"
+                            value={row.thue_suat}
+                            onChange={(e) => handleCt46Change(row.id, "thue_suat", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "thue_suat", "ct46")}
+                            placeholder="0"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -994,13 +1243,17 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Nhóm",
             fixed: "left",
             width: 100,
-            render: (val, row) => (
-                <Input
-                    value={row.so_ct0}
-                    onChange={(e) => handleCt46gtChange(row.id, "so_ct0", e.target.value)}
-                    placeholder="Số CT..."
-                    className="w-full"
-                />
+            render: (val, row, index) => (
+                <div data-table-input={`so_ct0_${row.id}`}>
+                    <Input
+                        inputRef={index === 0 ? inputRefs.current.firstCt46gtInputRef : null}
+                        value={row.so_ct0}
+                        onChange={(e) => handleCt46gtChange(row.id, "so_ct0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_ct0", "ct46gt")}
+                        placeholder="Số CT..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1009,12 +1262,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             width: 100,
             fixed: "left",
             render: (val, row) => (
-                <Input
-                    value={row.ma_ms}
-                    onChange={(e) => handleCt46gtChange(row.id, "ma_ms", e.target.value)}
-                    placeholder="Nhập số hóa đơn..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_ms_${row.id}`}>
+                    <Input
+                        value={row.ma_ms}
+                        onChange={(e) => handleCt46gtChange(row.id, "ma_ms", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_ms", "ct46gt")}
+                        placeholder="Nhập số hóa đơn..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1022,12 +1278,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Mẫu hóa đơn",
             width: 100,
             render: (val, row) => (
-                <Input
-                    value={row.kh_mau_hd}
-                    onChange={(e) => handleCt46gtChange(row.id, "kh_mau_hd", e.target.value)}
-                    placeholder="Nhập mẫu hóa đơn..."
-                    className="w-full"
-                />
+                <div data-table-input={`kh_mau_hd_${row.id}`}>
+                    <Input
+                        value={row.kh_mau_hd}
+                        onChange={(e) => handleCt46gtChange(row.id, "kh_mau_hd", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "kh_mau_hd", "ct46gt")}
+                        placeholder="Nhập mẫu hóa đơn..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1035,12 +1294,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Số seri",
             width: 150,
             render: (val, row) => (
-                <Input
-                    value={row.so_seri0}
-                    onChange={(e) => handleCt46gtChange(row.id, "so_seri0", e.target.value)}
-                    placeholder="Nhập số seri..."
-                    className="w-full"
-                />
+                <div data-table-input={`so_seri0_${row.id}`}>
+                    <Input
+                        value={row.so_seri0}
+                        onChange={(e) => handleCt46gtChange(row.id, "so_seri0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_seri0", "ct46gt")}
+                        placeholder="Nhập số seri..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1069,12 +1331,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Mã khách hàng",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_kh}
-                    onChange={(e) => handleCt46gtChange(row.id, "ma_kh", e.target.value)}
-                    placeholder="Nhập mã KH..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_kh_${row.id}`}>
+                    <Input
+                        value={row.ma_kh}
+                        onChange={(e) => handleCt46gtChange(row.id, "ma_kh", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kh", "ct46gt")}
+                        placeholder="Nhập mã KH..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1096,12 +1361,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Địa chỉ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.dia_chi}
-                    onChange={(e) => handleCt46gtChange(row.id, "dia_chi", e.target.value)}
-                    placeholder="Nhập địa chỉ..."
-                    className="w-full"
-                />
+                <div data-table-input={`dia_chi_${row.id}`}>
+                    <Input
+                        value={row.dia_chi}
+                        onChange={(e) => handleCt46gtChange(row.id, "dia_chi", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "dia_chi", "ct46gt")}
+                        placeholder="Nhập địa chỉ..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1109,12 +1377,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Mã số thuế",
             width: 150,
             render: (val, row) => (
-                <Input
-                    value={row.ma_so_thue}
-                    onChange={(e) => handleCt46gtChange(row.id, "ma_so_thue", e.target.value)}
-                    placeholder="Nhập mã số thuế..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_so_thue_${row.id}`}>
+                    <Input
+                        value={row.ma_so_thue}
+                        onChange={(e) => handleCt46gtChange(row.id, "ma_so_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_so_thue", "ct46gt")}
+                        placeholder="Nhập mã số thuế..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1122,12 +1393,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Hàng hóa, dịch vụ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.ten_vt}
-                    onChange={(e) => handleCt46gtChange(row.id, "ten_vt", e.target.value)}
-                    placeholder="Nhập hàng hóa, dịch vụ..."
-                    className="w-full"
-                />
+                <div data-table-input={`ten_vt_${row.id}`}>
+                    <Input
+                        value={row.ten_vt}
+                        onChange={(e) => handleCt46gtChange(row.id, "ten_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ten_vt", "ct46gt")}
+                        placeholder="Nhập hàng hóa, dịch vụ..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1135,13 +1409,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Tiền hàng",
             width: 180,
             render: (val, row) => (
-                <Input
-                    type="text"
-                    value={formatMoney(row.t_tien)}
-                    onChange={(e) => handleCt46gtChange(row.id, "t_tien", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`t_tien_${row.id}`}>
+                    <Input
+                        type="text"
+                        value={formatMoney(row.t_tien)}
+                        onChange={(e) => handleCt46gtChange(row.id, "t_tien", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_tien", "ct46gt")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1149,12 +1426,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Mã thuế",
             width: 100,
             render: (val, row) => (
-                <Input
-                    value={row.ma_thue}
-                    onChange={(e) => handleCt46gtChange(row.id, "ma_thue", e.target.value)}
-                    placeholder="Nhập mã thuế..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_thue_${row.id}`}>
+                    <Input
+                        value={row.ma_thue}
+                        onChange={(e) => handleCt46gtChange(row.id, "ma_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_thue", "ct46gt")}
+                        placeholder="Nhập mã thuế..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1162,13 +1442,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "%",
             width: 150,
             render: (val, row) => (
-                <Input
-                    type="text"
-                    value={row.thue_suat}
-                    onChange={(e) => handleCt46gtChange(row.id, "thue_suat", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`thue_suat_${row.id}`}>
+                    <Input
+                        type="text"
+                        value={row.thue_suat}
+                        onChange={(e) => handleCt46gtChange(row.id, "thue_suat", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "thue_suat", "ct46gt")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1176,13 +1459,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Tiền thuế",
             width: 180,
             render: (val, row) => (
-                <Input
-                    type="text"
-                    value={formatMoney(row.t_thue)}
-                    onChange={(e) => handleCt46gtChange(row.id, "t_thue", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`t_thue_${row.id}`}>
+                    <Input
+                        type="text"
+                        value={formatMoney(row.t_thue)}
+                        onChange={(e) => handleCt46gtChange(row.id, "t_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_thue", "ct46gt")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1190,13 +1476,16 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "TT",
             width: 180,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.t_tt}
-                    onChange={(e) => handleCt46gtChange(row.id, "t_tt", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`t_tt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.t_tt}
+                        onChange={(e) => handleCt46gtChange(row.id, "t_tt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_tt", "ct46gt")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1204,12 +1493,15 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             title: "Tài khoản thuế",
             width: 150,
             render: (val, row) => (
-                <Input
-                    value={row.tk_thue_no}
-                    onChange={(e) => handleCt46gtChange(row.id, "tk_thue_no", e.target.value)}
-                    placeholder="Nhập TK thuế..."
-                    className="w-full"
-                />
+                <div data-table-input={`tk_thue_no_${row.id}`}>
+                    <Input
+                        value={row.tk_thue_no}
+                        onChange={(e) => handleCt46gtChange(row.id, "tk_thue_no", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tk_thue_no", "ct46gt")}
+                        placeholder="Nhập TK thuế..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1269,16 +1561,18 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Loại phiếu chi
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.loaiPhieuChiRef}
                                             value={formData.loaiPhieuChi}
                                             onChange={(e) => handleFormChange("loaiPhieuChi", e.target.value)}
+                                            nextInputRef={inputRefs.current.maKhachHangRef}
                                             placeholder="1-9"
                                             maxLength={1}
-                                            className={`w-24 h-9 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi)
+                                            className={`w-24 h-9 text-sm ${formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi)
                                                 ? 'border-red-500 bg-red-50'
                                                 : 'border-gray-300'
                                                 }`}
+                                            tabIndex={1}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[200px] ml-4">
                                             T/T chi phí trực tiếp bằng tiền
@@ -1292,15 +1586,17 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách hàng <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maKhachHangRef}
                                             value={formData.maKhachHang}
                                             onChange={(e) => {
                                                 handleFormChange("maKhachHang", e.target.value);
                                                 handleMainFormCustomerSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.diaChiKhachHangRef}
                                             placeholder="KH005"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={2}
                                         />
                                         <input
                                             type="text"
@@ -1315,12 +1611,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.diaChiKhachHangRef}
                                             value={formData.diaChiKhachHang}
                                             onChange={(e) => handleFormChange("diaChiKhachHang", e.target.value)}
+                                            nextInputRef={inputRefs.current.ongBaRef}
                                             placeholder="Nhập địa chỉ khách hàng"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={3}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[40px] ml-4">
                                             MST
@@ -1339,12 +1637,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.ongBaRef}
                                             value={formData.ongBa}
                                             onChange={(e) => handleFormChange("ongBa", e.target.value)}
+                                            nextInputRef={inputRefs.current.liDoChiRef}
                                             placeholder="Tên người nhận"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={4}
                                         />
                                     </div>
 
@@ -1352,12 +1652,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Lý do chi
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.liDoChiRef}
                                             value={formData.liDoChi}
                                             onChange={(e) => handleFormChange("liDoChi", e.target.value)}
+                                            nextInputRef={inputRefs.current.taiKhoanCoRef}
                                             placeholder="Nhập lý do chi tiền"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={5}
                                         />
                                     </div>
 
@@ -1365,15 +1667,17 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             TK có <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.taiKhoanCoRef}
                                             value={formData.taiKhoanCo}
                                             onChange={(e) => {
                                                 handleFormChange("taiKhoanCo", e.target.value);
                                                 handleMainFormAccountSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.quyenSoRef}
                                             placeholder="2111"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={6}
                                         />
                                         <input
                                             type="text"
@@ -1417,12 +1721,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Quyển sổ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.quyenSoRef}
                                             value={formData.quyenSo}
                                             onChange={(e) => handleFormChange("quyenSo", e.target.value)}
+                                            nextInputRef={inputRefs.current.soPhieuChiRef}
                                             placeholder="PC001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={7}
                                         />
                                     </div>
 
@@ -1430,12 +1736,14 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu chi <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soPhieuChiRef}
                                             value={formData.soPhieuChi}
                                             onChange={(e) => handleFormChange("soPhieuChi", e.target.value)}
+                                            onEnterPress={handleLastInputEnter}
                                             placeholder="PC00010"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={8}
                                         />
                                     </div>
 
@@ -1478,6 +1786,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     {/* Tabs */}
                     <div className="px-6">
                         <Tabs
+                            activeTab={activeTab}
                             tabs={[
                                 {
                                     label: "Hạch toán",
@@ -1520,7 +1829,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                 }
                             }}
                             onChangeTab={(tabIndex) => {
-                                console.log('Changed to tab:', tabIndex);
+                                setActiveTab(tabIndex);
                             }}
                         />
                     </div>
