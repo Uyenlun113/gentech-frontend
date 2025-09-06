@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Button from "../../../components/ui/button/Button";
@@ -51,12 +51,50 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
     ten_kh: "",
   });
 
+  // Input refs cho Enter navigation
+  const inputRefs = useRef({
+    tenKhRef: null,
+    doiTacRef: null,
+    emailRef: null,
+    dienThoaiRef: null,
+    diaChiRef: null,
+    maSoThueRef: null,
+    maTraCuuRef: null,
+    tkNhRef: null,
+    tenNhRef: null,
+    ghiChuRef: null,
+    nhKh1Ref: null,
+    nhKh2Ref: null,
+    nhKh3Ref: null,
+  });
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
+  // Handler xử lý Enter navigation
+  const handleEnterPress = useCallback((currentField) => {
+    const fieldOrder = ['ten_kh', 'doi_tac', 'e_mail', 'dien_thoai', 'dia_chi', 'ma_so_thue', 'ma_tra_cuu', 'tk_nh', 'ten_nh', 'ghi_chu', 'nh_kh1', 'nh_kh2', 'nh_kh3'];
+    const currentIndex = fieldOrder.indexOf(currentField);
+
+    if (currentIndex < fieldOrder.length - 1) {
+      const nextField = fieldOrder[currentIndex + 1];
+      const nextRef = inputRefs.current[`${nextField.charAt(0).toUpperCase() + nextField.slice(1).replace(/_([a-z])/g, (match, letter) => letter.toUpperCase())}Ref`];
+
+      setTimeout(() => {
+        if (nextRef && nextRef.current) {
+          nextRef.current.focus();
+        }
+      }, 50);
+    } else {
+      // Nếu là field cuối cùng, submit form
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      document.querySelector('form').dispatchEvent(submitEvent);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -169,6 +207,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.tenKhRef}
                       type="text"
                       value={formData.ten_kh}
                       onChange={(e) => {
@@ -177,9 +216,11 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                           setErrors((prev) => ({ ...prev, ten_kh: "" }));
                         }
                       }}
+                      onEnterPress={() => handleEnterPress('ten_kh')}
                       placeholder="Nhập tên khách hàng"
                       required
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={1}
                     />
                     {errors.ten_kh && (
                       <p className="mt-1 text-sm text-red-500">{errors.ten_kh}</p>
@@ -193,11 +234,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.doiTacRef}
                       type="text"
                       value={formData.doi_tac}
                       onChange={(e) => handleInputChange('doi_tac', e.target.value)}
+                      onEnterPress={() => handleEnterPress('doi_tac')}
                       placeholder="Nhập đối tác"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={2}
                     />
                   </div>
                 </div>
@@ -208,11 +252,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.emailRef}
                       type="email"
                       value={formData.e_mail}
                       onChange={(e) => handleInputChange('e_mail', e.target.value)}
+                      onEnterPress={() => handleEnterPress('e_mail')}
                       placeholder="Nhập email"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={3}
                     />
                   </div>
                 </div>
@@ -223,11 +270,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.dienThoaiRef}
                       type="text"
                       value={formData.dien_thoai}
                       onChange={(e) => handleInputChange('dien_thoai', e.target.value)}
+                      onEnterPress={() => handleEnterPress('dien_thoai')}
                       placeholder="Nhập số điện thoại"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={4}
                     />
                   </div>
                 </div>
@@ -238,11 +288,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.diaChiRef}
                       type="text"
                       value={formData.dia_chi}
                       onChange={(e) => handleInputChange('dia_chi', e.target.value)}
+                      onEnterPress={() => handleEnterPress('dia_chi')}
                       placeholder="Nhập địa chỉ"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={5}
                     />
                   </div>
                 </div>
@@ -261,11 +314,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.maSoThueRef}
                       type="text"
                       value={formData.ma_so_thue}
                       onChange={(e) => handleInputChange('ma_so_thue', e.target.value)}
+                      onEnterPress={() => handleEnterPress('ma_so_thue')}
                       placeholder="Nhập mã số thuế"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={6}
                     />
                   </div>
                 </div>
@@ -276,11 +332,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.maTraCuuRef}
                       type="text"
                       value={formData.ma_tra_cuu}
                       onChange={(e) => handleInputChange('ma_tra_cuu', e.target.value)}
+                      onEnterPress={() => handleEnterPress('ma_tra_cuu')}
                       placeholder="Nhập mã tra cứu"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={7}
                     />
                   </div>
                 </div>
@@ -291,11 +350,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.tkNhRef}
                       type="text"
                       value={formData.tk_nh}
                       onChange={(e) => handleInputChange('tk_nh', e.target.value)}
+                      onEnterPress={() => handleEnterPress('tk_nh')}
                       placeholder="Nhập số tài khoản"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={8}
                     />
                   </div>
                 </div>
@@ -306,11 +368,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.tenNhRef}
                       type="text"
                       value={formData.ten_nh}
                       onChange={(e) => handleInputChange('ten_nh', e.target.value)}
+                      onEnterPress={() => handleEnterPress('ten_nh')}
                       placeholder="Nhập tên ngân hàng"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={9}
                     />
                   </div>
                 </div>
@@ -321,11 +386,14 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.ghiChuRef}
                       type="text"
                       value={formData.ghi_chu}
                       onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
+                      onEnterPress={() => handleEnterPress('ghi_chu')}
                       placeholder="Nhập ghi chú"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={10}
                     />
                   </div>
                 </div>
@@ -344,6 +412,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <SearchableSelect
+                      ref={inputRefs.current.nhKh1Ref}
                       value={formData.nh_kh1}
                       onChange={(value) => handleInputChange('nh_kh1', value)}
                       options={getFilteredOptions('nh_kh1')}
@@ -354,6 +423,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                       displayKey="ten_nh"
                       valueKey="ma_nh"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={11}
                     />
                   </div>
                 </div>
@@ -364,6 +434,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <SearchableSelect
+                      ref={inputRefs.current.nhKh2Ref}
                       value={formData.nh_kh2}
                       onChange={(value) => handleInputChange('nh_kh2', value)}
                       options={getFilteredOptions('nh_kh2')}
@@ -374,6 +445,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                       displayKey="ten_nh"
                       valueKey="ma_nh"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={12}
                     />
                   </div>
                 </div>
@@ -384,6 +456,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   </Label>
                   <div className="flex-1">
                     <SearchableSelect
+                      ref={inputRefs.current.nhKh3Ref}
                       value={formData.nh_kh3}
                       onChange={(value) => handleInputChange('nh_kh3', value)}
                       options={getFilteredOptions('nh_kh3')}
@@ -394,6 +467,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
                       displayKey="ten_nh"
                       valueKey="ma_nh"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={13}
                     />
                   </div>
                 </div>
@@ -401,7 +475,7 @@ export const ModalCreateCustomer = ({ isOpenCreate, closeModalCreate, onSaveCrea
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-2 pb-4 px-4 lg:justify-end bg-blue-50">
+          <div className="flex items-center gap-3 px-4 pb-4 lg:justify-end bg-blue-50">
             <Button size="sm" variant="outline" type="button" onClick={handleClose}>
               Hủy
             </Button>

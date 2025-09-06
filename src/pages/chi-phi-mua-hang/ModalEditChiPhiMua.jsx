@@ -754,12 +754,18 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
     const switchToChiPhiTab = useCallback(() => {
         // Chuyển sang tab chi phí (tab index 0)
         setActiveTab(0);
-        // Và focus vào input đầu tiên của bảng chi phí
+        // Và focus vào input đầu tiên của bảng chi phí (Mã kho)
         setTimeout(() => {
             if (inputRefs.current.firstChiPhiInputRef) {
                 inputRefs.current.firstChiPhiInputRef.focus();
+            } else {
+                // Fallback: tìm input đầu tiên trong bảng chi phí
+                const firstInput = document.querySelector('[data-table-input="ma_kho_i_1"] input');
+                if (firstInput) {
+                    firstInput.focus();
+                }
             }
-        }, 100);
+        }, 200);
     }, []);
 
     // Handler xử lý Enter cho form chính
@@ -783,20 +789,41 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                 const nextField = fieldOrder[currentFieldIndex + 1];
                 setTimeout(() => {
                     const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
-                    if (nextInput) {
+                    if (nextInput && !nextInput.disabled && !nextInput.readOnly) {
                         nextInput.focus();
                     } else {
-                        // Fallback: tìm input tiếp theo theo thứ tự
-                        const allInputs = document.querySelectorAll('[data-table-input] input');
-                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
-                        if (currentInput) {
-                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
-                            if (currentIndex < allInputs.length - 1) {
-                                allInputs[currentIndex + 1].focus();
+                        // Nếu field tiếp theo bị disabled, tìm field tiếp theo có thể focus được
+                        let nextFocusableFieldIndex = currentFieldIndex + 1;
+                        while (nextFocusableFieldIndex < fieldOrder.length) {
+                            const testField = fieldOrder[nextFocusableFieldIndex];
+                            const testInput = document.querySelector(`[data-table-input="${testField}_${rowId}"] input`);
+                            if (testInput && !testInput.disabled && !testInput.readOnly) {
+                                testInput.focus();
+                                return;
                             }
+                            nextFocusableFieldIndex++;
+                        }
+                        
+                        // Nếu không tìm được field nào có thể focus, chuyển sang dòng tiếp theo
+                        if (currentRowIndex < chiPhiData.length - 1) {
+                            const nextRowId = chiPhiData[currentRowIndex + 1].id;
+                            const firstInputNextRow = document.querySelector(`[data-table-input="ma_kho_i_${nextRowId}"] input`);
+                            if (firstInputNextRow) {
+                                firstInputNextRow.focus();
+                            }
+                        } else {
+                            // Thêm dòng mới nếu đã hết dòng
+                            addChiPhiRow();
+                            setTimeout(() => {
+                                const newRowId = chiPhiData.length + 1;
+                                const firstInputNewRow = document.querySelector(`[data-table-input="ma_kho_i_${newRowId}"] input`);
+                                if (firstInputNewRow) {
+                                    firstInputNewRow.focus();
+                                }
+                            }, 150);
                         }
                     }
-                }, 100);
+                }, 50);
             } else if (currentRowIndex < chiPhiData.length - 1) {
                 // Chuyển sang dòng tiếp theo, field đầu tiên
                 const nextRowId = chiPhiData[currentRowIndex + 1].id;
@@ -825,13 +852,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     if (firstInputNewRow) {
                         firstInputNewRow.focus();
                     } else {
-                        // Fallback: focus vào input cuối cùng
+                        // Fallback: tìm input đầu tiên của dòng mới
                         const allInputs = document.querySelectorAll('[data-table-input] input');
                         if (allInputs.length > 0) {
+                            // Focus vào input cuối cùng (đó sẽ là input đầu tiên của dòng mới)
                             allInputs[allInputs.length - 1].focus();
                         }
                     }
-                }, 200);
+                }, 150);
             }
         } else if (tableType === "hdThue") {
             // Tìm input tiếp theo trong bảng hóa đơn thuế
@@ -902,13 +930,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     if (firstInputNewRow) {
                         firstInputNewRow.focus();
                     } else {
-                        // Fallback: focus vào input cuối cùng
+                        // Fallback: tìm input đầu tiên của dòng mới
                         const allInputs = document.querySelectorAll('[data-table-input] input');
                         if (allInputs.length > 0) {
+                            // Focus vào input cuối cùng (đó sẽ là input đầu tiên của dòng mới)
                             allInputs[allInputs.length - 1].focus();
                         }
                     }
-                }, 200);
+                }, 150);
             }
         }
     }, [chiPhiData, hdThueData, addChiPhiRow, addHdThueRow]);

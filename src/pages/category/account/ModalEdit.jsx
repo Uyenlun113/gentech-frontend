@@ -1,5 +1,5 @@
 import { Pencil, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Label from "../../../components/form/Label";
 import Select from "../../../components/form/Select";
 import Input from "../../../components/form/input/InputField";
@@ -33,6 +33,17 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
   const updateAccountMutation = useUpdateAccount();
   const [errors, setErrors] = useState({
     ten_tk: "",
+  });
+
+  // Input refs cho Enter navigation
+  const inputRefs = useRef({
+    tk0Ref: null,
+    tenTkRef: null,
+    tkMeRef: null,
+    maNtRef: null,
+    nhTkRef: null,
+    tkCnRef: null,
+    tkScRef: null,
   });
 
   const { data: groupAccountsResponse, isLoading: isGroupLoading } = useGroupAccounts({
@@ -78,6 +89,27 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
   const handleListSearch = (searchTerm) => {
     setListSearchTerm(searchTerm);
   };
+
+  // Handler xử lý Enter navigation
+  const handleEnterPress = useCallback((currentField) => {
+    const fieldOrder = ['tk0', 'ten_tk', 'ma_nt', 'tk_me', 'nh_tk', 'tk_cn', 'tk_sc'];
+    const currentIndex = fieldOrder.indexOf(currentField);
+
+    if (currentIndex < fieldOrder.length - 1) {
+      const nextField = fieldOrder[currentIndex + 1];
+      const nextRef = inputRefs.current[`${nextField}Ref`];
+
+      setTimeout(() => {
+        if (nextRef && nextRef.current) {
+          nextRef.current.focus();
+        }
+      }, 50);
+    } else {
+      // Nếu là field cuối cùng, submit form
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      document.querySelector('form').dispatchEvent(submitEvent);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -166,12 +198,15 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.tk0Ref}
                       type="text"
                       value={formData.tk0}
                       onChange={(e) => handleInputChange('tk0', e.target.value)}
+                      onEnterPress={() => handleEnterPress('tk0')}
                       placeholder="Mã tài khoản"
                       className="w-full h-9 text-sm bg-gray-100 dark:bg-gray-800"
-                      disabled
+                      readOnly
+                      tabIndex={1}
                     />
                   </div>
                 </div>
@@ -182,6 +217,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.tenTkRef}
                       type="text"
                       value={formData.ten_tk}
                       onChange={(e) => {
@@ -190,9 +226,11 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                           setErrors((prev) => ({ ...prev, ten_tk: "" }));
                         }
                       }}
+                      onEnterPress={() => handleEnterPress('ten_tk')}
                       placeholder="Nhập tên tài khoản"
                       required
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={2}
                     />
                     {errors.ten_tk && (
                       <p className="mt-1 text-sm text-red-500">{errors.ten_tk}</p>
@@ -206,6 +244,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <SearchableSelect
+                      ref={inputRefs.current.tkMeRef}
                       value={formData.tk_me}
                       onChange={(value) => handleInputChange('tk_me', value)}
                       options={accountOptions}
@@ -216,6 +255,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                       displayKey="label"
                       valueKey="value"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={4}
                     />
                   </div>
                 </div>
@@ -226,11 +266,14 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <Input
+                      inputRef={inputRefs.current.maNtRef}
                       type="text"
                       value={formData.ma_nt}
                       onChange={(e) => handleInputChange('ma_nt', e.target.value)}
+                      onEnterPress={() => handleEnterPress('ma_nt')}
                       placeholder="Nhập mã ngoại tệ (VD: VND, USD)"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={3}
                     />
                   </div>
                 </div>
@@ -241,6 +284,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <SearchableSelect
+                      ref={inputRefs.current.nhTkRef}
                       value={formData.nh_tk}
                       onChange={(value) => handleInputChange('nh_tk', value)}
                       options={groupOptions}
@@ -251,6 +295,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                       displayKey="label"
                       valueKey="value"
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={5}
                     />
                   </div>
                 </div>
@@ -261,10 +306,12 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <Select
+                      ref={inputRefs.current.tkCnRef}
                       defaultValue={formData.tk_cn}
                       options={CN_OPTIONS}
                       onChange={(value) => handleInputChange("tk_cn", value)}
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={6}
                     />
                   </div>
                 </div>
@@ -275,10 +322,12 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
                   </Label>
                   <div className="flex-1">
                     <Select
+                      ref={inputRefs.current.tkScRef}
                       defaultValue={formData.tk_sc}
                       options={SC_OPTIONS}
                       onChange={(value) => handleInputChange("tk_sc", value)}
                       className="w-full h-9 text-sm bg-white"
+                      tabIndex={7}
                     />
                   </div>
                 </div>
@@ -286,7 +335,7 @@ export const ModalEditAccount = ({ isOpenEdit, closeModalEdit, onSaveEdit, selec
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-2 pb-4 px-4 lg:justify-end bg-blue-50">
+          <div className="flex items-center gap-4 px-6 pb-6 lg:justify-end bg-blue-50">
             <Button size="sm" variant="outline" type="button" onClick={handleClose}>
               Hủy
             </Button>

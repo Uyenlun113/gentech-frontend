@@ -408,6 +408,10 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             );
         }
 
+        // Lưu searchContext và tkSearchField trước khi reset
+        const currentSearchContext = searchStates.searchContext;
+        const currentTkSearchField = searchStates.tkSearchField;
+
         setSearchStates(prev => ({
             ...prev,
             showAccountPopup: false,
@@ -418,13 +422,25 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
 
         // Sau khi chọn TK, tự động focus sang trường tiếp theo để không bị mất Enter
         setTimeout(() => {
-            if (searchStates.searchContext === "mainForm") {
-                // Focus về Số phiếu chi để tiếp tục luồng nhập
-                inputRefs.current?.soPhieuChiRef?.current?.focus?.();
-            } else if (searchStates.searchContext === "ct46" && searchStates.tkSearchField === "tk_i" && typeof id === "number") {
+            if (currentSearchContext === "mainForm") {
+                // Focus sang trường tiếp theo trong thứ tự Enter navigation (Quyển số)
+                inputRefs.current?.quyenSoRef?.current?.focus?.();
+            } else if (currentSearchContext === "ct46" && currentTkSearchField === "tk_i" && typeof id === "number") {
                 const nextInput = document.querySelector(`[data-table-input="tien_${id}"] input`);
-                if (nextInput) nextInput.focus();
-            } else if (searchStates.searchContext === "ct46gt" && searchStates.tkSearchField === "tk_thue_no" && typeof id === "number") {
+                if (nextInput) {
+                    nextInput.focus();
+                } else {
+                    // Fallback: tìm input tiếp theo trong bảng
+                    const allInputs = document.querySelectorAll('[data-table-input] input');
+                    const currentInput = document.querySelector(`[data-table-input="tk_i_${id}"] input`);
+                    if (currentInput) {
+                        const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                        if (currentIndex < allInputs.length - 1) {
+                            allInputs[currentIndex + 1].focus();
+                        }
+                    }
+                }
+            } else if (currentSearchContext === "ct46gt" && currentTkSearchField === "tk_thue_no" && typeof id === "number") {
                 // Trường cuối dòng: nếu đã có dòng tiếp theo thì focus vào đầu dòng tiếp theo,
                 // nếu không thì thêm dòng mới
                 const currentRowIndex = ct46gtData.findIndex(row => row.id === id);
@@ -441,7 +457,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     }, 200);
                 }
             }
-        }, 100);
+        }, 150);
     }, [searchStates.tkSearchField, searchStates.searchContext, handleFormChange, addCt46gtRow, ct46gtData]);
 
     const handleCustomerSelect = useCallback((id, customer) => {
@@ -480,27 +496,100 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
             );
         }
 
+        // Lưu searchContext trước khi reset
+        const currentSearchContext = searchStates.searchContext;
+
         setSearchStates(prev => ({
             ...prev,
             showCustomerPopup: false,
             maKhSearch: "",
             searchContext: null
         }));
+
+        // Sau khi chọn khách hàng, tự động focus sang trường tiếp theo để không bị mất Enter
+        setTimeout(() => {
+            if (currentSearchContext === "mainForm") {
+                // Focus sang trường tiếp theo trong thứ tự Enter navigation (Địa chỉ khách hàng)
+                inputRefs.current?.diaChiKhachHangRef?.current?.focus?.();
+            } else if (currentSearchContext === "ct46" && typeof id === "number") {
+                // Focus sang trường tiếp theo trong bảng hạch toán
+                const nextInput = document.querySelector(`[data-table-input="dia_chi_t_${id}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                } else {
+                    // Fallback: tìm input tiếp theo trong bảng
+                    const allInputs = document.querySelectorAll('[data-table-input] input');
+                    const currentInput = document.querySelector(`[data-table-input="ma_kh_t_${id}"] input`);
+                    if (currentInput) {
+                        const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                        if (currentIndex < allInputs.length - 1) {
+                            allInputs[currentIndex + 1].focus();
+                        }
+                    }
+                }
+            } else if (currentSearchContext === "ct46gt" && typeof id === "number") {
+                // Focus sang trường tiếp theo trong bảng hợp đồng thuế
+                const nextInput = document.querySelector(`[data-table-input="dia_chi_${id}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                } else {
+                    // Fallback: tìm input tiếp theo trong bảng
+                    const allInputs = document.querySelectorAll('[data-table-input] input');
+                    const currentInput = document.querySelector(`[data-table-input="ma_kh_${id}"] input`);
+                    if (currentInput) {
+                        const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                        if (currentIndex < allInputs.length - 1) {
+                            allInputs[currentIndex + 1].focus();
+                        }
+                    }
+                }
+            }
+        }, 150);
     }, [searchStates.searchContext, handleFormChange]);
 
     // Handler chuyển sang tab hạch toán
     const switchToCt46Tab = useCallback(() => {
         // Chuyển sang tab hạch toán (tab index 0)
         setActiveTab(0);
-        // Và focus vào input đầu tiên của bảng hạch toán
+        // Và focus vào input đầu tiên của bảng hạch toán (Tài khoản nợ)
         setTimeout(() => {
-            if (inputRefs.current.firstCt46InputRef) {
+            const firstInput = document.querySelector(`[data-table-input="tk_i_1"] input`);
+            if (firstInput) {
+                firstInput.focus();
+            } else if (inputRefs.current.firstCt46InputRef) {
                 inputRefs.current.firstCt46InputRef.focus();
             }
-        }, 100);
+        }, 200);
     }, []);
 
     // Handler xử lý Enter cho form chính
+    const handleMainFormEnter = useCallback((currentField) => {
+        const fieldOrder = [
+            'loaiPhieuChi',
+            'maKhachHang', 
+            'diaChiKhachHang',
+            'ongBa',
+            'liDoChi',
+            'taiKhoanCo',
+            'quyenSo',
+            'soPhieuChi'
+        ];
+        
+        const currentIndex = fieldOrder.indexOf(currentField);
+        
+        if (currentIndex < fieldOrder.length - 1) {
+            // Focus sang trường tiếp theo
+            const nextField = fieldOrder[currentIndex + 1];
+            const nextRef = inputRefs.current[`${nextField}Ref`];
+            if (nextRef?.current) {
+                nextRef.current.focus();
+            }
+        } else {
+            // Chuyển sang tab hạch toán khi ấn Enter ở input cuối cùng
+            switchToCt46Tab();
+        }
+    }, [switchToCt46Tab]);
+
     const handleLastInputEnter = useCallback(() => {
         // Chuyển sang tab hạch toán khi ấn Enter ở input cuối cùng
         switchToCt46Tab();
@@ -524,7 +613,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                     if (nextInput) {
                         nextInput.focus();
                     } else {
-                        // Fallback: tìm input tiếp theo theo thứ tự
+                        // Fallback: tìm input tiếp theo theo thứ tự DOM
                         const allInputs = document.querySelectorAll('[data-table-input] input');
                         const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
                         if (currentInput) {
@@ -534,7 +623,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             }
                         }
                     }
-                }, 100);
+                }, 50);
             } else if (currentRowIndex < ct46Data.length - 1) {
                 // Chuyển sang dòng tiếp theo, field đầu tiên
                 const nextRowId = ct46Data[currentRowIndex + 1].id;
@@ -553,7 +642,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             }
                         }
                     }
-                }, 100);
+                }, 50);
             } else {
                 // Đây là input cuối cùng của bảng, tự động thêm dòng mới
                 addCt46Row();
@@ -569,7 +658,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             allInputs[allInputs.length - 1].focus();
                         }
                     }
-                }, 200);
+                }, 150);
             }
         } else if (tableType === "ct46gt") {
             // Tìm input tiếp theo trong bảng hợp đồng thuế
@@ -613,7 +702,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             }
                         }
                     }
-                }, 100);
+                }, 50);
             } else if (currentRowIndex < ct46gtData.length - 1) {
                 // Chuyển sang dòng tiếp theo, field đầu tiên
                 const nextRowId = ct46gtData[currentRowIndex + 1].id;
@@ -632,7 +721,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             }
                         }
                     }
-                }, 100);
+                }, 50);
             } else {
                 // Đây là input cuối cùng của bảng, tự động thêm dòng mới
                 addCt46gtRow();
@@ -648,7 +737,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                             allInputs[allInputs.length - 1].focus();
                         }
                     }
-                }, 200);
+                }, 150);
             }
         }
     }, [ct46Data, ct46gtData, addCt46Row, addCt46gtRow]);
@@ -1565,7 +1654,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             inputRef={inputRefs.current.loaiPhieuChiRef}
                                             value={formData.loaiPhieuChi}
                                             onChange={(e) => handleFormChange("loaiPhieuChi", e.target.value)}
-                                            nextInputRef={inputRefs.current.maKhachHangRef}
+                                            onEnterPress={() => handleMainFormEnter("loaiPhieuChi")}
                                             placeholder="1-9"
                                             maxLength={1}
                                             className={`w-24 h-9 text-sm ${formData.loaiPhieuChi && !validateLoaiPhieuChi(formData.loaiPhieuChi)
@@ -1593,7 +1682,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                                 handleFormChange("maKhachHang", e.target.value);
                                                 handleMainFormCustomerSearch(e.target.value);
                                             }}
-                                            nextInputRef={inputRefs.current.diaChiKhachHangRef}
+                                            onEnterPress={() => handleMainFormEnter("maKhachHang")}
                                             placeholder="KH005"
                                             className="w-32 h-9 text-sm"
                                             tabIndex={2}
@@ -1615,7 +1704,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             inputRef={inputRefs.current.diaChiKhachHangRef}
                                             value={formData.diaChiKhachHang}
                                             onChange={(e) => handleFormChange("diaChiKhachHang", e.target.value)}
-                                            nextInputRef={inputRefs.current.ongBaRef}
+                                            onEnterPress={() => handleMainFormEnter("diaChiKhachHang")}
                                             placeholder="Nhập địa chỉ khách hàng"
                                             className="flex-1 h-9 text-sm"
                                             tabIndex={3}
@@ -1641,7 +1730,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             inputRef={inputRefs.current.ongBaRef}
                                             value={formData.ongBa}
                                             onChange={(e) => handleFormChange("ongBa", e.target.value)}
-                                            nextInputRef={inputRefs.current.liDoChiRef}
+                                            onEnterPress={() => handleMainFormEnter("ongBa")}
                                             placeholder="Tên người nhận"
                                             className="flex-1 h-9 text-sm"
                                             tabIndex={4}
@@ -1656,7 +1745,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             inputRef={inputRefs.current.liDoChiRef}
                                             value={formData.liDoChi}
                                             onChange={(e) => handleFormChange("liDoChi", e.target.value)}
-                                            nextInputRef={inputRefs.current.taiKhoanCoRef}
+                                            onEnterPress={() => handleMainFormEnter("liDoChi")}
                                             placeholder="Nhập lý do chi tiền"
                                             className="flex-1 h-9 text-sm"
                                             tabIndex={5}
@@ -1674,7 +1763,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                                 handleFormChange("taiKhoanCo", e.target.value);
                                                 handleMainFormAccountSearch(e.target.value);
                                             }}
-                                            nextInputRef={inputRefs.current.quyenSoRef}
+                                            onEnterPress={() => handleMainFormEnter("taiKhoanCo")}
                                             placeholder="2111"
                                             className="w-32 h-9 text-sm"
                                             tabIndex={6}
@@ -1725,7 +1814,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                                             inputRef={inputRefs.current.quyenSoRef}
                                             value={formData.quyenSo}
                                             onChange={(e) => handleFormChange("quyenSo", e.target.value)}
-                                            nextInputRef={inputRefs.current.soPhieuChiRef}
+                                            onEnterPress={() => handleMainFormEnter("quyenSo")}
                                             placeholder="PC001"
                                             className="flex-1 h-9 text-sm"
                                             tabIndex={7}
