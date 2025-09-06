@@ -90,6 +90,9 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
 
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+    // Tab state
+    const [activeTab, setActiveTab] = useState(0);
+
     // Popup states
     const [showPhieuNhapPopup, setShowPhieuNhapPopup] = useState(false);
 
@@ -113,6 +116,25 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
 
     const chiPhiTableRef = useRef(null);
     const hdThueTableRef = useRef(null);
+
+    // Input refs cho form chính
+    const inputRefs = useRef({
+        maKhRef: null,
+        tenKhRef: null,
+        diaChiRef: null,
+        maSoThueRef: null,
+        ongBaRef: null,
+        dienGiaiRef: null,
+        tkThueNoRef: null,
+        soPnRef: null,
+        ngayPnRef: null,
+        maQsRef: null,
+        soCtRef: null,
+        tongChiPhiRef: null,
+        // Refs cho input đầu tiên của mỗi tab
+        firstChiPhiInputRef: null,
+        firstHdThueInputRef: null,
+    });
 
     // Debounced search values
     const debouncedTkSearch = useDebounce(searchStates.tkSearch, 600);
@@ -659,6 +681,238 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         }));
     }, []);
 
+    // Các function thêm/xóa dòng
+    const addChiPhiRow = useCallback(() => {
+        setChiPhiData(prev => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                ma_kho_i: "",
+                ma_vt: "",
+                ten_vt: "",
+                so_luong: "",
+                gia: "",
+                tien_nt: "",
+                tien_nt0: "",
+                tk_vt: "",
+                thue_nt: "",
+                cp_nt: "",
+                cp: "",
+                dvt: "",
+                ten_kho: "",
+            }
+        ]);
+
+        setTimeout(() => {
+            if (chiPhiTableRef.current) {
+                const tableContainer = chiPhiTableRef.current.querySelector('.overflow-x-auto');
+                if (tableContainer) {
+                    tableContainer.scrollTop = tableContainer.scrollHeight;
+                }
+            }
+        }, 100);
+    }, []);
+
+    const addHdThueRow = useCallback(() => {
+        setHdThueData(prev => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                so_ct0: "",
+                so_seri0: "",
+                ma_gd: "",
+                ma_hd: "",
+                ngay_ct0: "",
+                ma_kh: formData.ma_kh || "",
+                ten_kh: formData.ten_kh || "",
+                dia_chi: formData.dia_chi || "",
+                ma_so_thue: formData.ma_so_thue || "",
+                ma_kho: "",
+                ten_vt: "",
+                gia: "",
+                so_luong: "",
+                t_tien: "",
+                thue_suat: "",
+                t_thue: "",
+                han_tt: "",
+                tk_thue_no: "",
+                ten_kho: "",
+            }
+        ]);
+
+        setTimeout(() => {
+            if (hdThueTableRef.current) {
+                const tableContainer = hdThueTableRef.current.querySelector('.overflow-x-auto');
+                if (tableContainer) {
+                    tableContainer.scrollTop = tableContainer.scrollHeight;
+                }
+            }
+        }, 100);
+    }, [formData]);
+
+    // Handler chuyển sang tab chi phí
+    const switchToChiPhiTab = useCallback(() => {
+        // Chuyển sang tab chi phí (tab index 0)
+        setActiveTab(0);
+        // Và focus vào input đầu tiên của bảng chi phí
+        setTimeout(() => {
+            if (inputRefs.current.firstChiPhiInputRef) {
+                inputRefs.current.firstChiPhiInputRef.focus();
+            }
+        }, 100);
+    }, []);
+
+    // Handler xử lý Enter cho form chính
+    const handleLastInputEnter = useCallback(() => {
+        // Chuyển sang tab chi phí khi ấn Enter ở input cuối cùng
+        switchToChiPhiTab();
+    }, [switchToChiPhiTab]);
+
+    // Handler xử lý Enter cho bảng
+    const handleTableInputEnter = useCallback((rowId, field, tableType) => {
+        if (tableType === "chiPhi") {
+            // Tìm input tiếp theo trong bảng chi phí
+            const currentRowIndex = chiPhiData.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cho bảng chi phí
+            const fieldOrder = ["ma_kho_i", "ma_vt", "so_luong", "gia", "tien_nt", "tk_vt", "thue_nt", "cp_nt"];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input tiếp theo theo thứ tự
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < chiPhiData.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = chiPhiData[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="ma_kho_i_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input đầu tiên của dòng tiếp theo
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addChiPhiRow();
+                setTimeout(() => {
+                    const newRowId = chiPhiData.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="ma_kho_i_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 200);
+            }
+        } else if (tableType === "hdThue") {
+            // Tìm input tiếp theo trong bảng hóa đơn thuế
+            const currentRowIndex = hdThueData.findIndex(row => row.id === rowId);
+
+            // Danh sách các field theo thứ tự cột hiện có trong bảng hóa đơn thuế
+            const fieldOrder = [
+                "so_ct0",
+                "so_seri0",
+                "ma_gd",
+                "ma_kh",
+                "dia_chi",
+                "ma_so_thue",
+                "ma_kho",
+                "ten_vt",
+                "so_luong",
+                "gia",
+                "t_tien",
+                "thue_suat",
+                "tk_thue_no",
+            ];
+            const currentFieldIndex = fieldOrder.indexOf(field);
+
+            if (currentFieldIndex < fieldOrder.length - 1) {
+                // Chuyển sang field tiếp theo trong cùng dòng
+                const nextField = fieldOrder[currentFieldIndex + 1];
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input tiếp theo theo thứ tự
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else if (currentRowIndex < hdThueData.length - 1) {
+                // Chuyển sang dòng tiếp theo, field đầu tiên
+                const nextRowId = hdThueData[currentRowIndex + 1].id;
+                setTimeout(() => {
+                    const nextInput = document.querySelector(`[data-table-input="so_ct0_${nextRowId}"] input`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        // Fallback: tìm input đầu tiên của dòng tiếp theo
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        const currentInput = document.querySelector(`[data-table-input="${field}_${rowId}"] input`);
+                        if (currentInput) {
+                            const currentIndex = Array.from(allInputs).indexOf(currentInput);
+                            if (currentIndex < allInputs.length - 1) {
+                                allInputs[currentIndex + 1].focus();
+                            }
+                        }
+                    }
+                }, 100);
+            } else {
+                // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+                addHdThueRow();
+                setTimeout(() => {
+                    const newRowId = hdThueData.length + 1;
+                    const firstInputNewRow = document.querySelector(`[data-table-input="so_ct0_${newRowId}"] input`);
+                    if (firstInputNewRow) {
+                        firstInputNewRow.focus();
+                    } else {
+                        // Fallback: focus vào input cuối cùng
+                        const allInputs = document.querySelectorAll('[data-table-input] input');
+                        if (allInputs.length > 0) {
+                            allInputs[allInputs.length - 1].focus();
+                        }
+                    }
+                }, 200);
+            }
+        }
+    }, [chiPhiData, hdThueData, addChiPhiRow, addHdThueRow]);
+
     const handleAccountSelect = useCallback((id, account) => {
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("tk_thue_no", account.tk.trim());
@@ -688,6 +942,27 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             tkSearchField: null,
             searchContext: null
         }));
+
+        // Sau khi chọn TK, tự động focus sang trường tiếp theo để không bị mất Enter
+        setTimeout(() => {
+            if (searchStates.searchContext === "mainForm") {
+                // Focus về Số phiếu để tiếp tục luồng nhập
+                inputRefs.current?.soCtRef?.current?.focus?.();
+            } else if (searchStates.searchContext === "chiPhi" && searchStates.tkSearchField === "tk_vt" && typeof id === "number") {
+                const nextInput = document.querySelector(`[data-table-input="thue_nt_${id}"] input`);
+                if (nextInput) nextInput.focus();
+            } else if (searchStates.searchContext === "hdThue" && searchStates.tkSearchField === "tk_thue_no" && typeof id === "number") {
+                // Trường cuối dòng: nếu đã có dòng tiếp theo thì focus vào đầu dòng tiếp theo,
+                // nếu chưa có thì giữ focus tại trường hiện tại để người dùng Enter sẽ thêm dòng theo logic sẵn có
+                const nextRowInput = document.querySelector(`[data-table-input="so_ct0_${id + 1}"] input`);
+                if (nextRowInput) {
+                    nextRowInput.focus();
+                } else {
+                    const stayInput = document.querySelector(`[data-table-input="tk_thue_no_${id}"] input`);
+                    if (stayInput) stayInput.focus();
+                }
+            }
+        }, 200);
     }, [searchStates.tkSearchField, searchStates.searchContext, handleFormChange]);
 
     const handleCustomerSelect = useCallback((id, customer) => {
@@ -783,77 +1058,9 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
         }));
     }, [searchStates.searchContext]);
 
-    const addChiPhiRow = useCallback(() => {
-        setChiPhiData(prev => [
-            ...prev,
-            {
-                id: prev.length + 1,
-                ma_kho_i: "",
-                ma_vt: "",
-                ten_vt: "",
-                so_luong: "",
-                gia: "",
-                tien_nt: "",
-                tien_nt0: "",
-                tk_vt: "",
-                thue_nt: "",
-                cp_nt: "",
-                cp: "",
-                dvt: "",
-                ten_kho: "",
-            }
-        ]);
-
-        setTimeout(() => {
-            if (chiPhiTableRef.current) {
-                const tableContainer = chiPhiTableRef.current.querySelector('.overflow-x-auto');
-                if (tableContainer) {
-                    tableContainer.scrollTop = tableContainer.scrollHeight;
-                }
-            }
-        }, 100);
-    }, []);
-
     const deleteChiPhiRow = useCallback((id) => {
         setChiPhiData(prev => prev.filter(item => item.id !== id));
     }, []);
-
-    const addHdThueRow = useCallback(() => {
-        setHdThueData(prev => [
-            ...prev,
-            {
-                id: prev.length + 1,
-                so_ct0: "",
-                so_seri0: "",
-                ma_gd: "",
-                ma_hd: "",
-                ngay_ct0: "",
-                ma_kh: formData.ma_kh || "",
-                ten_kh: formData.ten_kh || "",
-                dia_chi: formData.dia_chi || "",
-                ma_so_thue: formData.ma_so_thue || "",
-                ma_kho: "",
-                ten_vt: "",
-                gia: "",
-                so_luong: "",
-                t_tien: "",
-                thue_suat: "",
-                t_thue: "",
-                han_tt: "",
-                tk_thue_no: "",
-                ten_kho: "",
-            }
-        ]);
-
-        setTimeout(() => {
-            if (hdThueTableRef.current) {
-                const tableContainer = hdThueTableRef.current.querySelector('.overflow-x-auto');
-                if (tableContainer) {
-                    tableContainer.scrollTop = tableContainer.scrollHeight;
-                }
-            }
-        }, 100);
-    }, [formData]);
 
     const deleteHdThueRow = useCallback((id) => {
         setHdThueData(prev => prev.filter(item => item.id !== id));
@@ -953,6 +1160,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             khoCodes: []
         });
         setIsDataLoaded(false);
+        setActiveTab(0);
         setSearchStates({
             tkSearch: "",
             tkSearchRowId: null,
@@ -1102,13 +1310,17 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mã kho",
             fixed: "left",
             width: 120,
-            render: (val, row) => (
-                <Input
-                    value={row.ma_kho_i}
-                    onChange={(e) => handleChiPhiChange(row.id, "ma_kho_i", e.target.value)}
-                    placeholder="Nhập mã kho..."
-                    className="w-full"
-                />
+            render: (val, row, index) => (
+                <div data-table-input={`ma_kho_i_${row.id}`}>
+                    <Input
+                        inputRef={index === 0 ? inputRefs.current.firstChiPhiInputRef : null}
+                        value={row.ma_kho_i}
+                        onChange={(e) => handleChiPhiChange(row.id, "ma_kho_i", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kho_i", "chiPhi")}
+                        placeholder="Nhập mã kho..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1126,12 +1338,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mã vật tư",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_vt}
-                    onChange={(e) => handleChiPhiChange(row.id, "ma_vt", e.target.value)}
-                    placeholder="Nhập mã VT..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_vt_${row.id}`}>
+                    <Input
+                        value={row.ma_vt}
+                        onChange={(e) => handleChiPhiChange(row.id, "ma_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_vt", "chiPhi")}
+                        placeholder="Nhập mã VT..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1159,13 +1374,33 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Số lượng",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.so_luong}
-                    onChange={(e) => handleChiPhiChange(row.id, "so_luong", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`so_luong_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.so_luong}
+                        onChange={(e) => handleChiPhiChange(row.id, "so_luong", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_luong", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
+            ),
+        },
+        {
+            key: "gia",
+            title: "Giá",
+            width: 120,
+            render: (val, row) => (
+                <div data-table-input={`gia_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.gia}
+                        onChange={(e) => handleChiPhiChange(row.id, "gia", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "gia", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1173,15 +1408,18 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Tiền hàng",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.tien_nt}
-                    onChange={(e) => handleChiPhiChange(row.id, "tien_nt", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                    readOnly
-                    disabled
-                />
+                <div data-table-input={`tien_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.tien_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "tien_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tien_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                        readOnly
+                        disabled
+                    />
+                </div>
             ),
         },
         {
@@ -1189,13 +1427,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Tiền chi phí",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.cp_nt}
-                    onChange={(e) => handleChiPhiChange(row.id, "cp_nt", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`cp_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.cp_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "cp_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "cp_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1203,12 +1444,32 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "TK vật tư",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.tk_vt}
-                    onChange={(e) => handleChiPhiChange(row.id, "tk_vt", e.target.value)}
-                    placeholder="Nhập TK..."
-                    className="w-full"
-                />
+                <div data-table-input={`tk_vt_${row.id}`}>
+                    <Input
+                        value={row.tk_vt}
+                        onChange={(e) => handleChiPhiChange(row.id, "tk_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tk_vt", "chiPhi")}
+                        placeholder="Nhập TK..."
+                        className="w-full"
+                    />
+                </div>
+            ),
+        },
+        {
+            key: "thue_nt",
+            title: "Thuế NT",
+            width: 120,
+            render: (val, row) => (
+                <div data-table-input={`thue_nt_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.thue_nt}
+                        onChange={(e) => handleChiPhiChange(row.id, "thue_nt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "thue_nt", "chiPhi")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1248,13 +1509,17 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Nhóm",
             fixed: "left",
             width: 100,
-            render: (val, row) => (
-                <Input
-                    value={row.so_ct0}
-                    onChange={(e) => handleHdThueChange(row.id, "so_ct0", e.target.value)}
-                    placeholder="Nhóm..."
-                    className="w-full"
-                />
+            render: (val, row, index) => (
+                <div data-table-input={`so_ct0_${row.id}`}>
+                    <Input
+                        inputRef={index === 0 ? inputRefs.current.firstHdThueInputRef : null}
+                        value={row.so_ct0}
+                        onChange={(e) => handleHdThueChange(row.id, "so_ct0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_ct0", "hdThue")}
+                        placeholder="Nhóm..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1262,12 +1527,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Số seri",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.so_seri0}
-                    onChange={(e) => handleHdThueChange(row.id, "so_seri0", e.target.value)}
-                    placeholder="Số seri..."
-                    className="w-full"
-                />
+                <div data-table-input={`so_seri0_${row.id}`}>
+                    <Input
+                        value={row.so_seri0}
+                        onChange={(e) => handleHdThueChange(row.id, "so_seri0", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_seri0", "hdThue")}
+                        placeholder="Số seri..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1275,12 +1543,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mẫu hóa đơn",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_gd}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_gd", e.target.value)}
-                    placeholder="Mẫu HĐ..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_gd_${row.id}`}>
+                    <Input
+                        value={row.ma_gd}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_gd", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_gd", "hdThue")}
+                        placeholder="Mẫu HĐ..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1309,12 +1580,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mã khách",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_kh}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_kh", e.target.value)}
-                    placeholder="Mã khách..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_kh_${row.id}`}>
+                    <Input
+                        value={row.ma_kh}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_kh", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kh", "hdThue")}
+                        placeholder="Mã khách..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1336,12 +1610,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Địa chỉ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.dia_chi}
-                    onChange={(e) => handleHdThueChange(row.id, "dia_chi", e.target.value)}
-                    placeholder="Địa chỉ..."
-                    className="w-full"
-                />
+                <div data-table-input={`dia_chi_${row.id}`}>
+                    <Input
+                        value={row.dia_chi}
+                        onChange={(e) => handleHdThueChange(row.id, "dia_chi", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "dia_chi", "hdThue")}
+                        placeholder="Địa chỉ..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1349,12 +1626,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mã số thuế",
             width: 150,
             render: (val, row) => (
-                <Input
-                    value={row.ma_so_thue}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_so_thue", e.target.value)}
-                    placeholder="MST..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_so_thue_${row.id}`}>
+                    <Input
+                        value={row.ma_so_thue}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_so_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_so_thue", "hdThue")}
+                        placeholder="MST..."
+                        className="w-full"
+                    />
+                </div>
             )
         },
         {
@@ -1362,12 +1642,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Mã kho",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.ma_kho}
-                    onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
-                    placeholder="Mã kho..."
-                    className="w-full"
-                />
+                <div data-table-input={`ma_kho_${row.id}`}>
+                    <Input
+                        value={row.ma_kho}
+                        onChange={(e) => handleHdThueChange(row.id, "ma_kho", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ma_kho", "hdThue")}
+                        placeholder="Mã kho..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1385,12 +1668,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Hàng hóa, dịch vụ",
             width: 200,
             render: (val, row) => (
-                <Input
-                    value={row.ten_vt}
-                    onChange={(e) => handleHdThueChange(row.id, "ten_vt", e.target.value)}
-                    placeholder="Hàng hóa, DV..."
-                    className="w-full"
-                />
+                <div data-table-input={`ten_vt_${row.id}`}>
+                    <Input
+                        value={row.ten_vt}
+                        onChange={(e) => handleHdThueChange(row.id, "ten_vt", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "ten_vt", "hdThue")}
+                        placeholder="Hàng hóa, DV..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1398,13 +1684,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Số lượng",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.so_luong}
-                    onChange={(e) => handleHdThueChange(row.id, "so_luong", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`so_luong_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.so_luong}
+                        onChange={(e) => handleHdThueChange(row.id, "so_luong", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "so_luong", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1412,13 +1701,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Giá",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.gia}
-                    onChange={(e) => handleHdThueChange(row.id, "gia", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`gia_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.gia}
+                        onChange={(e) => handleHdThueChange(row.id, "gia", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "gia", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1426,13 +1718,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Tiền hàng",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.t_tien}
-                    onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`t_tien_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.t_tien}
+                        onChange={(e) => handleHdThueChange(row.id, "t_tien", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_tien", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1440,13 +1735,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Thuế suất (%)",
             width: 100,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.thue_suat}
-                    onChange={(e) => handleHdThueChange(row.id, "thue_suat", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                />
+                <div data-table-input={`thue_suat_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.thue_suat}
+                        onChange={(e) => handleHdThueChange(row.id, "thue_suat", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "thue_suat", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                    />
+                </div>
             ),
         },
         {
@@ -1454,14 +1752,17 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "Tiền thuế",
             width: 120,
             render: (val, row) => (
-                <Input
-                    type="number"
-                    value={row.t_thue}
-                    onChange={(e) => handleHdThueChange(row.id, "t_thue", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-right"
-                    readOnly
-                />
+                <div data-table-input={`t_thue_${row.id}`}>
+                    <Input
+                        type="number"
+                        value={row.t_thue}
+                        onChange={(e) => handleHdThueChange(row.id, "t_thue", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "t_thue", "hdThue")}
+                        placeholder="0"
+                        className="w-full text-right"
+                        readOnly
+                    />
+                </div>
             ),
         },
         {
@@ -1469,12 +1770,15 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
             title: "TK thuế",
             width: 120,
             render: (val, row) => (
-                <Input
-                    value={row.tk_thue_no}
-                    onChange={(e) => handleHdThueChange(row.id, "tk_thue_no", e.target.value)}
-                    placeholder="TK thuế..."
-                    className="w-full"
-                />
+                <div data-table-input={`tk_thue_no_${row.id}`}>
+                    <Input
+                        value={row.tk_thue_no}
+                        onChange={(e) => handleHdThueChange(row.id, "tk_thue_no", e.target.value)}
+                        onEnterPress={() => handleTableInputEnter(row.id, "tk_thue_no", "hdThue")}
+                        placeholder="TK thuế..."
+                        className="w-full"
+                    />
+                </div>
             ),
         },
         {
@@ -1547,22 +1851,26 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã khách <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maKhRef}
                                             value={formData.ma_kh}
                                             onChange={(e) => {
                                                 handleFormChange("ma_kh", e.target.value);
                                                 handleMainFormCustomerSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.tenKhRef}
                                             placeholder="KH005"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={1}
                                         />
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.tenKhRef}
                                             value={formData.ten_kh}
                                             onChange={(e) => handleFormChange("ten_kh", e.target.value)}
+                                            nextInputRef={inputRefs.current.diaChiRef}
                                             readOnly
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600 ml-4"
+                                            className="flex-1 h-9 text-sm ml-4 bg-gray-50"
+                                            tabIndex={2}
                                         />
                                     </div>
 
@@ -1570,22 +1878,26 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Địa chỉ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.diaChiRef}
                                             value={formData.dia_chi}
                                             onChange={(e) => handleFormChange("dia_chi", e.target.value)}
+                                            nextInputRef={inputRefs.current.maSoThueRef}
                                             placeholder="Nhập địa chỉ khách hàng"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={3}
                                         />
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[40px] ml-4">
                                             MST
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maSoThueRef}
                                             value={formData.ma_so_thue}
                                             onChange={(e) => handleFormChange("ma_so_thue", e.target.value)}
+                                            nextInputRef={inputRefs.current.ongBaRef}
                                             placeholder="Mã số thuế"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            className="w-32 h-9 text-sm bg-gray-50"
+                                            tabIndex={4}
                                         />
                                     </div>
 
@@ -1593,12 +1905,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người giao hàng
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.ongBaRef}
                                             value={formData.ong_ba}
                                             onChange={(e) => handleFormChange("ong_ba", e.target.value)}
+                                            nextInputRef={inputRefs.current.dienGiaiRef}
                                             placeholder="Tên người giao hàng"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={5}
                                         />
                                     </div>
 
@@ -1606,12 +1920,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.dienGiaiRef}
                                             value={formData.dien_giai}
                                             onChange={(e) => handleFormChange("dien_giai", e.target.value)}
+                                            nextInputRef={inputRefs.current.tkThueNoRef}
                                             placeholder="Nhập diễn giải"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={6}
                                         />
                                     </div>
 
@@ -1619,15 +1935,17 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             TK có
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.tkThueNoRef}
                                             value={formData.tk_thue_no}
                                             onChange={(e) => {
                                                 handleFormChange("tk_thue_no", e.target.value);
                                                 handleMainFormAccountSearch(e.target.value);
                                             }}
+                                            nextInputRef={inputRefs.current.soPnRef}
                                             placeholder="1111"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="w-32 h-9 text-sm"
+                                            tabIndex={7}
                                         />
                                     </div>
 
@@ -1635,24 +1953,29 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu nhập
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soPnRef}
                                             value={formData.so_pn}
                                             onChange={(e) => handleFormChange("so_pn", e.target.value)}
+                                            nextInputRef={inputRefs.current.ngayPnRef}
                                             placeholder="PN001"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            className="w-32 h-9 text-sm bg-gray-50"
                                             readOnly
+                                            tabIndex={8}
                                         />
 
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[100px] ml-4">
                                             Ngày phiếu nhập
                                         </Label>
-                                        <input
+                                        <Input
+                                            inputRef={inputRefs.current.ngayPnRef}
                                             type="date"
                                             value={formData.ngay_pn}
                                             onChange={(e) => handleFormChange("ngay_pn", e.target.value)}
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                            nextInputRef={inputRefs.current.maQsRef}
+                                            className="flex-1 h-9 text-sm bg-gray-50"
                                             readOnly
+                                            tabIndex={9}
                                         />
                                         <button
                                             type="button"
@@ -1703,12 +2026,18 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Quyển sổ
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.maQsRef}
                                             value={formData.ma_qs}
                                             onChange={(e) => handleFormChange("ma_qs", e.target.value)}
+                                            onEnterPress={() => {
+                                                if (inputRefs.current.soCtRef) {
+                                                    inputRefs.current.soCtRef.focus();
+                                                }
+                                            }}
                                             placeholder="PN001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={10}
                                         />
                                     </div>
 
@@ -1716,12 +2045,14 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số phiếu <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
+                                        <Input
+                                            inputRef={inputRefs.current.soCtRef}
                                             value={formData.so_ct}
                                             onChange={(e) => handleFormChange("so_ct", e.target.value)}
+                                            onEnterPress={handleLastInputEnter}
                                             placeholder="PN00010"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            className="flex-1 h-9 text-sm"
+                                            tabIndex={11}
                                         />
                                     </div>
 
@@ -1763,6 +2094,7 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                     {/* Tabs */}
                     <div className="px-6">
                         <Tabs
+                            activeTab={activeTab}
                             tabs={[
                                 {
                                     label: "1. Chi phí",
@@ -1774,14 +2106,20 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                                     {/* Tổng chi phí */}
                                                     <div className="flex flex-col gap-1">
                                                         <Label className="text-sm font-medium text-gray-700">Tổng chi phí</Label>
-                                                        <input
+                                                        <Input
+                                                            inputRef={inputRefs.current.tongChiPhiRef}
                                                             type="number"
                                                             value={chiPhiFormData.t_cp_nt}
                                                             onChange={(e) =>
                                                                 setChiPhiFormData((prev) => ({ ...prev, t_cp_nt: e.target.value }))
                                                             }
+                                                            onEnterPress={() => {
+                                                                if (inputRefs.current.firstChiPhiInputRef) {
+                                                                    inputRefs.current.firstChiPhiInputRef.focus();
+                                                                }
+                                                            }}
                                                             placeholder="0"
-                                                            className="h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right"
+                                                            className="h-9 text-sm text-right"
                                                         />
                                                     </div>
 
@@ -1845,15 +2183,16 @@ export const ModalEditChiPhiMuaHang = ({ isOpenEdit, closeModalEdit, editingId }
                                     ),
                                 },
                             ]}
-                            onAddRow={(activeTab) => {
-                                if (activeTab === 0) {
-                                    addChiPhiRow();
-                                } else if (activeTab === 1) {
-                                    addHdThueRow();
-                                }
-                            }}
-                            onChangeTab={(tabIndex) => {
-                            }}
+                                                                        onAddRow={(activeTab) => {
+                                                if (activeTab === 0) {
+                                                    addChiPhiRow();
+                                                } else if (activeTab === 1) {
+                                                    addHdThueRow();
+                                                }
+                                            }}
+                                            onChangeTab={(tabIndex) => {
+                                                setActiveTab(tabIndex);
+                                            }}
                         />
                     </div>
                 </div>
