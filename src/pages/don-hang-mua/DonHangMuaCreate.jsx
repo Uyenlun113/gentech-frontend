@@ -97,6 +97,9 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
         showMainAccountPopup: false, // THÊM MỚI cho popup tài khoản chính
     });
 
+    // State để track tab nào đang active
+    const [activeTab, setActiveTab] = useState(0);
+
     const INITIAL_HANG_HOA_DATA = [
         {
             id: 1,
@@ -744,6 +747,77 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
         ];
     }, [chiPhiData, chiPhiTotals]);
 
+    // Handle Enter key navigation for form inputs
+    const handleFormInputEnter = useCallback((currentField) => {
+        const formFieldOrder = ["ma_kh", "dia_chi", "ong_ba", "dien_giai", "ma_nx", "so_ct", "ma_hdm", "ma_hdm_me"];
+        const currentFieldIndex = formFieldOrder.indexOf(currentField);
+
+        if (currentFieldIndex < formFieldOrder.length - 1) {
+            // Move to next form field
+            const nextField = formFieldOrder[currentFieldIndex + 1];
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-form-input="${nextField}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 100);
+        } else {
+            // Last form field - move to table
+            setTimeout(() => {
+                if (activeTab === 0) {
+                    // Tab "Hàng hóa" - focus vào ma_vt của dòng đầu tiên
+                    const firstInput = document.querySelector('[data-table-input="ma_vt_1"] input');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                } else if (activeTab === 1) {
+                    // Tab "Chi phí" - focus vào input đầu tiên của tab chi phí
+                    const firstInput = document.querySelector('[data-table-input="cp_1"] input');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }
+            }, 100);
+        }
+    }, [activeTab]);
+
+    // Handle Enter key navigation for table inputs
+    const handleTableInputEnter = useCallback((currentField, rowId) => {
+        const fieldOrder = ["ma_vt", "ma_kho_i", "so_luong", "gia0", "ma_thue", "thue_suat"];
+        const currentFieldIndex = fieldOrder.indexOf(currentField);
+        const currentRowIndex = hangHoaData.findIndex(row => row.id === rowId);
+
+        if (currentFieldIndex < fieldOrder.length - 1) {
+            // Move to next field in same row
+            const nextField = fieldOrder[currentFieldIndex + 1];
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 100);
+        } else if (currentRowIndex < hangHoaData.length - 1) {
+            // Move to first field of next row
+            const nextRowId = hangHoaData[currentRowIndex + 1].id;
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="ma_vt_${nextRowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 100);
+        } else {
+            // Add new row and focus first field
+            addHangHoaRow();
+            setTimeout(() => {
+                const newRowId = hangHoaData.length + 1;
+                const firstInputNewRow = document.querySelector(`[data-table-input="ma_vt_${newRowId}"] input`);
+                if (firstInputNewRow) {
+                    firstInputNewRow.focus();
+                }
+            }, 200);
+        }
+    }, [hangHoaData, addHangHoaRow]);
+
     // Table columns for hang hoa
     const hangHoaColumns = [
         {
@@ -767,31 +841,34 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                     return <div className="font-bold text-gray-900"></div>;
                 }
                 return (
-                    <Input
-                        value={row.ma_vt}
-                        onChange={(e) => {
-                            handleHangHoaChange(row.id, "ma_vt", e.target.value);
-                        }}
-                        onFocus={(e) => {
-                            // Lưu giá trị gốc khi focus
-                            setOriginalMaVt(prev => ({
-                                ...prev,
-                                [row.id]: row.ma_vt
-                            }));
-                            // Chọn toàn bộ text để dễ thay thế
-                            e.target.select();
-                        }}
-                        onBlur={(e) => {
-                            // Nếu không có giá trị mới và không đang tìm kiếm
-                            if (!e.target.value.trim() && !searchStates.showDmvtPopup) {
-                                // Khôi phục giá trị gốc
-                                const original = originalMaVt[row.id] || "";
-                                handleHangHoaChange(row.id, "ma_vt", original);
-                            }
-                        }}
-                        placeholder="Nhập mã vt..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_vt_${row.id}`}>
+                        <Input
+                            value={row.ma_vt}
+                            onChange={(e) => {
+                                handleHangHoaChange(row.id, "ma_vt", e.target.value);
+                            }}
+                            onFocus={(e) => {
+                                // Lưu giá trị gốc khi focus
+                                setOriginalMaVt(prev => ({
+                                    ...prev,
+                                    [row.id]: row.ma_vt
+                                }));
+                                // Chọn toàn bộ text để dễ thay thế
+                                e.target.select();
+                            }}
+                            onBlur={(e) => {
+                                // Nếu không có giá trị mới và không đang tìm kiếm
+                                if (!e.target.value.trim() && !searchStates.showDmvtPopup) {
+                                    // Khôi phục giá trị gốc
+                                    const original = originalMaVt[row.id] || "";
+                                    handleHangHoaChange(row.id, "ma_vt", original);
+                                }
+                            }}
+                            onEnterPress={() => handleTableInputEnter("ma_vt", row.id)}
+                            placeholder="Nhập mã vt..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -823,12 +900,15 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_kho_i}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_kho_i", e.target.value)}
-                        placeholder="Mã kho"
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_kho_i_${row.id}`}>
+                        <Input
+                            value={row.ma_kho_i}
+                            onChange={(e) => handleHangHoaChange(row.id, "ma_kho_i", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter("ma_kho_i", row.id)}
+                            placeholder="Mã kho"
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -845,13 +925,16 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                     );
                 }
                 return (
-                    <Input
-                        type="number"
-                        value={row.so_luong}
-                        onChange={(e) => handleHangHoaChange(row.id, "so_luong", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`so_luong_${row.id}`}>
+                        <Input
+                            type="number"
+                            value={row.so_luong}
+                            onChange={(e) => handleHangHoaChange(row.id, "so_luong", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter("so_luong", row.id)}
+                            placeholder="0"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -863,12 +946,15 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.gia0}
-                        onChange={(e) => handleHangHoaChange(row.id, "gia0", e.target.value)}
-                        placeholder="Mã kho"
-                        className="w-full"
-                    />
+                    <div data-table-input={`gia0_${row.id}`}>
+                        <Input
+                            value={row.gia0}
+                            onChange={(e) => handleHangHoaChange(row.id, "gia0", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter("gia0", row.id)}
+                            placeholder="Đơn giá"
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -906,12 +992,15 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_thue}
-                        onChange={(e) => handleHangHoaChange(row.id, "ma_thue", e.target.value)}
-                        placeholder="Mã Thuế"
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_thue_${row.id}`}>
+                        <Input
+                            value={row.ma_thue}
+                            onChange={(e) => handleHangHoaChange(row.id, "ma_thue", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter("ma_thue", row.id)}
+                            placeholder="Mã Thuế"
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -922,12 +1011,15 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.thue_suat}
-                        onChange={(e) => handleHangHoaChange(row.id, "thue_suat", e.target.value)}
-                        placeholder="Thuế suất"
-                        className="w-full"
-                    />
+                    <div data-table-input={`thue_suat_${row.id}`}>
+                        <Input
+                            value={row.thue_suat}
+                            onChange={(e) => handleHangHoaChange(row.id, "thue_suat", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter("thue_suat", row.id)}
+                            placeholder="Thuế suất"
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -1251,7 +1343,7 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                                         <div className="flex items-center gap-2 grid-cols-12">
                                             <Label className="text-xs min-w-[110px] col-span-2">Mã khách</Label>
                                             <div className="col-span-6">
-                                                <div className="relative flex-1">
+                                                <div className="relative flex-1" data-form-input="ma_kh">
                                                     <Input
                                                         value={maKhSearch}
                                                         onChange={e => {
@@ -1264,6 +1356,7 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                                                                 setSearchStates(prev => ({ ...prev, showMainCustomerPopup: false }));
                                                             }
                                                         }}
+                                                        onEnterPress={() => handleFormInputEnter("ma_kh")}
                                                         placeholder="Nhập mã khách hàng..."
                                                         onFocus={() => {
                                                             if (maKhSearch.length > 0) {
@@ -1281,32 +1374,43 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                                         <div className="grid grid-cols-12 gap-2 items-center">
                                             {/* Label Địa chỉ */}
                                             <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
-                                            <div className="col-span-10">
+                                            <div className="col-span-10" data-form-input="dia_chi">
                                                 {/* Input Địa chỉ */}
-                                                <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
+                                                <Input 
+                                                    value={formData.dia_chi} 
+                                                    className="h-8 text-sm bg-white" 
+                                                    onChange={e => handleChange("dia_chi", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("dia_chi")}
+                                                />
                                             </div>
                                         </div>
 
                                         <div className="grid items-center gap-2 grid-cols-12">
                                             <Label className="text-xs min-w-[110px] col-span-2">Người giao hàng</Label>
-                                            <div className="col-span-10">
-                                                <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
+                                            <div className="col-span-10" data-form-input="ong_ba">
+                                                <Input 
+                                                    value={formData.ong_ba} 
+                                                    className="h-8 text-sm flex-1 col-span-6 bg-white" 
+                                                    onChange={e => handleChange("ong_ba", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("ong_ba")}
+                                                />
                                             </div>
                                         </div>
 
                                         <div className="grid items-center gap-2 grid-cols-12">
                                             <Label className="text-xs min-w-[110px] col-span-2">Lý do nhập</Label>
-                                            <div className="col-span-10">
+                                            <div className="col-span-10" data-form-input="dien_giai">
                                                 <Input
                                                     value={formData.dien_giai}
                                                     onChange={e => handleChange("dien_giai", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("dien_giai")}
                                                     className="h-8 text-sm flex-1 bg-white"
                                                 />
                                             </div>
                                         </div>
                                         <div className="grid items-center gap-2 grid-cols-12">
                                             <Label className="text-xs min-w-[110px] col-span-2">Mã nx (tk có)</Label>
-                                            <div className="col-span-6">
+                                            <div className="col-span-6" data-form-input="ma_nx">
                                                 <Input
                                                     value={formData.ma_nx}
                                                     onChange={e => {
@@ -1321,6 +1425,7 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                                                             setMaTaiKhoanSearch("");
                                                         }
                                                     }}
+                                                    onEnterPress={() => handleFormInputEnter("ma_nx")}
                                                     onFocus={() => {
                                                         // CHỈ hiển thị popup nếu có giá trị và user đang focus để tìm kiếm
                                                         if (formData.ma_nx && formData.ma_nx.length > 0) {
@@ -1372,10 +1477,11 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
 
                                         <div className="grid grid-cols-12 items-center gap-2">
                                             <Label className="text-xs col-span-6 text-left">Quyển số</Label>
-                                            <div className="col-span-5">
+                                            <div className="col-span-5" data-form-input="so_ct">
                                                 <Input
                                                     value={formData.so_ct}
                                                     onChange={e => handleChange("so_ct", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("so_ct")}
                                                     className="h-8 text-sm bg-white"
                                                 />
                                             </div>
@@ -1384,10 +1490,11 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
 
                                         <div className="grid grid-cols-12 items-center gap-2">
                                             <Label className="text-xs col-span-6 text-left">Số đơn hàng</Label>
-                                            <div className="col-span-5">
+                                            <div className="col-span-5" data-form-input="ma_hdm">
                                                 <Input
                                                     value={formData.ma_hdm}
                                                     onChange={e => handleChange("ma_hdm", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("ma_hdm")}
                                                     className="h-8 text-sm bg-white"
                                                 />
                                             </div>
@@ -1396,10 +1503,11 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
 
                                         <div className="grid grid-cols-12 items-center gap-2">
                                             <Label className="text-xs col-span-6 text-left">Số đơn hàng mẹ</Label>
-                                            <div className="col-span-5">
+                                            <div className="col-span-5" data-form-input="ma_hdm_me">
                                                 <Input
                                                     value={formData.ma_hdm_me}
                                                     onChange={e => handleChange("ma_hdm_me", e.target.value)}
+                                                    onEnterPress={() => handleFormInputEnter("ma_hdm_me")}
                                                     className="h-8 text-sm bg-white"
                                                 />
                                             </div>
@@ -1449,6 +1557,8 @@ export const ModalCreateDonHangMua = ({ isOpenCreate, closeModalCreate }) => {
                     {/* Hang Hoa section */}
                     <div className="flex justify-between shadow-lg border-0 px-6">
                         <Tabs
+                            defaultTab={activeTab}
+                            onChangeTab={setActiveTab}
                             tabs={[
                                 {
                                     label: "Hàng hóa",
