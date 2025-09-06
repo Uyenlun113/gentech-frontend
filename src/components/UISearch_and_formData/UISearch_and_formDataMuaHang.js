@@ -87,7 +87,7 @@ export const FILTER_CONFIGS = {
     ]
   },
   bang_ke_hoa_don_mua_hang_va_dich_vu: {
-    title: 'Bảng kê phiếu nhập',
+    title: 'Bảng kê hóa đơn mua hàng và dịch vụ',
     defaultFormData: {
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
@@ -111,19 +111,6 @@ export const FILTER_CONFIGS = {
           valueKey: "ma_khach", displayKey: "ten_khach", popupTitle: "Chọn khách hàng", emptyMessage: "Không tìm thấy khách hàng",
           searchConfig: { searchType: "customer", fields: ["ma_khach", "ten_khach"] }
         },
-        {
-          key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư...",
-          valueKey: "ma_vat_tu", displayKey: "ten_vat_tu", popupTitle: "Chọn vật tư", emptyMessage: "Không tìm thấy vật tư",
-          searchConfig: { searchType: "material", fields: ["ma_vat_tu", "ten_vat_tu"] }
-        },
-        {
-          key: "loai_phieu_nhap", label: "Loại phiếu nhập", type: "select",
-          options: [
-            { value: "Tất cả", label: "Tất cả" },
-            { value: "Phiếu nhập", label: "Phiếu nhập" },
-            { value: "Phiếu xuất", label: "Phiếu xuất" }
-          ]
-        }
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled", placeholder: "Nhập mã đơn vị..." },
@@ -146,14 +133,8 @@ export const FILTER_CONFIGS = {
     },
     advancedFields: [
       { id: 'ma_dang_nx', name: 'Mã dạng nx', checked: true, operator: 'like' },
-      { id: 'tk_vat_tu_dmvt', name: 'Tk vật tư (dmvt)', checked: true, operator: 'like' },
-      { id: 'tk_vat_tu_khi_ht', name: 'Tk vật tư (khi ht)', checked: true, operator: 'like' },
-      { id: 'ma_kho', name: 'Mã kho', checked: true, operator: 'like' },
-      { id: 'ma_phan_xuong', name: 'Mã phân xưởng', checked: true, operator: 'like' },
       { id: 'ma_du_an', name: 'Mã dự án', checked: true, operator: 'like' },
-      { id: 'nhom_vat_tu_1', name: 'Nhóm vật tư 1', checked: true, operator: 'like' },
-      { id: 'nhom_vat_tu_2', name: 'Nhóm vật tư 2', checked: true, operator: 'like' },
-      { id: 'nhom_vat_tu_3', name: 'Nhóm vật tư 3', checked: true, operator: 'like' }
+      { id: 'ma_ct', name: 'Mã chứng từ', checked: true, operator: 'like' },
     ],
     submitFields: [
       'ngay_ct1', 'ngay_ct2', 'ma_dvcs', 'chung_tu_tu_so', 'den_so',
@@ -165,7 +146,7 @@ export const FILTER_CONFIGS = {
     ]
   },
   bang_ke_phieu_xuat_tra_lai_nha_cung_cap: {
-    title: 'Bảng kê phiếu nhập',
+    title: 'Bảng kê phiếu xuất trả lại nhà cung cấp',
     defaultFormData: {
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
@@ -190,18 +171,10 @@ export const FILTER_CONFIGS = {
           searchConfig: { searchType: "customer", fields: ["ma_khach", "ten_khach"] }
         },
         {
-          key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư...",
-          valueKey: "ma_vat_tu", displayKey: "ten_vat_tu", popupTitle: "Chọn vật tư", emptyMessage: "Không tìm thấy vật tư",
-          searchConfig: { searchType: "material", fields: ["ma_vat_tu", "ten_vat_tu"] }
+          key: "ma_kho", label: "Mã kho", type: "lookup", placeholder: "Nhập mã kho...",
+          valueKey: "ma_kho", displayKey: "ten_kho", popupTitle: "Chọn kho", emptyMessage: "Không tìm thấy kho",
+          searchConfig: { searchType: "warehouse", fields: ["ma_kho", "ten_kho"] }
         },
-        {
-          key: "loai_phieu_nhap", label: "Loại phiếu nhập", type: "select",
-          options: [
-            { value: "Tất cả", label: "Tất cả" },
-            { value: "Phiếu nhập", label: "Phiếu nhập" },
-            { value: "Phiếu xuất", label: "Phiếu xuất" }
-          ]
-        }
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled", placeholder: "Nhập mã đơn vị..." },
@@ -243,7 +216,7 @@ export const FILTER_CONFIGS = {
     ]
   },
   bang_ke_phieu_nhap_cua_mot_mat_hang: {
-    title: 'Bảng kê phiếu nhập',
+    title: 'Bảng kê phiếu nhập của một mặt hàng',
     defaultFormData: {
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
@@ -263,11 +236,6 @@ export const FILTER_CONFIGS = {
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text", placeholder: "Nhập số chứng từ..." },
         { key: "den_so", label: "Đến số", type: "text", placeholder: "Nhập đến số..." },
         {
-          key: "ma_khach", label: "Mã khách", type: "lookup", placeholder: "Nhập mã kh...",
-          valueKey: "ma_khach", displayKey: "ten_khach", popupTitle: "Chọn khách hàng", emptyMessage: "Không tìm thấy khách hàng",
-          searchConfig: { searchType: "customer", fields: ["ma_khach", "ten_khach"] }
-        },
-        {
           key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư...",
           valueKey: "ma_vat_tu", displayKey: "ten_vat_tu", popupTitle: "Chọn vật tư", emptyMessage: "Không tìm thấy vật tư",
           searchConfig: { searchType: "material", fields: ["ma_vat_tu", "ten_vat_tu"] }
@@ -279,7 +247,12 @@ export const FILTER_CONFIGS = {
             { value: "Phiếu nhập", label: "Phiếu nhập" },
             { value: "Phiếu xuất", label: "Phiếu xuất" }
           ]
-        }
+        },
+        {
+          key: "ma_kho", label: "Mã kho", type: "lookup", placeholder: "Nhập mã kho...",
+          valueKey: "ma_kho", displayKey: "ten_kho", popupTitle: "Chọn kho", emptyMessage: "Không tìm thấy kho",
+          searchConfig: { searchType: "warehouse", fields: ["ma_kho", "ten_kho"] }
+        },
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled", placeholder: "Nhập mã đơn vị..." },
@@ -321,7 +294,7 @@ export const FILTER_CONFIGS = {
     ]
   },
   bang_ke_phieu_nhap_cua_mot_mat_hang_nhom_theo_nha_cung_cap: {
-    title: 'Bảng kê phiếu nhập',
+    title: 'Bảng kê phiếu nhập của một mặt hàng nhóm theo nhà cung cấp',
     defaultFormData: {
       ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
@@ -341,11 +314,6 @@ export const FILTER_CONFIGS = {
         { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text", placeholder: "Nhập số chứng từ..." },
         { key: "den_so", label: "Đến số", type: "text", placeholder: "Nhập đến số..." },
         {
-          key: "ma_khach", label: "Mã khách", type: "lookup", placeholder: "Nhập mã kh...",
-          valueKey: "ma_khach", displayKey: "ten_khach", popupTitle: "Chọn khách hàng", emptyMessage: "Không tìm thấy khách hàng",
-          searchConfig: { searchType: "customer", fields: ["ma_khach", "ten_khach"] }
-        },
-        {
           key: "ma_vat_tu", label: "Mã vật tư", type: "lookup", placeholder: "Nhập mã vật tư...",
           valueKey: "ma_vat_tu", displayKey: "ten_vat_tu", popupTitle: "Chọn vật tư", emptyMessage: "Không tìm thấy vật tư",
           searchConfig: { searchType: "material", fields: ["ma_vat_tu", "ten_vat_tu"] }
@@ -357,7 +325,12 @@ export const FILTER_CONFIGS = {
             { value: "Phiếu nhập", label: "Phiếu nhập" },
             { value: "Phiếu xuất", label: "Phiếu xuất" }
           ]
-        }
+        },
+        {
+          key: "ma_kho", label: "Mã kho", type: "lookup", placeholder: "Nhập mã kho...",
+          valueKey: "ma_kho", displayKey: "ten_kho", popupTitle: "Chọn kho", emptyMessage: "Không tìm thấy kho",
+          searchConfig: { searchType: "warehouse", fields: ["ma_kho", "ten_kho"] }
+        },
       ],
       rightBox1Keys: [
         { key: "ma_dvcs", label: "Mã ĐVCS", type: "text_disabled", placeholder: "Nhập mã đơn vị..." },
