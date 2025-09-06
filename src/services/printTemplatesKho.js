@@ -766,21 +766,21 @@ export const printTemplatesKho = {
     `,
 
     tong_hop_hang_nhap_kho: (data, filterInfo, totals) => `
-<div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
-    <!-- Header -->
-   <div style="font-size: 10px; text-align: left;">
-            Công ty Cổ phần Công nghệ Gentech<br/>
-            Tầng 02 CT3 Nghĩa Đô, Cổ Nhuế, TP Hà Nội
+    <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
+        <!-- Header -->
+    <div style="font-size: 10px; text-align: left;">
+                Công ty Cổ phần Công nghệ Gentech<br/>
+                Tầng 02 CT3 Nghĩa Đô, Cổ Nhuế, TP Hà Nội
+            </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0; text-transform: uppercase;">
+                TỔNG HỢP HÀNG NHẬP KHO
+            </h2>
+            <div style="font-size: 12px; margin-bottom: 10px;">
+                TỪ NGÀY: ${formatDate(filterInfo?.ngay_ct1)} ĐẾN NGÀY: ${formatDate(filterInfo?.ngay_ct2)}
+            </div>
         </div>
-    
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0; text-transform: uppercase;">
-            TỔNG HỢP HÀNG NHẬP KHO
-        </h2>
-        <div style="font-size: 12px; margin-bottom: 10px;">
-            TỪ NGÀY: ${formatDate(filterInfo?.ngay_ct1)} ĐẾN NGÀY: ${formatDate(filterInfo?.ngay_ct2)}
-        </div>
-    </div>
     
     <!-- Main Table -->
     <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">

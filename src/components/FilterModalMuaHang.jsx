@@ -1,6 +1,6 @@
 import { Filter, Loader, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { getFilterConfig, validateSubmitData } from "./UISearch_and_formData/UISearch_and_formData"
+import { getFilterConfig, validateSubmitData } from "./UISearch_and_formData/UISearch_and_formDataMuaHang"
 import CustomerSelectionPopup from "../components/general/CustomerSelectionPopup";
 import WarehouseSelectionPopup from "../components/general/dmkPopup";
 import MaterialSelectionPopup from "../components/general/dmvtPopup";
@@ -8,6 +8,10 @@ import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
 import { useDmvt } from "../hooks/useDmvt";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import DatePicker from "react-datepicker";
+import { registerLocale } from "react-datepicker";
+import vi from "date-fns/locale/vi";
+registerLocale("vi", vi);
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -25,7 +29,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-export default function FilterModalKho({
+export default function FilterModalMuaHang({
   isOpen,
   onClose,
   onSubmit,
@@ -598,35 +602,35 @@ export default function FilterModalKho({
             />
           );
 
-        case 'date':
-          const formatDateForInput = (dateStr) => {
-            if (!dateStr) return "";
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-              return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-            return dateStr;
+        case "date":
+          const parseDate = (dateStr) => {
+            if (!dateStr) return null;
+            const [day, month, year] = dateStr.split("-");
+            return new Date(`${year}-${month}-${day}`);
           };
 
-          const formatDateForState = (dateStr) => {
-            if (!dateStr) return "";
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-              return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-            return dateStr;
+          const formatDateForState = (date) => {
+            if (!date) return "";
+            const dd = String(date.getDate()).padStart(2, "0");
+            const mm = String(date.getMonth() + 1).padStart(2, "0");
+            const yyyy = date.getFullYear();
+            return `${dd}-${mm}-${yyyy}`; // state lưu DD-MM-YYYY
           };
 
           return (
-            <input
-              type="date"
-              value={formatDateForInput(value)}
-              onChange={(e) => {
-                const formatted = formatDateForState(e.target.value);
+            <DatePicker
+              locale="vi"
+              selected={parseDate(value)}
+              onChange={(date) => {
+                const formatted = formatDateForState(date);
                 handleInputChange(field.key, formatted);
               }}
+              dateFormat="dd-MM-yyyy"
               className={inputClasses}
               disabled={isSubmitting}
+              placeholderText="Chọn ngày"
+              onKeyDown={(e) => e.preventDefault()}
+              onPaste={(e) => e.preventDefault()}
             />
           );
 

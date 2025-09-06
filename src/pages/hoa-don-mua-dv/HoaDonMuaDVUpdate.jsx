@@ -35,6 +35,19 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
     ty_gia: "1",
   });
 
+  // Refs cho các input fields theo thứ tự tab
+  const inputRefs = useRef({
+    maKhRef: useRef(null),
+    diaChiRef: useRef(null),
+    mstRef: useRef(null),
+    ongBaRef: useRef(null),
+    dienGiaiRef: useRef(null),
+    maTaiKhoanRef: useRef(null),
+    maQsRef: useRef(null),
+    soCtRef: useRef(null),
+    tyGiaRef: useRef(null),
+  });
+
   // State cho customer search
   const [maKhSearch, setMaKhSearch] = useState("");
 
@@ -61,6 +74,9 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
     showMainCustomerPopup: false,
     showCustomerPopup: false, // Thêm cho customer popup trong bảng
   });
+
+  // State để track tab nào đang active
+  const [activeTab, setActiveTab] = useState(0);
 
   const INITIAL_ACCOUNTING_DATA = [
     {
@@ -245,6 +261,117 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
     return () => clearTimeout(delayDebounce);
   }, [maTaiKhoanSearch]);
 
+  // Thêm các function cần thiết cho Enter navigation
+  const handleLastInputEnter = useCallback(() => {
+    // Chuyển focus sang tab đầu tiên (Hạch toán)
+    setTimeout(() => {
+      const firstTableInput = document.querySelector('[data-table-input="tk_vt_1"] input');
+      if (firstTableInput) {
+        firstTableInput.focus();
+      }
+    }, 100);
+  }, []);
+
+  const handleTableInputEnter = useCallback((rowId, field, tableType = "hachToan") => {
+    if (tableType === "hachToan") {
+      const fieldOrder = ["tk_vt", "tien", "dien_giaii"];
+      const currentFieldIndex = fieldOrder.indexOf(field);
+      const currentRowIndex = hachToanData.findIndex(row => row.id === rowId);
+
+      if (currentFieldIndex < fieldOrder.length - 1) {
+        // Chuyển sang field tiếp theo trong cùng dòng
+        const nextField = fieldOrder[currentFieldIndex + 1];
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }, 50);
+      } else if (currentRowIndex < hachToanData.length - 1) {
+        // Chuyển sang dòng tiếp theo, field đầu tiên
+        const nextRowId = hachToanData[currentRowIndex + 1].id;
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-table-input="tk_vt_${nextRowId}"] input`);
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }, 50);
+      } else {
+        // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+        addHachToanRow();
+        setTimeout(() => {
+          const newRowId = hachToanData.length + 1;
+          const firstInputNewRow = document.querySelector(`[data-table-input="tk_vt_${newRowId}"] input`);
+          if (firstInputNewRow) {
+            firstInputNewRow.focus();
+          }
+        }, 150);
+      }
+    } else if (tableType === "hopDongThue") {
+      const fieldOrder = ["ma_ms", "so_ct0", "kh_mau_hd", "so_seri0", "ma_kh", "dia_chi", "ma_so_thue", "ten_vt", "tien_nt", "ma_thue", "thue_suat", "t_thue"];
+      const currentFieldIndex = fieldOrder.indexOf(field);
+      const currentRowIndex = hopDongThueData.findIndex(row => row.id === rowId);
+
+      if (currentFieldIndex < fieldOrder.length - 1) {
+        // Chuyển sang field tiếp theo trong cùng dòng
+        const nextField = fieldOrder[currentFieldIndex + 1];
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }, 50);
+      } else if (currentRowIndex < hopDongThueData.length - 1) {
+        // Chuyển sang dòng tiếp theo, field đầu tiên
+        const nextRowId = hopDongThueData[currentRowIndex + 1].id;
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-table-input="ma_ms_${nextRowId}"] input`);
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }, 50);
+      } else {
+        // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+        addHopDongThueRow();
+        setTimeout(() => {
+          const newRowId = hopDongThueData.length + 1;
+          const firstInputNewRow = document.querySelector(`[data-table-input="ma_ms_${newRowId}"] input`);
+          if (firstInputNewRow) {
+            firstInputNewRow.focus();
+          }
+        }, 150);
+      }
+    }
+  }, [hachToanData, hopDongThueData]);
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
+    // Trigger customer search when ma_kh changes
+    if (field === 'ma_kh') {
+      setMaKhSearch(value);
+    }
+
+    // Trigger account search when ma_nx changes
+    if (field === 'ma_nx') {
+      setMaTaiKhoanSearch(value);
+    }
+
+    // Auto update exchange rate when currency changes
+    if (field === 'ma_nt') {
+      const exchangeRate = value === 'USD' ? 25000 : 1;
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        ty_gia: exchangeRate
+      }));
+    }
+  };
+
+
   // Thêm handleHopDongThueChange
   const handleHopDongThueChange = useCallback((id, field, value) => {
     setHopDongThueData(prev =>
@@ -284,98 +411,6 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
     }
   }, []);
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
-    // Trigger customer search when ma_kh changes
-    if (field === 'ma_kh') {
-      setMaKhSearch(value);
-    }
-
-    // Trigger account search when tk changes
-    if (field === 'ma_nx') {
-      setMaTaiKhoanSearch(value);
-    }
-
-    // Auto update exchange rate when currency changes
-    if (field === 'ma_nt') {
-      const exchangeRate = value === 'USD' ? 25000 : 1;
-      setFormData(prev => ({
-        ...prev,
-        [field]: value,
-        ty_gia: exchangeRate
-      }));
-    }
-  };
-
-  const validateForm = useCallback(() => {
-    if (!formData.ngay_ct) {
-      console.error("Vui lòng nhập ngày hạch toán");
-      return false;
-    }
-    if (!formData.ngay_lct) {
-      console.error("Vui lòng nhập ngày lập chứng từ");
-      return false;
-    }
-    if (!formData.so_ct) {
-      console.error("Vui lòng nhập số chứng từ");
-      return false;
-    }
-    if (!selectedHoaDonMuaDV) {
-      console.error("Không có dữ liệu phiếu thu để cập nhật");
-      return false;
-    }
-
-    const validAccountingRows = hachToanData.filter(row =>
-      row.tk_vt && (parseFloat(row.tien) > 0)
-    );
-    if (validAccountingRows.length === 0) {
-      console.error("Vui lòng nhập ít nhất một dòng hạch toán hợp lệ");
-      return false;
-    }
-
-    return true;
-  }, [formData, hachToanData, selectedHoaDonMuaDV]);
-
-  // Handle customer selection
-  const handleMainCustomerSelect = (customer) => {
-    if (!customer) {
-      console.error('Customer object is null or undefined');
-      return;
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      mst: customer.ma_so_thue || "",
-      ma_kh: customer.ma_kh.trim() || "",
-      ong_ba: customer.ten_kh.trim() || "",
-      dia_chi: customer.dia_chi || ""
-    }));
-
-    setMaKhSearch(customer.ma_kh || "");
-
-    setSearchStates(prev => ({
-      ...prev,
-      showMainCustomerPopup: false
-    }));
-  };
-
-  // Handle account selection
-  const handleMainAccountSelect = (account) => {
-    setFormData(prev => ({
-      ...prev,
-      ma_nx: account.ma_nx.trim()
-    }));
-    setSelectedAccount(account);
-    setMaTaiKhoanSearch(account.ma_nx.trim());
-    setSearchStates(prev => ({
-      ...prev,
-      showMainAccountPopup: false
-    }));
-  };
 
   // Handle account selection for table - CẬP NHẬT để hỗ trợ cả hachToan và hopDongThue
   const handleAccountSelect = useCallback((id, account) => {
@@ -516,6 +551,31 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
     }, 100);
   }, []);
 
+  const validateForm = useCallback(() => {
+    if (!formData.ngay_ct) {
+      console.error("Vui lòng nhập ngày hạch toán");
+      return false;
+    }
+    if (!formData.ngay_lct) {
+      console.error("Vui lòng nhập ngày lập chứng từ");
+      return false;
+    }
+    if (!formData.so_ct) {
+      console.error("Vui lòng nhập số chứng từ");
+      return false;
+    }
+
+    const validAccountingRows = hachToanData.filter(row =>
+      row.tk_vt && (parseFloat(row.tien) > 0)
+    );
+    if (validAccountingRows.length === 0) {
+      console.error("Vui lòng nhập ít nhất một dòng hạch toán hợp lệ");
+      return false;
+    }
+
+    return true;
+  }, [formData, hachToanData]);
+
   // Thêm addHopDongThueRow
   const addHopDongThueRow = useCallback(() => {
     setHopDongThueData(prev => [
@@ -594,12 +654,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
           return <div className="font-bold text-gray-900"></div>;
         }
         return (
-          <Input
-            value={row.tk_vt}
-            onChange={(e) => handleHachToanChange(row.id, "tk_vt", e.target.value)}
-            placeholder="Nhập mã TK..."
-            className="w-full"
-          />
+          <div data-table-input={`tk_vt_${row.id}`}>
+            <Input
+              value={row.tk_vt}
+              onChange={(e) => handleHachToanChange(row.id, "tk_vt", e.target.value)}
+              placeholder="Nhập mã TK..."
+              className="w-full"
+              onEnterPress={() => handleTableInputEnter(row.id, "tk_vt", "hachToan")}
+            />
+          </div>
         );
       },
     },
@@ -613,18 +676,20 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
         </div>
       )
     },
-
     {
       key: "tien",
       title: "Tiền hàng",
       width: 120,
       render: (val, row) => (
-        <Input
-          value={row.tien}
-          onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
+        <div data-table-input={`tien_${row.id}`}>
+          <Input
+            value={row.tien}
+            onChange={(e) => handleHachToanChange(row.id, "tien", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            onEnterPress={() => handleTableInputEnter(row.id, "tien", "hachToan")}
+          />
+        </div>
       ),
     },
     {
@@ -634,13 +699,16 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       render: (val, row) => {
         if (row.id === 'total') return <div></div>;
         return (
-          <Input
-            value={row.dien_giaii}
-            onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
-            placeholder="Nhập diễn giải..."
-            className="w-full"
-            title="Mỗi dòng có thể có diễn giải riêng"
-          />
+          <div data-table-input={`dien_giaii_${row.id}`}>
+            <Input
+              value={row.dien_giaii}
+              onChange={(e) => handleHachToanChange(row.id, "dien_giaii", e.target.value)}
+              placeholder="Nhập diễn giải..."
+              className="w-full"
+              title="Mỗi dòng có thể có diễn giải riêng"
+              onEnterPress={() => handleTableInputEnter(row.id, "dien_giaii", "hachToan")}
+            />
+          </div>
         );
       },
     },
@@ -690,12 +758,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       fixed: "left",
       width: 80,
       render: (val, row) => (
-        <Input
-          value={row.ma_ms}
-          onChange={(e) => handleHopDongThueChange(row.id, "ma_ms", e.target.value)}
-          placeholder="Nhập nhóm..."
-          className="w-full"
-        />
+        <div data-table-input={`ma_ms_${row.id}`}>
+          <Input
+            value={row.ma_ms}
+            onChange={(e) => handleHopDongThueChange(row.id, "ma_ms", e.target.value)}
+            placeholder="Nhập nhóm..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "ma_ms", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -704,12 +775,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       width: 150,
       fixed: "left",
       render: (val, row) => (
-        <Input
-          value={row.so_ct0}
-          onChange={(e) => handleHopDongThueChange(row.id, "so_ct0", e.target.value)}
-          placeholder="Nhập số hóa đơn..."
-          className="w-full"
-        />
+        <div data-table-input={`so_ct0_${row.id}`}>
+          <Input
+            value={row.so_ct0}
+            onChange={(e) => handleHopDongThueChange(row.id, "so_ct0", e.target.value)}
+            placeholder="Nhập số hóa đơn..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "so_ct0", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -717,12 +791,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Mẫu hóa đơn",
       width: 150,
       render: (val, row) => (
-        <Input
-          value={row.kh_mau_hd}
-          onChange={(e) => handleHopDongThueChange(row.id, "kh_mau_hd", e.target.value)}
-          placeholder="Nhập mẫu hóa đơn..."
-          className="w-full"
-        />
+        <div data-table-input={`kh_mau_hd_${row.id}`}>
+          <Input
+            value={row.kh_mau_hd}
+            onChange={(e) => handleHopDongThueChange(row.id, "kh_mau_hd", e.target.value)}
+            placeholder="Nhập mẫu hóa đơn..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "kh_mau_hd", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -730,12 +807,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Số seri",
       width: 150,
       render: (val, row) => (
-        <Input
-          value={row.so_seri0}
-          onChange={(e) => handleHopDongThueChange(row.id, "so_seri0", e.target.value)}
-          placeholder="Nhập số seri..."
-          className="w-full"
-        />
+        <div data-table-input={`so_seri0_${row.id}`}>
+          <Input
+            value={row.so_seri0}
+            onChange={(e) => handleHopDongThueChange(row.id, "so_seri0", e.target.value)}
+            placeholder="Nhập số seri..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "so_seri0", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -764,12 +844,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Mã khách hàng",
       width: 150,
       render: (val, row) => (
-        <Input
-          value={row.ma_kh}
-          onChange={(e) => handleHopDongThueChange(row.id, "ma_kh", e.target.value)}
-          placeholder="Nhập mã KH..."
-          className="w-full"
-        />
+        <div data-table-input={`ma_kh_${row.id}`}>
+          <Input
+            value={row.ma_kh}
+            onChange={(e) => handleHopDongThueChange(row.id, "ma_kh", e.target.value)}
+            placeholder="Nhập mã KH..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "ma_kh", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -791,12 +874,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Địa chỉ",
       width: 200,
       render: (val, row) => (
-        <Input
-          value={row.dia_chi}
-          onChange={(e) => handleHopDongThueChange(row.id, "dia_chi", e.target.value)}
-          placeholder="Nhập địa chỉ..."
-          className="w-full"
-        />
+        <div data-table-input={`dia_chi_${row.id}`}>
+          <Input
+            value={row.dia_chi}
+            onChange={(e) => handleHopDongThueChange(row.id, "dia_chi", e.target.value)}
+            placeholder="Nhập địa chỉ..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "dia_chi", "hopDongThue")}
+          />
+        </div>
       )
     },
     {
@@ -804,12 +890,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Mã số thuế",
       width: 150,
       render: (val, row) => (
-        <Input
-          value={row.ma_so_thue}
-          onChange={(e) => handleHopDongThueChange(row.id, "ma_so_thue", e.target.value)}
-          placeholder="Nhập mã số thuế..."
-          className="w-full"
-        />
+        <div data-table-input={`ma_so_thue_${row.id}`}>
+          <Input
+            value={row.ma_so_thue}
+            onChange={(e) => handleHopDongThueChange(row.id, "ma_so_thue", e.target.value)}
+            placeholder="Nhập mã số thuế..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "ma_so_thue", "hopDongThue")}
+          />
+        </div>
       )
     },
     {
@@ -817,12 +906,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Hàng hóa, dịch vụ",
       width: 200,
       render: (val, row) => (
-        <Input
-          value={row.ten_vt}
-          onChange={(e) => handleHopDongThueChange(row.id, "ten_vt", e.target.value)}
-          placeholder="Nhập hàng hóa, dịch vụ..."
-          className="w-full"
-        />
+        <div data-table-input={`ten_vt_${row.id}`}>
+          <Input
+            value={row.ten_vt}
+            onChange={(e) => handleHopDongThueChange(row.id, "ten_vt", e.target.value)}
+            placeholder="Nhập hàng hóa, dịch vụ..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "ten_vt", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -830,13 +922,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Tiền hàng",
       width: 120,
       render: (val, row) => (
-        <Input
-          type="text"
-          value={row.t_tien}
-          onChange={(e) => handleHopDongThueChange(row.id, "t_tien", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
+        <div data-table-input={`tien_nt_${row.id}`}>
+          <Input
+            value={row.tien_nt}
+            onChange={(e) => handleHopDongThueChange(row.id, "tien_nt", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            onEnterPress={() => handleTableInputEnter(row.id, "tien_nt", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -844,26 +938,31 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Mã thuế",
       width: 100,
       render: (val, row) => (
-        <Input
-          value={row.ma_thue}
-          onChange={(e) => handleHopDongThueChange(row.id, "ma_thue", e.target.value)}
-          placeholder="Nhập mã thuế..."
-          className="w-full"
-        />
+        <div data-table-input={`ma_thue_${row.id}`}>
+          <Input
+            value={row.ma_thue}
+            onChange={(e) => handleHopDongThueChange(row.id, "ma_thue", e.target.value)}
+            placeholder="Nhập mã thuế..."
+            className="w-full"
+            onEnterPress={() => handleTableInputEnter(row.id, "ma_thue", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
       key: "thue_suat",
       title: "Thuế suất (%)",
-      width: 80,
+      width: 120,
       render: (val, row) => (
-        <Input
-          type="text"
-          value={row.thue_suat}
-          onChange={(e) => handleHopDongThueChange(row.id, "thue_suat", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
+        <div data-table-input={`thue_suat_${row.id}`}>
+          <Input
+            value={row.thue_suat}
+            onChange={(e) => handleHopDongThueChange(row.id, "thue_suat", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            onEnterPress={() => handleTableInputEnter(row.id, "thue_suat", "hopDongThue")}
+          />
+        </div>
       ),
     },
     {
@@ -871,13 +970,15 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
       title: "Tiền thuế",
       width: 120,
       render: (val, row) => (
-        <Input
-          type="text"
-          value={row.t_thue}
-          onChange={(e) => handleHopDongThueChange(row.id, "t_thue", e.target.value)}
-          placeholder="0"
-          className="w-full text-right"
-        />
+        <div data-table-input={`t_thue_${row.id}`}>
+          <Input
+            value={row.t_thue}
+            onChange={(e) => handleHopDongThueChange(row.id, "t_thue", e.target.value)}
+            placeholder="0"
+            className="w-full text-right"
+            onEnterPress={() => handleTableInputEnter(row.id, "t_thue", "hopDongThue")}
+          />
+        </div>
       ),
     },
     // {
@@ -904,6 +1005,8 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
           onChange={(e) => handleHopDongThueChange(row.id, "tk_thue_no", e.target.value)}
           placeholder="Nhập TK thuế..."
           className="w-full"
+          onEnterPress={() => handleTableInputEnter(row.id, "tk_thue_no", "hopDongThue")}
+          data-table-input={`tk_thue_no_${row.id}`}
         />
       ),
     },
@@ -1105,12 +1208,12 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
               <div className="dark:border-gray-600 rounded-lg flex flex-col lg:col-span-3">
                 <div className="p-3 flex-1 overflow-y-auto">
                   <div className="space-y-2">
-
                     <div className="flex items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Mã khách</Label>
                       <div className="col-span-6">
                         <div className="relative flex-1">
                           <Input
+                            inputRef={inputRefs.current.maKhRef}
                             value={maKhSearch}
                             onChange={e => {
                               const value = e.target.value;
@@ -1129,6 +1232,7 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                               }
                             }}
                             className="h-8 text-sm w-full bg-white"
+                            nextInputRef={inputRefs.current.diaChiRef}
                           />
                         </div>
                       </div>
@@ -1141,19 +1245,19 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       <Label className="text-xs col-span-1 flex items-center col-span-2">Địa chỉ</Label>
                       <div className="col-span-6">
                         {/* Input Địa chỉ */}
-                        <Input value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} />
+                        <Input inputRef={inputRefs.current.diaChiRef} value={formData.dia_chi} className="h-8 text-sm bg-white" onChange={e => handleChange("dia_chi", e.target.value)} nextInputRef={inputRefs.current.mstRef} />
                       </div>
                       <Label className="text-xs col-span-1 flex items-center justify-end col-span-1">MST</Label>
                       <div className="col-span-3">
                         {/* Input MST */}
-                        <Input value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} />
+                        <Input inputRef={inputRefs.current.mstRef} value={formData.mst} className="h-8 text-sm bg-white" onChange={e => handleChange("mst", e.target.value)} nextInputRef={inputRefs.current.ongBaRef} />
                       </div>
                     </div>
 
                     <div className="grid items-center gap-2 grid-cols-12">
                       <Label className="text-xs min-w-[110px] col-span-2">Người nộp tiền</Label>
                       <div className="col-span-6">
-                        <Input value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} />
+                        <Input inputRef={inputRefs.current.ongBaRef} value={formData.ong_ba} className="h-8 text-sm flex-1 col-span-6 bg-white" onChange={e => handleChange("ong_ba", e.target.value)} nextInputRef={inputRefs.current.dienGiaiRef} />
                       </div>
                       <div className="col-span-3"></div>
                     </div>
@@ -1162,9 +1266,11 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       <Label className="text-xs min-w-[110px] col-span-2">Lý do nộp</Label>
                       <div className="col-span-10">
                         <Input
+                          inputRef={inputRefs.current.dienGiaiRef}
                           value={formData.dien_giai}
                           onChange={e => handleChange("dien_giai", e.target.value)}
                           className="h-8 text-sm flex-1 bg-white"
+                          nextInputRef={inputRefs.current.maTaiKhoanRef}
                         />
                       </div>
                     </div>
@@ -1173,6 +1279,7 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       <Label className="text-xs col-span-2">Tk có</Label>
                       <div className="relative col-span-6">
                         <Input
+                          inputRef={inputRefs.current.maTaiKhoanRef}
                           value={maTaiKhoanSearch}
                           onChange={e => {
                             const value = e.target.value;
@@ -1191,6 +1298,7 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                             }
                           }}
                           className="h-8 text-sm w-full bg-white"
+                          nextInputRef={inputRefs.current.maQsRef}
                         />
                       </div>
                       <div className="col-span-3 flex items-center justify-center">
@@ -1248,9 +1356,11 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       <Label className="text-xs col-span-6 text-left">Quyển số</Label>
                       <div className="col-span-5">
                         <Input
+                          inputRef={inputRefs.current.maQsRef}
                           value={formData.ma_qs}
                           onChange={e => handleChange("ma_qs", e.target.value)}
                           className="h-8 text-sm bg-white"
+                          nextInputRef={inputRefs.current.soCtRef}
                         />
                       </div>
                       <div className="col-span-1"></div>
@@ -1260,9 +1370,25 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       <Label className="text-xs col-span-6 text-left">Số phiếu thu</Label>
                       <div className="col-span-5">
                         <Input
+                          inputRef={inputRefs.current.soCtRef}
                           value={formData.so_ct}
                           onChange={e => handleChange("so_ct", e.target.value)}
                           className="h-8 text-sm bg-white"
+                          onEnterPress={() => {
+                            setTimeout(() => {
+                              let firstTableInput;
+                              if (activeTab === 0) {
+                                // Tab Hạch toán - focus vào Tài khoản
+                                firstTableInput = document.querySelector('[data-table-input="tk_vt_1"] input');
+                              } else if (activeTab === 1) {
+                                // Tab Hợp đồng thuế - focus vào Nhóm
+                                firstTableInput = document.querySelector('[data-table-input="ma_ms_1"] input');
+                              }
+                              if (firstTableInput) {
+                                firstTableInput.focus();
+                              }
+                            }, 100);
+                          }}
                         />
                       </div>
                       <div className="col-span-1"></div>
@@ -1282,6 +1408,7 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
                       </div>
                       <div className="col-span-5">
                         <Input
+                          inputRef={inputRefs.current.tyGiaRef}
                           value={formData.ty_gia}
                           onChange={e => handleChange("ty_gia", e.target.value)}
                           disabled
@@ -1311,6 +1438,8 @@ export const ModalEditHoaDonMuaDV = ({ isOpenEdit, closeModalEdit, selectedHoaDo
           {/* Accounting section */}
           <div className="flex justify-between shadow-lg border-0 px-6">
             <Tabs
+              defaultTab={activeTab}
+              onChangeTab={setActiveTab}
               tabs={[
                 {
                   label: "Hạch toán",
