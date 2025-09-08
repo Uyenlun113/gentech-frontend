@@ -287,12 +287,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             console.error('ID received:', id);
             return;
         }
+        
+        let nextField = "";
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("maKho", kho.ma_kho?.toString().trim() || "");
             handleFormChange("tenKho", kho.ten_kho?.toString().trim() || "");
+            nextField = "maKhon";
         } else if (searchStates.searchContext === "mainFormReceive") {
             handleFormChange("maKhon", kho.ma_kho?.toString().trim() || "");
             handleFormChange("tenKhon", kho.ten_kho?.toString().trim() || "");
+            nextField = "ongBa";
         }
 
         setSearchStates(prev => ({
@@ -301,6 +305,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             khoSearch: "",
             searchContext: null
         }));
+
+        // Auto focus next field after popup selection
+        setTimeout(() => {
+            const nextInput = document.querySelector(`[data-form-field="${nextField}"] input`);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }, 100);
     }, [searchStates.searchContext, handleFormChange]);
 
     const handleDmvtSelect = useCallback((dmvt) => {
@@ -335,6 +347,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
 
         setDmvtSearchTerm("");
         setDmvtData({ data: [] });
+
+        // Auto focus next field after popup selection
+        setTimeout(() => {
+            const nextInput = document.querySelector(`[data-table-input="so_luong_${searchStates.maVtSearchRowId}"] input`);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }, 100);
     }, [searchStates.maVtSearchRowId]);
 
     const handleDmkhoSelect = useCallback((kho) => {
@@ -404,6 +424,82 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
     const deleteCt85Row = useCallback((id) => {
         setCt85Data(prev => prev.filter(item => item.id !== id));
     }, []);
+
+    // Handlers for Enter key navigation  
+    const handleFormFieldEnter = useCallback((currentField) => {
+        // Định nghĩa thứ tự các field trong form
+        const fieldOrder = [
+            "maKho", "maKhon", "ongBa", "dienGiai", "hd_lenhdd",
+            "maQs", "soCt"
+        ];
+        
+        const currentIndex = fieldOrder.indexOf(currentField);
+        
+        if (currentField === "soCt") {
+            // Từ số chứng từ chuyển thẳng sang bảng hạch toán
+            setTimeout(() => {
+                const firstTableInput = document.querySelector('[data-table-input="ma_vt_1"] input');
+                if (firstTableInput) {
+                    firstTableInput.focus();
+                }
+            }, 100);
+        } else if (currentIndex < fieldOrder.length - 1) {
+            // Chuyển sang field tiếp theo trong form
+            const nextField = fieldOrder[currentIndex + 1];
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-form-field="${nextField}"] input, [data-form-field="${nextField}"] .flatpickr-input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 50);
+        } else {
+            // Các field khác (ngayLct, ngayCtPhieu, tyGia, trangThai) cũng chuyển sang bảng
+            setTimeout(() => {
+                const firstTableInput = document.querySelector('[data-table-input="ma_vt_1"] input');
+                if (firstTableInput) {
+                    firstTableInput.focus();
+                }
+            }, 100);
+        }
+    }, []);
+
+    const handleTableInputEnter = useCallback((rowId, field) => {
+        // Tìm input tiếp theo trong bảng
+        const currentRowIndex = ct85Data.findIndex(row => row.id === rowId);
+        // Danh sách các field theo thứ tự (chỉ các field có thể nhập)
+        const fieldOrder = ["ma_vt", "so_luong", "gia_nt", "ma_nx_i"];
+        const currentFieldIndex = fieldOrder.indexOf(field);
+        
+        if (currentFieldIndex < fieldOrder.length - 1) {
+            // Chuyển sang field tiếp theo trong cùng dòng
+            const nextField = fieldOrder[currentFieldIndex + 1];
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="${nextField}_${rowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 50);
+        } else if (currentRowIndex < ct85Data.length - 1) {
+            // Chuyển sang dòng tiếp theo, field đầu tiên
+            const nextRowId = ct85Data[currentRowIndex + 1].id;
+            setTimeout(() => {
+                const nextInput = document.querySelector(`[data-table-input="ma_vt_${nextRowId}"] input`);
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }, 50);
+        } else {
+            // Đây là input cuối cùng của bảng, tự động thêm dòng mới
+            addCt85Row();
+            setTimeout(() => {
+                const newRowId = Math.max(...ct85Data.map(item => item.id), 0) + 1;
+                const firstInputNewRow = document.querySelector(`[data-table-input="ma_vt_${newRowId}"] input`);
+                if (firstInputNewRow) {
+                    firstInputNewRow.focus();
+                }
+            }, 150);
+        }
+    }, [ct85Data, addCt85Row]);
 
     const resetForm = useCallback(() => {
         setFormData({
@@ -540,12 +636,15 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_vt || ""}
-                        onChange={(e) => handleCt85Change(row.id, "ma_vt", e.target.value)}
-                        placeholder="Nhập mã VT..."
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_vt_${row.id}`}>
+                        <Input
+                            value={row.ma_vt || ""}
+                            onChange={(e) => handleCt85Change(row.id, "ma_vt", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "ma_vt")}
+                            placeholder="Nhập mã VT..."
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -592,13 +691,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                     );
                 }
                 return (
-                    <Input
-                        type="number"
-                        value={row.so_luong || ""} // FIX: Dùng so_luong
-                        onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`so_luong_${row.id}`}>
+                        <Input
+                            type="number"
+                            value={row.so_luong || ""} // FIX: Dùng so_luong
+                            onChange={(e) => handleCt85Change(row.id, "so_luong", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "so_luong")}
+                            placeholder="0"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -609,13 +711,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        type="number"
-                        value={row.gia_nt || ''}
-                        onChange={(e) => handleCt85Change(row.id, "gia_nt", e.target.value)}
-                        placeholder="0"
-                        className="w-full text-right"
-                    />
+                    <div data-table-input={`gia_nt_${row.id}`}>
+                        <Input
+                            type="number"
+                            value={row.gia_nt || ''}
+                            onChange={(e) => handleCt85Change(row.id, "gia_nt", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "gia_nt")}
+                            placeholder="0"
+                            className="w-full text-right"
+                        />
+                    </div>
                 );
             },
         },
@@ -646,12 +751,15 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             render: (val, row) => {
                 if (row.id === 'total') return <div></div>;
                 return (
-                    <Input
-                        value={row.ma_nx_i || ''}
-                        onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
-                        placeholder="TK nợ"
-                        className="w-full"
-                    />
+                    <div data-table-input={`ma_nx_i_${row.id}`}>
+                        <Input
+                            value={row.ma_nx_i || ''}
+                            onChange={(e) => handleCt85Change(row.id, "ma_nx_i", e.target.value)}
+                            onEnterPress={() => handleTableInputEnter(row.id, "ma_nx_i")}
+                            placeholder="TK nợ"
+                            className="w-full"
+                        />
+                    </div>
                 );
             },
         },
@@ -713,7 +821,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            +<h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 dark:bg-green-900 rounded-lg">
                                     <Plus className="w-6 h-6 text-green-600 dark:text-green-400" />
                                 </div>
@@ -744,16 +852,19 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Xuất <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.maKho}
-                                            onChange={(e) => {
-                                                handleFormChange("maKho", e.target.value);
-                                                handleMainFormKhoSearch(e.target.value);
-                                            }}
-                                            placeholder="KHO01"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="maKho">
+                                            <Input
+                                                type="text"
+                                                value={formData.maKho}
+                                                onChange={(e) => {
+                                                    handleFormChange("maKho", e.target.value);
+                                                    handleMainFormKhoSearch(e.target.value);
+                                                }}
+                                                onEnterPress={() => handleFormFieldEnter("maKho")}
+                                                placeholder="KHO01"
+                                                className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                         <span className="text-gray-600 text-sm">{formData.tenKho}</span>
                                     </div>
 
@@ -762,16 +873,19 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Nhận <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.maKhon}
-                                            onChange={(e) => {
-                                                handleFormChange("maKhon", e.target.value);
-                                                handleMainFormKhoNhanSearch(e.target.value);
-                                            }}
-                                            placeholder="KHO02"
-                                            className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="maKhon">
+                                            <Input
+                                                type="text"
+                                                value={formData.maKhon}
+                                                onChange={(e) => {
+                                                    handleFormChange("maKhon", e.target.value);
+                                                    handleMainFormKhoNhanSearch(e.target.value);
+                                                }}
+                                                onEnterPress={() => handleFormFieldEnter("maKhon")}
+                                                placeholder="KHO02"
+                                                className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                         <span className="text-gray-600 text-sm">{formData.tenKhon}</span>
                                     </div>
 
@@ -779,39 +893,48 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận hàng
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.ongBa}
-                                            onChange={(e) => handleFormChange("ongBa", e.target.value)}
-                                            placeholder="Nguyễn Văn A"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="ongBa">
+                                            <Input
+                                                type="text"
+                                                value={formData.ongBa}
+                                                onChange={(e) => handleFormChange("ongBa", e.target.value)}
+                                                onEnterPress={() => handleFormFieldEnter("ongBa")}
+                                                placeholder="Nguyễn Văn A"
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.dienGiai}
-                                            onChange={(e) => handleFormChange("dienGiai", e.target.value)}
-                                            placeholder="Nhập diễn giải..."
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="dienGiai">
+                                            <Input
+                                                type="text"
+                                                value={formData.dienGiai}
+                                                onChange={(e) => handleFormChange("dienGiai", e.target.value)}
+                                                onEnterPress={() => handleFormFieldEnter("dienGiai")}
+                                                placeholder="Nhập diễn giải..."
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số hợp đồng
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.hd_lenhdd}
-                                            onChange={(e) => handleFormChange("hd_lenhdd", e.target.value)}
-                                            placeholder="HD-001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="hd_lenhdd">
+                                            <Input
+                                                type="text"
+                                                value={formData.hd_lenhdd}
+                                                onChange={(e) => handleFormChange("hd_lenhdd", e.target.value)}
+                                                onEnterPress={() => handleFormFieldEnter("hd_lenhdd")}
+                                                placeholder="HD-001"
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
@@ -821,52 +944,80 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã quyển sổ <span className="text-red-500">*</span>
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.maQs}
-                                            onChange={(e) => handleFormChange("maQs", e.target.value)}
-                                            placeholder="XDC001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="maQs">
+                                            <Input
+                                                type="text"
+                                                value={formData.maQs}
+                                                onChange={(e) => handleFormChange("maQs", e.target.value)}
+                                                onEnterPress={() => handleFormFieldEnter("maQs")}
+                                                placeholder="XDC001"
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số chứng từ
                                         </Label>
-                                        <input
-                                            type="text"
-                                            value={formData.soCt}
-                                            onChange={(e) => handleFormChange("soCt", e.target.value)}
-                                            placeholder="001"
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="soCt">
+                                            <Input
+                                                type="text"
+                                                value={formData.soCt}
+                                                onChange={(e) => handleFormChange("soCt", e.target.value)}
+                                                onEnterPress={() => handleFormFieldEnter("soCt")}
+                                                placeholder="001"
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày lập CT <span className="text-red-500">*</span>
                                         </Label>
-                                        <Flatpickr
-                                            value={formData.ngayLct}
-                                            onChange={(date) => handleDateChange(date, "ngayLct")}
-                                            options={FLATPICKR_OPTIONS}
-                                            placeholder="Chọn ngày..."
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="ngayLct">
+                                            <Flatpickr
+                                                value={formData.ngayLct}
+                                                onChange={(date) => handleDateChange(date, "ngayLct")}
+                                                options={{
+                                                    ...FLATPICKR_OPTIONS,
+                                                    onKeyDown: [
+                                                        (_, __, ___, e) => {
+                                                            if (e.key === 'Enter') {
+                                                                handleFormFieldEnter("ngayLct");
+                                                            }
+                                                        }
+                                                    ]
+                                                }}
+                                                placeholder="Chọn ngày..."
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày chứng từ
                                         </Label>
-                                        <Flatpickr
-                                            value={formData.ngayCtPhieu}
-                                            onChange={(date) => handleDateChange(date, "ngayCtPhieu")}
-                                            options={FLATPICKR_OPTIONS}
-                                            placeholder="Chọn ngày..."
-                                            className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        />
+                                        <div data-form-field="ngayCtPhieu">
+                                            <Flatpickr
+                                                value={formData.ngayCtPhieu}
+                                                onChange={(date) => handleDateChange(date, "ngayCtPhieu")}
+                                                options={{
+                                                    ...FLATPICKR_OPTIONS,
+                                                    onKeyDown: [
+                                                        (_, __, ___, e) => {
+                                                            if (e.key === 'Enter') {
+                                                                handleFormFieldEnter("ngayCtPhieu");
+                                                            }
+                                                        }
+                                                    ]
+                                                }}
+                                                placeholder="Chọn ngày..."
+                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3 items-center">
@@ -877,13 +1028,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             <span className="px-3 py-2 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                                                 VND
                                             </span>
-                                            <input
-                                                type="number"
-                                                value={formData.tyGia}
-                                                onChange={(e) => handleFormChange("tyGia", e.target.value)}
-                                                placeholder="1.00"
-                                                className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
-                                            />
+                                            <div data-form-field="tyGia">
+                                                <Input
+                                                    type="number"
+                                                    value={formData.tyGia}
+                                                    onChange={(e) => handleFormChange("tyGia", e.target.value)}
+                                                    onEnterPress={() => handleFormFieldEnter("tyGia")}
+                                                    placeholder="1.00"
+                                                    className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -891,11 +1045,16 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Trạng thái
                                         </Label>
-                                        <div className="flex-1">
+                                        <div className="flex-1" data-form-field="trangThai">
                                             <Select
                                                 defaultValue={formData.trangThai}
                                                 options={STATUS_OPTIONS}
                                                 onChange={(value) => handleFormChange("trangThai", value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleFormFieldEnter("trangThai");
+                                                    }
+                                                }}
                                                 className="w-full h-9 text-sm bg-white"
                                             />
                                         </div>
