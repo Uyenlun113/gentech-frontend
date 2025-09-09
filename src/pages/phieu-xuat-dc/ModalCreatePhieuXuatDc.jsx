@@ -287,7 +287,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             console.error('ID received:', id);
             return;
         }
-        
+
         let nextField = "";
         if (searchStates.searchContext === "mainForm") {
             handleFormChange("maKho", kho.ma_kho?.toString().trim() || "");
@@ -432,9 +432,9 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
             "maKho", "maKhon", "ongBa", "dienGiai", "hd_lenhdd",
             "maQs", "soCt"
         ];
-        
+
         const currentIndex = fieldOrder.indexOf(currentField);
-        
+
         if (currentField === "soCt") {
             // Từ số chứng từ chuyển thẳng sang bảng hạch toán
             setTimeout(() => {
@@ -469,7 +469,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
         // Danh sách các field theo thứ tự (chỉ các field có thể nhập)
         const fieldOrder = ["ma_vt", "so_luong", "gia_nt", "ma_nx_i"];
         const currentFieldIndex = fieldOrder.indexOf(field);
-        
+
         if (currentFieldIndex < fieldOrder.length - 1) {
             // Chuyển sang field tiếp theo trong cùng dòng
             const nextField = fieldOrder[currentFieldIndex + 1];
@@ -821,7 +821,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                 <div className="flex-shrink-0 p-2 px-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
                     <div className="flex items-center justify-between">
                         <div>
-                            +<h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <h4 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 dark:bg-green-900 rounded-lg">
                                     <Plus className="w-6 h-6 text-green-600 dark:text-green-400" />
                                 </div>
@@ -852,7 +852,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Xuất <span className="text-red-500">*</span>
                                         </Label>
-                                        <div data-form-field="maKho">
+                                        <div data-form-field="maKho" >
                                             <Input
                                                 type="text"
                                                 value={formData.maKho}
@@ -873,7 +873,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã kho Nhận <span className="text-red-500">*</span>
                                         </Label>
-                                        <div data-form-field="maKhon">
+                                        <div data-form-field="maKhon" >
                                             <Input
                                                 type="text"
                                                 value={formData.maKhon}
@@ -883,7 +883,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                                 }}
                                                 onEnterPress={() => handleFormFieldEnter("maKhon")}
                                                 placeholder="KHO02"
-                                                className="w-32 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                         <span className="text-gray-600 text-sm">{formData.tenKhon}</span>
@@ -893,14 +893,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Người nhận hàng
                                         </Label>
-                                        <div data-form-field="ongBa">
+                                        <div data-form-field="ongBa" className="flex-1">
                                             <Input
                                                 type="text"
                                                 value={formData.ongBa}
                                                 onChange={(e) => handleFormChange("ongBa", e.target.value)}
                                                 onEnterPress={() => handleFormFieldEnter("ongBa")}
                                                 placeholder="Nguyễn Văn A"
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -909,14 +909,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Diễn giải
                                         </Label>
-                                        <div data-form-field="dienGiai">
+                                        <div data-form-field="dienGiai" className="flex-1">
                                             <Input
                                                 type="text"
                                                 value={formData.dienGiai}
                                                 onChange={(e) => handleFormChange("dienGiai", e.target.value)}
                                                 onEnterPress={() => handleFormFieldEnter("dienGiai")}
                                                 placeholder="Nhập diễn giải..."
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -925,14 +925,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số hợp đồng
                                         </Label>
-                                        <div data-form-field="hd_lenhdd">
+                                        <div data-form-field="hd_lenhdd" className="flex-1">
                                             <Input
                                                 type="text"
                                                 value={formData.hd_lenhdd}
                                                 onChange={(e) => handleFormChange("hd_lenhdd", e.target.value)}
                                                 onEnterPress={() => handleFormFieldEnter("hd_lenhdd")}
                                                 placeholder="HD-001"
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -944,14 +944,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Mã quyển sổ <span className="text-red-500">*</span>
                                         </Label>
-                                        <div data-form-field="maQs">
+                                        <div data-form-field="maQs" className="flex-1">
                                             <Input
                                                 type="text"
                                                 value={formData.maQs}
                                                 onChange={(e) => handleFormChange("maQs", e.target.value)}
                                                 onEnterPress={() => handleFormFieldEnter("maQs")}
                                                 placeholder="XDC001"
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -960,14 +960,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Số chứng từ
                                         </Label>
-                                        <div data-form-field="soCt">
+                                        <div data-form-field="soCt" className="flex-1">
                                             <Input
                                                 type="text"
                                                 value={formData.soCt}
                                                 onChange={(e) => handleFormChange("soCt", e.target.value)}
                                                 onEnterPress={() => handleFormFieldEnter("soCt")}
                                                 placeholder="001"
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -976,7 +976,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày lập CT <span className="text-red-500">*</span>
                                         </Label>
-                                        <div data-form-field="ngayLct">
+                                        <div data-form-field="ngayLct" className="flex-1">
                                             <Flatpickr
                                                 value={formData.ngayLct}
                                                 onChange={(date) => handleDateChange(date, "ngayLct")}
@@ -991,7 +991,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                                     ]
                                                 }}
                                                 placeholder="Chọn ngày..."
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -1000,7 +1000,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                         <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">
                                             Ngày chứng từ
                                         </Label>
-                                        <div data-form-field="ngayCtPhieu">
+                                        <div data-form-field="ngayCtPhieu" className="flex-1">
                                             <Flatpickr
                                                 value={formData.ngayCtPhieu}
                                                 onChange={(date) => handleDateChange(date, "ngayCtPhieu")}
@@ -1015,7 +1015,7 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                                     ]
                                                 }}
                                                 placeholder="Chọn ngày..."
-                                                className="flex-1 h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                                className="w-full h-9 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -1028,14 +1028,14 @@ export const ModalCreatePhieuXuatDc = ({ isOpenCreate, closeModalCreate }) => {
                                             <span className="px-3 py-2 bg-gray-50 text-gray-700 font-medium border-r border-gray-300 text-sm">
                                                 VND
                                             </span>
-                                            <div data-form-field="tyGia">
+                                            <div data-form-field="tyGia" className="flex-1">
                                                 <Input
                                                     type="number"
                                                     value={formData.tyGia}
                                                     onChange={(e) => handleFormChange("tyGia", e.target.value)}
                                                     onEnterPress={() => handleFormFieldEnter("tyGia")}
                                                     placeholder="1.00"
-                                                    className="flex-1 px-3 py-2 text-sm focus:outline-none h-9 border-none"
+                                                    className="w-full px-3 py-2 text-sm focus:outline-none h-9 border-none"
                                                 />
                                             </div>
                                         </div>

@@ -39,7 +39,7 @@ export default function CashCapitalPage() {
             'inventory-detail': {
                 tk: '',
                 ngay_ct1: '2025-01-01',
-                ngay_ct2: '',
+                ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
                 store: 'GLSO1D',
                 gop_tk: '0',
@@ -47,7 +47,7 @@ export default function CashCapitalPage() {
             'import-export-summary': {
                 tk: '',
                 ngay_ct1: '2025-01-01',
-                ngay_ct2: '',
+                ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY',
                 store: 'GLSO1',
                 gop_tk: '0',
@@ -70,7 +70,6 @@ export default function CashCapitalPage() {
                 ngay_ct2: '2025-08-31',
                 ma_dvcs: 'CTY'
             },
-            // Default values cho management tab
             'cost-analysis': {
                 tk: '6211',
                 ngay_ct1: '2025-07-01',
@@ -185,7 +184,7 @@ export default function CashCapitalPage() {
                 // reportType: selectedMenuItem?.id,
                 // reportName: selectedMenuItem?.label
             };
-            let paramSearch = new URLSearchParams(requestData).toString();
+            const paramSearch = new URLSearchParams(requestData).toString();
             // Gọi API để lấy dữ liệu báo cáo
             const materialData = await vonBangTienService.getData(paramSearch);
 
@@ -308,11 +307,10 @@ export default function CashCapitalPage() {
                     {currentMenuItems.map((item) => (
                         <div
                             key={item.id}
-                            className={`flex items-center p-1 text-sm rounded-md transition-colors ${
-                                item.isCanUse === false 
-                                    ? 'text-gray-400 cursor-not-allowed' 
-                                    : 'text-gray-700 hover:bg-gray-50 cursor-pointer'
-                            }`}
+                            className={`flex items-center p-1 text-sm rounded-md transition-colors ${item.isCanUse === false
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-gray-700 hover:bg-gray-50 cursor-pointer'
+                                }`}
                             onClick={() => item.isCanUse !== false && handleMenuItemClick(item)}
                         >
                             <ChevronRight className={`w-4 h-4 mr-2 ${item.isCanUse === false ? 'text-gray-300' : 'text-gray-400'}`} />
