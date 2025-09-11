@@ -33,6 +33,16 @@ const PrintWrapper = forwardRef(({
                 return printBcDonBanHang.invoiceBySales;
             case 'import-export-detail':
                 return printBcDonBanHang.invoiceByCustomerProductGroup;
+            case 'customer-summary':
+                return printBcDonBanHang.invoiceByCustomerSummary;
+            case 'cost-analysis':
+                return printBcDonBanHang.costAnalysisReport;
+            case 'performance-report':
+                return printBcDonBanHang.performanceReport;
+            case 'turnover-analysis':
+                return printBcDonBanHang.turnoverAnalysisReport;
+            case 'abc-analysis':
+                return printBcDonBanHang.abcAnalysisReport;
 
             default:
                 return printTemplates.default;
@@ -54,6 +64,16 @@ const PrintWrapper = forwardRef(({
         htmlContent = selectedTemplate(data2, filterInfo, totals);
     } else if (reportType?.toLowerCase() === 'import-export-detail') {
         htmlContent = selectedTemplate(data2, filterInfo, totals);
+    } else if (reportType?.toLowerCase() === 'customer-summary') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'cost-analysis') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'performance-report') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'turnover-analysis') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
+    } else if (reportType?.toLowerCase() === 'abc-analysis') {
+        htmlContent = selectedTemplate(data1, data2, filterInfo);
     } else {
         htmlContent = selectedTemplate(dataTable, filterInfo, totals);
     }
