@@ -1,11 +1,13 @@
 import { CarFront, ChevronRight, FileText, FileType, Users } from 'lucide-react';
 import { useState } from 'react';
 import FilterModalMuaHang from '../../components/FilterModalMuaHang';
+import usePostBCMuaHang from "../../hooks/useBCMuaHang";
 export default function Sales() {
   const [activeTab, setActiveTab] = useState('reportIn');
   const [openModalId, setOpenModalId] = useState(null);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const getBCMuaHangMutation = usePostBCMuaHang();
 
   const managementMenuItems = [
     { id: 'cost-analysis', label: 'Phân tích chi phí vật tư', isCanUse: false },
@@ -91,7 +93,7 @@ export default function Sales() {
       const requestData = {
         ...formData,
       };
-      const responseData = await getBCKhoMutation.mutateAsync(requestData);
+      const responseData = await getBCMuaHangMutation.mutateAsync(requestData);
       // Đóng modal
       setOpenModalId(null);
       setSelectedMenuItem(null);
