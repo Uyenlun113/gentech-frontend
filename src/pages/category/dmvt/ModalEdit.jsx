@@ -80,11 +80,11 @@ export const ModalEditMaterial = ({ isOpenEdit, closeModalEdit, onSaveEdit, sele
         }
     }, [selectedMaterial, isOpenEdit, accountsData]);
 
-    const accountOptions = accountsData?.data?.map(account => ({
+    const accountOptions = (accountsData?.data || []).map(account => ({
         value: account.tk0,
         displayKey: account.ten_tk,
         valueKey: account.tk0,
-    })) || [];
+    }));
 
     const materialGroupOptions = materialGroupsData?.data || [];
 

@@ -34,11 +34,13 @@ const AccountSelectionPopup = ({
     if (isOpen) {
       setSearchTerm(searchValue);
       setSelectedAccountIndex(0);
-      // Focus search input when popup opens
+      // Focus search input when popup opens but don't select all text
       setTimeout(() => {
         if (searchInputRef.current) {
           searchInputRef.current.focus();
-          searchInputRef.current.select();
+          // Move cursor to end instead of selecting all
+          const length = searchInputRef.current.value.length;
+          searchInputRef.current.setSelectionRange(length, length);
         }
       }, 100);
     }
@@ -113,11 +115,25 @@ const AccountSelectionPopup = ({
           // Allow tab to work normally for accessibility
           break;
         default:
-          // Focus search input for typing
-          if (event.target !== searchInputRef.current && !event.ctrlKey && !event.altKey) {
-            if (searchInputRef.current) {
-              searchInputRef.current.focus();
-            }
+          // Don't interfere with typing in the search input
+          if (event.target === searchInputRef.current) {
+            return; // Let the input handle its own events
+          }
+          
+          // Only auto-focus search input for alphanumeric characters when not already focused
+          if (!event.ctrlKey && !event.altKey && !event.metaKey &&
+              event.key.length === 1 && 
+              /^[a-zA-Z0-9]$/.test(event.key) && 
+              searchInputRef.current &&
+              document.activeElement !== searchInputRef.current) {
+            searchInputRef.current.focus();
+            // Move cursor to end to prevent text selection
+            setTimeout(() => {
+              if (searchInputRef.current) {
+                const length = searchInputRef.current.value.length;
+                searchInputRef.current.setSelectionRange(length, length);
+              }
+            }, 0);
           }
           break;
       }
