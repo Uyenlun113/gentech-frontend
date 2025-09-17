@@ -1,12 +1,15 @@
 import { Filter, Loader, Search, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { getFilterConfig, validateSubmitData } from "./UISearch_and_formData/UISearch_and_formDataMuaHang"
 import CustomerSelectionPopup from "../components/general/CustomerSelectionPopup";
 import WarehouseSelectionPopup from "../components/general/dmkPopup";
 import MaterialSelectionPopup from "../components/general/dmvtPopup";
+import AccountSelectionPopup from "../components/general/AccountSelectionPopup";
 import { useCustomers } from "../hooks/useCustomer";
 import { useDmkho } from "../hooks/useDmkho";
+import { useListDonBanHang } from "../hooks/useDonBanHang";
 import { useDmvt } from "../hooks/useDmvt";
+import { useAccounts } from "../hooks/useAccounts";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import DatePicker from "react-datepicker";
 import { registerLocale } from "react-datepicker";
@@ -37,6 +40,9 @@ export default function FilterModalMuaHang({
   configName,
   title = "Bộ lọc dữ liệu"
 }) {
+  // Ref to track component mounting state
+  const isMountedRef = useRef(true);
+
   // State cho cấu hình từ getFilterConfig
   const [filterConfig, setFilterConfig] = useState(null);
   const [filterData, setFilterData] = useState({});
@@ -48,6 +54,7 @@ export default function FilterModalMuaHang({
     ma_kho_xuat: "",
     ma_kho_nhap: "",
     ma_vat_tu: "",
+    ma_tai_khoan: "",
   });
 
   const [popupSearchStates, setPopupSearchStates] = useState({
@@ -56,6 +63,7 @@ export default function FilterModalMuaHang({
     ma_kho_xuat: "",
     ma_kho_nhap: "",
     ma_vat_tu: "",
+    ma_tai_khoan: "",
   });
 
   const [popupStates, setPopupStates] = useState({
@@ -64,6 +72,7 @@ export default function FilterModalMuaHang({
     showKhoXuatPopup: false,
     showKhoNhapPopup: false,
     showVatTuPopup: false,
+    showAccountPopup: false,
   });
 
   const [focusStates, setFocusStates] = useState({});
@@ -91,12 +100,14 @@ export default function FilterModalMuaHang({
   const debouncedKhoXuatSearch = useDebounce(searchStates.ma_kho_xuat || "", 300);
   const debouncedKhoNhapSearch = useDebounce(searchStates.ma_kho_nhap || "", 300);
   const debouncedVatTuSearch = useDebounce(searchStates.ma_vat_tu || "", 300);
+  const debouncedAccountSearch = useDebounce(searchStates.ma_tai_khoan || "", 300);
 
   const debouncedPopupMaKhSearch = useDebounce(popupSearchStates.ma_khach || "", 300);
   const debouncedPopupKhoSearch = useDebounce(popupSearchStates.ma_kho || "", 300);
   const debouncedPopupKhoXuatSearch = useDebounce(popupSearchStates.ma_kho_xuat || "", 300);
   const debouncedPopupKhoNhapSearch = useDebounce(popupSearchStates.ma_kho_nhap || "", 300);
   const debouncedPopupVatTuSearch = useDebounce(popupSearchStates.ma_vat_tu || "", 300);
+  const debouncedPopupAccountSearch = useDebounce(popupSearchStates.ma_tai_khoan || "", 300);
 
   const { data: customerData = [], isLoading: isLoadingCustomers } = useCustomers(
     { search: debouncedMaKhSearch || debouncedPopupMaKhSearch || "" },
@@ -135,6 +146,14 @@ export default function FilterModalMuaHang({
     {
       enabled: !!(debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch) &&
         (debouncedKhoNhapSearch || debouncedPopupKhoNhapSearch).length > 0
+    }
+  );
+
+  const { data: accountData = [], isLoading: isLoadingAccounts } = useAccounts(
+    { search: debouncedAccountSearch || debouncedPopupAccountSearch || "" },
+    {
+      enabled: !!(debouncedAccountSearch || debouncedPopupAccountSearch) &&
+        (debouncedAccountSearch || debouncedPopupAccountSearch).length > 0
     }
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -223,6 +242,20 @@ export default function FilterModalMuaHang({
     }
   }, [debouncedVatTuSearch, vatTuData]);
 
+  useEffect(() => {
+    // API call cho tài khoản
+    if (debouncedAccountSearch && debouncedAccountSearch.length > 0) {
+      setLoadingStates(prev => ({ ...prev, ma_tai_khoan: true }));
+      setSearchResults(prev => ({
+        ...prev,
+        ma_tai_khoan: Array.isArray(accountData?.data) ? accountData.data : []
+      }));
+      setLoadingStates(prev => ({ ...prev, ma_tai_khoan: false }));
+    } else {
+      setSearchResults(prev => ({ ...prev, ma_tai_khoan: [] }));
+    }
+  }, [debouncedAccountSearch, accountData]);
+
   // Reset form khi modal đóng/mở
   useEffect(() => {
     if (isOpen && filterConfig) {
@@ -239,6 +272,7 @@ export default function FilterModalMuaHang({
         ma_kho_xuat: "",
         ma_kho_nhap: "",
         ma_vat_tu: "",
+        ma_tai_khoan: "",
       });
       setPopupSearchStates({
         ma_khach: "",
@@ -246,6 +280,7 @@ export default function FilterModalMuaHang({
         ma_kho_xuat: "",
         ma_kho_nhap: "",
         ma_vat_tu: "",
+        ma_tai_khoan: "",
       });
       setPopupStates({
         showCustomerPopup: false,
@@ -253,6 +288,7 @@ export default function FilterModalMuaHang({
         showKhoXuatPopup: false,
         showKhoNhapPopup: false,
         showVatTuPopup: false,
+        showAccountPopup: false,
       });
       setFocusStates({});
       setSearchResults({});
@@ -290,7 +326,8 @@ export default function FilterModalMuaHang({
     if (debouncedKhoNhapSearch && debouncedKhoNhapSearch.length > 0 &&
       focusStates.ma_kho_nhap && !filterData.ma_kho_nhap &&
       !popupStates.showCustomerPopup && !popupStates.showKhoPopup &&
-      !popupStates.showKhoXuatPopup && !popupStates.showVatTuPopup) {
+      !popupStates.showKhoXuatPopup && !popupStates.showVatTuPopup &&
+      !popupStates.showAccountPopup) {
       setPopupStates(prev => ({ ...prev, showKhoNhapPopup: true }));
     }
 
@@ -298,12 +335,22 @@ export default function FilterModalMuaHang({
     if (debouncedVatTuSearch && debouncedVatTuSearch.length > 0 &&
       focusStates.ma_vat_tu && !filterData.ma_vat_tu &&
       !popupStates.showCustomerPopup && !popupStates.showKhoPopup &&
-      !popupStates.showKhoXuatPopup && !popupStates.showKhoNhapPopup) {
+      !popupStates.showKhoXuatPopup && !popupStates.showKhoNhapPopup &&
+      !popupStates.showAccountPopup) {
       setPopupStates(prev => ({ ...prev, showVatTuPopup: true }));
     }
-  }, [debouncedMaKhSearch, debouncedKhoSearch, debouncedKhoXuatSearch, debouncedKhoNhapSearch, debouncedVatTuSearch,
+
+    // Logic cho popup tài khoản
+    if (debouncedAccountSearch && debouncedAccountSearch.length > 0 &&
+      focusStates.ma_tai_khoan && !filterData.ma_tai_khoan &&
+      !popupStates.showCustomerPopup && !popupStates.showKhoPopup &&
+      !popupStates.showKhoXuatPopup && !popupStates.showKhoNhapPopup &&
+      !popupStates.showVatTuPopup) {
+      setPopupStates(prev => ({ ...prev, showAccountPopup: true }));
+    }
+  }, [debouncedMaKhSearch, debouncedKhoSearch, debouncedKhoXuatSearch, debouncedKhoNhapSearch, debouncedVatTuSearch, debouncedAccountSearch,
     focusStates, filterData, popupStates.showCustomerPopup, popupStates.showKhoPopup,
-    popupStates.showKhoXuatPopup, popupStates.showKhoNhapPopup, popupStates.showVatTuPopup]);
+    popupStates.showKhoXuatPopup, popupStates.showKhoNhapPopup, popupStates.showVatTuPopup, popupStates.showAccountPopup]);
 
   const handleInputChange = useCallback((field, value) => {
     setFilterData((prev) => ({
@@ -372,7 +419,8 @@ export default function FilterModalMuaHang({
       showKhoPopup: false,
       showKhoXuatPopup: false,
       showKhoNhapPopup: false,
-      showVatTuPopup: false
+      showVatTuPopup: false,
+      showAccountPopup: false
     });
 
     // Clear focus state
@@ -405,7 +453,8 @@ export default function FilterModalMuaHang({
       showKhoPopup: false,
       showKhoXuatPopup: false,
       showKhoNhapPopup: false,
-      showVatTuPopup: false
+      showVatTuPopup: false,
+      showAccountPopup: false
     });
 
     // Set focus cho field hiện tại
@@ -414,7 +463,8 @@ export default function FilterModalMuaHang({
       ma_kho: fieldKey === 'ma_kho',
       ma_kho_xuat: fieldKey === 'ma_kho_xuat',
       ma_kho_nhap: fieldKey === 'ma_kho_nhap',
-      ma_vat_tu: fieldKey === 'ma_vat_tu'
+      ma_vat_tu: fieldKey === 'ma_vat_tu',
+      ma_tai_khoan: fieldKey === 'ma_tai_khoan'
     });
   }, []);
 
@@ -470,7 +520,17 @@ export default function FilterModalMuaHang({
         showKhoPopup: false,
         showKhoXuatPopup: false,
         showKhoNhapPopup: false,
-        showVatTuPopup: true
+        showVatTuPopup: true,
+        showAccountPopup: false
+      });
+    } else if (fieldKey === 'ma_tai_khoan' && !filterData.ma_tai_khoan) {
+      setPopupStates({
+        showCustomerPopup: false,
+        showKhoPopup: false,
+        showKhoXuatPopup: false,
+        showKhoNhapPopup: false,
+        showVatTuPopup: false,
+        showAccountPopup: true
       });
     }
   }, [handleLookupInputFocus, filterData]);
@@ -514,6 +574,11 @@ export default function FilterModalMuaHang({
     handleLookupSelect('ma_kho_nhap', kho, field);
   }, [handleLookupSelect]);
 
+  const handleAccountSelect = useCallback((account) => {
+    const field = { valueKey: 'tk' };
+    handleLookupSelect('ma_tai_khoan', account, field);
+  }, [handleLookupSelect]);
+
   //  THÊM: Hàm đóng popup
   const handleClosePopup = useCallback((popupType) => {
     setPopupStates(prev => ({
@@ -522,11 +587,11 @@ export default function FilterModalMuaHang({
     }));
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (!filterConfig) {
-      console.error("Filter config not loaded");
-      return;
-    }
+  const handleSubmit = useCallback(async () => {
+    // if (!filterConfig || !isMountedRef.current) {
+    //   console.error("Filter config not loaded or component unmounted");
+    //   return;
+    // }
 
     try {
       // Merge filter data với search states cho các lookup fields
@@ -548,9 +613,9 @@ export default function FilterModalMuaHang({
         return;
       }
 
-      // Clear validation errors và submit
       setValidationErrors({});
       onSubmit(submitData);
+
 
     } catch (error) {
       console.error("Error in handleSubmit:", error);
@@ -562,6 +627,13 @@ export default function FilterModalMuaHang({
       onClose();
     }
   }, [isSubmitting, onClose]);
+
+  // Cleanup effect to track component unmounting
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Xử lý ESC key
   useEffect(() => {
@@ -1051,6 +1123,18 @@ export default function FilterModalMuaHang({
             materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
             searchValue={popupSearchStates.ma_vat_tu || ""}
             onSearch={(value) => handlePopupSearch('ma_vat_tu', value)}
+          />
+        )}
+
+        {/* Popup cho tài khoản */}
+        {popupStates.showAccountPopup && (
+          <AccountSelectionPopup
+            isOpen={true}
+            onClose={() => handleClosePopup('showAccountPopup')}
+            onSelect={handleAccountSelect}
+            accounts={Array.isArray(accountData?.data) ? accountData.data : []}
+            searchValue={popupSearchStates.ma_tai_khoan || ""}
+            onSearchChange={(value) => handlePopupSearch('ma_tai_khoan', value)}
           />
         )}
       </div>

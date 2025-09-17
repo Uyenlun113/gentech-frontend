@@ -50,6 +50,7 @@ import PhieuNhapKhoList from "./pages/phieu-nhap-kho/PhieuNhapKhoList";
 import PhieuXuatDcListPage from "./pages/phieu-xuat-dc/PhieuXuatDcListPage";
 import PhieuXuatKhoList from "./pages/phieu-xuat-kho/PhieuXuatKhoList";
 import TablePrintKho from "./pages/Purchases/TablePrintKho";
+import TablePrintMuaHang from "./pages/Sales/TablePrintMuaHang";
 import QuickReport from "./pages/Quick Report/QuickReport";
 import SoDuDauKyTable from "./pages/Sddk/SoDuDauKyTable";
 import CashReceiptList from "./pages/SupportingDocuments/CashReceipt/CashReceiptList";
@@ -125,6 +126,7 @@ export default function App() {
               <Route path="/purchases" element={<PurchasesPage />} />
               {/* Sales Page */}
               <Route path="/sales" element={<SalesPage />} />
+              <Route path="/sales/print-mua-hang" element={<TablePrintMuaHang />} />
               {/* Inventory Page */}
               <Route path="/inventory" element={<InventoryPage />} />
               {/* Fixed Assets Page */}
