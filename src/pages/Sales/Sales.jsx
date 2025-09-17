@@ -2,12 +2,14 @@ import { CarFront, ChevronRight, FileText, FileType, Users } from 'lucide-react'
 import { useState } from 'react';
 import FilterModalMuaHang from '../../components/FilterModalMuaHang';
 import usePostBCMuaHang from "../../hooks/useBCMuaHang";
+import { useNavigate } from 'react-router-dom';
 export default function Sales() {
   const [activeTab, setActiveTab] = useState('reportIn');
   const [openModalId, setOpenModalId] = useState(null);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const getBCMuaHangMutation = usePostBCMuaHang();
+  const navigate = useNavigate();
 
   const managementMenuItems = [
     { id: 'cost-analysis', label: 'Phân tích chi phí vật tư', isCanUse: false },
@@ -98,7 +100,7 @@ export default function Sales() {
       setOpenModalId(null);
       setSelectedMenuItem(null);
       // Điều hướng sang trang TablePrintKho với dữ liệu
-      navigate('/purchases/print-kho', {
+      navigate('/sales/print-mua-hang', {
         state: {
           data: responseData,
           filterData: requestData,

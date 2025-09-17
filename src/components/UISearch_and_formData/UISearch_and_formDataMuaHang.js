@@ -3,7 +3,7 @@ export const FILTER_CONFIGS = {
   bang_ke_phieu_nhap: {
     title: 'Bảng kê phiếu nhập',
     defaultFormData: {
-      ngay_ct1: "",
+      ngay_ct1: "01-01-2025",
       ngay_ct2: "31-08-2025",
       ma_dvcs: "CTY",
       chung_tu_tu_so: "",
@@ -57,7 +57,7 @@ export const FILTER_CONFIGS = {
           ]
         },
         {
-          key: "mau_vnd_ngoai_te", label: "Mẫu báo cáo", type: "select",
+          key: "mau_bao_cao", label: "Mẫu báo cáo", type: "select",
           options: [
             { value: "mauthuong", label: "Mẫu thường" },
             { value: "maunhapmua", label: "Mẫu nhập mua" },

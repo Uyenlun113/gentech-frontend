@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { printTemplatesMuaHang } from '../services/printTemplatesMuaHang';
 
 
-const PrintWrapperKho = forwardRef(({
+const PrintWrapperMuaHang = forwardRef(({
     reportType,
     dataTable,
     filterInfo,
@@ -71,6 +71,6 @@ const PrintWrapperKho = forwardRef(({
     );
 });
 
-PrintWrapperKho.displayName = 'PrintWrapperKho';
+PrintWrapperMuaHang.displayName = 'PrintWrapperMuaHang';
 
-export default PrintWrapperKho;
+export default PrintWrapperMuaHang;
