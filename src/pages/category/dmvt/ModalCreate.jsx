@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
-
 import { Modal } from "../../../components/ui/modal";
-
 import { Plus, Save, X } from "lucide-react";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCreateDmvt } from "../../../hooks/useDmvt";
@@ -42,14 +40,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
   const [accountSearchTerm, setAccountSearchTerm] = useState("");
   const [materialGroupSearchTerm, setMaterialGroupSearchTerm] = useState("");
-  const [selectedAccounts, setSelectedAccounts] = useState({
-    tk_vt: null,
-    tk_dt: null,
-    tk_dtnb: null,
-    tk_ck: null,
-    tk_gv: null,
-    tk_km: null
-  });
 
   const { data: accountsData, isLoading: isLoadingAccounts } = useAccounts({
     search: accountSearchTerm,
@@ -86,35 +76,71 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
     });
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
   // Handle account selection cho từng loại tài khoản
-  const handleAccountSelect = (accountType, accountCode) => {
-    const account = accountsData?.data?.find(acc => acc.tk0 === accountCode);
-    setSelectedAccounts(prev => ({
-      ...prev,
-      [accountType]: account
-    }));
+  const handleAccountSelect = useCallback((accountType, accountCode) => {
     setFormData(prev => ({
       ...prev,
       [accountType]: accountCode
     }));
-  };
+  }, []);
 
   // Handle account search
-  const handleAccountSearch = (searchTerm) => {
+  const handleAccountSearch = useCallback((searchTerm) => {
     setAccountSearchTerm(searchTerm);
-  };
+  }, []);
 
   // Handle material group search
-  const handleMaterialGroupSearch = (searchTerm) => {
+  const handleMaterialGroupSearch = useCallback((searchTerm) => {
     setMaterialGroupSearchTerm(searchTerm);
-  };
+  }, []);
+
+  // Handle Enter key navigation (bỏ qua field disabled và không focus được)
+  const handleFormFieldEnter = useCallback((currentField) => {
+    const fieldOrder = [
+      "ten_vt", "dvt", "vt_ton_kho", "gia_ton", "loai_vt", "tk_vt",
+      "sua_tk_vt", "tk_dt", "tk_dtnb", "tk_ck", "tk_gv", "tk_km",
+      "tk_tl", "tk_spdd", "nh_vt1", "nh_vt2", "nh_vt3",
+      "sl_min", "sl_max", "ghi_chu", "status"
+    ];
+
+    const focusFirstFocusableInField = (fieldName) => {
+      const container = document.querySelector(`[data-form-field="${fieldName}"]`);
+      if (!container) return false;
+      const candidate = container.querySelector(
+        'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), [role="combobox"], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (candidate) {
+        candidate.focus();
+        if (typeof candidate.select === 'function') {
+          candidate.select();
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const currentIndex = fieldOrder.indexOf(currentField);
+    for (let i = currentIndex + 1; i < fieldOrder.length; i++) {
+      if (focusFirstFocusableInField(fieldOrder[i])) {
+        return;
+      }
+    }
+
+    // Cuối form hoặc không tìm thấy field phù hợp -> focus nút Lưu
+    setTimeout(() => {
+      const saveButton = document.querySelector('[data-save-button]');
+      if (saveButton) {
+        saveButton.focus();
+      }
+    }, 50);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -186,14 +212,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
         status: "1",
         // ma_tra_cuu: ""
       });
-      setSelectedAccounts({
-        tk_vt: null,
-        tk_dt: null,
-        tk_dtnb: null,
-        tk_ck: null,
-        tk_gv: null,
-        tk_km: null
-      });
       setAccountSearchTerm("");
       setMaterialGroupSearchTerm("");
       setErrors({ ten_vt: "" });
@@ -232,14 +250,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
       ghi_chu: "",
       status: "1",
       // ma_tra_cuu: ""
-    });
-    setSelectedAccounts({
-      tk_vt: null,
-      tk_dt: null,
-      tk_dtnb: null,
-      tk_ck: null,
-      tk_gv: null,
-      tk_km: null
     });
     setAccountSearchTerm("");
     setMaterialGroupSearchTerm("");
@@ -305,7 +315,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               <div className="mb-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[15%]">Tên vật tư *</Label>
-                  <div className="w-[87.5%]">
+                  <div className="w-[87.5%]" data-form-field="ten_vt">
                     <Input
                       type="text"
                       value={formData.ten_vt}
@@ -315,8 +325,9 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                           setErrors((prev) => ({ ...prev, ten_vt: "" }));
                         }
                       }}
+                      onEnterPress={() => handleFormFieldEnter('ten_vt')}
                       placeholder="Nhập tên vật tư"
-                      className="h-8 text-sm flex-1 bg-white"
+                      className="h-8 text-sm w-full bg-white"
                       required
                     />
                   </div>
@@ -330,7 +341,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
 
             {/* <div className="gap-x-8 gap-y-2">
-              <div className="mb-2">
+              <div className="mb-2">  
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[15%]">Tên 2</Label>
                   <div className="w-[87.5%]">
@@ -351,13 +362,14 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               <div className="space-y-2 mb-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">Đơn vị tính</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="dvt">
                     <Input
                       type="text"
                       value={formData.dvt}
                       onChange={(e) => handleInputChange('dvt', e.target.value)}
+                      onEnterPress={() => handleFormFieldEnter('dvt')}
                       placeholder=""
-                      className="h-8 text-sm w-20 bg-white"
+                      className="h-8 text-sm w-full bg-white"
                     />
                   </div>
                 </div>
@@ -365,11 +377,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 <div className="flex items-center gap-2">
                   <Label className="text-xs basis-[30%]">Theo dõi tồn kho</Label>
                   <div className="flex gap-2 items-center basis-[70%]">
-                    <div className="basis-3/5">
+                    <div className="basis-3/5" data-form-field="vt_ton_kho">
                       <Input
                         type="text"
                         value={formData.vt_ton_kho}
                         onChange={(e) => handleInputChange('vt_ton_kho', e.target.value)}
+                        onEnterPress={() => handleFormFieldEnter('vt_ton_kho')}
                         placeholder="1"
                         className="h-8 text-sm w-full bg-white"
                       />
@@ -384,11 +397,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 <div className="flex items-center gap-2">
                   <Label className="text-xs basis-[30%]">Cách tính giá tồn kho</Label>
                   <div className="flex items-center gap-2 basis-[70%]">
-                    <div className="basis-3/5">
+                    <div className="basis-3/5" data-form-field="gia_ton">
                       <Input
                         type="number"
                         value={formData.gia_ton}
                         onChange={(e) => handleInputChange('gia_ton', e.target.value)}
+                        onEnterPress={() => handleFormFieldEnter('gia_ton')}
                         placeholder="1"
                         className="h-8 text-sm w-full bg-white"
                         disabled
@@ -400,13 +414,14 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">Loại vật tư</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="loai_vt">
                     <Input
                       type="text"
                       value={formData.loai_vt}
                       onChange={(e) => handleInputChange('loai_vt', e.target.value)}
+                      onEnterPress={() => handleFormFieldEnter('loai_vt')}
                       placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
+                      className="h-8 text-sm w-full bg-white"
                     />
                   </div>
 
@@ -414,10 +429,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">Tài khoản kho</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_vt">
                     <SearchableSelect
                       value={formData.tk_vt}
-                      onChange={(value) => handleAccountSelect('tk_vt', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_vt', value);
+                        handleFormFieldEnter('tk_vt');
+                      }}
                       options={accountOptions}
                       placeholder="Chọn tài khoản kho"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -434,11 +452,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 <div className="flex items-center gap-2">
                   <Label className="text-xs basis-[30%]">Sửa tài khoản khoản</Label>
                   <div className="flex items-center gap-2 basis-[70%]">
-                    <div className="basis-3/5">
+                    <div className="basis-3/5" data-form-field="sua_tk_vt">
                       <Input
                         type="text"
                         value={formData.sua_tk_vt}
                         onChange={(e) => handleInputChange('sua_tk_vt', e.target.value)}
+                        onEnterPress={() => handleFormFieldEnter('sua_tk_vt')}
                         placeholder="0"
                         className="h-8 text-sm w-full bg-white"
                       />
@@ -452,10 +471,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK doanh thu</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_dt">
                     <SearchableSelect
                       value={formData.tk_dt}
-                      onChange={(value) => handleAccountSelect('tk_dt', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_dt', value);
+                        handleFormFieldEnter('tk_dt');
+                      }}
                       options={accountOptions}
                       placeholder="Chọn tài khoản doanh thu"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -470,10 +492,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK doanh thu nội bộ</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_dtnb">
                     <SearchableSelect
                       value={formData.tk_dtnb}
-                      onChange={(value) => handleAccountSelect('tk_dtnb', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_dtnb', value);
+                        handleFormFieldEnter('tk_dtnb');
+                      }}
                       options={accountOptions}
                       placeholder="Chọn tài khoản"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -488,10 +513,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK chiết khấu</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_ck">
                     <SearchableSelect
                       value={formData.tk_ck}
-                      onChange={(value) => handleAccountSelect('tk_ck', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_ck', value);
+                        handleFormFieldEnter('tk_ck');
+                      }}
                       options={accountOptions}
                       placeholder="Chọn tài khoản"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -506,10 +534,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK giá vốn</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_gv">
                     <SearchableSelect
                       value={formData.tk_gv}
-                      onChange={(value) => handleAccountSelect('tk_gv', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_gv', value);
+                        handleFormFieldEnter('tk_gv');
+                      }}
                       options={accountOptions}
                       placeholder="112"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -524,10 +555,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK có khuyến mãi</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_km">
                     <SearchableSelect
                       value={formData.tk_km}
-                      onChange={(value) => handleAccountSelect('tk_km', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_km', value);
+                        handleFormFieldEnter('tk_km');
+                      }}
                       options={accountOptions}
                       placeholder="1131"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -565,10 +599,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK hàng bán bị trả lại</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_tl">
                     <SearchableSelect
                       value={formData.tk_tl}
-                      onChange={(value) => handleAccountSelect('tk_tl', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_tl', value);
+                        handleFormFieldEnter('tk_tl');
+                      }}
                       options={accountOptions}
                       placeholder="112"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -599,12 +636,15 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK nguyên vật liệu</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_nvl">
                     <SearchableSelect
-                      value={formData.tk_vt}
-                      onChange={(value) => handleAccountSelect('tk_vt', value)}
+                      value={formData.tk_nvl}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_nvl', value);
+                        handleFormFieldEnter('tk_nvl');
+                      }}
                       options={accountOptions}
-                      placeholder="Chọn tài khoản kho"
+                      placeholder="Chọn tài khoản nguyên vật liệu"
                       searchPlaceholder="Tìm kiếm tài khoản..."
                       loading={isLoadingAccounts}
                       onSearch={handleAccountSearch}
@@ -618,10 +658,13 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK sản phẩm dở dang</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="tk_spdd">
                     <SearchableSelect
                       value={formData.tk_spdd}
-                      onChange={(value) => handleAccountSelect('tk_spdd', value)}
+                      onChange={(value) => {
+                        handleAccountSelect('tk_spdd', value);
+                        handleFormFieldEnter('tk_spdd');
+                      }}
                       options={accountOptions}
                       placeholder="Chọn tài khoản"
                       searchPlaceholder="Tìm kiếm tài khoản..."
@@ -648,42 +691,60 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                   <Label className="text-xs w-[15%]">Nhóm vật tư 1, 2, 3</Label>
                   <div className="w-[87.5%]">
                     <div className="grid grid-cols-3 gap-2">
-                      <SearchableSelect
-                        value={formData.nh_vt1}
-                        onChange={(value) => handleInputChange('nh_vt1', value)}
-                        options={getFilteredMaterialGroupOptions('nh_vt1')}
-                        placeholder="Chọn nhóm vật tư 1"
-                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
-                        loading={isLoadingMaterialGroups}
-                        onSearch={handleMaterialGroupSearch}
-                        displayKey="ten_nh"
-                        valueKey="ma_nh"
-                        className="h-8 text-sm flex-1 bg-white"
-                      />
-                      <SearchableSelect
-                        value={formData.nh_vt2}
-                        onChange={(value) => handleInputChange('nh_vt2', value)}
-                        options={getFilteredMaterialGroupOptions('nh_vt2')}
-                        placeholder="Chọn nhóm vật tư 2"
-                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
-                        loading={isLoadingMaterialGroups}
-                        onSearch={handleMaterialGroupSearch}
-                        displayKey="ten_nh"
-                        valueKey="ma_nh"
-                        className="h-8 text-sm flex-1 bg-white"
-                      />
-                      <SearchableSelect
-                        value={formData.nh_vt3}
-                        onChange={(value) => handleInputChange('nh_vt3', value)}
-                        options={getFilteredMaterialGroupOptions('nh_vt3')}
-                        placeholder="Chọn nhóm vật tư 3"
-                        searchPlaceholder="Tìm kiếm nhóm vật tư..."
-                        loading={isLoadingMaterialGroups}
-                        onSearch={handleMaterialGroupSearch}
-                        displayKey="ten_nh"
-                        valueKey="ma_nh"
-                        className="h-8 text-sm flex-1 bg-white"
-                      />
+                      <div data-form-field="nh_vt1">
+                        <SearchableSelect
+                          value={formData.nh_vt1}
+                          onChange={(value) => {
+                            handleInputChange('nh_vt1', value);
+                            handleFormFieldEnter('nh_vt1');
+                          }}
+                          onEnterPress={() => handleFormFieldEnter('nh_vt1')}
+                          options={getFilteredMaterialGroupOptions('nh_vt1')}
+                          placeholder="Chọn nhóm vật tư 1"
+                          searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                          loading={isLoadingMaterialGroups}
+                          onSearch={handleMaterialGroupSearch}
+                          displayKey="ten_nh"
+                          valueKey="ma_nh"
+                          className="h-8 text-sm flex-1 bg-white"
+                        />
+                      </div>
+                      <div data-form-field="nh_vt2">
+                        <SearchableSelect
+                          value={formData.nh_vt2}
+                          onChange={(value) => {
+                            handleInputChange('nh_vt2', value);
+                            handleFormFieldEnter('nh_vt2');
+                          }}
+                          onEnterPress={() => handleFormFieldEnter('nh_vt2')}
+                          options={getFilteredMaterialGroupOptions('nh_vt2')}
+                          placeholder="Chọn nhóm vật tư 2"
+                          searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                          loading={isLoadingMaterialGroups}
+                          onSearch={handleMaterialGroupSearch}
+                          displayKey="ten_nh"
+                          valueKey="ma_nh"
+                          className="h-8 text-sm flex-1 bg-white"
+                        />
+                      </div>
+                      <div data-form-field="nh_vt3">
+                        <SearchableSelect
+                          value={formData.nh_vt3}
+                          onChange={(value) => {
+                            handleInputChange('nh_vt3', value);
+                            handleFormFieldEnter('nh_vt3');
+                          }}
+                          onEnterPress={() => handleFormFieldEnter('nh_vt3')}
+                          options={getFilteredMaterialGroupOptions('nh_vt3')}
+                          placeholder="Chọn nhóm vật tư 3"
+                          searchPlaceholder="Tìm kiếm nhóm vật tư..."
+                          loading={isLoadingMaterialGroups}
+                          onSearch={handleMaterialGroupSearch}
+                          displayKey="ten_nh"
+                          valueKey="ma_nh"
+                          className="h-8 text-sm flex-1 bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -694,14 +755,15 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               <div className="space-y-2 mb-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">SL tồn tối thiểu</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="sl_min">
                     <Input
                       type="number"
                       step="0.001"
                       value={formData.sl_min}
                       onChange={(e) => handleInputChange('sl_min', e.target.value)}
+                      onEnterPress={() => handleFormFieldEnter('sl_min')}
                       placeholder="0,000"
-                      className="h-8 text-sm w-24 bg-white text-right"
+                      className="h-8 text-sm w-full bg-white text-right"
                     />
                   </div>
                 </div>
@@ -709,14 +771,15 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               <div className="space-y-2 mb-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">SL tồn tối đa</Label>
-                  <div className="w-[70%]">
+                  <div className="w-[70%]" data-form-field="sl_max">
                     <Input
                       type="number"
                       step="0.001"
                       value={formData.sl_max}
                       onChange={(e) => handleInputChange('sl_max', e.target.value)}
+                      onEnterPress={() => handleFormFieldEnter('sl_max')}
                       placeholder="0,000"
-                      className="h-8 text-sm w-24 bg-white text-right"
+                      className="h-8 text-sm w-full bg-white text-right"
                     />
                   </div>
 
@@ -727,13 +790,14 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               <div className="mb-2">
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[15%]">Ghi chú</Label>
-                  <div className="w-[87.5%]">
+                  <div className="w-[87.5%]" data-form-field="ghi_chu">
                     <Input
                       type="text"
                       value={formData.ghi_chu}
                       onChange={(e) => handleInputChange('ghi_chu', e.target.value)}
+                      onEnterPress={() => handleFormFieldEnter('ghi_chu')}
                       placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
+                      className="h-8 text-sm w-full bg-white"
                     />
                   </div>
 
@@ -745,11 +809,12 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 <div className="flex items-center gap-2">
                   <Label className="text-xs basis-[30%]">Trạng thái</Label>
                   <div className="flex items-center gap-2 basis-[70%]">
-                    <div className="basis-3/5">
+                    <div className="basis-3/5" data-form-field="status">
                       <Input
                         type="text"
                         value={formData.status}
                         onChange={(e) => handleInputChange('status', e.target.value)}
+                        onEnterPress={() => handleFormFieldEnter('status')}
                         placeholder="1"
                         className="h-8 text-sm w-full bg-white"
                       />
@@ -777,6 +842,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
               type="button"
               onClick={handleSubmit}
               disabled={isPending}
+              data-save-button
               className={`px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2 ${isPending ? "opacity-50 cursor-not-allowed" : ""
                 }`}
             >

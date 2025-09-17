@@ -252,7 +252,7 @@ export default function BaoCaoDonBanHang() {
                                 <Button
                                     onClick={() => {
                                         let hasData = false;
-                                        const typeCheckData12 = ['import-plan', 'export-plan', 'inventory2', 'inventory-detail2', 'import-export-summary2', 'import-export-detail'];
+                                        const typeCheckData12 = ['import-plan', 'export-plan', 'inventory2', 'inventory-detail2', 'import-export-summary2', 'import-export-detail', 'customer-summary', 'cost-analysis', 'performance-report', 'turnover-analysis', 'abc-analysis', 'inventory-valuation'];
                                         if (typeCheckData12.includes(reportType)) {
                                             hasData =
                                                 (data1 && data1.length > 0) ||

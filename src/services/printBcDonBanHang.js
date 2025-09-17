@@ -898,5 +898,671 @@ export const printBcDonBanHang = {
             </div>
         </div>
     `;
+    },
+    invoiceByCustomerSummary: (data1, data2, filterInfo) => {
+        const fromDate = filterInfo?.StartDate || '01-08-2025';
+        const toDate = filterInfo?.EndDate || '30-09-2025';
+        const account = filterInfo?.Account || '1111 - TIỀN MẶT VND';
+        
+        // Nhóm dữ liệu theo khách hàng
+        const groupedData = {};
+        
+        if (Array.isArray(data1)) {
+            data1.forEach(item => {
+                const key = item.ma_kh?.trim() || 'unknown';
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        ma_kh: item.ma_kh,
+                        ten_kh: item.ten_kh,
+                        items: []
+                    };
+                }
+            });
+        }
+        
+        if (Array.isArray(data2)) {
+            data2.forEach(item => {
+                const key = item.ma_kh?.trim() || 'unknown';
+                if (groupedData[key]) {
+                    groupedData[key].items.push(item);
+                }
+            });
+        }
+
+        let allRows = '';
+        let grandTotal = 0;
+
+        Object.keys(groupedData).forEach(groupKey => {
+            const group = groupedData[groupKey];
+            const items = group.items;
+            
+            if (items.length === 0) return;
+
+            // Header row cho khách hàng
+            allRows += `
+                <tr style="background-color: #f5f5f5;">
+                    <td colspan="2" style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">
+                        ${group.ma_kh || ''} - ${group.ten_kh || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;"></td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;"></td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;"></td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;"></td>
+                </tr>
+            `;
+
+            // Chi tiết các chứng từ
+            items.forEach(item => {
+                const tienValue = parseFloat(item.tien?.toString().replace(/,/g, '')) || 0;
+                grandTotal += tienValue;
+                
+                allRows += `
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            ${formatDate(item.ngay_ct)}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            ${item.so_ct?.trim() || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                            ${item.dien_giai || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${formatCurrency(item.tk_dung)}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${formatCurrency(item.ps_no)}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${formatCurrency(item.ps_co)}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Dòng cộng cho từng khách hàng
+            const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.tien?.toString().replace(/,/g, '')) || 0), 0);
+            allRows += `
+                <tr style="font-weight: bold;">
+                    <td colspan="4" style="border: 1px solid #000; padding: 4px; text-align: right;">Cộng:</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${formatCurrency(items.reduce((sum, item) => sum + (parseFloat(item.ps_no?.toString().replace(/,/g, '')) || 0), 0))}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${formatCurrency(items.reduce((sum, item) => sum + (parseFloat(item.ps_co?.toString().replace(/,/g, '')) || 0), 0))}
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Dòng tổng cộng cuối
+        const totalPsNo = Object.values(groupedData).reduce((sum, group) => 
+            sum + group.items.reduce((itemSum, item) => 
+                itemSum + (parseFloat(item.ps_no?.toString().replace(/,/g, '')) || 0), 0), 0);
+        
+        const totalPsCo = Object.values(groupedData).reduce((sum, group) => 
+            sum + group.items.reduce((itemSum, item) => 
+                itemSum + (parseFloat(item.ps_co?.toString().replace(/,/g, '')) || 0), 0), 0);
+
+        allRows += `
+            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td colspan="4" style="border: 1px solid #000; padding: 4px; text-align: right;">TỔNG CỘNG:</td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalPsNo)}
+                </td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalPsCo)}
+                </td>
+            </tr>
+        `;
+
+        return `
+            <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
+                <div style="text-align: left; margin-bottom: 10px; font-size: 10px;">
+                    PHẦN MỀM CHƯA ĐĂNG KÝ BẢN QUYỀN<br/>
+                    LIÊN HỆ VỚI FAST ĐỂ BIẾT THÊM CHI TIẾT
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; text-transform: uppercase;">
+                        BẢNG KÊ CHỨNG TỪ THEO KHÁCH HÀNG
+                    </h2>
+                    <div style="font-size: 12px; margin-bottom: 20px;">
+                        TÀI KHOẢN: ${account}<br/>
+                        TỪ NGÀY: ${formatDate(fromDate)} ĐẾN NGÀY: ${formatDate(toDate)}
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #E8F5E8;">
+                            <th colspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">CHỨNG TỪ</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">DIỄN GIẢI</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TK DÙNG</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">PS NỢ</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">PS CÓ</th>
+                        </tr>
+                        <tr style="background-color: #E8F5E8;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">NGÀY</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">SỐ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; font-size: 11px; margin-top: 40px; margin-right: 30px;"> 
+                    Ngày......tháng.....năm........
+                </div>
+                
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 20px;">
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">NGƯỜI LẬP BIỂU</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">KẾ TOÁN TRƯỞNG</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    performanceReport: (data1, data2, filterInfo) => {
+        const fromDate = filterInfo?.StartDate || '01-08-2025';
+        const toDate = filterInfo?.EndDate || '30-09-2025';
+        const account = filterInfo?.Account || '1111 - TIỀN MẶT VND';
+        
+        // Sử dụng data2 và xử lý theo tag
+        const dataToProcess = Array.isArray(data2) ? data2 : [];
+        
+        let allRows = '';
+        let totalPsNo = 0;
+        let totalPsCo = 0;
+        let currentGroupPsNo = 0;
+        let currentGroupPsCo = 0;
+        let isFirstGroup = true;
+
+        dataToProcess.forEach((item, index) => {
+            if (item.tag === "0") {
+                // Đây là header khách hàng
+                
+                // Nếu không phải nhóm đầu tiên, thêm dòng "Cộng:" cho nhóm trước
+                if (!isFirstGroup) {
+                    allRows += `
+                        <tr style="font-weight: bold;">
+                            <td colspan="4" style="border: 1px solid #000; padding: 4px; text-align: right;">Cộng:</td>
+                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                                ${formatCurrency(currentGroupPsNo)}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                                ${currentGroupPsCo > 0 ? formatCurrency(currentGroupPsCo) : '0'}
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                // Reset cho nhóm mới
+                currentGroupPsNo = 0;
+                currentGroupPsCo = 0;
+                isFirstGroup = false;
+                
+                // Header row cho khách hàng
+                allRows += `
+                    <tr style="background-color: #f5f5f5;">
+                        <td colspan="6" style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold;">
+                            ${item.dien_giai || ''}
+                        </td>
+                    </tr>
+                `;
+            } else if (item.tag === "1") {
+                // Đây là chi tiết chứng từ
+                const psNo = parseFloat(item.ps_no) || 0;
+                const psCo = parseFloat(item.ps_co) || 0;
+                
+                currentGroupPsNo += psNo;
+                currentGroupPsCo += psCo;
+                
+                allRows += `
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            ${formatDate(item.ngay_ct)}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            ${item.so_ct?.trim() || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                            ${item.dien_giai || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            ${item.tk_du?.trim() || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${psNo > 0 ? formatCurrency(psNo) : ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${psCo > 0 ? formatCurrency(psCo) : ''}
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // Nếu là item cuối cùng, thêm dòng "Cộng:" cho nhóm cuối
+            if (index === dataToProcess.length - 1 && item.tag === "1") {
+                allRows += `
+                    <tr style="font-weight: bold;">
+                        <td colspan="4" style="border: 1px solid #000; padding: 4px; text-align: right;">Cộng:</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${formatCurrency(currentGroupPsNo)}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            ${currentGroupPsCo > 0 ? formatCurrency(currentGroupPsCo) : '0'}
+                        </td>
+                    </tr>
+                `;
+                
+                // Cộng vào tổng
+                totalPsNo += currentGroupPsNo;
+                totalPsCo += currentGroupPsCo;
+            }
+        });
+        
+        // Tính tổng từ các item tag = "0" (header có chứa tổng của nhóm)
+        const groupHeaders = dataToProcess.filter(item => item.tag === "0");
+        totalPsNo = groupHeaders.reduce((sum, item) => sum + (parseFloat(item.ps_no) || 0), 0);
+        totalPsCo = groupHeaders.reduce((sum, item) => sum + (parseFloat(item.ps_co) || 0), 0);
+
+        // Dòng tổng cộng cuối
+        allRows += `
+            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td colspan="4" style="border: 1px solid #000; padding: 4px; text-align: right;">TỔNG CỘNG:</td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalPsNo)}
+                </td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${totalPsCo > 0 ? formatCurrency(totalPsCo) : '0'}
+                </td>
+            </tr>
+        `;
+
+        return `
+            <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
+                <div style="text-align: left; margin-bottom: 10px; font-size: 10px;">
+                    PHẦN MỀM CHƯA ĐĂNG KÝ BẢN QUYỀN<br/>
+                    LIÊN HỆ VỚI FAST ĐỂ BIẾT THÊM CHI TIẾT
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; text-transform: uppercase;">
+                        BẢNG KÊ CHỨNG TỪ THEO KHÁCH HÀNG
+                    </h2>
+                    <div style="font-size: 12px; margin-bottom: 20px;">
+                        TÀI KHOẢN: ${account}<br/>
+                        TỪ NGÀY: ${formatDate(fromDate)} ĐẾN NGÀY: ${formatDate(toDate)}
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #E8F5E8;">
+                            <th colspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">CHỨNG TỪ</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">DIỄN GIẢI</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TK DÙNG</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">PS NỢ</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">PS CÓ</th>
+                        </tr>
+                        <tr style="background-color: #E8F5E8;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">NGÀY</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">SỐ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; font-size: 11px; margin-top: 40px; margin-right: 30px;"> 
+                    Ngày......tháng.....năm........
+                </div>
+                
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 20px;">
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">NGƯỜI LẬP BIỂU</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">KẾ TOÁN TRƯỞNG</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    costAnalysisReport: (data1, data2, filterInfo) => {
+        const fromDate = filterInfo?.StartDate || '01-08-2025';
+        const toDate = filterInfo?.EndDate || '30-09-2025';
+        
+        // Sử dụng data2 để hiển thị danh sách chứng từ không nhóm theo khách hàng
+        const dataToProcess = Array.isArray(data2) ? data2 : [];
+        
+        let allRows = '';
+        let totalPsNo = 0;
+        let totalPsCo = 0;
+
+        // Hiển thị từng chứng từ
+        dataToProcess.forEach(item => {
+            const psNo = parseFloat(item.ps_no) || 0;
+            const psCo = parseFloat(item.ps_co) || 0;
+            
+            totalPsNo += psNo;
+            totalPsCo += psCo;
+            
+            allRows += `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${formatDate(item.ngay_ct)}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${item.so_ct?.trim() || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                        ${item.ten_kh || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                        ${item.dien_giai || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${item.tk?.trim() || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${item.tk_du?.trim() || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${psNo > 0 ? formatCurrency(psNo) : ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${psCo > 0 ? formatCurrency(psCo) : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Dòng tổng cộng
+        allRows += `
+            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td colspan="6" style="border: 1px solid #000; padding: 4px; text-align: right;">TỔNG CỘNG:</td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalPsNo)}
+                </td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${totalPsCo > 0 ? formatCurrency(totalPsCo) : '0'}
+                </td>
+            </tr>
+        `;
+
+        return `
+            <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
+                <div style="text-align: left; margin-bottom: 10px; font-size: 10px;">
+                    PHẦN MỀM CHƯA ĐĂNG KÝ BẢN QUYỀN<br/>
+                    LIÊN HỆ VỚI FAST ĐỂ BIẾT THÊM CHI TIẾT
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; text-transform: uppercase;">
+                        BẢNG KÊ CHỨNG TỪ
+                    </h2>
+                    <div style="font-size: 12px; margin-bottom: 20px;">
+                        TỪ NGÀY: ${formatDate(fromDate)} ĐẾN NGÀY: ${formatDate(toDate)}
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #E8F5E8;">
+                            <th colspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">CHỨNG TỪ</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TÊN KHÁCH</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">DIỄN GIẢI</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TÀI KHOẢN</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TK ĐỐI ỨNG</th>
+                            <th colspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">SỐ PHÁT SINH</th>
+                        </tr>
+                        <tr style="background-color: #E8F5E8;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">NGÀY</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">SỐ</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">NỢ</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">CÓ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; font-size: 11px; margin-top: 20px;">
+                    Trang: 1, 11-09-2025
+                </div>
+                
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 40px;">
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">NGƯỜI LẬP BIỂU</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">KẾ TOÁN TRƯỞNG</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    turnoverAnalysisReport: (data1, data2, filterInfo) => {
+        const fromDate = filterInfo?.StartDate || '01-08-2025';
+        const toDate = filterInfo?.EndDate || '30-09-2025';
+        const account = filterInfo?.Account || '1111 - TIỀN MẶT VND';
+        
+        // Sử dụng data2 để hiển thị tổng hợp theo khách hàng
+        const dataToProcess = Array.isArray(data2) ? data2 : [];
+        
+        let allRows = '';
+        let totalPsNo = 0;
+        let totalPsCo = 0;
+        let stt = 0;
+
+        dataToProcess.forEach(item => {
+            stt++;
+            const psNo = parseFloat(item.ps_no) || 0;
+            const psCo = parseFloat(item.ps_co) || 0;
+            
+            totalPsNo += psNo;
+            totalPsCo += psCo;
+            
+            allRows += `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${stt}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${item.ma?.trim() || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                        ${item.ten || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${psNo > 0 ? formatCurrency(psNo) : ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${psCo > 0 ? formatCurrency(psCo) : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Dòng tổng cộng
+        allRows += `
+            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td colspan="3" style="border: 1px solid #000; padding: 4px; text-align: right;">TỔNG CỘNG:</td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalPsNo)}
+                </td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${totalPsCo > 0 ? formatCurrency(totalPsCo) : '0'}
+                </td>
+            </tr>
+        `;
+
+        return `
+            <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
+                <div style="text-align: left; margin-bottom: 10px; font-size: 10px;">
+                    PHẦN MỀM CHƯA ĐĂNG KÝ BẢN QUYỀN<br/>
+                    LIÊN HỆ VỚI FAST ĐỂ BIẾT THÊM CHI TIẾT
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; text-transform: uppercase;">
+                        TỔNG HỢP SỐ PHÁT SINH THEO KHÁCH HÀNG
+                    </h2>
+                    <div style="font-size: 12px; margin-bottom: 20px;">
+                        TÀI KHOẢN: ${account}<br/>
+                        TỪ NGÀY: ${formatDate(fromDate)} ĐẾN NGÀY: ${formatDate(toDate)}
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #E8F5E8;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 50px;">STT</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">MÃ KHÁCH</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center;">TÊN KHÁCH HÀNG</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">PHÁT SINH NỢ</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">PHÁT SINH CÓ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; font-size: 11px; margin-top: 40px; margin-right: 30px;"> 
+                    Ngày......tháng.....năm........
+                </div>
+                
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 20px;">
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">NGƯỜI LẬP BIỂU</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">KẾ TOÁN TRƯỞNG</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    abcAnalysisReport: (data1, data2, filterInfo) => {
+        const customerInfo = filterInfo?.ma_khach || 'TENLUN (KH005)';
+        const reportDate = filterInfo?.ngay || '30-09-2025';
+        
+        // Sử dụng data2 để hiển thị chi tiết tài khoản
+        const dataToProcess = Array.isArray(data2) ? data2 : [];
+        
+        let allRows = '';
+        let totalNo = 0;
+        let totalCo = 0;
+
+        dataToProcess.forEach(item => {
+            const soDuNo = parseFloat(item.no_ck) || 0;
+            const soDuCo = parseFloat(item.co_ck) || 0;
+            
+            totalNo += soDuNo;
+            totalCo += soDuCo;
+            
+            allRows += `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        ${item.tk?.trim() || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: left;">
+                        ${item.ten_tk || ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${soDuNo > 0 ? formatCurrency(soDuNo) : ''}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        ${formatCurrency(soDuCo)}
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Dòng tổng cộng
+        allRows += `
+            <tr style="font-weight: bold; background-color: #f0f0f0;">
+                <td colspan="2" style="border: 1px solid #000; padding: 4px; text-align: right;">TỔNG CỘNG:</td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${totalNo > 0 ? formatCurrency(totalNo) : '0'}
+                </td>
+                <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                    ${formatCurrency(totalCo)}
+                </td>
+            </tr>
+        `;
+
+        return `
+            <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4;">
+                <div style="text-align: left; margin-bottom: 10px; font-size: 10px;">
+                    PHẦN MỀM CHƯA ĐĂNG KÝ BẢN QUYỀN<br/>
+                    LIÊN HỆ VỚI FAST ĐỂ BIẾT THÊM CHI TIẾT
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; text-transform: uppercase;">
+                        TRA SỐ DƯ CÔNG NỢ CỦA MỘT KHÁCH HÀNG
+                    </h2>
+                    <div style="font-size: 12px; margin-bottom: 20px;">
+                        KHÁCH HÀNG: ${customerInfo}<br/>
+                        NGÀY: ${formatDate(reportDate)}
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #E8F5E8;">
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">TÀI KHOẢN</th>
+                            <th rowspan="2" style="border: 1px solid #000; padding: 6px; text-align: center;">TÊN TÀI KHOẢN</th>
+                            <th colspan="2" style="border: 1px solid #000; padding: 6px; text-align: center; width: 200px;">SỐ DƯ</th>
+                        </tr>
+                        <tr style="background-color: #E8F5E8;">
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">NỢ</th>
+                            <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 100px;">CÓ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allRows}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; font-size: 11px; margin-top: 40px; margin-right: 30px;"> 
+                    Ngày......tháng.....năm.....
+                </div>
+                
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 20px;">
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">NGƯỜI LẬP BIỂU</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                    <div style="text-align: center; width: 200px;">
+                        <div style="font-weight: bold;">KẾ TOÁN TRƯỞNG</div>
+                        <div style="font-style: italic; margin-bottom: 60px;">(Ký, họ tên)</div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 };

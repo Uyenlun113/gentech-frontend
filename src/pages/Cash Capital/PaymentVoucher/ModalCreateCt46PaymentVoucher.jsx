@@ -1286,7 +1286,7 @@ export const ModalCreateCt46PaymentVoucher = ({ isOpenCreate, closeModalCreate }
                         <button
                             onClick={() => deleteCt46Row(row.id)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Xóa dòng"
+                            title="Xóa dòng"    
                         >
                             <Trash2 size={16} />
                         </button>

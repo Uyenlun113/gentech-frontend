@@ -12,9 +12,11 @@ const SearchableSelect = ({
     displayKey = "value",
     valueKey = "value",
     className = "",
+    onEnterPress,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [highlightedIndex, setHighlightedIndex] = useState(0);
     const dropdownRef = useRef(null);
     const searchInputRef = useRef(null);
 
@@ -49,15 +51,64 @@ const SearchableSelect = ({
     }, [searchTerm, onSearch]);
 
     const handleToggle = () => {
-        setIsOpen(!isOpen);
-        if (!isOpen) setSearchTerm('');
+        const nextOpen = !isOpen;
+        setIsOpen(nextOpen);
+        if (!nextOpen) {
+            setSearchTerm('');
+        } else {
+            setHighlightedIndex(0);
+        }
     };
 
     const handleSelect = (option) => {
         onChange(option[valueKey]);
         setIsOpen(false);
         setSearchTerm('');
+        setHighlightedIndex(0);
     };
+
+    const handleButtonKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleToggle();
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!isOpen) setIsOpen(true);
+            setHighlightedIndex(0);
+        }
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlightedIndex((prev) => Math.min(prev + 1, Math.max(options.length - 1, 0)));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const option = options[highlightedIndex];
+            if (option) {
+                handleSelect(option);
+            } else {
+                // Không có dữ liệu để chọn -> đóng và bắn sự kiện Enter ra ngoài
+                setIsOpen(false);
+                setSearchTerm('');
+                if (typeof onEnterPress === 'function') {
+                    onEnterPress();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setIsOpen(false);
+        }
+    };
+
+    useEffect(() => {
+        if (highlightedIndex > Math.max(options.length - 1, 0)) {
+            setHighlightedIndex(0);
+        }
+    }, [options, highlightedIndex]);
 
     const handleClear = (e) => {
         e.stopPropagation();
@@ -70,6 +121,10 @@ const SearchableSelect = ({
             <button
                 type="button"
                 onClick={handleToggle}
+                onKeyDown={handleButtonKeyDown}
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
                 className={`h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 flex items-center justify-between ${className}`}
             >
                 <span className={`truncate ${!selectedOption ? 'text-gray-500' : ''}`}>
@@ -97,13 +152,14 @@ const SearchableSelect = ({
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={handleSearchKeyDown}
                                 placeholder={searchPlaceholder}
                                 className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                             />
                         </div>
                     </div>
 
-                    <div className="max-h-60 overflow-y-auto">
+                    <div className="max-h-60 overflow-y-auto" role="listbox">
                         {loading ? (
                             <div className="p-4 text-center text-gray-500">
                                 <div className="inline-block w-4 h-4 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin"></div>
@@ -114,15 +170,14 @@ const SearchableSelect = ({
                                 {searchTerm ? 'Không tìm thấy kết quả' : 'Không có dữ liệu'}
                             </div>
                         ) : (
-                            options.map((option) => (
+                            options.map((option, idx) => (
                                 <button
                                     key={option[valueKey]}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${value === option[valueKey]
-                                            ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                                            : 'text-gray-800 dark:text-white'
-                                        }`}
+                                    role="option"
+                                    aria-selected={idx === highlightedIndex}
+                                    className={`w-full px-4 py-2 text-left text-sm transition-colors ${idx === highlightedIndex ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400' : 'hover:bg-gray-50 dark:hover:bg-gray-800'} ${value === option[valueKey] ? 'font-medium' : ''} text-gray-800 dark:text-white`}
                                 >
                                     {option[valueKey]} - {option[displayKey]}
                                 </button>
