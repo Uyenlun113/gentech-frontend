@@ -680,7 +680,7 @@ export const FILTER_CONFIGS = {
       kieu_loc: "Tất cả các vật tư trọn",
       ma_tai_khoan: "",
       ghi_no_co: "",
-      loai_bao_cao: "theo_tk_doi_ung"
+      loai_bao_cao: "1"
     },
     searchFields: {
       mainFieldKeys: [
@@ -718,8 +718,8 @@ export const FILTER_CONFIGS = {
         {
           key: "loai_bao_cao", label: "Loại báo cáo", type: "select",
           options: [
-            { value: "theo_tk_doi_ung", label: "Theo TK đối ứng" },
-            { value: "theo_tieu_khoan", label: "Theo tiểu khoản" }
+            { value: "1", label: "Theo TK đối ứng" },
+            { value: "2", label: "Theo tiểu khoản" }
           ]
         }
       ]
