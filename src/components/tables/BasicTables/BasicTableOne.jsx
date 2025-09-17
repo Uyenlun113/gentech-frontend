@@ -170,7 +170,7 @@ const TableBasic = ({
             <TableHeader className="sticky top-0 z-30 bg-gray-100 dark:bg-gray-800 shadow-sm">
               <TableRow className="bg-gray-100 dark:bg-gray-800">
                 {/* Left Fixed Columns */}
-                {leftFixedColumns.map((col, idx) => renderTableCell(col, col.key || idx, null, undefined, true))}
+                {leftFixedColumns.map((col, idx) => renderTableCell(col, idx, null, undefined, true))}
 
                 {/* Scrollable Columns */}
                 {scrollableColumns.map((col, idx) => (

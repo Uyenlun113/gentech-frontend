@@ -110,15 +110,15 @@ export const preferredColumnsByReport = {
 
   bang_ke_hoa_don_mua_hang_va_dich_vu: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
-    { key: 'ma_ct_in', title: 'Mã c.từ in', width: 100 },
+    { key: 'ma_ct0', title: 'Mã c.từ in', width: 100 },
     { key: 'so_ct', title: 'Số c.từ', width: 120 },
     { key: 'ma_kh', title: 'Mã khách', width: 100 },
-    { key: 'ten_khach_hang', title: 'Tên khách hàng', width: 180 },
-    { key: 'tien_hang', title: 'Tiền hàng', width: 120 },
-    { key: 'tien_thue', title: 'Tiền thuế', width: 120 },
-    { key: 'tong_tien', title: 'Tổng tiền', width: 120 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
+    { key: 'tien0', title: 'Tiền hàng', width: 120 },
+    { key: 'thue', title: 'Tiền thuế', width: 120 },
+    { key: 'ttt', title: 'Tổng tiền', width: 120 },
     { key: 'ma_nx', title: 'Mã nx', width: 100 },
-    { key: 'ma_du_an', title: 'Mã dự án', width: 120 },
+    { key: 'stt_rec_pn', title: 'Mã dự án', width: 120 },
     { key: 'dien_giai', title: 'Diễn giải', width: 220 },
     { key: 'ma_dvcs', title: 'Mã ĐVCS', width: 100 },
     { key: 'ma_ct', title: 'Mã c.t', width: 100 }
