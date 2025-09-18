@@ -287,37 +287,37 @@ export const preferredColumnsByReport = {
 
   so_doi_chieu_cong_no: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
-    { key: 'ma_ct_in', title: 'Mã c.từ in', width: 100 },
-    { key: 'ngay_lap_ct', title: 'Ngày lập c.từ', width: 120 },
+    { key: 'ma_ct', title: 'Mã c.từ in', width: 100 },
+    { key: 'ngay_lct', title: 'Ngày lập c.từ', width: 120 },
     { key: 'so_ct', title: 'Số c.từ', width: 120 },
     { key: 'dien_giai', title: 'Diễn giải', width: 200 },
-    { key: 'phat_sinh_no', title: 'Phát sinh nợ', width: 120 },
-    { key: 'phat_sinh_co', title: 'Phát sinh có', width: 120 },
-    { key: 'ma_du_an', title: 'Mã dự án', width: 120 },
+    { key: 'ps_no', title: 'Phát sinh nợ', width: 120 },
+    { key: 'ps_co', title: 'Phát sinh có', width: 120 },
+    { key: 'stt_rec', title: 'Mã dự án', width: 120 },
     { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
   ],
 
   so_chi_tiet_cong_no_len_tat_ca_nha_cung_cap: [
     { key: 'stt', title: 'Stt', width: 60 },
-    { key: 'ma_khach', title: 'Mã khách', width: 100 },
-    { key: 'ten_khach_hang', title: 'Tên khách hàng', width: 200 },
+    { key: 'ma_kh', title: 'Mã khách', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 200 },
     { key: 'du_dau', title: 'Dư đầu', width: 120 },
-    { key: 'du', title: 'Dư', width: 80 },
-    { key: 'phat_sinh_no', title: 'Phát sinh nợ', width: 120 },
-    { key: 'phat_sinh_co', title: 'Phát sinh có', width: 120 },
+    // { key: 'du_cuoi', title: 'Dư', width: 80 },
+    { key: 'ps_no', title: 'Phát sinh nợ', width: 120 },
+    { key: 'ps_co', title: 'Phát sinh có', width: 120 },
     { key: 'du_cuoi', title: 'Dư cuối', width: 120 },
-    { key: 'du_2', title: 'Dư', width: 80 }
+    // { key: 'du_2', title: 'Dư', width: 80 }
   ],
 
   // Báo cáo đơn hàng
   bang_ke_don_hang: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
-    { key: 'ma_ct_in', title: 'Mã c.từ in', width: 100 },
-    { key: 'so_don_hang_mua', title: 'Số đ.hàng mua', width: 120 },
-    { key: 'ma_khach', title: 'Mã khách', width: 100 },
-    { key: 'ten_khach_hang', title: 'Tên khách hàng', width: 180 },
+    { key: 'ma_ct0', title: 'Mã c.từ in', width: 100 },
+    { key: 'so_ct', title: 'Số đ.hàng mua', width: 120 },
+    { key: 'ma_kh', title: 'Mã khách', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
     { key: 'dien_giai', title: 'Diễn giải', width: 200 },
-    { key: 'tong_tien_hang', title: 'Tổng tiền hàng', width: 140 },
+    { key: 't_tien0', title: 'Tổng tiền hàng', width: 140 },
     { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
   ],
 
@@ -351,21 +351,21 @@ export const preferredColumnsByReport = {
 
   so_chi_tiet_don_hang: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
-    { key: 'ma_ct_in', title: 'Mã c.từ in', width: 100 },
+    { key: 'ma_ct0', title: 'Mã c.từ in', width: 100 },
     { key: 'so_ct', title: 'Số c.từ', width: 120 },
-    { key: 'ma_khach', title: 'Mã khách', width: 100 },
-    { key: 'ten_khach_hang', title: 'Tên khách hàng', width: 180 },
+    { key: 'ma_kh', title: 'Mã khách', width: 100 },
+    { key: 'ten_kh', title: 'Tên khách hàng', width: 180 },
     { key: 'dien_giai', title: 'Diễn giải', width: 180 },
-    { key: 'tk_doi_ung', title: 'TK đ.ứng', width: 100 },
+    { key: 'tk_du', title: 'TK đ.ứng', width: 100 },
     { key: 'ps_no', title: 'Ps nợ', width: 120 },
     { key: 'ps_co', title: 'Ps có', width: 120 },
-    { key: 'so_don_hang_mua', title: 'Số đơn hàng mua', width: 140 },
-    { key: 'ten_tai_khoan', title: 'Tên tài khoản', width: 180 },
+    { key: 'stt_rec', title: 'Số đơn hàng mua', width: 140 },
+    { key: 'ten_kh', title: 'Tên tài khoản', width: 180 },
     { key: 'ma_ct', title: 'Mã c.từ', width: 100 }
   ],
   bang_ke_chung_tu_phat_sinh_theo_don_hang: [
     { key: 'ngay_ct', title: 'Ngày c.từ', width: 100 },
-    { key: 'ma_ct_in', title: 'Mã c.từ in', width: 100 },
+    { key: 'ma_ct0', title: 'Mã c.từ in', width: 100 },
     { key: 'so_ct', title: 'Số c.từ', width: 120 },
     { key: 'ma_khach', title: 'Mã khách', width: 100 },
     { key: 'ten_khach_hang', title: 'Tên khách hàng', width: 180 },
