@@ -904,9 +904,8 @@ export const FILTER_CONFIGS = {
     },
     searchFields: {
       mainFieldKeys: [
-
-        { key: "chung_tu_tu_so", label: "Chứng từ từ số", type: "text", placeholder: "Nhập số chứng từ..." },
-        { key: "den_so", label: "Đến số", type: "text", placeholder: "Nhập đến số..." },
+        { key: "ngay_ct1", label: "Từ ngày", type: "date", required: true },
+        { key: "ngay_ct2", label: "Đến ngày", type: "date", required: true },
         {
           key: "ma_tai_khoan",
           label: "Mã tài khoản",
