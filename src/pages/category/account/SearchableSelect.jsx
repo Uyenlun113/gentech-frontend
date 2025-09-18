@@ -21,6 +21,18 @@ const SearchableSelect = ({
     const searchInputRef = useRef(null);
 
     const selectedOption = options.find(option => option[valueKey] === value);
+    
+    // Debug: Log when selected option is not found but value exists
+    useEffect(() => {
+        if (value && options.length > 0 && !selectedOption) {
+            console.warn('SearchableSelect: Value not found in options', {
+                value,
+                valueKey,
+                options: options.slice(0, 3), // Log first 3 options for debugging
+                optionsLength: options.length
+            });
+        }
+    }, [value, options, selectedOption, valueKey]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -127,11 +139,12 @@ const SearchableSelect = ({
                 aria-expanded={isOpen}
                 className={`h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-sm focus:border-brand-300 focus:outline-none focus:ring focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 flex items-center justify-between ${className}`}
             >
-                <span className={`truncate ${!selectedOption ? 'text-gray-500' : ''}`}>
-                    {selectedOption ? `${selectedOption[valueKey]} - ${selectedOption[displayKey]}` : placeholder}
+                <span className={`truncate ${!selectedOption && !value ? 'text-gray-500' : ''}`}>
+                    {selectedOption ? `${selectedOption[valueKey]} - ${selectedOption[displayKey]}` : 
+                     value ? `${value} - (Đang tải...)` : placeholder}
                 </span>
                 <div className="flex items-center gap-2">
-                    {selectedOption && (
+                    {(selectedOption || value) && (
                         <X size={16} className="text-gray-400 hover:text-gray-600" onClick={handleClear} />
                     )}
                     <ChevronDown

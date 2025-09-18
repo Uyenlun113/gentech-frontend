@@ -1,8 +1,8 @@
+import { Plus, Save, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import { Modal } from "../../../components/ui/modal";
-import { Plus, Save, X } from "lucide-react";
 import { useAccounts } from "../../../hooks/useAccounts";
 import { useCreateDmvt } from "../../../hooks/useDmvt";
 import { useMaterialGroups } from "../../../hooks/useMaterialGroup";
@@ -57,11 +57,11 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
   });
 
   // Prepare options cho SearchableSelect
-  const accountOptions = accountsData?.data?.map(account => ({
+  const accountOptions = (accountsData?.data || []).map(account => ({
     value: account.tk0,
     displayKey: account.ten_tk,
     valueKey: account.tk0,
-  })) || [];
+  }));
 
   const materialGroupOptions = materialGroupsData?.data || [];
 
@@ -278,38 +278,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
 
         <form className="flex flex-col" onSubmit={handleSubmit}>
           <div className="px-4 py-3 bg-blue-50">
-            {/* Grid layout 2 cột cho toàn bộ form */}
-            {/* <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[30%]">Mã vật tư</Label>
-                  <div className="w-[70%]">
-                    <Input
-                      type="text"
-                      value={formData.ma_vt}
-                      onChange={(e) => handleInputChange('ma_vt', e.target.value)}
-                      placeholder="VT003"
-                      className="h-8 text-sm w-full bg-white"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[30%]">Mã tra cứu</Label>
-                  <div className="w-[70%]">
-                    <Input
-                      type="text"
-                      value={formData.ma_tra_cuu}
-                      onChange={(e) => handleInputChange('ma_tra_cuu', e.target.value)}
-                      placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
-                    />
-                  </div>
-
-                </div>
-              </div>
-            </div> */}
 
             <div className="gap-x-8 gap-y-2">
               <div className="mb-2">
@@ -338,24 +306,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                 </div>
               </div>
             </div>
-
-
-            {/* <div className="gap-x-8 gap-y-2">
-              <div className="mb-2">  
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs w-[15%]">Tên 2</Label>
-                  <div className="w-[87.5%]">
-                    <Input
-                      type="text"
-                      value={formData.ten_vt2}
-                      onChange={(e) => handleInputChange('ten_vt2', e.target.value)}
-                      placeholder=""
-                      className="h-8 text-sm flex-1 bg-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div> */}
             <div className="space-y-2 mb-2"></div>
             <div className="grid grid-cols-2 gap-x-8 gap-y-2">
               {/* Cột trái */}
@@ -468,7 +418,6 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                     </span>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <Label className="text-xs w-[30%]">TK doanh thu</Label>
                   <div className="w-[70%]" data-form-field="tk_dt">
@@ -821,7 +770,7 @@ export const ModalCreateMaterial = ({ isOpenCreate, closeModalCreate, onSaveCrea
                     </div>
                     <span className="text-xs text-gray-600 basis-2/5">
                       <div>0 - Không sử dụng,</div>
-                      <div>1 - Sử dụng</div>
+                      <div>1 - Sử dụng</div>       
                     </span>
                   </div>
                 </div>

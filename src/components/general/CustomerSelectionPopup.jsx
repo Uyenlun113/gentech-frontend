@@ -6,7 +6,8 @@ const CustomerSelectionPopup = ({
     onClose,
     onSelect,
     customers = [],
-    searchValue = ""
+    searchValue = "",
+    onSearchChange
 }) => {
     const [searchTerm, setSearchTerm] = useState(searchValue);
     const [selectedCustomerIndex, setSelectedCustomerIndex] = useState(0);
@@ -33,11 +34,13 @@ const CustomerSelectionPopup = ({
         if (isOpen) {
             setSearchTerm(searchValue);
             setSelectedCustomerIndex(0);
-            // Focus search input when popup opens
+            // Focus search input when popup opens but don't select all text
             setTimeout(() => {
                 if (searchInputRef.current) {
                     searchInputRef.current.focus();
-                    searchInputRef.current.select();
+                    // Move cursor to end instead of selecting all
+                    const length = searchInputRef.current.value.length;
+                    searchInputRef.current.setSelectionRange(length, length);
                 }
             }, 100);
         }
@@ -104,11 +107,25 @@ const CustomerSelectionPopup = ({
                     // Allow tab to work normally for accessibility
                     break;
                 default:
-                    // Focus search input for typing
-                    if (event.target !== searchInputRef.current && !event.ctrlKey && !event.altKey) {
-                        if (searchInputRef.current) {
-                            searchInputRef.current.focus();
-                        }
+                    // Don't interfere with typing in the search input
+                    if (event.target === searchInputRef.current) {
+                        return; // Let the input handle its own events
+                    }
+                    
+                    // Only auto-focus search input for alphanumeric characters when not already focused
+                    if (!event.ctrlKey && !event.altKey && !event.metaKey &&
+                        event.key.length === 1 && 
+                        /^[a-zA-Z0-9]$/.test(event.key) && 
+                        searchInputRef.current &&
+                        document.activeElement !== searchInputRef.current) {
+                        searchInputRef.current.focus();
+                        // Move cursor to end to prevent text selection
+                        setTimeout(() => {
+                            if (searchInputRef.current) {
+                                const length = searchInputRef.current.value.length;
+                                searchInputRef.current.setSelectionRange(length, length);
+                            }
+                        }, 0);
                     }
                     break;
             }
@@ -166,7 +183,13 @@ const CustomerSelectionPopup = ({
                             ref={searchInputRef}
                             type="text"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setSearchTerm(value);
+                                if (onSearchChange) {
+                                    onSearchChange(value);
+                                }
+                            }}
                             placeholder="Tìm kiếm theo mã khách hàng, tên hoặc địa chỉ..."
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />

@@ -177,25 +177,25 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
     const debouncedVtSearch = useDebounce(searchStates.vtSearch, 300);
     const debouncedKhoSearch = useDebounce(searchStates.khoSearch, 300);
 
-    // React Query calls với enabled condition để tránh gọi API không cần thiết
+    // React Query calls - Always enabled to load full list when search is empty
     const { data: accountRawData = {} } = useAccounts(
         { search: debouncedTkSearch || "" },
-        { enabled: !!debouncedTkSearch && debouncedTkSearch.length > 0 }
+        { enabled: searchStates.showAccountPopup }
     );
 
     const { data: customerData = [] } = useCustomers(
         { search: debouncedMaKhSearch || "" },
-        { enabled: !!debouncedMaKhSearch && debouncedMaKhSearch.length > 0 }
+        { enabled: searchStates.showCustomerPopup }
     );
 
     const { data: vatTuData = [] } = useDmvt(
         { search: debouncedVtSearch || "" },
-        { enabled: !!debouncedVtSearch && debouncedVtSearch.length > 0 }
+        { enabled: searchStates.showVatTuPopup }
     );
 
     const { data: khoData = [] } = useDmkho(
         { search: debouncedKhoSearch || "" },
-        { enabled: !!debouncedKhoSearch && debouncedKhoSearch.length > 0 }
+        { enabled: searchStates.showKhoPopup }
     );
 
     const { mutateAsync: createPhieuMua, isPending } = useCreatePhieuMua();
@@ -228,33 +228,41 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
         return { totalSoLuong, totalTienHang, totalChiPhi, totalThueGtgt, totalThanhTien };
     }, [hangHoaData, chiPhiData, hdThueData]);
 
-    // Auto show/hide popups khi có search term
+    // Auto show popups when search starts, but keep them open even when search is cleared
     useEffect(() => {
-        setSearchStates(prev => ({
-            ...prev,
-            showAccountPopup: !!debouncedTkSearch && debouncedTkSearch.length > 0
-        }));
+        if (debouncedTkSearch && debouncedTkSearch.length > 0) {
+            setSearchStates(prev => ({
+                ...prev,
+                showAccountPopup: true
+            }));
+        }
     }, [debouncedTkSearch]);
 
     useEffect(() => {
-        setSearchStates(prev => ({
-            ...prev,
-            showCustomerPopup: !!debouncedMaKhSearch && debouncedMaKhSearch.length > 0
-        }));
+        if (debouncedMaKhSearch && debouncedMaKhSearch.length > 0) {
+            setSearchStates(prev => ({
+                ...prev,
+                showCustomerPopup: true
+            }));
+        }
     }, [debouncedMaKhSearch]);
 
     useEffect(() => {
-        setSearchStates(prev => ({
-            ...prev,
-            showVatTuPopup: !!debouncedVtSearch && debouncedVtSearch.length > 0
-        }));
+        if (debouncedVtSearch && debouncedVtSearch.length > 0) {
+            setSearchStates(prev => ({
+                ...prev,
+                showVatTuPopup: true
+            }));
+        }
     }, [debouncedVtSearch]);
 
     useEffect(() => {
-        setSearchStates(prev => ({
-            ...prev,
-            showKhoPopup: !!debouncedKhoSearch && debouncedKhoSearch.length > 0
-        }));
+        if (debouncedKhoSearch && debouncedKhoSearch.length > 0) {
+            setSearchStates(prev => ({
+                ...prev,
+                showKhoPopup: true
+            }));
+        }
     }, [debouncedKhoSearch]);
 
     // Auto fill tổng chi phí từ form xuống bảng chi phí - chỉ khi tổng chi phí thay đổi
@@ -2397,6 +2405,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                         }}
                         customers={customerData.data || []}
                         searchValue={searchStates.maKhSearch}
+                        onSearchChange={(value) => setSearchStates(prev => ({ ...prev, maKhSearch: value }))}
                     />
                 )}
 
@@ -2410,6 +2419,7 @@ export const ModalCreatePhieuMua = ({ isOpenCreate, closeModalCreate }) => {
                         materials={Array.isArray(vatTuData?.data) ? vatTuData.data : []}
                         searchValue={searchStates.vtSearch}
                         rowId={searchStates.vtSearchRowId}
+                        onSearchChange={(value) => setSearchStates(prev => ({ ...prev, vtSearch: value }))}
                     />
                 )}
 
