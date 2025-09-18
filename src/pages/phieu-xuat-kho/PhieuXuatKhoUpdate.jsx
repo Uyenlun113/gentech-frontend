@@ -560,6 +560,46 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
     }, 100);
   }, []);
 
+  const handleEnterPressOnLastField = useCallback((currentRowId) => {
+    // Add new row
+    setHangHoaData(prev => {
+      const newRowId = prev.length + 1;
+      const newRow = {
+        id: newRowId,
+        stt_rec: newRowId.toString(),
+        ma_vt: "",
+        ten_vt: "",
+        ma_kho_i: "",
+        so_luong: "",
+        gia: "",
+        tien: "",
+        tk_vt: "",
+        ma_nx_i: "",
+        dien_giai: "",
+      };
+      return [...prev, newRow];
+    });
+
+    // Focus on first field of new row after a short delay
+    setTimeout(() => {
+      // Calculate the tabIndex for the first field (ma_vt) of the new row
+      const newRowTabIndex = 8 + (hangHoaData.length * 7); // 8 is base tabIndex for ma_vt, 7 fields per row (excluding disabled tien)
+      const firstFieldOfNewRow = document.querySelector(`input[tabindex="${newRowTabIndex}"]`);
+      if (firstFieldOfNewRow) {
+        firstFieldOfNewRow.focus();
+        firstFieldOfNewRow.select();
+      }
+
+      // Scroll to bottom of table
+      if (hangHoaTableRef.current) {
+        const tableContainer = hangHoaTableRef.current.querySelector('.overflow-x-auto');
+        if (tableContainer) {
+          tableContainer.scrollTop = tableContainer.scrollHeight;
+        }
+      }
+    }, 150);
+  }, [hangHoaData.length]);
+
   const hangHoaDataWithTotal = useMemo(() => {
     return [
       ...hangHoaData,
@@ -603,7 +643,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         }
         return (
           <Input
-            tabIndex={8}
+            tabIndex={8 + ((row.id - 1) * 7)}
             value={row.ma_vt}
             onChange={(e) => handleHangHoaChange(row.id, "ma_vt", e.target.value)}
             placeholder="Nhập mã vt..."
@@ -630,7 +670,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            tabIndex={9}
+            tabIndex={9 + ((row.id - 1) * 7)}
             value={row.ma_kho_i}
             onChange={(e) => handleHangHoaChange(row.id, "ma_kho_i", e.target.value)}
             placeholder="Mã kho"
@@ -653,7 +693,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         }
         return (
           <Input
-            tabIndex={10}
+            tabIndex={10 + ((row.id - 1) * 7)}
             type="number"
             value={row.so_luong}
             onChange={(e) => handleHangHoaChange(row.id, "so_luong", e.target.value)}
@@ -671,7 +711,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            tabIndex={11}
+            tabIndex={11 + ((row.id - 1) * 7)}
             type="number"
             value={row.gia}
             onChange={(e) => handleHangHoaChange(row.id, "gia", e.target.value)}
@@ -718,7 +758,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            tabIndex={12}
+            tabIndex={12 + ((row.id - 1) * 7)}
             value={row.tk_vt}
             onChange={(e) => handleHangHoaChange(row.id, "tk_vt", e.target.value)}
             placeholder="TK"
@@ -735,7 +775,7 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            tabIndex={13}
+            tabIndex={13 + ((row.id - 1) * 7)}
             value={row.ma_nx_i}
             onChange={(e) => handleHangHoaChange(row.id, "ma_nx_i", e.target.value)}
             placeholder="TK"
@@ -752,12 +792,13 @@ export const ModalEditPhieuXuatKho = ({ isOpenEdit, closeModalEdit, selectedPhie
         if (row.id === 'total') return <div></div>;
         return (
           <Input
-            tabIndex={14}
+            tabIndex={14 + ((row.id - 1) * 7)}
             value={row.dien_giai}
             onChange={(e) => handleHangHoaChange(row.id, "dien_giai", e.target.value)}
             placeholder="Nhập diễn giải..."
             className="w-full"
             title="Mỗi dòng có thể có diễn giải riêng"
+            onEnterPress={() => handleEnterPressOnLastField(row.id)}
           />
         );
       },
